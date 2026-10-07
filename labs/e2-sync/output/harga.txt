@@ -1,0 +1,18 @@
+== D. Harga: Ani (offline) dan tablet kasir sama-sama mengubah harga dari versi 1
+--- Ani offline
+app      offline. Ani mengubah harga 25.000 → 27.000 (dilihat di versi 1). Queue: op-hmz42b3mbh ubah_harga
+--- selama Ani offline, tablet kasir mengubah harga 25.000 → 26.000 (versi 1 → 2)
+server   POST /sync tablet-1 ubah_harga  → diterapkan
+--- sinyal kembali
+app      online. Queue berisi 1 perubahan
+server   POST /sync op-hmz42b3mbh ubah_harga  → konflik
+app      ← 200 op-hmz42b3mbh konflik: server stok 25, harga 26.000, versi 2
+app      konflik: tampilkan dua harga ke Ani (27.000 miliknya, 26.000 di server) dan minta ia memilih
+app      queue: 1 konflik menunggu keputusan Ani. Layar Ani sekarang: stok 25, harga 26.000
+
+-- PostgreSQL 17 sesudahnya
+ stok | harga | versi 
+------+-------+-------
+   25 | 26000 |     2
+(1 row)
+

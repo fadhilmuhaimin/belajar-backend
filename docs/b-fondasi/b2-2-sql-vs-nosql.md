@@ -1,0 +1,122 @@
+---
+title: "1.9 SQL atau NoSQL"
+---
+
+<div data-bb="kamu-di-sini" data-tahap="1"></div>
+
+# 1.9 SQL atau NoSQL
+
+Baca 5 menit · coba 2 menit · Prasyarat: [[B2.1]] · Jalur inti
+{: .meta }
+
+<div data-bb="selesai"></div>
+
+??? question "Sudah tahu? Cek 3 pertanyaan"
+
+    1. Apakah document database lebih cepat dari PostgreSQL?
+    2. Data Rekeningo mana yang cocok disimpan sebagai dokumen?
+    3. Apa yang hilang kalau saldo disimpan tanpa constraint di database?
+
+    Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+## Inti
+
+Pilih database dari bentuk data dan pola aksesnya, bukan dari reputasi "lebih cepat". Data uang yang saling terkait butuh transaction dan constraint.
+
+<div data-bb="arsitektur" data-tahap="1"></div>
+
+## Lihat sendiri
+
+Pilih satu fitur. Bagian database yang mengerjakannya tersorot di kedua opsi. Oranye menandai kerja tambahan yang pindah ke kodemu.
+
+<div data-bb="banding" data-src="data/b2-2-banding.json"></div>
+
+## Kenapa ini ada
+
+Di Flutter, Raka terbiasa dengan Firestore. Tidak perlu migration, data langsung berbentuk JSON, dan app bisa membaca satu dokumen tanpa backend.
+
+Wajar kalau pertanyaan pertamanya: kenapa tidak pakai itu saja untuk Rekeningo? Seorang teman bilang NoSQL "lebih cepat dan lebih scalable".
+
+Raka mencoba menjawab dengan data Rekeningo sendiri. Transfer mengubah dua saldo sekaligus. Saldo tidak boleh negatif.
+
+Ani ingin laporan penjualan per bulan, yang belum pernah ia minta sebelumnya. Ketiganya soal **hubungan antar-data dan aturan**, bukan kecepatan.
+
+## Cara kerjanya
+
+"NoSQL" bukan satu jenis. Yang paling sering dibandingkan dengan SQL adalah **document database**, mis. Firestore dan MongoDB. Bedanya ada di apa yang dijaga database untukmu:
+
+| Pertanyaan | Relasional (PostgreSQL) | Document database |
+|---|---|---|
+| Bentuk data | Tabel dengan skema tetap; perubahan lewat migration | Dokumen JSON; bentuk bisa berbeda antar-dokumen |
+| Hubungan antar-data | Foreign key dijaga database | Rujukan antar-dokumen dijaga kode aplikasi [perlu verifikasi per produk] |
+| Aturan data | `CHECK`, `UNIQUE`, `NOT NULL` di database | Validasi skema per dokumen (MongoDB) atau aturan keamanan (Firestore) |
+| Banyak perubahan sekaligus | Transaction, bagian inti sejak awal | Tersedia ([MongoDB](https://www.mongodb.com/docs/manual/core/transactions/), [Firestore](https://firebase.google.com/docs/firestore/manage-data/transactions)), dengan batasan masing-masing |
+| Query baru yang tidak direncanakan | `JOIN`, `GROUP BY` bebas | Biasanya butuh index baru atau bentuk dokumen baru |
+
+**"Lebih cepat" tergantung pola akses.** Membaca satu pesanan beserta itemnya memang satu baca di dokumen. Di SQL, itu dua tabel.
+
+Tapi laporan per bulan, yang menyatukan banyak pesanan, adalah kekuatan SQL. Untuk volume Rekeningo Tahap 1 (±0,14 request per detik di jam puncak, lihat halaman Tahap 1), kecepatan mesin bukan faktor penentu.
+
+**Dokumentasi MongoDB sendiri** menyebut bahwa data yang disimpan dalam satu dokumen sering tidak butuh transaction multi-dokumen ([MongoDB: Transactions](https://www.mongodb.com/docs/manual/core/transactions/)). Artinya, model dokumen paling kuat saat satu aksi hanya menyentuh satu dokumen. Transfer saldo menyentuh dua.
+
+Keputusan Rekeningo: PostgreSQL untuk saldo, transfer, pesanan. Kolom `jsonb` di PostgreSQL tetap tersedia untuk data yang bentuknya bebas, mis. pengaturan notifikasi per user ([PostgreSQL: JSON types](https://www.postgresql.org/docs/current/datatype-json.html)).
+
+## Di stack lain
+
+Halaman ini membandingkan jenis database, bukan kode framework. Yang perlu kamu tahu per stack: database bawaan yang biasanya dipakai.
+
+| Stack | Pilihan umum | Catatan |
+|---|---|---|
+| Go | PostgreSQL atau MySQL lewat `database/sql` | Tidak ada bawaan |
+| Node.js | PostgreSQL, MySQL, atau MongoDB lewat driver/ORM | Tidak ada bawaan |
+| Laravel | Database relasional lewat Eloquent | ORM dirancang untuk SQL |
+| Django | Database relasional lewat ORM bawaan | ORM dirancang untuk SQL |
+| Spring | Database relasional lewat Spring Data JPA | Ada juga Spring Data MongoDB |
+| Supabase | PostgreSQL | Relasional, plus API otomatis |
+| Firebase | Firestore (document database) | Transaction tersedia; aturan data lewat Security Rules |
+
+Baris di atas adalah ringkasan dari dokumentasi masing-masing, tidak dijalankan.
+
+## Trade-off: kapan pakai apa
+
+| Data | Pilihan | Alasan |
+|---|---|---|
+| Saldo, transfer, pembayaran | Relasional | Transaction, constraint, dan audit |
+| Pesanan dan item | Relasional (bisa juga dokumen) | Laporan lintas pesanan lebih mudah di SQL |
+| Pengaturan per user, payload webhook mentah | `jsonb` di PostgreSQL | Bentuk bebas, jarang di-query per field |
+| Feed atau chat dengan volume sangat besar | Pertimbangkan database khusus | Diukur dulu di Tahap 5, bukan ditebak di Tahap 1 |
+
+## Cek diri
+
+**1.** Benar atau salah: "Document database tidak punya transaction, jadi tidak bisa dipakai untuk uang."
+
+??? success "Jawaban"
+
+    Salah. Firestore dan MongoDB punya transaction multi-dokumen. Alasan memilih SQL untuk uang di Rekeningo adalah constraint dan relasi yang dijaga database, ditambah kebutuhan laporan, bukan ketiadaan transaction.
+
+**2.** Jelaskan kenapa "lebih cepat" bukan alasan yang cukup untuk memilih database di Tahap 1.
+
+??? success "Jawaban"
+
+    Kecepatan bergantung pada pola akses, dan setiap jenis cepat untuk pola yang berbeda. Di Tahap 1, puncaknya ±0,14 request per detik, jadi mesin apa pun cukup. Yang menentukan adalah kebenaran data: transaction, constraint, dan kemudahan query yang belum terpikir hari ini.
+
+**3.** Pengaturan notifikasi tiap user bentuknya sering berubah. Perlu database kedua?
+
+??? success "Jawaban"
+
+    Tidak. Kolom `jsonb` di PostgreSQL cukup. Satu database lebih sedikit untuk di-backup, dimonitor, dan dijaga konsistensinya.
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Pilihan database disertai alasan dari pola akses dan aturan data, bukan "lebih cepat".
+- [ ] Data uang memakai database yang bisa menjaga constraint dan transaction.
+- [ ] Kalau memakai document database, aturan integritas antar-dokumen ditulis eksplisit dan dites.
+- [ ] Tidak ada database kedua tanpa masalah nyata yang dijawabnya.
+
+## Bacaan lanjut
+
+- [PostgreSQL: JSON types](https://www.postgresql.org/docs/current/datatype-json.html)
+- [MongoDB: Transactions](https://www.mongodb.com/docs/manual/core/transactions/) · [Firestore: Transactions](https://firebase.google.com/docs/firestore/manage-data/transactions)
+- Kleppmann & Riccomini, *Designing Data-Intensive Applications*, edisi 2 (2026), bab model data
+
+<div data-bb="umpan-balik"></div>

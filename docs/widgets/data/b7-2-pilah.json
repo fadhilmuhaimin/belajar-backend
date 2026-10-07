@@ -1,0 +1,11 @@
+{
+  "judul": "Sesuai batas modul, atau melanggar?",
+  "kelompok": ["Sesuai batas", "Melanggar batas"],
+  "item": [
+    { "teks": "Modul pesanan memanggil pembayaran.Bayar(id, total).", "jawab": 0, "kenapa": "Bayar adalah API publik modul pembayaran. Rekaman bagian A: go build lolos." },
+    { "teks": "Modul katalog mengimpor modul/pembayaran/internal/gateway supaya bisa menagih diskon langsung.", "jawab": 1, "kenapa": "Detail di dalam internal/ milik modul pembayaran. Compiler Go menolaknya: use of internal package ... not allowed (rekaman bagian B)." },
+    { "teks": "Modul pesanan menjalankan JOIN ke tabel pembayaran.transaksi untuk menampilkan status bayar.", "jawab": 1, "kenapa": "Tabel itu milik modul pembayaran. Kalau tim pembayaran mengubah kolomnya, layar pesanan rusak. Rekaman bagian D: role modul_pesanan ditolak dengan permission denied." },
+    { "teks": "Modul pembayaran menulis event pembayaran_berhasil ke outbox, lalu modul pesanan bereaksi.", "jawab": 0, "kenapa": "Pembayaran tidak perlu tahu siapa yang mendengarkan. Arah ketergantungan tetap satu, dan tidak ada import cycle (lihat rekaman bagian C untuk versi yang salah)." },
+    { "teks": "Modul pembayaran memanggil pesanan.TandaiLunas() langsung, padahal pesanan sudah memanggil pembayaran.", "jawab": 1, "kenapa": "Dua modul saling bergantung. Di Go ini import cycle dan tidak bisa di-build (rekaman bagian C). Di bahasa lain mungkin bisa di-build, tapi kedua modul tidak bisa lagi diubah atau dipisah sendiri-sendiri." }
+  ]
+}

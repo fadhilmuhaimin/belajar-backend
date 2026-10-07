@@ -1,0 +1,213 @@
+{
+ "versi": 2,
+ "judul": "Ani menambah stok saat sinyal hilang",
+ "sumber": {
+  "jenis": "rekaman",
+  "file": "labs/e2-sync/output/operasi.txt",
+  "fileVarian": "labs/e2-sync/output/nilai-akhir.txt",
+  "catatan": "App Dart 3.11 dengan queue lokal (file JSON pengganti sqflite) → server Go → PostgreSQL 17, direkam 2026-10-07 (labs/e2-sync)."
+ },
+ "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': queue berisi nilai akhir stok, bukan selisihnya.",
+ "komponen": [
+  {
+   "id": "ani",
+   "label": "HP Ani"
+  },
+  {
+   "id": "pembeli",
+   "label": "HP pembeli"
+  },
+  {
+   "id": "api",
+   "label": "Monolith API"
+  },
+  {
+   "id": "db",
+   "label": "PostgreSQL"
+  }
+ ],
+ "perangkat": [
+  {
+   "id": "ani",
+   "label": "HP Ani"
+  }
+ ],
+ "layarAwal": {
+  "ani": {
+   "judul": "Toko saya",
+   "waktu": "12.00",
+   "sinyal": 4,
+   "isi": [
+    {
+     "jenis": "baris",
+     "kiri": "Nasi goreng · stok",
+     "kanan": "25"
+    }
+   ]
+  }
+ },
+ "predict": {
+  "q": "Nanti kamu akan mengubah satu hal: app menyimpan nilai akhir stok (35), bukan selisihnya (+10). Selama Ani offline, 3 porsi terjual. Berapa stok di server setelah sync?",
+  "options": [
+   "32",
+   "35",
+   "22"
+  ],
+  "answer": 1,
+  "varian": true,
+  "explain": "PUT stok=35 menimpa nilai di server. Tiga penjualan selama Ani offline hilang dari hitungan. Rekaman lab: PostgreSQL berisi 35, padahal sisa porsi 32."
+ },
+ "langkah": [
+  {
+   "dari": "ani",
+   "judul": "Sinyal hilang, Ani menambah 10 porsi",
+   "kirim": "queue lokal: op-hmz42a27wj tambah_stok +10\n(layar 25 → 35)",
+   "jelas": "Perubahan disimpan dulu di HP, dengan op_id yang dibuat saat itu juga. Queue tetap ada walau app ditutup.",
+   "layar": {
+    "ani": {
+     "judul": "Toko saya",
+     "waktu": "12.05",
+     "sinyal": 0,
+     "isi": [
+      {
+       "jenis": "baris",
+       "kiri": "Nasi goreng · stok",
+       "kanan": "35"
+      },
+      {
+       "jenis": "toast",
+       "teks": "1 perubahan menunggu sinyal",
+       "nada": "warn"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "dari": "pembeli",
+   "ke": "api",
+   "judul": "Selama itu, 3 porsi terjual online",
+   "kirim": "POST /pesanan {\"produk\":\"nasgor\",\"jumlah\":1}   ×3",
+   "jelas": "Server tidak tahu apa pun tentang perubahan di HP Ani."
+  },
+  {
+   "dari": "api",
+   "ke": "db",
+   "judul": "Stok di server berkurang",
+   "kirim": "UPDATE produk SET stok = stok - 1 WHERE id = 'nasgor';   ×3\n→ stok 22",
+   "jelas": "Sekarang ada dua versi: HP Ani 35, server 22. Yang benar 25 + 10 − 3 = 32."
+  },
+  {
+   "dari": "ani",
+   "ke": "api",
+   "judul": "Sinyal kembali, app mengirim queue",
+   "kirim": "POST /sync\n[{\"op_id\":\"op-hmz42a27wj\",\"jenis\":\"tambah_stok\",\"jumlah\":10}]",
+   "jelas": "Yang dikirim selisihnya (+10), bukan angka 35 yang terlihat di layar."
+  },
+  {
+   "dari": "api",
+   "ke": "db",
+   "judul": "Terapkan selisih, catat op_id",
+   "kirim": "UPDATE produk SET stok = stok + 10 WHERE id = 'nasgor';   → 32\nINSERT INTO op_sync (op_id, hasil) VALUES ('op-hmz42a27wj', ...);",
+   "jelas": "Dua penulisan dalam satu transaction. op_id adalah PRIMARY KEY, sama seperti idempotency key ([[E3]])."
+  },
+  {
+   "dari": "api",
+   "ke": "ani",
+   "judul": "Response diterima, lalu app mati",
+   "kirim": "200 [{\"op_id\":\"op-hmz42a27wj\",\"status\":\"diterapkan\",\"server\":{\"stok\":32}}]\n(app ditutup paksa sebelum queue dihapus)",
+   "jelas": "Di sela menerima response dan menghapus queue, app bisa mati. Queue di HP masih berisi operasi yang sama.",
+   "nada": "warn"
+  },
+  {
+   "dari": "ani",
+   "ke": "api",
+   "judul": "App dibuka lagi, queue dikirim ulang",
+   "kirim": "POST /sync\n[{\"op_id\":\"op-hmz42a27wj\",\"jenis\":\"tambah_stok\",\"jumlah\":10}]",
+   "jelas": "Dari sisi app, ini kiriman pertama yang belum terkonfirmasi. Mengirim ulang adalah perilaku yang benar."
+  },
+  {
+   "dari": "api",
+   "ke": "db",
+   "judul": "op_id sudah ada: kirim hasil lama",
+   "kirim": "SELECT hasil FROM op_sync WHERE op_id = 'op-hmz42a27wj';\n→ ada. Tidak ada UPDATE kedua.",
+   "jelas": "Tanpa op_id, stok akan bertambah 10 lagi menjadi 42."
+  },
+  {
+   "dari": "api",
+   "ke": "ani",
+   "judul": "Queue kosong, layar Ani 32",
+   "kirim": "200 [{\"status\":\"diterapkan\",\"server\":{\"stok\":32}}]\nPostgreSQL: stok 32",
+   "jelas": "App mengganti angka di layar dengan nilai dari server, lalu menghapus queue.",
+   "layar": {
+    "ani": {
+     "judul": "Toko saya",
+     "waktu": "12.12",
+     "sinyal": 4,
+     "isi": [
+      {
+       "jenis": "baris",
+       "kiri": "Nasi goreng · stok",
+       "kanan": "32"
+      },
+      {
+       "jenis": "toast",
+       "teks": "Tersinkron",
+       "nada": "good"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "varian": {
+  "label": "queue berisi nilai akhir stok (35), dikirim dengan PUT",
+  "mulai": 3,
+  "langkah": [
+   {
+    "dari": "ani",
+    "ke": "api",
+    "judul": "Sinyal kembali, app mengirim nilai akhir",
+    "kirim": "PUT /produk/nasgor/stok {\"stok\":35}",
+    "jelas": "Queue hanya menyimpan angka yang terlihat di layar Ani.",
+    "nada": "warn"
+   },
+   {
+    "dari": "api",
+    "ke": "db",
+    "judul": "Server menimpa stok",
+    "kirim": "UPDATE produk SET stok = 35 WHERE id = 'nasgor';\n→ stok 35 (yang benar 32)",
+    "jelas": "Yang terakhir menulis yang menang (last write wins). Tiga penjualan selama Ani offline hilang dari hitungan.",
+    "nada": "warn"
+   },
+   {
+    "dari": "api",
+    "ke": "ani",
+    "judul": "Layar Ani 35, padahal sisa 32",
+    "kirim": "200 {\"stok\":35}\nPostgreSQL: stok 35",
+    "jelas": "Tiga pembeli berikutnya bisa memesan porsi yang tidak ada. Pesanan itu harus dibatalkan dan uangnya dikembalikan.",
+    "nada": "warn",
+    "layar": {
+     "ani": {
+      "judul": "Toko saya",
+      "waktu": "12.12",
+      "sinyal": 4,
+      "isi": [
+       {
+        "jenis": "baris",
+        "kiri": "Nasi goreng · stok",
+        "kanan": "35",
+        "nada": "warn"
+       },
+       {
+        "jenis": "toast",
+        "teks": "Tersinkron",
+        "nada": "good"
+       }
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

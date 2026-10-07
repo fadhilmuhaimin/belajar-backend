@@ -1,0 +1,25 @@
+== A. Vektor uji RFC 7636 Lampiran B
+code_verifier  = dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+code_challenge = E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
+sama dengan RFC: true
+
+== B. Server identitas mewajibkan PKCE · app jahat dengan skema URL yang sama mencegat code
+browser  GET /authorize (PKCE: true) → 302, Location: rekeningo://callback?code=4D4kyN_ihm…(disensor)&state=s-41
+app jahat POST /token (code_verifier: false) → 400 {"error":"invalid_grant"}
+(code hanya berlaku sekali; Budi login ulang dan kali ini app Rekeningo yang menerima code)
+browser  GET /authorize (PKCE: true) → 302, Location: rekeningo://callback?code=Gtniu9cMVL…(disensor)&state=s-41
+app       POST /token (code_verifier: true) → 200 access_token=xatIXsSm-n…(disensor) id_token=eyJhbGciOi…(disensor)
+
+== C. Server identitas tanpa PKCE · app jahat mencegat code
+browser  GET /authorize (PKCE: false) → 302, Location: rekeningo://callback?code=vGfGfeG_4u…(disensor)&state=s-41
+app jahat POST /token (code_verifier: false) → 200 access_token=a25WxR3N7R…(disensor) id_token=eyJhbGciOi…(disensor)
+
+== D. API Rekeningo memeriksa ID token
+app      kirim ID token dari langkah B
+api      POST /auth/sosial → 200, akun Rekeningo terhubung ke sub=akun-7781, token Rekeningo diterbitkan
+app      kirim ID token yang diterbitkan untuk app lain (aud=app-lain)
+api      POST /auth/sosial → 401 (aud "app-lain" bukan client id Rekeningo)
+app      kirim ID token yang sudah kedaluwarsa
+api      POST /auth/sosial → 401 (kedaluwarsa)
+app      kirim ID token dari langkah B dengan isi diubah
+api      POST /auth/sosial → 401 (signature tidak cocok)

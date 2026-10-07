@@ -1,0 +1,3 @@
+module rekeningo
+
+go 1.27.1

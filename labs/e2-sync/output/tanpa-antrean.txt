@@ -1,0 +1,17 @@
+== A. Tanpa antrean: request gagal saat offline, perubahan dibuang
+--- Ani offline
+app      Ani menambah 10 porsi: layar menampilkan stok 35, lalu mengirim PUT stok=35
+app      gagal: Connection refused. Tanpa antrean, perubahan dibuang
+--- selama Ani offline, pembeli lain memesan lewat app
+server   POST /pesanan nasgor -1          → stok 24
+server   POST /pesanan nasgor -1          → stok 23
+server   POST /pesanan nasgor -1          → stok 22
+--- sinyal kembali
+app      dibuka lagi, mengambil data server: stok 22, harga 25.000
+
+-- PostgreSQL 17 sesudahnya (stok yang benar: 25 + 10 − 3 = 32)
+ stok | harga | versi 
+------+-------+-------
+   22 | 25000 |     1
+(1 row)
+

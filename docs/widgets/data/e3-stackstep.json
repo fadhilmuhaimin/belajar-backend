@@ -1,0 +1,45 @@
+{
+  "skenario": "Budi membayar Rp25.000, response pertama hilang, app mengulang dengan key yang sama.",
+  "langkah": [
+    { "id": "key", "label": "Buat key sekali" },
+    { "id": "header", "label": "Kirim key di header" },
+    { "id": "timeout", "label": "Batas waktu 1 detik" },
+    { "id": "jeda", "label": "Jeda membesar + jitter" },
+    { "id": "simpan", "label": "Server: catat key unik" }
+  ],
+  "stack": {
+    "Flutter (Dart)": {
+      "pola": {
+        "key": ["var key = kunciBaru();"],
+        "header": ["kirim(key)"],
+        "timeout": [".timeout(const Duration(seconds: 1))"],
+        "jeda": ["pow(2, percobaan - 1)", "Future.delayed"]
+      },
+      "catatan": {
+        "header": "Header dipasang di fungsi kirim(): req.headers.set('Idempotency-Key', key)",
+        "simpan": "Bukan tugas app. Lihat tab Server (Go)"
+      }
+    },
+    "Android (Kotlin)": {
+      "pola": {
+        "key": ["UUID.randomUUID()"],
+        "header": ["@Header(\"Idempotency-Key\")", "api.bayar(key"],
+        "timeout": ["withTimeout(1_000)"],
+        "jeda": ["delay(jeda", "jeda *= 2"]
+      },
+      "catatan": { "simpan": "Bukan tugas app. Lihat tab Server (Go)" }
+    },
+    "Server (Go)": {
+      "pola": {
+        "header": ["func bayar(ctx context.Context, key"],
+        "simpan": ["ON CONFLICT (key) DO NOTHING", "RowsAffected(); n == 0"]
+      },
+      "catatan": {
+        "key": "Server tidak membuat key. Key selalu datang dari client",
+        "header": "Handler membaca r.Header.Get(\"Idempotency-Key\") lalu memanggil bayar()",
+        "timeout": "Server memakai context.WithoutCancel: pekerjaan database tetap selesai walau client menyerah",
+        "jeda": "Jeda adalah urusan client"
+      }
+    }
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "versi": 2,
+  "judul": "Jam 12.00: 17 pembayaran per detik, pool 10 koneksi",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/t3-bayar/output/pool-outbox.txt",
+    "fileVarian": "labs/t3-bayar/output/pool-dalam-tx.txt",
+    "catatan": "Server Go 1.27 (database/sql, MaxOpenConns 10), PostgreSQL 17.11, layanan notifikasi tiruan 2 detik, generator beban 17 RPS selama 10 detik. Direkam 2026-10-06 (labs/t3-bayar)."
+  },
+  "pengantar": "Ikuti satu pembayaran di tengah beban. Setelah itu centang 'Ubah satu hal': notifikasi dipanggil di dalam transaction.",
+  "komponen": [
+    {
+      "id": "app",
+      "label": "App user (17/detik)"
+    },
+    {
+      "id": "api",
+      "label": "Monolith API",
+      "lapisan": [
+        "handler",
+        "pool 10 koneksi"
+      ]
+    },
+    {
+      "id": "db",
+      "label": "PostgreSQL"
+    },
+    {
+      "id": "worker",
+      "label": "Worker"
+    },
+    {
+      "id": "notif",
+      "label": "Layanan notifikasi"
+    }
+  ],
+  "layarAwal": {
+    "hp": {
+      "waktu": "12.00",
+      "isi": [
+        {
+          "jenis": "baris",
+          "kiri": "Makan siang",
+          "kanan": "Rp25.000"
+        },
+        {
+          "jenis": "tombol",
+          "teks": "Bayar"
+        }
+      ]
+    }
+  },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: notifikasi (2 detik) dipanggil di dalam transaction. Pool 10 koneksi, 17 pembayaran per detik selama 10 detik (170 request), timeout app 5 detik. Kira-kira berapa yang berhasil?",
+    "options": [
+      "Hampir semua (±170)",
+      "Sekitar 50",
+      "Tidak ada"
+    ],
+    "answer": 1,
+    "varian": true,
+    "explain": "Setiap koneksi dipegang ±2 detik, jadi 10 koneksi hanya melayani ±5 request per detik. Rekaman lab: 54 dari 170 berhasil, 116 timeout, dan pool mencatat 160 kali menunggu. Little's Law: 17 × 2 = 34 koneksi dibutuhkan, yang tersedia 10."
+  },
+  "langkah": [
+    {
+      "dari": "app",
+      "ke": "api",
+      "lapisan": "handler",
+      "judul": "Satu dari 17 pembayaran di detik ini",
+      "kirim": "POST /bayar {\"akun_id\": 1287, \"jumlah\": 25000}",
+      "jelas": "Generator beban mengirim 17 request per detik, ke akun acak supaya tidak berebut baris yang sama (itu masalah [[B3.2]]).",
+      "layar": {
+        "hp": {
+          "waktu": "12.00",
+          "isi": [
+            {
+              "jenis": "proses",
+              "teks": "Membayar..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "api",
+      "lapisan": "pool 10 koneksi",
+      "judul": "Pinjam koneksi dari pool",
+      "kirim": "tunggu_koneksi_ms: 13   (paling lama di rekaman)",
+      "jelas": "Koneksi database dibuka sekali dan dipinjamkan bergantian. Ada koneksi kosong, jadi hampir tidak menunggu."
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "pool 10 koneksi",
+      "judul": "Transaction hanya berisi query",
+      "kirim": "BEGIN;\nUPDATE akun SET saldo = saldo - 25000 ...;\nINSERT INTO pembayaran ...;\nINSERT INTO outbox (jenis, data) VALUES ('pembayaran_berhasil', ...);\nCOMMIT;   -- query_ms: 3",
+      "jelas": "Notifikasi tidak dikirim di sini. Ia ditulis sebagai baris outbox, di transaction yang sama dengan pembayaran.",
+      "nada": "good"
+    },
+    {
+      "dari": "api",
+      "ke": "app",
+      "lapisan": "handler",
+      "judul": "201 dalam hitungan milidetik",
+      "kirim": "201 Created\n170 dari 170 berhasil · p50 5 ms · p95 7 ms",
+      "jelas": "Koneksi kembali ke pool setelah ±20 ms. Pool tidak pernah penuh: jumlah_menunggu 0.",
+      "nada": "good",
+      "layar": {
+        "hp": {
+          "waktu": "12.00",
+          "nada": "good",
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Pembayaran berhasil",
+              "nada": "good"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "db",
+      "ke": "worker",
+      "judul": "Worker mengambil dari outbox",
+      "kirim": "UPDATE outbox SET coba_lagi = now() + '30 seconds' ...\n  WHERE id IN (... FOR UPDATE SKIP LOCKED) RETURNING ...",
+      "jelas": "Worker adalah proses terpisah dari codebase yang sama. Ia meminjam koneksinya sendiri, sebentar saja."
+    },
+    {
+      "dari": "worker",
+      "ke": "notif",
+      "judul": "Notifikasi dikirim di luar jalur request",
+      "kirim": "POST /kirim (2 detik per kiriman, 20 paralel)\nsemua 170 terkirim ±21 detik setelah beban dimulai",
+      "jelas": "Notifikasi tetap lambat, tapi tidak lagi membuat user menunggu di layar bayar."
+    }
+  ],
+  "varian": {
+    "label": "notifikasi dipanggil di dalam transaction",
+    "mulai": 2,
+    "langkah": [
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "pool 10 koneksi",
+        "judul": "Transaction dibuka, query jalan",
+        "kirim": "BEGIN;\nUPDATE akun ...; INSERT INTO pembayaran ...;   -- query_ms: 1",
+        "jelas": "Bagian database tetap cepat."
+      },
+      {
+        "dari": "api",
+        "ke": "notif",
+        "lapisan": "pool 10 koneksi",
+        "judul": "Menunggu notifikasi sambil memegang koneksi",
+        "kirim": "POST /kirim   -- notifikasi_ms: 2000\n(koneksi database masih dipinjam, transaction belum COMMIT)",
+        "jelas": "Selama 2 detik, koneksi ini tidak bisa dipakai request lain.",
+        "nada": "warn"
+      },
+      {
+        "dari": "api",
+        "lapisan": "pool 10 koneksi",
+        "judul": "Pool penuh, request lain mengantre",
+        "kirim": "GET /debug/pool\n{\"maks_koneksi\":10, \"jumlah_menunggu\":160,\n \"total_waktu_menunggu_ms\":609031}",
+        "jelas": "10 koneksi × (1 ÷ 2 detik) = maks ±5 request per detik. Yang datang 17 per detik.",
+        "nada": "warn"
+      },
+      {
+        "dari": "api",
+        "ke": "app",
+        "lapisan": "handler",
+        "judul": "Sebagian besar timeout",
+        "kirim": "hasil: 201: 54 · timeout (5 s): 116\nlog: tunggu_koneksi_ms 2899, notifikasi_ms 2000, durasi_ms 4902",
+        "jelas": "Yang berhasil pun menunggu hampir 5 detik, sebagian besar untuk mendapat koneksi. Menambah server tidak menolong: masalahnya W (lama koneksi dipegang), bukan jumlah server.",
+        "nada": "warn",
+        "layar": {
+          "hp": {
+            "waktu": "12.00",
+            "nada": "warn",
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Waktu habis. Coba lagi.",
+                "nada": "warn"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

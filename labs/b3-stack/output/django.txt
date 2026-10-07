@@ -1,0 +1,5 @@
+transfer budi -> ani 70: IntegrityError new row for relation "akun" violates check constraint "akun_check"
+budi=100 ani=980 total=1080
+tarik 70: sukses
+tarik 50: saldo tidak cukup
+budi=30 ani=980 total=1010

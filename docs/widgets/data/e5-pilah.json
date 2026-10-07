@@ -1,0 +1,14 @@
+{
+  "judul": "Layar daftar riwayat Ani: field mana yang perlu dikirim?",
+  "kelompok": ["Perlu di daftar", "Hanya di detail", "Tidak perlu"],
+  "item": [
+    { "teks": "id pesanan", "jawab": 0, "kenapa": "Dipakai untuk membuka detail dan sebagai cursor." },
+    { "teks": "total", "jawab": 0, "kenapa": "Tampil di setiap baris daftar." },
+    { "teks": "dibuat", "jawab": 0, "kenapa": "Tampil sebagai jam pesanan, dan bagian dari cursor ([[B1.3]])." },
+    { "teks": "objek toko lengkap (nama, alamat, deskripsi, jam buka)", "jawab": 2, "kenapa": "Semua pesanan di layar ini milik Warung Ani. Mengirim objek yang sama 100 kali hanya menambah ukuran." },
+    { "teks": "daftar item lengkap", "jawab": 1, "kenapa": "Daftar cukup menampilkan jumlah item. Rincian item dimuat saat Ani membuka satu pesanan." },
+    { "teks": "jumlah_item", "jawab": 0, "kenapa": "Satu angka kecil menggantikan seluruh daftar item di layar daftar." },
+    { "teks": "foto pembeli", "jawab": 1, "kenapa": "Kalau layar detail menampilkannya, kirim URL di detail. Gambarnya sendiri dimuat terpisah dan bisa di-cache app." }
+  ],
+  "penutup": "Rekaman lab: 100 pesanan bentuk lengkap 52.931 B, bentuk ringkas 8.110 B sebelum kompresi. Bentuk response mengikuti layar, bukan bentuk tabel."
+}

@@ -1,0 +1,39 @@
+== A. BATAS=ip · satu IP (10.0.0.66) menebak PIN akun Budi 8 kali, lalu menunggu 12 detik
+  0.0 s  tebakan #1 dari 10.0.0.66          401
+  0.0 s  tebakan #2 dari 10.0.0.66          401
+  0.0 s  tebakan #3 dari 10.0.0.66          401
+  0.0 s  tebakan #4 dari 10.0.0.66          401
+  0.0 s  tebakan #5 dari 10.0.0.66          401
+  0.0 s  tebakan #6 dari 10.0.0.66          429  Retry-After: 12
+  0.0 s  tebakan #7 dari 10.0.0.66          429  Retry-After: 12
+  0.0 s  tebakan #8 dari 10.0.0.66          429  Retry-After: 12
+ 12.0 s  tebakan #9 setelah menunggu 12 detik 401
+
+== B. BATAS=ip · 30 karyawan satu tempat kerja login benar lewat satu Wi-Fi (10.0.0.20)
+  0.0 s  30 login benar dari 10.0.0.20 → 200: 5 · 429: 25
+
+== C. BATAS=akun+ip · ember per akun (5, 1 per 12 detik) + ember per IP longgar (60, 1 per detik)
+  0.0 s  tebakan #1 dari 10.0.1.1           401
+  0.0 s  tebakan #2 dari 10.0.1.2           401
+  0.0 s  tebakan #3 dari 10.0.1.3           401
+  0.0 s  tebakan #4 dari 10.0.1.4           401
+  0.0 s  tebakan #5 dari 10.0.1.5           401
+  0.0 s  tebakan #6 dari 10.0.1.6           429  Retry-After: 12
+  0.0 s  tebakan #7 dari 10.0.1.7           429  Retry-After: 12
+  0.0 s  tebakan #8 dari 10.0.1.8           429  Retry-After: 12
+  0.0 s  30 login benar dari 10.0.0.20 → 200: 30
+
+== D. BATAS=akun+ip · dua instance API, ember di memori masing-masing; tebakan bergantian ke instance 1 dan 2
+  0.0 s  tebakan #1 → instance 1            401
+  0.0 s  tebakan #2 → instance 2            401
+  0.0 s  tebakan #3 → instance 1            401
+  0.0 s  tebakan #4 → instance 2            401
+  0.0 s  tebakan #5 → instance 1            401
+  0.0 s  tebakan #6 → instance 2            401
+  0.0 s  tebakan #7 → instance 1            401
+  0.0 s  tebakan #8 → instance 2            401
+  0.0 s  tebakan #9 → instance 1            401
+  0.0 s  tebakan #10 → instance 2           401
+  0.0 s  tebakan #11 → instance 1           429  Retry-After: 12
+  0.0 s  tebakan #12 → instance 2           429  Retry-After: 12
+        tebakan yang sampai ke pemeriksaan PIN: 10 (batas per akun 5)

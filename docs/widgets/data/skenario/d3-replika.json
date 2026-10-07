@@ -1,0 +1,170 @@
+{
+ "versi": 2,
+ "judul": "Budi top-up Rp200.000, lalu langsung melihat saldo",
+ "sumber": {
+  "jenis": "rekaman",
+  "file": "labs/t5-replika/output/replika.txt",
+  "fileVarian": "labs/t5-replika/output/replika.txt",
+  "catatan": "PostgreSQL 17 primary dan read replica, replica ditunda 2 detik dengan recovery_min_apply_delay supaya lag terlihat, direkam 2026-10-07 (labs/t5-replika)."
+ },
+ "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': semua baca selalu dari replica.",
+ "komponen": [
+  {
+   "id": "budi",
+   "label": "App Budi"
+  },
+  {
+   "id": "api",
+   "label": "Monolith API"
+  },
+  {
+   "id": "primary",
+   "label": "DB primary"
+  },
+  {
+   "id": "replica",
+   "label": "Read replica"
+  }
+ ],
+ "perangkat": [
+  {
+   "id": "budi",
+   "label": "HP Budi"
+  }
+ ],
+ "layarAwal": {
+  "budi": {
+   "judul": "Rekeningo",
+   "waktu": "19.10",
+   "isi": [
+    {
+     "jenis": "baris",
+     "kiri": "Saldo",
+     "kanan": "Rp50.000"
+    },
+    {
+     "jenis": "tombol",
+     "teks": "Top-up Rp200.000"
+    }
+   ]
+  }
+ },
+ "predict": {
+  "q": "Nanti kamu akan mengubah satu hal: setelah top-up, saldo selalu dibaca dari replica. Replica tertinggal 2 detik. Saldo berapa yang Budi lihat satu detik setelah top-up?",
+  "options": [
+   "Rp250.000",
+   "Rp50.000",
+   "Error"
+  ],
+  "answer": 1,
+  "varian": true,
+  "explain": "Replica belum menerapkan COMMIT top-up. Rekaman lab: sampai detik ke-1,5 replica masih menjawab 50000, padahal primary sudah 250000."
+ },
+ "langkah": [
+  {
+   "dari": "budi",
+   "ke": "api",
+   "judul": "Budi top-up",
+   "kirim": "POST /topup {\"jumlah\":200000}",
+   "jelas": "Semua tulis ke primary."
+  },
+  {
+   "dari": "api",
+   "ke": "primary",
+   "judul": "Tulis ke primary, catat LSN",
+   "kirim": "UPDATE akun SET saldo = saldo + 200000 WHERE id = 'budi';  → COMMIT\nSELECT pg_current_wal_lsn();",
+   "jelas": "LSN adalah posisi di log perubahan (WAL). Replica yang sudah sampai posisi ini pasti sudah melihat top-up Budi."
+  },
+  {
+   "dari": "budi",
+   "ke": "api",
+   "judul": "Budi langsung membuka saldo",
+   "kirim": "GET /saldo   (membawa LSN terakhir Budi)",
+   "jelas": "API menyimpan LSN tulis terakhir per user, mis. di token atau cache."
+  },
+  {
+   "dari": "api",
+   "ke": "replica",
+   "judul": "Replica sudah sampai LSN itu?",
+   "kirim": "SELECT pg_last_wal_replay_lsn() >= '<LSN tulis>'::pg_lsn;\n→ false",
+   "jelas": "Replica masih tertinggal."
+  },
+  {
+   "dari": "api",
+   "ke": "primary",
+   "judul": "Belum: baca dari primary",
+   "kirim": "SELECT saldo FROM akun WHERE id = 'budi';  → 250000 (primary)",
+   "jelas": "Hanya user yang baru menulis yang dibaca dari primary. User lain tetap dilayani replica."
+  },
+  {
+   "dari": "api",
+   "ke": "budi",
+   "judul": "Budi melihat saldo barunya",
+   "kirim": "200 {\"saldo\":250000}",
+   "jelas": "Read-your-writes: setiap user selalu melihat tulisannya sendiri, walau replica tertinggal.",
+   "layar": {
+    "budi": {
+     "judul": "Rekeningo",
+     "waktu": "19.11",
+     "isi": [
+      {
+       "jenis": "baris",
+       "kiri": "Saldo",
+       "kanan": "Rp250.000"
+      },
+      {
+       "jenis": "toast",
+       "teks": "Top-up berhasil",
+       "nada": "good"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "varian": {
+  "label": "semua baca selalu dari replica",
+  "mulai": 3,
+  "langkah": [
+   {
+    "dari": "api",
+    "ke": "replica",
+    "judul": "Baca dari replica",
+    "kirim": "SELECT saldo FROM akun WHERE id = 'budi';\n→ 50000   (primary: 250000)",
+    "jelas": "Rekaman: replica masih 50000 sampai detik ke-1,5.",
+    "nada": "warn"
+   },
+   {
+    "dari": "api",
+    "ke": "budi",
+    "judul": "Budi melihat saldo lama",
+    "kirim": "200 {\"saldo\":50000}",
+    "jelas": "Budi mengira top-up gagal, lalu menekan top-up lagi. Masalah yang sama dengan timeout di [[B11]]: hasil yang belum terlihat dianggap gagal.",
+    "nada": "warn",
+    "layar": {
+     "budi": {
+      "judul": "Rekeningo",
+      "waktu": "19.11",
+      "isi": [
+       {
+        "jenis": "baris",
+        "kiri": "Saldo",
+        "kanan": "Rp50.000",
+        "nada": "warn"
+       },
+       {
+        "jenis": "toast",
+        "teks": "Top-up berhasil",
+        "nada": "good"
+       },
+       {
+        "jenis": "tombol",
+        "teks": "Top-up Rp200.000"
+       }
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,19 @@
+-- Redis 8.10.2 · PostgreSQL 17.11 · TTL cache 300 detik
+
+# A. Hanya TTL, cache tidak dihapus saat harga berubah
+Budi  baca harga  → Rp25.000 (MISS, sisa TTL 300 detik)
+Ani   ubah harga jadi Rp28.000 di database
+Budi  baca harga  → Rp25.000 (HIT, sisa TTL 299 detik)
+      database: Rp28.000
+
+# B. Cache dihapus setiap kali harga berubah
+Budi  baca harga  → Rp25.000 (MISS, sisa TTL 300 detik)
+Ani   ubah harga jadi Rp28.000, lalu DEL produk:1:harga
+Budi  baca harga  → Rp28.000 (MISS, sisa TTL 300 detik)
+Budi  baca harga  → Rp28.000 (HIT, sisa TTL 300 detik)
+
+# C. Waktu baca, localhost, median 200 kali
+Redis GET (hit)        0.262 ms
+PostgreSQL SELECT      0.186 ms
+Query ringkasan 200.000 pesanan  9.256 ms  (median 20 kali)
+Redis GET hasil ringkasan        0.217 ms

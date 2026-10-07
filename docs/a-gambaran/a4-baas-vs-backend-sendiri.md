@@ -1,0 +1,114 @@
+---
+title: "1.2 BaaS atau backend sendiri?"
+---
+
+<div data-bb="kamu-di-sini" data-tahap="1"></div>
+
+# 1.2 BaaS atau backend sendiri?
+
+Baca 6 menit · coba 2 menit · Prasyarat: [[A1]] · Jalur inti
+{: .meta }
+
+<div data-bb="selesai"></div>
+
+??? question "Sudah tahu? Cek 3 pertanyaan"
+
+    1. Di Supabase, app bisa membaca tabel tanpa kamu menulis endpoint. Siapa yang membuat API-nya?
+    2. Di Supabase, di mana aturan "Budi hanya boleh melihat riwayatnya sendiri" ditulis?
+    3. Kenapa transfer saldo lebih sulit di BaaS daripada daftar toko?
+
+    Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+## Inti
+
+Supabase dan Firebase memberi database, login, dan API otomatis. Aturan bisnis lalu ditulis sebagai policy atau fungsi database. Backend sendiri lebih lambat dibuat, tapi semua aturan ada di satu tempat.
+
+<div data-bb="arsitektur" data-tahap="1"></div>
+
+## Lihat sendiri
+
+Dua cara membangun Rekeningo. Pilih satu fitur, lalu lihat bagian mana yang mengerjakannya di setiap opsi. Mulailah dari "Daftar toko", lalu bandingkan dengan "Transfer saldo".
+
+<div data-bb="banding" data-src="data/a4-banding.json"></div>
+
+## Kenapa ini ada
+
+Sinta ingin uji coba dimulai dalam enam minggu. Raka sudah memakai Firebase di beberapa app Flutter, jadi pilihan pertamanya jelas: BaaS.
+
+Dalam dua hari, prototipe Supabase sudah jalan. Login, daftar toko, dan profil selesai tanpa satu baris kode server. Lalu Raka sampai di transfer saldo.
+
+Transfer mengubah dua saldo sekaligus, dan keduanya harus berhasil bersama. Di Supabase, itu berarti fungsi PL/pgSQL yang dipanggil lewat `rpc`, ditambah policy RLS untuk setiap tabel.
+
+Raka menimbang. Uji coba ini menyangkut uang sungguhan, dan nanti tim akan bertambah. Aturan uang yang tersebar di policy, fungsi SQL, dan kode app akan sulit di-review. Raka memilih satu monolith dengan satu PostgreSQL.
+
+Pilihan ini **bukan satu-satunya yang benar**. Banyak produk berjalan baik dengan BaaS. Cerita ini memilih backend sendiri supaya kamu melihat apa yang biasanya dikerjakan BaaS diam-diam.
+
+## Cara kerjanya
+
+Yang dikerjakan BaaS untukmu, tanpa kamu tulis:
+
+| Kebutuhan | Di Supabase | Di backend sendiri |
+|---|---|---|
+| API dari tabel | Dibuat otomatis oleh PostgREST dari skema database | Kamu tulis endpoint satu per satu |
+| Login dan token | Supabase Auth | Library auth di API |
+| Izin per baris | Policy RLS di PostgreSQL | Kode: `WHERE user_id = <id dari token>` |
+| Logika banyak langkah | Fungsi SQL (`rpc`) atau Edge Function | Lapisan logika bisnis |
+
+Supabase menyebut API-nya dibuat otomatis langsung dari skema database ([Supabase: REST API](https://supabase.com/docs/guides/api)). Artinya, **setiap tabel bisa diakses dari app**. Yang membatasi hanya policy RLS. Kalau satu policy lupa ditulis, tabel itu terbuka.
+
+Di backend sendiri, kebalikannya: tidak ada yang bisa diakses sampai kamu menulis endpoint-nya. Lebih lambat, tapi lupa menulis endpoint hanya membuat fitur belum jalan, bukan data terbuka untuk semua orang.
+
+## Di stack lain
+
+| Kebutuhan | Supabase | Firebase | Backend sendiri (Go, Node, Laravel, Django, Spring) |
+|---|---|---|---|
+| Aturan akses data | Policy RLS (SQL) | Security Rules | Kode di lapisan logika bisnis |
+| Logika transfer | Fungsi PL/pgSQL lewat `rpc` | Firestore transaction + Cloud Functions | Satu transaction di kode ([[B3.1]]) |
+| Tempat tes | Tes SQL atau tes lewat API | Firebase Emulator | Unit test dan integration test biasa |
+
+Rekaman di [[B3.1]] menunjukkan satu konsekuensinya: satu panggilan `rpc` Supabase berjalan sebagai satu transaction tanpa `BEGIN` yang terlihat di kode.
+
+## Trade-off: kapan pakai apa
+
+| Situasi | Pilih | Alasan |
+|---|---|---|
+| Prototipe, data sebagian besar milik satu user | BaaS | Login dan CRUD selesai dalam hari, bukan minggu |
+| Logika uang, banyak langkah, banyak aturan | Backend sendiri | Aturan di satu tempat, bisa dites dan di-review seperti kode biasa |
+| Tim kecil tanpa pengalaman server | BaaS, dengan policy yang di-review | Biaya operasional server dihindari |
+| Sudah mulai BaaS, lalu muncul logika rumit | Campuran: BaaS + fungsi server untuk bagian rumit | Tidak perlu migrasi total |
+
+## Cek diri
+
+**1.** Di Supabase, Raka membuat tabel `transaksi` baru tapi lupa menulis policy RLS-nya. Apa risikonya?
+
+??? success "Jawaban"
+
+    Tergantung RLS aktif atau tidak di tabel itu. Kalau RLS tidak diaktifkan, tabel bisa diakses lewat API otomatis sesuai hak role yang dipakai app. Kalau RLS aktif tapi tanpa policy, semua akses ditolak. Karena itu setiap tabel baru di BaaS harus dicek RLS-nya ([Supabase: Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)).
+
+**2.** Jelaskan kenapa "daftar toko" cocok untuk BaaS, tapi "transfer saldo" kurang cocok.
+
+??? success "Jawaban"
+
+    Daftar toko adalah data publik yang hanya dibaca. API otomatis langsung cukup. Transfer mengubah dua baris sekaligus dengan aturan saldo, dan semuanya harus berhasil bersama. Di BaaS, itu jadi fungsi SQL atau Cloud Function tersendiri, terpisah dari kode lain.
+
+**3.** Benar atau salah: memakai Supabase berarti tidak punya backend.
+
+??? success "Jawaban"
+
+    Salah. Backend-nya ada (PostgREST, Auth, PostgreSQL), hanya saja dijalankan oleh Supabase. Aturan bisnis tetap harus kamu tulis, dalam bentuk policy dan fungsi.
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Di proyek BaaS: setiap tabel baru punya RLS aktif dan policy yang jelas.
+- [ ] Logika uang tidak dijalankan di app lalu hasilnya ditulis langsung ke tabel.
+- [ ] Kunci `service_role` Supabase atau kredensial admin Firebase tidak ada di kode app.
+- [ ] Fungsi SQL yang mengubah banyak baris berjalan dalam satu transaction.
+
+## Bacaan lanjut
+
+- [Supabase: REST API](https://supabase.com/docs/guides/api) · [Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security) · [Memanggil fungsi lewat rpc](https://supabase.com/docs/reference/javascript/rpc) · [Edge Functions](https://supabase.com/docs/guides/functions)
+- [PostgREST](https://docs.postgrest.org/en/stable/)
+- [Firebase: Security Rules](https://firebase.google.com/docs/rules) · [Firestore transactions](https://firebase.google.com/docs/firestore/manage-data/transactions) · [Cloud Functions](https://firebase.google.com/docs/functions)
+
+
+<div data-bb="umpan-balik"></div>

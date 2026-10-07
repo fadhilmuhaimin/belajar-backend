@@ -1,0 +1,8 @@
+-- status pesanan 812 berubah di detik ke-7 · polling setiap 5 detik vs SSE
+  0.1 s  sse      koneksi dibuka (1 request)
+  0.1 s  sse      event: {"status":"disiapkan"}
+  0.1 s  polling  request #1: {"status":"disiapkan"}
+  5.1 s  polling  request #2: {"status":"disiapkan"}
+  7.1 s  sse      event: {"status":"siap diambil"}
+ 10.1 s  polling  request #3: {"status":"siap diambil"}
+ 10.1 s  polling  tahu pesanan siap setelah 3 request

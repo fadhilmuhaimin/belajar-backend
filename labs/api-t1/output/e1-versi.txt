@@ -1,0 +1,29 @@
+# Bagian signature token disensor sebagai <signature>.
+# server: ./api-t1
+
+# server dijalankan dengan VERSI_MINIMUM=1.5.0 VERSI_DISARANKAN=1.6.0
+
+$ curl -i -X GET /config -H 'X-App-Version: 1.4.2'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 53
+
+{"versi_disarankan":"1.6.0","versi_minimum":"1.5.0"}
+
+$ curl -i -X POST /login -d '{"id": "budi", "pin": "123456"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 182
+
+{"kedaluwarsa_detik":900,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJidWRpIiwiaWF0IjoxNzkxMjg3NDQ3LCJleHAiOjE3OTEyODgzNDd9.<signature>"}
+
+# 6 request GET /akun/budi dari versi 1.4.2, 1.5.0 (2x), 1.6.0 (3x), tidak ditampilkan
+
+$ curl -i -X GET /metrics/versi-app
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 131
+
+[{"versi":"(tanpa header)","request":2},{"versi":"1.4.2","request":2},{"versi":"1.5.0","request":2},{"versi":"1.6.0","request":3}]
+
+server log: api-t1 dev mendengarkan di 127.0.0.1:18081

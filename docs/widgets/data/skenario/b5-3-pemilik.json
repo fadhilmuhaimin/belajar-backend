@@ -1,0 +1,48 @@
+{
+  "versi": 2,
+  "judul": "Budi mengganti ID di URL menjadi ani",
+  "sumber": { "jenis": "rekaman", "file": "labs/api-t1/output/b5-3-pemilik.txt", "fileVarian": "labs/api-t1/output/b5-3-pemilik.txt",
+    "catatan": "Server Go 1.27 (labs/api-t1) + PostgreSQL 17.11, direkam dengan curl -i 2026-10-06. Varian: flag -tanpa-cek-pemilik." },
+  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal' dan perhatikan layar HP Budi.",
+  "komponen": [
+    { "id": "app", "label": "App Budi" },
+    { "id": "api", "label": "Monolith API", "lapisan": ["middleware auth", "logika bisnis", "akses data"] },
+    { "id": "db", "label": "PostgreSQL" }
+  ],
+  "layarAwal": { "hp": { "waktu": "10.00", "saldo": 100000, "isi": [ { "jenis": "baris", "kiri": "Akun", "kanan": "budi" } ] } },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: server tidak membandingkan pemilik token dengan ID di URL. Token Budi asli dan valid. Apa yang didapat Budi dari GET /akun/ani?",
+    "options": ["401, karena token bukan milik Ani", "Data dan saldo Ani", "404"],
+    "answer": 1,
+    "varian": true,
+    "explain": "Token hanya membuktikan siapa pengirimnya (authentication). Ia tidak memutuskan data mana yang boleh dibaca. Tanpa cek pemilik, server melayani ID apa pun. Rekaman lab: 200 dengan saldo Warung Ani Rp250.000. OWASP menempatkan kesalahan ini di peringkat pertama API Security Top 10 2023."
+  },
+  "langkah": [
+    { "dari": "app", "ke": "api", "lapisan": "middleware auth", "judul": "Budi meminta akun lain",
+      "kirim": "GET /akun/ani\nAuthorization: Bearer <token Budi>",
+      "jelas": "App tidak punya tombol untuk ini. Budi mengubah ID di request sendiri, mis. lewat proxy di laptopnya." },
+    { "dari": "api", "lapisan": "middleware auth", "judul": "Token valid: peminta = budi",
+      "kirim": "signature ✓  exp ✓  → peminta = \"budi\"",
+      "jelas": "Authentication lolos. Pertanyaan berikutnya belum terjawab: bolehkah budi membaca akun ani?", "nada": "good" },
+    { "dari": "api", "lapisan": "logika bisnis", "judul": "Cek pemilik: peminta ≠ id",
+      "kirim": "LihatAkun(peminta=\"budi\", id=\"ani\")\n\"budi\" != \"ani\"  → ErrTidakDitemukan",
+      "jelas": "Aturan ada di logika bisnis, bukan di handler, supaya berlaku untuk semua jalur yang membaca akun." },
+    { "dari": "api", "ke": "app", "lapisan": "middleware auth", "judul": "404, bukan 403",
+      "kirim": "404 Not Found\n{\"type\":\"/problems/tidak-ditemukan\",\"title\":\"Akun tidak ditemukan\",\"status\":404}",
+      "jelas": "Jawaban sama dengan akun yang benar-benar tidak ada. Budi tidak bisa memakai jawaban ini untuk menebak ID mana yang terdaftar.", "nada": "good",
+      "layar": { "hp": { "waktu": "10.00", "saldo": 100000, "isi": [ { "jenis": "toast", "teks": "Akun tidak ditemukan", "nada": "warn" } ] } } }
+  ],
+  "varian": {
+    "label": "server tidak membandingkan pemilik token dengan ID di URL",
+    "mulai": 2,
+    "langkah": [
+      { "dari": "api", "ke": "db", "lapisan": "akses data", "judul": "Query langsung memakai ID dari URL",
+        "kirim": "SELECT id, nama, saldo FROM akun WHERE id = 'ani';",
+        "jelas": "Kodenya terlihat wajar. Satu baris pemeriksaan yang hilang tidak terlihat di review yang terburu-buru.", "nada": "warn" },
+      { "dari": "api", "ke": "app", "lapisan": "akses data", "judul": "Data Ani terkirim ke Budi",
+        "kirim": "200 OK\n{\"id\":\"ani\",\"nama\":\"Warung Ani\",\"saldo\":250000}",
+        "jelas": "Dengan mengganti ID satu per satu, Budi bisa membaca semua akun. Rekaman lab: 200 dengan saldo Rp250.000.", "nada": "warn",
+        "layar": { "hp": { "waktu": "10.01", "saldo": 250000, "saldoLabel": "Saldo Warung Ani", "nada": "warn", "isi": [ { "jenis": "baris", "kiri": "Akun", "kanan": "ani", "nada": "warn" } ] } } }
+    ]
+  }
+}

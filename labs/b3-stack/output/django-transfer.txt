@@ -1,0 +1,10 @@
+$ python django/main.py transfer
+transfer budi -> ani 70000: IntegrityError new row for relation "akun" violates check constraint "akun_check"
+budi=100000 ani=980000 total=1080000
+
+-- diterima PostgreSQL 17.11 (log_statement=all), urut saat diterima:
+BEGIN
+UPDATE "akun" SET "saldo" = ("akun"."saldo" - 70000) WHERE "akun"."nama" = 'budi'
+UPDATE "akun" SET "saldo" = ("akun"."saldo" + 70000) WHERE "akun"."nama" = 'ani'
+ERROR: new row for relation "akun" violates check constraint "akun_check"
+ROLLBACK

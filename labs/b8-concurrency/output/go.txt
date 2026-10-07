@@ -1,0 +1,8 @@
+# Go go1.27.1 · 10 notifikasi, layanan tiruan 500 ms per kiriman
+berurutan                      5.02 detik
+paralel (10 goroutine)         0.50 detik
+dibatasi 3 bersamaan           2.01 detik
+
+# goroutine leak: 1.000 kali memanggil fungsi yang menyerah setelah 10 ms
+goroutine sebelum: 5
+goroutine sesudah: 1005

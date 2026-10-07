@@ -1,0 +1,12 @@
+== D. Webhook palsu: body diubah, dan kiriman lama diputar ulang
+api      evt_902 → 401 signature atau timestamp tidak sah
+gateway  kirim evt_902 {"order_id":"tp_5521","status":"paid","amount":2000000} → 401
+api      evt_901 → 401 signature atau timestamp tidak sah
+gateway  kirim evt_901 {"order_id":"tp_5521","status":"paid","amount":200000} → 401
+
+-- PostgreSQL 17 sesudahnya (saldo awal Budi 50000)
+ saldo_budi | status_topup | event_tercatat | baris_outbox 
+------------+--------------+----------------+--------------
+      50000 | menunggu     |              0 |            0
+(1 row)
+

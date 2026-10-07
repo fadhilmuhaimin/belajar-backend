@@ -1,0 +1,26 @@
+{
+  "skenario": "Transfer dengan jumlah -70000 harus ditolak di server, apa pun jalur masuknya.",
+  "langkah": [
+    { "id": "aturan", "label": "Aturan: jumlah > 0" },
+    { "id": "status", "label": "Status saat aturan dilanggar" },
+    { "id": "db", "label": "Pertahanan terakhir: CHECK" }
+  ],
+  "stack": {
+    "Go": {
+      "pola": { "aturan": ["if jumlah <= 0"], "status": [] , "db": [] },
+      "catatan": { "status": "Handler memetakan ErrValidasi ke 422 (lihat [[B1.2]])", "db": "Di schema.sql: CHECK (jumlah > 0)" }
+    },
+    "Laravel": {
+      "pola": { "aturan": ["'jumlah' => 'required|integer|min:1'"] },
+      "catatan": { "status": "Otomatis 422 untuk request JSON", "db": "Di migration: $table->bigInteger('jumlah') plus CHECK lewat DB::statement" }
+    },
+    "Django": {
+      "pola": { "aturan": ["MinValueValidator(1)"], "db": ["CheckConstraint("] },
+      "catatan": { "status": "full_clean() melempar ValidationError; status ditentukan kodemu" }
+    },
+    "Spring": {
+      "pola": { "aturan": ["@Positive"], "status": ["@Valid"] },
+      "catatan": { "status": "Bawaan: 400 (MethodArgumentNotValidException), bukan 422", "db": "Di migration Flyway: CHECK (jumlah > 0)" }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Pengaman lokal. Pasang: cp tools/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+set -euo pipefail
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+bad=$(printf '%s\n' "$staged" | grep -E '(^|/)\.env[^/]*$' || true)
+if [ -n "$bad" ]; then
+  echo "DITOLAK: file .env* ikut di-commit:" >&2
+  printf '  %s\n' $bad >&2
+  exit 1
+fi
+if ! command -v gitleaks >/dev/null; then
+  echo "DITOLAK: gitleaks tidak terpasang (brew install gitleaks)." >&2
+  exit 1
+fi
+gitleaks git --pre-commit --staged --redact --no-banner --config .gitleaks.toml || {
+  echo "DITOLAK: gitleaks menemukan kemungkinan secret." >&2
+  exit 1
+}
+# Pemeriksaan tambahan milik clone ini (opsional, tidak ikut repo).
+for f in tools/lokal/pre-commit-*.sh; do
+  [ -f "$f" ] || continue
+  bash "$f" || { echo "DITOLAK: $f gagal." >&2; exit 1; }
+done

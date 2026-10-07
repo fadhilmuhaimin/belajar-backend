@@ -1,0 +1,135 @@
+---
+title: "4.2 Proxy dan BFF"
+---
+
+<div data-bb="kamu-di-sini" data-tahap="4"></div>
+
+# 4.2 Proxy dan BFF
+
+Baca 7 menit · coba 4 menit · Prasyarat: [[B11]]
+{: .meta }
+
+<div data-bb="selesai"></div>
+
+??? question "Sudah tahu? Cek 3 pertanyaan"
+
+    1. Kenapa kredensial layanan eksternal tidak boleh disimpan di app, walau disamarkan?
+    2. Signed URL untuk bukti bayar diteruskan ke orang lain. Apa yang terjadi?
+    3. Apa bedanya proxy dengan BFF?
+
+    Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+## Inti
+
+Proxy memegang kredensial yang tidak boleh ada di app. BFF menggabungkan banyak request jadi satu.
+
+<div data-bb="arsitektur" data-tahap="4"></div>
+
+## Lihat sendiri
+
+Untuk saldo besar, Rekeningo memverifikasi identitas lewat layanan pihak ketiga. Data identitas di rekaman ini fiktif.
+
+<div data-bb="alur" data-src="data/skenario/b11-2-verifikasi.json"></div>
+
+## Kenapa ini ada
+
+Sinta menandatangani kerja sama dengan layanan verifikasi identitas. Syaratnya: request hanya dari IP yang didaftarkan, dengan kredensial khusus Rekeningo.
+
+Ide pertama di rapat: simpan kredensial di konfigurasi app, lalu app memanggil layanan langsung. Raka menolak. File app bisa dibongkar siapa pun yang mengunduhnya, dan IP HP berubah-ubah sehingga tidak bisa didaftarkan.
+
+Di minggu yang sama, tim app mengeluh layar beranda butuh 5 request sebelum tampil.
+
+## Cara kerjanya
+
+Tiga istilah ini sering tertukar:
+
+| Istilah | Artinya | Di Rekeningo |
+|---|---|---|
+| Proxy | Server perantara yang meneruskan request, sambil menambahkan yang tidak boleh dipegang app | Proxy verifikasi yang memegang kredensial |
+| BFF (Backend for Frontend) | "Satu backend per user experience" ([Sam Newman](https://samnewman.io/patterns/architectural/bff/)) | Endpoint beranda khusus app mobile |
+| Gateway offloading | Urusan bersama (TLS, rate limit, auth) dipindah ke satu komponen di depan service ([Microsoft](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-offloading)) | Rate limit dari [[C4]] |
+
+**Proxy verifikasi.** Proxy memeriksa token user, menambah kredensial, memasang timeout, mencatat audit tanpa NIK utuh, dan menerjemahkan format jawaban. Penerjemahan ini disebut anti-corruption layer: format eksternal tidak menyebar ke seluruh kode ([Microsoft](https://learn.microsoft.com/en-us/azure/architecture/patterns/anti-corruption-layer)).
+
+```go title="labs/b11-2-proxy/main.go"
+--8<-- "labs/b11-2-proxy/main.go:proxy"
+```
+
+Tanpa timeout, proxy menunggu selama layanan menunggu. Rekaman C: layanan lambat 8 detik, Budi menunggu 8,0 detik. Dengan timeout 3 detik (rekaman B), Budi mendapat `504` setelah 3,0 detik.
+
+**File: lewat proxy atau signed URL?** Bukti bayar disimpan di object storage. Ada dua cara memberikannya ke app:
+
+<div data-bb="alur" data-src="data/skenario/b11-2-file.json"></div>
+
+Dokumentasi AWS menyebut presigned URL sebagai bearer token: siapa pun yang memegangnya bisa memakainya. Masa berlakunya bisa sampai 7 hari, tergantung jenis credential pembuatnya ([AWS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html)). Rekeningo memakai signed URL untuk foto produk yang memang publik, dan proxy untuk bukti bayar.
+
+**BFF.** Endpoint `/beranda` mengambil lima bagian sekaligus di server, lalu mengirim satu response.
+
+```go title="labs/b11-2-proxy/main.go"
+--8<-- "labs/b11-2-proxy/main.go:bff"
+```
+
+```text title="Output rekaman: labs/b11-2-proxy/output/e-bff.txt"
+--8<-- "labs/b11-2-proxy/output/e-bff.txt"
+```
+
+Di localhost bedanya 211 ms lawan 42 ms. Di jaringan seluler, setiap request menambah satu round trip. Misalkan satu round trip 150 ms (asumsi, bukan rekaman). Lima request berurutan butuh 5 × 150 = 750 ms, satu request 150 ms, sebelum kerja server dihitung.
+
+## Di stack lain
+
+Yang sama di semua stack: kredensial hanya di server, timeout di setiap panggilan keluar. Yang berbeda: komponen yang mengerjakannya. Hanya Go yang dijalankan di lab. Baris lain dicek ke dokumentasi.
+
+| Stack | Yang dipakai | Sumber |
+|---|---|---|
+| Go | Handler biasa seperti lab, atau `httputil.ReverseProxy` untuk meneruskan apa adanya | [httputil](https://pkg.go.dev/net/http/httputil#ReverseProxy) |
+| Nginx | `proxy_pass` untuk meneruskan; tanpa logika bisnis | [Nginx: proxy module](https://nginx.org/en/docs/http/ngx_http_proxy_module.html) |
+| Spring Cloud Gateway | Gateway di depan service: routing, rate limit, filter | [Spring Cloud Gateway](https://docs.spring.io/spring-cloud-gateway/reference/) |
+| Supabase | Edge Function sebagai proxy; kredensial disimpan sebagai secret | [Supabase: secrets](https://supabase.com/docs/guides/functions/secrets) |
+| Firebase | Cloud Functions dengan `defineSecret` | [Firebase: secrets](https://firebase.google.com/docs/functions/config-env) |
+
+Di BaaS, proxy ini biasanya satu function. Konsepnya tetap sama: app memanggil function milikmu, function memanggil layanan eksternal.
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Proxy di depan layanan eksternal | Kredensial dan IP di satu tempat; timeout, audit, dan format terpusat | Satu komponen lagi yang harus selalu hidup; kalau proxy mati, verifikasi berhenti total |
+| File lewat proxy API | Cek pemilik di setiap unduhan, akses bisa dicabut seketika | Semua byte lewat server API |
+| Signed URL | Byte langsung dari storage | Bearer: berlaku untuk siapa pun sampai kedaluwarsa |
+| BFF untuk beranda | Satu round trip, response pas untuk layar | Endpoint yang mengikuti layar app; ikut berubah setiap layar berubah |
+
+## Cek diri
+
+**1.** Kredensial layanan verifikasi disimpan di app, tapi disamarkan (obfuscation). Kenapa itu tetap tidak aman?
+
+??? success "Jawaban"
+
+    App berjalan di HP orang lain. Kode yang disamarkan tetap bisa dibongkar, dan request dari HP milik penyerang sendiri bisa disadap untuk melihat kredensialnya. Begitu bocor, kredensial tidak bisa dicabut dari app yang sudah terpasang. Kredensial di proxy bisa diganti kapan saja tanpa update app.
+
+**2.** Jelaskan kenapa bukti bayar lebih cocok lewat proxy, sedangkan foto produk cocok dengan signed URL.
+
+??? success "Jawaban"
+
+    Bukti bayar bersifat pribadi. Proxy memeriksa pemilik di setiap unduhan, sedangkan signed URL yang diteruskan bisa dibuka orang lain (rekaman: Ani mendapat file Budi). Foto produk memang publik, jadi bebas dibuka siapa pun. Untuk foto, yang penting byte tidak membebani server API.
+
+**3.** Proxy verifikasi dipasang tanpa timeout. Layanan eksternal lambat 8 detik di jam sibuk. Apa yang terjadi pada proxy?
+
+??? success "Jawaban"
+
+    Setiap request menunggu 8 detik dan menahan koneksi di proxy (rekaman C). Request yang datang terus menumpuk, sama seperti top-up di [[B11]]. Pasang timeout, dan pertimbangkan circuit breaker untuk layanan yang sering lambat.
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Tidak ada kredensial atau API key pihak ketiga di kode atau konfigurasi app.
+- [ ] Proxy memeriksa token user sebelum meneruskan apa pun.
+- [ ] Panggilan keluar dari proxy punya timeout.
+- [ ] Log dan audit tidak menyimpan data pribadi utuh (NIK, foto identitas).
+- [ ] File pribadi tidak dibagikan lewat signed URL berumur panjang.
+
+## Bacaan lanjut
+
+- [Sam Newman: Backends For Frontends](https://samnewman.io/patterns/architectural/bff/)
+- [Microsoft: Anti-corruption Layer pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/anti-corruption-layer)
+- [AWS: Sharing objects with presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html)
+
+<div data-bb="umpan-balik"></div>

@@ -1,0 +1,13 @@
+{
+  "judul": "Hal ini paling tepat dites di level mana?",
+  "kelompok": ["Unit", "Integration", "End-to-end"],
+  "item": [
+    { "teks": "Transfer ditolak kalau jumlah lebih dari Rp5.000.000", "jawab": 0, "kenapa": "Aturan murni di logika bisnis. Bisa dites dengan data palsu di memori, ratusan kali per detik. Lihat TestTransferMenolakInputSalah di rekaman." },
+    { "teks": "UPDATE dengan syarat saldo >= jumlah benar-benar mencegah saldo negatif", "jawab": 1, "kenapa": "Perilakunya ditentukan PostgreSQL. Data palsu di memori tidak bisa membuktikannya." },
+    { "teks": "Dua transfer bersamaan tidak membuat uang tercipta", "jawab": 1, "kenapa": "Butuh database sungguhan dan dua request paralel. Rekaman: test ini gagal untuk implementasi baca-hitung-tulis." },
+    { "teks": "Request tanpa token dijawab 401 dengan format problem+json", "jawab": 1, "kenapa": "Melibatkan router, middleware, dan format response. httptest menjalankan HTTP sungguhan tanpa jaringan." },
+    { "teks": "Budi login di app, transfer, lalu saldo di layar berubah", "jawab": 2, "kenapa": "Melibatkan app, API, dan database bersama. Lambat dan rapuh, jadi sedikit saja: hanya jalur terpenting." },
+    { "teks": "Format Rupiah 1080000 menjadi Rp1.080.000", "jawab": 0, "kenapa": "Fungsi murni tanpa ketergantungan." }
+  ],
+  "penutup": "Banyak test unit yang cepat, cukup test integration untuk semua yang melibatkan database dan HTTP, dan sedikit test end-to-end untuk jalur yang paling penting."
+}

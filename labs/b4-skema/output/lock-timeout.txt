@@ -1,0 +1,8 @@
+A> BEGIN; SELECT count(*) FROM akun;   -- transaction panjang, mis. laporan
+   2500
+B> SET lock_timeout = '1s';
+B> ALTER TABLE akun ADD COLUMN catatan text;
+   ERROR:  canceling statement due to lock timeout   (setelah 1.0 detik)
+A> COMMIT;
+B> ALTER TABLE akun ADD COLUMN catatan text;   -- dicoba ulang
+   ALTER TABLE

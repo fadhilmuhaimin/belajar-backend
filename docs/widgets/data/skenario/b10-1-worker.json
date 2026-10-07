@@ -1,0 +1,56 @@
+{
+  "versi": 2,
+  "judul": "Notifikasi pembayaran lewat outbox dan worker",
+  "sumber": { "jenis": "rekaman", "file": "labs/t3-bayar/output/pool-outbox.txt", "fileVarian": "labs/t3-bayar/output/worker-retry.txt",
+    "catatan": "Server dan worker Go 1.27 dari codebase yang sama, PostgreSQL 17.11, layanan notifikasi tiruan. Varian: layanan notifikasi menjawab 503 untuk 7 kiriman pertama. Direkam 2026-10-06 (labs/t3-bayar)." },
+  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': layanan notifikasi sedang gangguan.",
+  "komponen": [
+    { "id": "app", "label": "App Budi" },
+    { "id": "api", "label": "Monolith API" },
+    { "id": "db", "label": "PostgreSQL (outbox)" },
+    { "id": "worker", "label": "Worker" },
+    { "id": "notif", "label": "Layanan notifikasi" }
+  ],
+  "layarAwal": { "hp": { "waktu": "12.05", "isi": [ { "jenis": "baris", "kiri": "Makan siang", "kanan": "Rp25.000" }, { "jenis": "tombol", "teks": "Bayar" } ] } },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: layanan notifikasi menjawab 503 untuk 7 kiriman pertama. Ada 3 pesan di outbox, worker mencoba maksimal 3 kali dengan jeda 2 lalu 4 detik. Berapa pesan yang akhirnya masuk dead-letter?",
+    "options": ["0", "1", "3"],
+    "answer": 1,
+    "varian": true,
+    "explain": "Percobaan 1: 3 gagal (total 3). Percobaan 2: 3 gagal (total 6). Percobaan 3: satu pesan gagal (total 7), dua sisanya berhasil. Rekaman lab: id 1 berstatus gagal setelah 3 percobaan, id 2 dan 3 terkirim. Pembayarannya sendiri sudah sukses sejak awal."
+  },
+  "langkah": [
+    { "dari": "app", "ke": "api", "judul": "Budi membayar", "kirim": "POST /bayar {\"akun_id\": 1287, \"jumlah\": 25000}",
+      "jelas": "Jalur request hanya berisi pekerjaan yang harus selesai sebelum Budi diberi jawaban.",
+      "layar": { "hp": { "waktu": "12.05", "isi": [ { "jenis": "proses", "teks": "Membayar..." } ] } } },
+    { "dari": "api", "ke": "db", "judul": "Pembayaran + pesan outbox, satu transaction",
+      "kirim": "BEGIN;\nUPDATE akun ...; INSERT INTO pembayaran ...;\nINSERT INTO outbox (jenis, data) VALUES ('pembayaran_berhasil', ...);\nCOMMIT;",
+      "jelas": "Kalau pembayaran batal, pesan outbox ikut batal. Kalau pembayaran sukses, pesannya pasti ada. Tidak ada notifikasi untuk pembayaran yang tidak terjadi." },
+    { "dari": "api", "ke": "app", "judul": "Budi langsung mendapat jawaban",
+      "kirim": "201 Created   (rekaman beban: p50 5 ms)",
+      "jelas": "Notifikasi belum terkirim, dan itu tidak apa-apa. Layar sudah bisa menampilkan hasil pembayaran.", "nada": "good",
+      "layar": { "hp": { "waktu": "12.05", "isi": [ { "jenis": "toast", "teks": "Pembayaran berhasil", "nada": "good" } ] } } },
+    { "dari": "db", "ke": "worker", "judul": "Worker mengambil pesan dengan lease",
+      "kirim": "UPDATE outbox SET coba_lagi = now() + '30 seconds', percobaan = percobaan + 1\nWHERE id IN (SELECT id ... WHERE status = 'menunggu' AND coba_lagi <= now()\n             LIMIT 20 FOR UPDATE SKIP LOCKED)\nRETURNING id, data, percobaan;",
+      "jelas": "SKIP LOCKED membuat beberapa worker bisa berjalan bersamaan tanpa mengambil pesan yang sama. Lease 30 detik: kalau worker mati di tengah, pesannya diambil lagi nanti." },
+    { "dari": "worker", "ke": "notif", "judul": "Kirim, di luar transaction", "kirim": "POST /kirim   (2 detik)",
+      "jelas": "Tidak ada koneksi database yang dipegang selama menunggu." },
+    { "dari": "worker", "ke": "db", "judul": "Tandai terkirim",
+      "kirim": "UPDATE outbox SET status = 'terkirim' WHERE id = ...;\nrekaman beban: 170 terkirim ±21 detik setelah beban dimulai",
+      "jelas": "Kalau worker mati tepat sebelum langkah ini, pesan dikirim ulang setelah lease habis. Jaminannya at-least-once, jadi penerima harus tahan duplikat.", "nada": "good" }
+  ],
+  "varian": {
+    "label": "layanan notifikasi sedang gangguan (503)",
+    "mulai": 4,
+    "langkah": [
+      { "dari": "worker", "ke": "notif", "judul": "Percobaan 1 gagal, coba lagi 2 detik", "kirim": "{\"msg\": \"retry\", \"outbox_id\": 1, \"percobaan\": 1, \"coba_lagi_dalam\": \"2s\",\n \"error\": \"notifikasi: status 503\"}",
+        "jelas": "Jadwal ulang ditulis di kolom coba_lagi, bukan dengan sleep di memori. Kalau worker restart, jadwalnya tetap ada.", "nada": "warn" },
+      { "dari": "worker", "ke": "notif", "judul": "Percobaan 2 gagal, coba lagi 4 detik", "kirim": "{\"msg\": \"retry\", \"outbox_id\": 1, \"percobaan\": 2, \"coba_lagi_dalam\": \"4s\", ...}",
+        "jelas": "Jeda membesar: 2 detik, lalu 4 detik. Layanan yang sedang kesulitan tidak dibanjiri.", "nada": "warn" },
+      { "dari": "worker", "ke": "db", "judul": "Percobaan 3: satu pesan ke dead-letter", "kirim": "{\"msg\": \"dead-letter\", \"outbox_id\": 1, \"percobaan\": 3, ...}\nUPDATE outbox SET status = 'gagal', error_akhir = 'notifikasi: status 503' ...",
+        "jelas": "Setelah batas percobaan, pesan berhenti diulang dan menunggu manusia. Tanpa batas ini, pesan yang selalu gagal akan diulang selamanya." },
+      { "dari": "db", "judul": "Keadaan akhir outbox", "kirim": " id |  status  | percobaan\n  1 | gagal    |         3\n  2 | terkirim |         3\n  3 | terkirim |         3",
+        "jelas": "Dead-letter perlu alert dan cara mengirim ulang manual. Pembayaran Budi tidak terpengaruh: yang tertunda hanya notifikasinya." }
+    ]
+  }
+}

@@ -1,0 +1,155 @@
+{
+ "versi": 2,
+ "judul": "Budi memverifikasi identitas untuk menaikkan batas saldo",
+ "sumber": {
+  "jenis": "rekaman",
+  "file": "labs/b11-2-proxy/output/a-proxy.txt",
+  "fileVarian": "labs/b11-2-proxy/output/a-proxy.txt",
+  "catatan": "Proxy Go dan layanan verifikasi tiruan (nama netral), direkam 2026-10-07 (labs/b11-2-proxy). Data identitas fiktif."
+ },
+ "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': app memanggil layanan verifikasi langsung.",
+ "komponen": [
+  {
+   "id": "app",
+   "label": "App Budi"
+  },
+  {
+   "id": "proxy",
+   "label": "Proxy verifikasi"
+  },
+  {
+   "id": "layanan",
+   "label": "Layanan verifikasi"
+  },
+  {
+   "id": "audit",
+   "label": "Audit log"
+  }
+ ],
+ "perangkat": [
+  {
+   "id": "app",
+   "label": "HP Budi"
+  }
+ ],
+ "layarAwal": {
+  "app": {
+   "judul": "Naikkan batas saldo",
+   "waktu": "12.00",
+   "isi": [
+    {
+     "jenis": "input",
+     "label": "NIK",
+     "nilai": "3201 0101 0190 0001"
+    },
+    {
+     "jenis": "tombol",
+     "teks": "Verifikasi"
+    }
+   ]
+  }
+ },
+ "predict": {
+  "q": "Nanti kamu akan mengubah satu hal: app memanggil layanan verifikasi langsung, tanpa proxy. Apa jawaban layanan?",
+  "options": [
+   "200",
+   "401",
+   "504"
+  ],
+  "answer": 1,
+  "varian": true,
+  "explain": "Layanan hanya menerima request yang membawa kredensial Rekeningo. Rekaman lab: 401 unauthorized. Supaya berhasil, kredensial harus ikut di dalam app, dan siapa pun yang membongkar file app bisa mengambilnya."
+ },
+ "langkah": [
+  {
+   "dari": "app",
+   "ke": "proxy",
+   "judul": "Budi mengirim data identitas",
+   "kirim": "POST /verifikasi\nAuthorization: Bearer token-budi\n{\"nik\":\"3201010101900001\",\"nama\":\"Budi Santoso\"}",
+   "jelas": "App hanya tahu alamat proxy milik Rekeningo, bukan alamat layanan eksternal."
+  },
+  {
+   "dari": "proxy",
+   "judul": "Token user diperiksa lebih dulu",
+   "kirim": "token Budi valid ✓\n(rekaman: tanpa token → 401, tidak ada yang diteruskan)",
+   "jelas": "Proxy yang meneruskan apa saja tanpa memeriksa siapa pengirimnya menjadi pintu terbuka ke layanan berbayar."
+  },
+  {
+   "dari": "proxy",
+   "ke": "layanan",
+   "judul": "Kredensial ditambahkan, format diterjemahkan",
+   "kirim": "POST /v2/identity/match\nX-Kredensial: kred-lab-…\n{\"national_id\":\"3201…\",\"full_name\":\"Budi Santoso\"}",
+   "jelas": "Kredensial hanya ada di proxy. Di cerita, layanan ini juga hanya menerima IP statis proxy; lab meniru syarat itu dengan kredensial saja."
+  },
+  {
+   "dari": "layanan",
+   "ke": "proxy",
+   "judul": "Layanan menjawab dengan formatnya sendiri",
+   "kirim": "200 {\"match\":true,\"score\":0.97,\"ref\":\"vx-88213\"}",
+   "jelas": "Nama field dan skor ini milik layanan eksternal. Kalau mereka mengubahnya, hanya proxy yang perlu disesuaikan."
+  },
+  {
+   "dari": "proxy",
+   "ke": "audit",
+   "judul": "Audit log tanpa NIK utuh",
+   "kirim": "audit: user=budi nik=3201… hasil=true lama=0s",
+   "jelas": "Bisa dilacak siapa memverifikasi kapan, tanpa menyimpan data pribadi utuh di log."
+  },
+  {
+   "dari": "proxy",
+   "ke": "app",
+   "judul": "App menerima format Rekeningo",
+   "kirim": "200 {\"status\":\"terverifikasi\"}",
+   "jelas": "App tidak pernah melihat format, alamat, atau kredensial layanan eksternal.",
+   "layar": {
+    "app": {
+     "judul": "Naikkan batas saldo",
+     "waktu": "12.01",
+     "isi": [
+      {
+       "jenis": "toast",
+       "teks": "Identitas terverifikasi",
+       "nada": "good"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "varian": {
+  "label": "app memanggil layanan verifikasi langsung, tanpa proxy",
+  "mulai": 0,
+  "langkah": [
+   {
+    "dari": "app",
+    "ke": "layanan",
+    "judul": "App memanggil layanan langsung",
+    "kirim": "POST /v2/identity/match\n{\"nik\":\"3201010101900001\",\"nama\":\"Budi Santoso\"}\n(tanpa X-Kredensial)",
+    "jelas": "App tidak punya kredensial, karena kredensial tidak boleh ada di file app.",
+    "nada": "warn"
+   },
+   {
+    "dari": "layanan",
+    "ke": "app",
+    "judul": "Ditolak: 401",
+    "kirim": "401 {\"error\":\"unauthorized\"}",
+    "jelas": "Supaya berhasil, kredensial harus ditanam di app, dan IP setiap HP harus didaftarkan. Yang pertama membocorkan kredensial; yang kedua tidak mungkin, karena IP HP berubah-ubah.",
+    "nada": "warn",
+    "layar": {
+     "app": {
+      "judul": "Naikkan batas saldo",
+      "waktu": "12.01",
+      "isi": [
+       {
+        "jenis": "toast",
+        "teks": "Verifikasi gagal",
+        "nada": "warn"
+       }
+      ],
+      "nada": "warn"
+     }
+    }
+   }
+  ]
+ }
+}

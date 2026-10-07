@@ -1,0 +1,70 @@
+# Bagian signature token disensor sebagai <signature>.
+# server: ./api-t1
+
+$ curl -i -X POST /login -d '{"id": "budi", "pin": "000000"}'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+Content-Length: 74
+
+{"type":"/problems/login-gagal","title":"ID atau PIN salah","status":401}
+
+$ curl -i -X POST /login -d '{"id": "budi", "pin": "123456"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 182
+
+{"kedaluwarsa_detik":900,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJidWRpIiwiaWF0IjoxNzkxMjg3NDQzLCJleHAiOjE3OTEyODgzNDN9.<signature>"}
+
+# isi token (base64url, bisa dibaca siapa saja):
+header : {"alg":"HS256","typ":"JWT"}
+payload: {"sub":"budi","iat":1791287443,"exp":1791288343}
+
+$ curl -i -X GET /akun/budi -H 'Authorization: Bearer <token Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 43
+
+{"id":"budi","nama":"Budi","saldo":100000}
+
+# payload diubah jadi {"sub":"ani","iat":1791287443,"exp":1791288343}, signature lama dipakai ulang:
+
+$ curl -i -X GET /akun/ani -H 'Authorization: Bearer <token palsu: sub=ani>'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+Www-Authenticate: Bearer error="invalid_token"
+Content-Length: 101
+
+{"type":"/problems/belum-login","title":"Belum login","status":401,"detail":"signature tidak cocok"}
+
+# header diubah jadi {"alg":"none"}, tanpa signature:
+
+$ curl -i -X GET /akun/ani -H 'Authorization: Bearer <token palsu: alg=none>'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+Www-Authenticate: Bearer error="invalid_token"
+Content-Length: 104
+
+{"type":"/problems/belum-login","title":"Belum login","status":401,"detail":"algoritma tidak diterima"}
+
+server log: api-t1 dev mendengarkan di 127.0.0.1:18081
+
+# server: ./api-t1 -umur-token 2s
+
+$ curl -i -X POST /login -d '{"id": "budi", "pin": "123456"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 180
+
+{"kedaluwarsa_detik":2,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJidWRpIiwiaWF0IjoxNzkxMjg3NDQzLCJleHAiOjE3OTEyODc0NDV9.<signature>"}
+
+# token berumur 2 detik, ditunggu 3 detik:
+
+$ curl -i -X GET /akun/budi -H 'Authorization: Bearer <token Budi, kedaluwarsa>'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+Www-Authenticate: Bearer error="invalid_token"
+Content-Length: 97
+
+{"type":"/problems/belum-login","title":"Belum login","status":401,"detail":"token kedaluwarsa"}
+
+server log: api-t1 dev mendengarkan di 127.0.0.1:18081

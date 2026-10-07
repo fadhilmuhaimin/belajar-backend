@@ -1,0 +1,7 @@
+== A. Verifikasi identitas lewat proxy (timeout 3 detik)
+  0.0 s  layanan  ditolak: tanpa kredensial yang benar → 401
+  0.0 s  app      langsung ke layanan (tanpa kredensial) → 401 {"error":"unauthorized"}
+  0.0 s  app      ke proxy tanpa token user → 401 {"title":"Token tidak valid"}
+  0.0 s  layanan  diterima dengan kredensial → 200 (setelah 0 detik)
+  0.0 s  proxy    audit: user=budi nik=3201… hasil=true lama=0s
+  0.0 s  app      ke proxy dengan token Budi → 200 {"status":"terverifikasi"}

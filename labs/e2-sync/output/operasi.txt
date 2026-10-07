@@ -1,0 +1,24 @@
+== C. Queue berisi operasi (+10) dengan op_id; app mati setelah sync, sebelum queue dihapus
+--- Ani offline
+app      offline. Ani menambah 10 porsi (layar 25 → 35). Queue: op-hmz42a27wj tambah_stok +10
+--- selama Ani offline, pembeli lain memesan lewat app
+server   POST /pesanan nasgor -1          → stok 24
+server   POST /pesanan nasgor -1          → stok 23
+server   POST /pesanan nasgor -1          → stok 22
+--- sinyal kembali
+app      online. Queue berisi 1 perubahan
+server   POST /sync op-hmz42a27wj tambah_stok → diterapkan
+app      ← 200 op-hmz42a27wj diterapkan: server stok 32, harga 25.000, versi 1
+app      ditutup paksa sebelum queue dihapus
+--- Ani membuka app lagi; queue masih berisi operasi yang sama
+app      online. Queue berisi 1 perubahan
+server   POST /sync op-hmz42a27wj sudah pernah diterima → kirim hasil lama, tidak diterapkan lagi
+app      ← 200 op-hmz42a27wj diterapkan: server stok 32, harga 25.000, versi 1
+app      queue kosong. Layar Ani sekarang: stok 32, harga 25.000
+
+-- PostgreSQL 17 sesudahnya (stok yang benar: 25 + 10 − 3 = 32)
+ stok | harga | versi 
+------+-------+-------
+   32 | 25000 |     1
+(1 row)
+

@@ -1,0 +1,188 @@
+{
+  "skenario": "Budi menarik Rp70.000 dari HP dan Rp50.000 dari tablet, bersamaan. Saldo Rp100.000.",
+  "langkah": [
+    {
+      "id": "mulai",
+      "label": "Mulai transaction"
+    },
+    {
+      "id": "baca",
+      "label": "Baca saldo terbaru + lock"
+    },
+    {
+      "id": "cek",
+      "label": "Cek saldo cukup"
+    },
+    {
+      "id": "tulis",
+      "label": "Kurangi saldo"
+    },
+    {
+      "id": "akhir",
+      "label": "COMMIT atau tolak"
+    }
+  ],
+  "stack": {
+    "Go · FOR UPDATE": {
+      "src": "labs/b3-stack/go/main.go#tarik",
+      "pola": {
+        "mulai": [
+          "db.BeginTx"
+        ],
+        "baca": [
+          "FOR UPDATE"
+        ],
+        "cek": [
+          "saldo < jumlah"
+        ],
+        "tulis": [
+          "UPDATE akun SET saldo = $1"
+        ],
+        "akhir": [
+          "tx.Commit()",
+          "return ErrSaldoKurang"
+        ]
+      },
+      "catatan": {
+        "akhir": "Yang ditolak keluar lewat return; defer tx.Rollback() mengirim ROLLBACK"
+      }
+    },
+    "Node.js · UPDATE atomik": {
+      "src": "labs/b3-stack/node/main.js#tarik",
+      "pola": {
+        "mulai": [],
+        "baca": [
+          "AND saldo >= $1"
+        ],
+        "cek": [
+          "AND saldo >= $1"
+        ],
+        "tulis": [
+          "saldo = saldo - $1"
+        ],
+        "akhir": [
+          "rowCount === 0"
+        ]
+      },
+      "catatan": {
+        "mulai": "Tidak ada BEGIN: satu UPDATE berjalan sebagai transaction implisit",
+        "baca": "Baca, cek, dan tulis terjadi dalam satu UPDATE",
+        "cek": "Syarat WHERE dicek ulang ke saldo terbaru setelah lock didapat"
+      }
+    },
+    "Laravel · lockForUpdate": {
+      "src": "labs/b3-stack/laravel/main.php#tarik",
+      "pola": {
+        "mulai": [
+          "$db->transaction("
+        ],
+        "baca": [
+          "->lockForUpdate()"
+        ],
+        "cek": [
+          "saldo < $jumlah"
+        ],
+        "tulis": [
+          "->update(["
+        ],
+        "akhir": [
+          "throw new RuntimeException"
+        ]
+      },
+      "catatan": {
+        "akhir": "Exception → Laravel mengirim ROLLBACK; tanpa exception → COMMIT"
+      }
+    },
+    "Django · select_for_update": {
+      "src": "labs/b3-stack/django/main.py#tarik",
+      "pola": {
+        "mulai": [
+          "transaction.atomic()"
+        ],
+        "baca": [
+          ".select_for_update()"
+        ],
+        "cek": [
+          "akun.saldo < jumlah"
+        ],
+        "tulis": [
+          "akun.save("
+        ],
+        "akhir": [
+          "raise ValueError"
+        ]
+      },
+      "catatan": {
+        "akhir": "Exception keluar dari blok → Django mengirim ROLLBACK; tanpa exception → COMMIT"
+      }
+    },
+    "Spring · @Lock": {
+      "md": "docs/b-fondasi/b3-2-race-condition-lock.md",
+      "pola": {
+        "mulai": [
+          "@Transactional"
+        ],
+        "baca": [
+          "PESSIMISTIC_WRITE"
+        ],
+        "cek": [
+          "getSaldo() < jumlah"
+        ],
+        "tulis": [
+          "setSaldo("
+        ],
+        "akhir": [
+          "throw new SaldoKurangException"
+        ]
+      },
+      "catatan": {
+        "akhir": "Tidak dijalankan di lab; RuntimeException memicu rollback"
+      }
+    },
+    "Supabase · fungsi + rpc": {
+      "src": "labs/b3-stack/supabase/fungsi.sql#tarik",
+      "pola": {
+        "mulai": [],
+        "baca": [
+          "saldo >= p_jumlah"
+        ],
+        "cek": [
+          "saldo >= p_jumlah"
+        ],
+        "tulis": [
+          "saldo = saldo - p_jumlah"
+        ],
+        "akhir": [
+          "return found"
+        ]
+      },
+      "catatan": {
+        "mulai": "Tidak ada BEGIN: satu panggilan rpc = satu transaction implisit",
+        "akhir": "found = false berarti tidak ada baris berubah, app menampilkan saldo tidak cukup"
+      }
+    },
+    "Firebase · transaction": {
+      "md": "docs/b-fondasi/b3-2-race-condition-lock.md",
+      "pola": {
+        "mulai": [
+          "runTransaction("
+        ],
+        "baca": [
+          "tx.get(budiRef)"
+        ],
+        "cek": [
+          "saldo < 50000"
+        ],
+        "tulis": [
+          "tx.update("
+        ],
+        "akhir": [
+          "throw new Error"
+        ]
+      },
+      "catatan": {
+        "baca": "Tanpa lock: Firestore mengulang seluruh fungsi kalau dokumen berubah (tidak dijalankan di lab)"
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+== A. Sesi disimpan di memori instance (SESI=memori)
+lb       POST /login → 127.0.0.1:18142
+app      POST /login → 200, token a1c1b8…(disensor)
+lb       GET /riwayat → 127.0.0.1:18141
+api:18141 GET /riwayat → 401 (sesi tidak dikenal di instance ini)
+app      GET /riwayat ke-1 → 401
+lb       GET /riwayat → 127.0.0.1:18142
+api:18142 GET /riwayat → 200 untuk budi
+app      GET /riwayat ke-2 → 200
+
+== B. Token bertanda tangan (SESI=token)
+lb       POST /login → 127.0.0.1:18142
+app      POST /login → 200, token budi.9…(disensor)
+lb       GET /riwayat → 127.0.0.1:18141
+api:18141 GET /riwayat → 200 untuk budi
+app      GET /riwayat ke-1 → 200
+lb       GET /riwayat → 127.0.0.1:18142
+api:18142 GET /riwayat → 200 untuk budi
+app      GET /riwayat ke-2 → 200

@@ -1,0 +1,17 @@
+{
+  "layar": [
+    { "waktu": "09.12", "saldo": 100000, "isi": [
+      { "jenis": "baris", "kiri": "Top-up bank", "kanan": "+Rp100.000", "nada": "good" },
+      { "jenis": "tombol", "teks": "Transfer" } ],
+      "catatan": "App asli: saldo diambil dari backend." },
+    { "waktu": "09.14", "saldo": 10000000, "nada": "warn", "isi": [
+      { "jenis": "input", "label": "Kirim ke Ani", "nilai": "Rp5.000.000" },
+      { "jenis": "tombol", "teks": "Kirim" } ],
+      "catatan": "App yang dimodifikasi: angka di layar diubah." },
+    { "waktu": "09.14", "saldo": 10000000, "nada": "warn", "isi": [
+      { "jenis": "input", "label": "Kirim ke Ani", "nilai": "Rp5.000.000" },
+      { "jenis": "toast", "teks": "Ditolak server: saldo tidak cukup", "nada": "warn" } ],
+      "catatan": "Backend memeriksa saldo di database: Rp100.000." }
+  ],
+  "caption": "Angka di HP hanya tampilan. Keputusan ada di backend, karena hanya backend yang tidak bisa diubah oleh user."
+}

@@ -1,0 +1,10 @@
+$ php main.php transfer
+transfer budi -> ani 70000: SQLSTATE[23514]: Check violation: 7 ERROR:  new row for relation "akun" violates check constraint "akun_check"
+budi=100000 ani=980000 total=1080000
+
+-- diterima PostgreSQL 17.11 (log_statement=all), urut saat diterima:
+BEGIN
+update "akun" set "saldo" = "saldo" - 70000 where "nama" = 'budi'
+update "akun" set "saldo" = "saldo" + 70000 where "nama" = 'ani'
+ERROR: new row for relation "akun" violates check constraint "akun_check"
+ROLLBACK

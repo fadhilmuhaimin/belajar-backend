@@ -1,0 +1,29 @@
+-- PostgreSQL 17.11 · riwayat Warung Ani (toko 1), 3 per halaman supaya ringkas
+
+# A. OFFSET
+halaman 1
+   SELECT id, dibuat::date FROM pesanan WHERE toko_id = 1 ORDER BY dibuat DESC, id DESC LIMIT 3 OFFSET 0
+   → id: [200000, 199950, 199900]
+(pesanan baru 200001 masuk untuk Warung Ani)
+halaman 2
+   SELECT id, dibuat::date FROM pesanan WHERE toko_id = 1 ORDER BY dibuat DESC, id DESC LIMIT 3 OFFSET 3
+   → id: [199900, 199850, 199800]
+
+# B. Cursor (keyset): halaman berikutnya dimulai sesudah baris terakhir yang sudah dilihat
+halaman 1
+   SELECT id, dibuat::date FROM pesanan WHERE toko_id = 1 ORDER BY dibuat DESC, id DESC LIMIT 3
+   → id: [200000, 199950, 199900]
+(pesanan baru 200001 masuk untuk Warung Ani)
+halaman 2 (cursor = dibuat dan id baris terakhir)
+   SELECT id, dibuat::date FROM pesanan WHERE toko_id = 1 AND (dibuat, id) < ('2026-12-30T05:51:40+00:00', 199900) ORDER BY dibuat DESC, id DESC LIMIT 3
+   → id: [199850, 199800, 199750]
+
+# C. Halaman jauh: 20 baris mulai posisi ke-3.000 dari 4.000 pesanan Warung Ani
+OFFSET 3000:
+   ->  Bitmap Heap Scan on pesanan (actual time=0.227..1.182 rows=4000 loops=1)
+   ->  Bitmap Index Scan on pesanan_toko_dibuat_idx (actual time=0.142..0.142 rows=4000 loops=1)
+   Execution Time: 1.774 ms
+cursor:
+   ->  Bitmap Heap Scan on pesanan (actual time=0.059..0.262 rows=1000 loops=1)
+   ->  Bitmap Index Scan on pesanan_toko_dibuat_idx (actual time=0.036..0.037 rows=1000 loops=1)
+   Execution Time: 0.321 ms

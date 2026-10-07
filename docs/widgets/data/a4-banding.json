@@ -1,0 +1,192 @@
+{
+  "judul": "Rekeningo dibangun dengan dua cara",
+  "opsi": [
+    {
+      "id": "baas",
+      "nama": "Opsi A · Supabase (BaaS)",
+      "baris": [
+        [
+          {
+            "id": "app",
+            "label": "App Flutter",
+            "sub": "supabase_flutter"
+          },
+          {
+            "id": "rest",
+            "label": "API otomatis",
+            "sub": "PostgREST"
+          },
+          {
+            "id": "db",
+            "label": "PostgreSQL",
+            "sub": "tabel + RLS"
+          }
+        ],
+        [
+          {
+            "id": "auth",
+            "label": "Supabase Auth"
+          },
+          {
+            "id": "fn",
+            "label": "Fungsi SQL",
+            "sub": "dipanggil lewat rpc"
+          },
+          {
+            "id": "edge",
+            "label": "Edge Function",
+            "sub": "kode server kecil"
+          }
+        ]
+      ],
+      "judulBaris": [
+        "",
+        "Komponen pendukung"
+      ]
+    },
+    {
+      "id": "own",
+      "nama": "Opsi B · Backend sendiri",
+      "baris": [
+        [
+          {
+            "id": "app",
+            "label": "App Flutter",
+            "sub": "http / dio"
+          },
+          {
+            "id": "api",
+            "label": "Monolith API",
+            "sub": "kode yang kamu tulis"
+          },
+          {
+            "id": "db",
+            "label": "PostgreSQL",
+            "sub": "tabel + constraint"
+          }
+        ],
+        [
+          {
+            "id": "handler",
+            "label": "handler"
+          },
+          {
+            "id": "logic",
+            "label": "logika bisnis"
+          },
+          {
+            "id": "data",
+            "label": "akses data"
+          }
+        ]
+      ],
+      "judulBaris": [
+        "",
+        "Di dalam Monolith API"
+      ]
+    }
+  ],
+  "fitur": [
+    {
+      "label": "Login",
+      "sorot": {
+        "baas": [
+          "app",
+          "auth"
+        ],
+        "own": [
+          "app",
+          "api",
+          "handler",
+          "db"
+        ]
+      },
+      "catatan": {
+        "baas": "Sudah jadi. App memanggil Supabase Auth, token langsung dipakai untuk semua request.",
+        "own": "Kamu menulis endpoint login atau memasang library auth. Lebih banyak kerja, tapi aturannya terlihat di kode."
+      }
+    },
+    {
+      "label": "Daftar toko",
+      "sorot": {
+        "baas": [
+          "app",
+          "rest",
+          "db"
+        ],
+        "own": [
+          "app",
+          "api",
+          "handler",
+          "data",
+          "db"
+        ]
+      },
+      "catatan": {
+        "baas": "Kamu tidak menulis kode server. App membaca tabel lewat API otomatis.",
+        "own": "Satu endpoint GET sederhana. Untuk data publik seperti ini, BaaS jelas lebih cepat."
+      }
+    },
+    {
+      "label": "Riwayat milik sendiri",
+      "sorot": {
+        "baas": [
+          "app",
+          "rest",
+          "db"
+        ],
+        "own": [
+          "api",
+          "logic",
+          "data"
+        ]
+      },
+      "catatan": {
+        "baas": "Aturan 'hanya milik sendiri' ditulis sebagai policy RLS di database. Lupa satu policy, data orang lain ikut terbaca.",
+        "own": "Aturan ada di kode: query selalu memakai id user dari token. Bisa dites seperti kode biasa."
+      }
+    },
+    {
+      "label": "Transfer saldo",
+      "sorot": {
+        "baas": [
+          "app",
+          "rest",
+          "fn",
+          "db"
+        ],
+        "own": [
+          "api",
+          "handler",
+          "logic",
+          "data",
+          "db"
+        ]
+      },
+      "nada": {
+        "baas": "warn"
+      },
+      "catatan": {
+        "baas": "Logika uang ditulis sebagai fungsi PL/pgSQL. Bisa benar, tapi tes, review, dan debug-nya terpisah dari kode lain dan lebih jarang dikuasai tim mobile.",
+        "own": "Logika uang ada di satu tempat: lapisan logika bisnis, dalam satu transaction ([[B3.1]])."
+      }
+    },
+    {
+      "label": "Notifikasi ke Ani",
+      "sorot": {
+        "baas": [
+          "db",
+          "edge"
+        ],
+        "own": [
+          "api",
+          "logic"
+        ]
+      },
+      "catatan": {
+        "baas": "Butuh komponen tambahan: webhook database atau Edge Function yang memanggil layanan push.",
+        "own": "Logika bisnis memanggil layanan push setelah transfer tersimpan."
+      }
+    }
+  ]
+}

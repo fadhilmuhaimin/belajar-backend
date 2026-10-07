@@ -1,0 +1,243 @@
+{
+  "versi": 2,
+  "judul": "Budi membayar nasi goreng Rp25.000, sinyal putus",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/e3-idempotency/output/kunci-sama.txt",
+    "catatan": "Client Dart 3.11 → server Go 1.27 → PostgreSQL 17.11, direkam 2026-10-06. Sinyal putus ditiru dengan menahan response pertama 1,5 detik setelah COMMIT.",
+    "fileVarian": "labs/e3-idempotency/output/kunci-baru.txt"
+  },
+  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal' dan perhatikan saldo Budi.",
+  "komponen": [
+    {
+      "id": "app",
+      "label": "App Budi"
+    },
+    {
+      "id": "api",
+      "label": "Monolith API",
+      "lapisan": [
+        "handler",
+        "logika bisnis",
+        "akses data"
+      ]
+    },
+    {
+      "id": "db",
+      "label": "PostgreSQL"
+    }
+  ],
+  "layarAwal": {
+    "hp": {
+      "waktu": "12.10",
+      "sinyal": 1,
+      "saldo": 100000,
+      "isi": [
+        {
+          "jenis": "baris",
+          "kiri": "Nasi goreng · Warung Ani",
+          "kanan": "Rp25.000"
+        },
+        {
+          "jenis": "tombol",
+          "teks": "Bayar"
+        }
+      ]
+    }
+  },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: app membuat idempotency key baru di setiap retry. Saldo awal Budi Rp100.000. Berapa saldonya di akhir?",
+    "options": [
+      "Rp75.000",
+      "Rp50.000",
+      "Rp100.000"
+    ],
+    "answer": 1,
+    "varian": true,
+    "explain": "Server melihat key baru sebagai pembayaran baru. Pembayaran pertama sudah COMMIT walau response-nya tidak sampai, jadi pembayaran kedua memotong saldo lagi: Rp100.000 − Rp25.000 − Rp25.000 = Rp50.000. Ini persis output rekaman lab mode kunci-baru."
+  },
+  "langkah": [
+    {
+      "dari": "app",
+      "judul": "Budi menekan Bayar, app membuat key sekali",
+      "kirim": "Idempotency-Key: 3e4d58fd\n(disimpan bersama pesanan yang belum selesai)",
+      "jelas": "Satu tap Bayar = satu key. Key ini dipakai ulang di setiap retry untuk tap yang sama, juga kalau app ditutup lalu dibuka lagi.",
+      "layar": {
+        "hp": {
+          "waktu": "12.10",
+          "sinyal": 1,
+          "saldo": 100000,
+          "isi": [
+            {
+              "jenis": "baris",
+              "kiri": "Nasi goreng · Warung Ani",
+              "kanan": "Rp25.000"
+            },
+            {
+              "jenis": "proses",
+              "teks": "Membayar..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "app",
+      "ke": "api",
+      "lapisan": "handler",
+      "judul": "Percobaan 1 dikirim",
+      "kirim": "POST /pembayaran\nIdempotency-Key: 3e4d58fd\n{\"toko\": \"warung_ani\", \"jumlah\": 25000}",
+      "jelas": "Handler memeriksa header dan format JSON. Request tanpa key ditolak dengan 400."
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "akses data",
+      "judul": "Key dicatat lebih dulu",
+      "kirim": "BEGIN;\nINSERT INTO idempotency_key (key, akun)\n  VALUES ('3e4d58fd', 'budi')\n  ON CONFLICT (key) DO NOTHING;\n→ 1 baris ditulis: key baru",
+      "jelas": "Kolom key adalah PRIMARY KEY, jadi unik. Satu baris tertulis berarti key ini belum pernah diproses."
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "logika bisnis",
+      "judul": "Bayar dan simpan response, satu transaction",
+      "kirim": "UPDATE akun ... saldo - 25000 WHERE id = 'budi' AND saldo >= 25000;\nUPDATE akun ... saldo + 25000 WHERE id = 'warung_ani';\nINSERT INTO pembayaran ... → id 1\nUPDATE idempotency_key SET status_code = 201,\n  body = '{\"id\":1,\"saldo\":75000}';\nCOMMIT;",
+      "jelas": "Response ikut disimpan di transaction yang sama dengan pembayaran. Jadi tidak mungkin ada pembayaran tanpa catatan key, atau sebaliknya.",
+      "nada": "good"
+    },
+    {
+      "dari": "api",
+      "ke": "app",
+      "lapisan": "handler",
+      "judul": "Response hilang, app timeout",
+      "kirim": "server: 201 {\"id\":1,\"saldo\":75000}  (tertahan)\nclient: percobaan 1 → timeout setelah 1 detik",
+      "jelas": "Uang sudah pindah di database, tapi app tidak tahu. Bagi app, timeout bisa berarti gagal atau sukses.",
+      "nada": "warn",
+      "layar": {
+        "hp": {
+          "waktu": "12.10",
+          "sinyal": 0,
+          "saldo": 100000,
+          "isi": [
+            {
+              "jenis": "baris",
+              "kiri": "Nasi goreng · Warung Ani",
+              "kanan": "Rp25.000"
+            },
+            {
+              "jenis": "proses",
+              "teks": "Koneksi lambat, mencoba lagi..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "app",
+      "judul": "Backoff, lalu retry dengan key yang sama",
+      "kirim": "jeda = 200 ms × 2⁰ + jitter = 220 ms\nIdempotency-Key: 3e4d58fd  (tetap)",
+      "jelas": "Jeda yang membesar dan diacak (jitter) mencegah ribuan app mengulang di detik yang sama saat server kesulitan."
+    },
+    {
+      "dari": "app",
+      "ke": "api",
+      "lapisan": "handler",
+      "judul": "Percobaan 2 dikirim",
+      "kirim": "POST /pembayaran\nIdempotency-Key: 3e4d58fd\n{\"toko\": \"warung_ani\", \"jumlah\": 25000}",
+      "jelas": "Isi request sama persis dengan percobaan 1, termasuk key-nya."
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "akses data",
+      "judul": "Key sudah ada: ambil response lama",
+      "kirim": "INSERT ... ON CONFLICT (key) DO NOTHING;\n→ 0 baris ditulis: key lama\nSELECT status_code, body FROM idempotency_key\n  WHERE key = '3e4d58fd';\n→ 201 {\"id\": 1, \"saldo\": 75000}",
+      "jelas": "Tidak ada UPDATE saldo kedua. Server hanya mengembalikan hasil percobaan 1."
+    },
+    {
+      "dari": "api",
+      "ke": "app",
+      "lapisan": "handler",
+      "judul": "App menerima hasil percobaan 1",
+      "kirim": "201 {\"id\": 1, \"saldo\": 75000}",
+      "jelas": "Budi membayar tepat satu kali. Rekaman lab: saldo Budi Rp75.000, satu baris di tabel pembayaran.",
+      "nada": "good",
+      "layar": {
+        "hp": {
+          "waktu": "12.10",
+          "sinyal": 2,
+          "saldo": 75000,
+          "nada": "good",
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Pembayaran Rp25.000 berhasil",
+              "nada": "good"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "varian": {
+    "label": "app membuat key baru di setiap retry",
+    "mulai": 5,
+    "langkah": [
+      {
+        "dari": "app",
+        "judul": "Backoff, lalu retry dengan key BARU",
+        "kirim": "jeda = 220 ms\nIdempotency-Key: 8f433da7  (baru)",
+        "jelas": "Kesalahan yang sering muncul: key dibuat di dalam fungsi kirim, bukan saat tap Bayar. Setiap retry jadi aksi baru.",
+        "nada": "warn"
+      },
+      {
+        "dari": "app",
+        "ke": "api",
+        "lapisan": "handler",
+        "judul": "Percobaan 2 dikirim",
+        "kirim": "POST /pembayaran\nIdempotency-Key: 8f433da7\n{\"toko\": \"warung_ani\", \"jumlah\": 25000}",
+        "jelas": "Bagi server, ini request yang tidak berhubungan dengan percobaan 1."
+      },
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "logika bisnis",
+        "judul": "Pembayaran kedua tercatat",
+        "kirim": "INSERT ... ON CONFLICT DO NOTHING; → 1 baris: key baru\nUPDATE akun ... saldo - 25000 ...\nINSERT INTO pembayaran ... → id 2\nCOMMIT;",
+        "jelas": "Constraint unik bekerja benar. Yang salah adalah key-nya berbeda.",
+        "nada": "warn"
+      },
+      {
+        "dari": "api",
+        "ke": "app",
+        "lapisan": "handler",
+        "judul": "Budi tertagih dua kali",
+        "kirim": "201 {\"id\": 2, \"saldo\": 50000}",
+        "jelas": "Rekaman lab mode kunci-baru: saldo Budi Rp50.000, dua baris pembayaran, Warung Ani menerima Rp50.000.",
+        "nada": "warn",
+        "layar": {
+          "hp": {
+            "waktu": "12.10",
+            "sinyal": 2,
+            "saldo": 50000,
+            "nada": "warn",
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Pembayaran Rp25.000 berhasil",
+                "nada": "good"
+              },
+              {
+                "jenis": "baris",
+                "kiri": "Riwayat: Warung Ani",
+                "kanan": "2 × Rp25.000",
+                "nada": "warn"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

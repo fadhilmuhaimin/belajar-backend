@@ -1,0 +1,16 @@
+-- SELECT ... FOR UPDATE
+-- PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2), isolation: read committed, saldo awal 100000, A tarik 70000, B tarik 50000
+-- direkam 2026-10-06 oleh labs/b3-race/run.py
+
+ 1 [A] BEGIN  -> BEGIN
+ 2 [B] BEGIN  -> BEGIN
+ 3 [A] SELECT saldo FROM akun WHERE id = 1 FOR UPDATE  -> 100000   [lock: A]
+ 4 [B] SELECT saldo FROM akun WHERE id = 1 FOR UPDATE  -> MENUNGGU lock   [lock: A]
+ 5 [A] (saldo Rp100.000 >= Rp70.000, lanjut. Saldo baru: Rp30.000)   [lock: A]
+ 6 [A] UPDATE akun SET saldo = 30000 WHERE id = 1  -> UPDATE 1   [lock: A]
+ 7 [A] COMMIT  -> COMMIT   [lock: B]
+ 8 [B] SELECT saldo FROM akun WHERE id = 1 FOR UPDATE  -> 30000   [lock: B]
+ 9 [B] (saldo Rp30.000 < Rp50.000, tolak penarikan)   [lock: B]
+10 [B] ROLLBACK  -> ROLLBACK
+
+-- saldo akhir: 30000

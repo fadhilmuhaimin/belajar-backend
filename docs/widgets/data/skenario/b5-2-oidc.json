@@ -1,0 +1,215 @@
+{
+ "versi": 2,
+ "judul": "Budi masuk ke Rekeningo dengan akun yang sudah ia punya",
+ "sumber": {
+  "jenis": "rekaman",
+  "file": "labs/b5-2-oidc/output/oidc.txt",
+  "fileVarian": "labs/b5-2-oidc/output/oidc.txt",
+  "catatan": "Server identitas tiruan (Go, RS256 + JWKS) dan API Go, direkam 2026-10-07 (labs/b5-2-oidc). Browser dan app ditiru oleh client HTTP; token di rekaman disensor."
+ },
+ "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': server identitas tidak mewajibkan PKCE, dan ada app jahat di HP Budi.",
+ "komponen": [
+  {
+   "id": "app",
+   "label": "App Rekeningo"
+  },
+  {
+   "id": "browser",
+   "label": "Browser sistem"
+  },
+  {
+   "id": "idp",
+   "label": "Server identitas"
+  },
+  {
+   "id": "api",
+   "label": "Monolith API"
+  },
+  {
+   "id": "jahat",
+   "label": "App jahat"
+  }
+ ],
+ "perangkat": [
+  {
+   "id": "app",
+   "label": "HP Budi"
+  }
+ ],
+ "layarAwal": {
+  "app": {
+   "judul": "Rekeningo",
+   "waktu": "08.00",
+   "isi": [
+    {
+     "jenis": "tombol",
+     "teks": "Masuk dengan akun lain"
+    },
+    {
+     "jenis": "tombol",
+     "teks": "Masuk dengan nomor HP"
+    }
+   ]
+  }
+ },
+ "predict": {
+  "q": "Nanti kamu akan mengubah satu hal: server identitas tidak mewajibkan PKCE, dan app jahat di HP Budi mendaftarkan skema rekeningo:// yang sama. Apa yang didapat app jahat?",
+  "options": [
+   "Tidak ada: code tidak berguna tanpa client secret",
+   "Token milik Budi",
+   "Error 400"
+  ],
+  "answer": 1,
+  "varian": true,
+  "explain": "App mobile tidak bisa menyimpan client secret: secret di dalam app bisa dibaca siapa pun yang membongkarnya (RFC 8252 §8.5). Jadi code saja sudah cukup untuk ditukar token. Rekaman lab bagian C: app jahat mendapat 200 dengan access token dan ID token."
+ },
+ "langkah": [
+  {
+   "dari": "app",
+   "judul": "App membuat code_verifier",
+   "kirim": "code_verifier = 32 byte acak (base64url), disimpan di HP\ncode_challenge = BASE64URL(SHA256(code_verifier))",
+   "jelas": "Rumus yang sama dengan RFC 7636. Rekaman bagian A: vektor uji RFC menghasilkan nilai yang sama persis."
+  },
+  {
+   "dari": "app",
+   "ke": "browser",
+   "judul": "App membuka browser sistem",
+   "kirim": "GET /authorize?response_type=code&client_id=rekeningo-app\n&redirect_uri=rekeningo://callback&state=s-41\n&code_challenge=…&code_challenge_method=S256",
+   "jelas": "Browser sistem, bukan WebView di dalam app. RFC 8252: app native tidak boleh memakai embedded user-agent, karena app bisa membaca password yang diketik di dalamnya.",
+   "layar": {
+    "app": {
+     "judul": "Browser",
+     "waktu": "08.00",
+     "isi": [
+      {
+       "jenis": "input",
+       "label": "Login di server identitas",
+       "nilai": "budi@contoh.test"
+      },
+      {
+       "jenis": "tombol",
+       "teks": "Izinkan Rekeningo"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "dari": "browser",
+   "ke": "idp",
+   "judul": "Budi login dan menyetujui",
+   "kirim": "(login dan persetujuan terjadi di server identitas)",
+   "jelas": "Password Budi tidak pernah sampai ke Rekeningo."
+  },
+  {
+   "dari": "idp",
+   "ke": "app",
+   "judul": "Code dikirim lewat redirect",
+   "kirim": "302 Location: rekeningo://callback?code=…(disensor)&state=s-41",
+   "jelas": "Sistem operasi meneruskan URL rekeningo:// ke app yang mendaftarkan skema itu. App memeriksa state sama dengan yang ia kirim."
+  },
+  {
+   "dari": "app",
+   "ke": "idp",
+   "judul": "Tukar code dengan code_verifier",
+   "kirim": "POST /token\ngrant_type=authorization_code&code=…&code_verifier=…\n→ 200 access_token=…(disensor) id_token=eyJhbGciOi…(disensor)",
+   "jelas": "Server identitas menghitung SHA256 dari code_verifier dan membandingkannya dengan code_challenge di langkah 2. Hanya app yang membuat verifier yang bisa lolos."
+  },
+  {
+   "dari": "app",
+   "ke": "api",
+   "judul": "ID token dikirim ke Rekeningo",
+   "kirim": "POST /auth/sosial\n{\"id_token\":\"eyJhbGciOi…(disensor)\"}",
+   "jelas": "ID token adalah JWT yang menyatakan siapa Budi menurut server identitas."
+  },
+  {
+   "dari": "api",
+   "ke": "idp",
+   "judul": "Ambil kunci publik",
+   "kirim": "GET /jwks → {\"keys\":[{\"kty\":\"RSA\",\"kid\":\"lab-1\",…}]}",
+   "jelas": "Di production, kunci ini di-cache dan diperbarui berkala."
+  },
+  {
+   "dari": "api",
+   "judul": "Periksa signature, iss, aud, exp",
+   "kirim": "signature ✓ · iss ✓ · aud = rekeningo-app ✓ · exp ✓\n→ sub=akun-7781",
+   "jelas": "Rekaman bagian D: token untuk app lain (aud salah), token kedaluwarsa, dan token yang isinya diubah semuanya ditolak 401."
+  },
+  {
+   "dari": "api",
+   "ke": "app",
+   "judul": "Token Rekeningo diterbitkan",
+   "kirim": "200 · akun Rekeningo terhubung ke sub=akun-7781",
+   "jelas": "Setelah ini, app memakai token Rekeningo seperti login biasa ([[B5.1]]). ID token tidak dipakai untuk setiap request.",
+   "layar": {
+    "app": {
+     "judul": "Rekeningo",
+     "waktu": "08.01",
+     "isi": [
+      {
+       "jenis": "toast",
+       "teks": "Masuk sebagai Budi",
+       "nada": "good"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "varian": {
+  "label": "server identitas tidak mewajibkan PKCE, dan app jahat mendaftarkan skema rekeningo://",
+  "mulai": 0,
+  "langkah": [
+   {
+    "dari": "app",
+    "ke": "browser",
+    "judul": "App membuka browser tanpa PKCE",
+    "kirim": "GET /authorize?response_type=code&client_id=rekeningo-app\n&redirect_uri=rekeningo://callback&state=s-41",
+    "jelas": "Tidak ada code_challenge. Server identitas juga tidak mewajibkannya."
+   },
+   {
+    "dari": "browser",
+    "ke": "idp",
+    "judul": "Budi login dan menyetujui",
+    "kirim": "(sama seperti jalur normal)",
+    "jelas": "Dari sisi Budi, tidak ada yang terlihat berbeda."
+   },
+   {
+    "dari": "idp",
+    "ke": "jahat",
+    "judul": "Redirect ditangkap app jahat",
+    "kirim": "302 Location: rekeningo://callback?code=…(disensor)&state=s-41",
+    "jelas": "App jahat mendaftarkan skema URL yang sama. Ini serangan yang dijelaskan di pembukaan RFC 7636.",
+    "nada": "warn"
+   },
+   {
+    "dari": "jahat",
+    "ke": "idp",
+    "judul": "App jahat menukar code",
+    "kirim": "POST /token\ngrant_type=authorization_code&code=…\n→ 200 access_token=…(disensor) id_token=eyJhbGciOi…(disensor)",
+    "jelas": "App mobile tidak punya client secret yang bisa dirahasiakan, jadi code saja cukup.",
+    "nada": "warn"
+   },
+   {
+    "dari": "jahat",
+    "judul": "App jahat memegang token Budi",
+    "kirim": "Dengan PKCE wajib (rekaman bagian B):\napp jahat POST /token → 400 {\"error\":\"invalid_grant\"}",
+    "jelas": "Perbaikannya: app selalu mengirim PKCE, dan server identitas menolak request tanpa PKCE. RFC 9700 mewajibkan PKCE untuk public client.",
+    "nada": "warn",
+    "layar": {
+     "app": {
+      "judul": "Rekeningo",
+      "waktu": "08.01",
+      "isi": [
+       {
+        "jenis": "proses",
+        "teks": "Menunggu login..."
+       }
+      ],
+      "nada": "warn"
+     }
+    }
+   }
+  ]
+ }
+}

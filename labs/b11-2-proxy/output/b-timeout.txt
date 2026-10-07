@@ -1,0 +1,3 @@
+== B. Layanan lambat 8 detik · proxy timeout 3 detik
+  3.0 s  proxy    audit: user=budi nik=3201… hasil=false lama=3s
+  3.0 s  app      ke proxy dengan token Budi → 504 {"title":"Verifikasi sedang lambat, coba lagi nanti"} (menunggu 3.0 detik)

@@ -1,0 +1,121 @@
+---
+title: "3.5 Push dan real-time"
+---
+
+<div data-bb="kamu-di-sini" data-tahap="3"></div>
+
+# 3.5 Push dan real-time
+
+Baca 6 menit · coba 2 menit · Prasyarat: [[B10.1]]
+{: .meta }
+
+<div data-bb="selesai"></div>
+
+??? question "Sudah tahu? Cek 3 pertanyaan"
+
+    1. Status berubah di detik ke-7, app polling setiap 5 detik. Kapan app tahu?
+    2. Apa beda SSE dan WebSocket?
+    3. Cara mana yang tetap bekerja saat app tertutup?
+
+    Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+## Inti
+
+Polling terlambat dan menambah beban. SSE memberi kabar saat itu juga selama app terbuka. Saat app tertutup, hanya push yang sampai.
+
+<div data-bb="arsitektur" data-tahap="3"></div>
+
+## Lihat sendiri
+
+Pilih satu pertanyaan. Angka polling dan SSE di catatannya berasal dari rekaman lab.
+
+<div data-bb="banding" data-src="data/e4-banding.json"></div>
+
+## Kenapa ini ada
+
+Di Tahap 3, layar pesanan Budi menanyakan status setiap 5 detik: "sudah siap?". Selama jam makan siang, ribuan HP melakukan hal yang sama, dan sebagian besar jawabannya "belum".
+
+Asumsi beban Tahap 3 memang naik dari 40 ke 60 request per user aktif per hari, salah satunya karena polling ini. Budi juga mengeluh: notifikasi "pesanan siap" kadang baru muncul belasan detik setelah Ani menekan tombol.
+
+## Cara kerjanya
+
+Rekaman dari lab: status pesanan 812 berubah di detik ke-7.
+
+```text title="Output rekaman: labs/e4-realtime/output/realtime.txt"
+--8<-- "labs/e4-realtime/output/realtime.txt"
+```
+
+| Cara | Arah | Cocok untuk |
+|---|---|---|
+| Polling | App bertanya berulang | Data yang jarang berubah, interval panjang |
+| SSE | Server ke app, satu arah, lewat HTTP biasa | Status dan feed selama layar dibuka |
+| WebSocket | Dua arah, satu koneksi | Chat, kolaborasi, game ([RFC 6455](https://www.rfc-editor.org/rfc/rfc6455.html)) |
+| Push (FCM) | Server ke HP lewat layanan push OS | Kabar penting saat app tertutup |
+
+**SSE** adalah response HTTP yang tidak ditutup. Server menulis event saat ada perubahan ([HTML: Server-sent events](https://html.spec.whatwg.org/multipage/server-sent-events.html)):
+
+```go
+--8<-- "labs/e4-realtime/main.go:sse"
+```
+
+**Push notification** tidak dijalankan di lab, karena butuh project FCM sungguhan. Dokumentasi FCM menjelaskan dua prioritas: pesan normal bisa ditunda saat HP dalam mode Doze untuk menghemat baterai, sedangkan pesan high priority dicoba dikirim segera dan bisa membangunkan HP ([FCM: message priority](https://firebase.google.com/docs/cloud-messaging/android/message-priority)). Untuk "pesanan siap", Rekeningo memakai high priority. Untuk promo, normal.
+
+**Kombinasi di Rekeningo Tahap 3:** FCM untuk "pesanan siap", SSE saat layar pesanan sedang dibuka, dan polling dengan interval panjang (60 detik) sebagai cadangan kalau koneksi SSE putus. WebSocket belum perlu, karena tidak ada kebutuhan dua arah.
+
+**Hal yang berubah di server:** koneksi SSE terbuka lama, jadi setiap koneksi memegang sedikit memori dan satu slot koneksi di load balancer. Timeout proxy dan load balancer harus mengizinkan koneksi panjang. Koneksi SSE tidak boleh memegang koneksi database selama terbuka ([[B2.5]]).
+
+## Di stack lain
+
+Yang sama di semua stack: SSE adalah response HTTP yang di-flush berkala, dan push lewat SDK server FCM. Yang berbeda: dukungan bawaan untuk koneksi panjang. Hanya Go yang dijalankan di lab.
+
+| Stack | SSE | Catatan |
+|---|---|---|
+| Go | `http.Flusher` dari pustaka standar (lab) | Satu goroutine per koneksi |
+| Express | `res.write` tanpa `res.end` | Koneksi panjang cocok dengan event loop |
+| Laravel (PHP-FPM) | Bisa, tapi setiap koneksi memegang satu proses PHP | Biasanya diganti layanan terpisah [perlu verifikasi] |
+| Django | `StreamingHttpResponse`, idealnya di ASGI | Di WSGI, setiap koneksi memegang satu worker |
+| Spring | `SseEmitter` | Thread per koneksi, atau virtual thread |
+| Supabase | Realtime (WebSocket) bawaan | Berlangganan perubahan tabel |
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Polling pendek (5 detik) | Paling sederhana, lewat proxy apa pun | Terlambat sampai satu interval; beban naik bersama jumlah user |
+| SSE / WebSocket | Kabar saat itu juga | Koneksi panjang di server, proxy, dan load balancer; tidak bekerja saat app tertutup |
+| Push (FCM) | Sampai walau app tertutup | Waktu sampai tidak dijamin; butuh token perangkat dan izin notifikasi |
+
+## Cek diri
+
+**1.** Rekaman: status berubah di detik ke-7. Kenapa polling baru tahu di detik ke-10, dan bukan ke-7?
+
+??? success "Jawaban"
+
+    App bertanya di detik 0, 5, dan 10. Perubahan di detik ke-7 baru terlihat saat pertanyaan berikutnya, di detik ke-10. Polling selalu terlambat antara 0 sampai satu interval penuh.
+
+**2.** Jelaskan kenapa SSE saja tidak cukup untuk "pesanan siap".
+
+??? success "Jawaban"
+
+    SSE hanya bekerja selama app terbuka dan koneksinya hidup. Budi biasanya menutup app sambil menunggu. Push notification lewat FCM sampai ke HP walau app tertutup.
+
+**3.** Koneksi SSE dibuka di handler yang juga membuka transaction database, lalu menunggu perubahan status. Apa masalahnya?
+
+??? success "Jawaban"
+
+    Setiap layar pesanan yang terbuka memegang satu koneksi database selama koneksi SSE hidup. Dengan ratusan user, pool habis seperti di [[B2.5]]. Handler SSE harus membaca data singkat lalu melepas koneksi, dan menunggu perubahan dengan cara lain, mis. channel atau notifikasi dari database.
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Interval polling sesuai kebutuhan, dan ada backoff saat tidak ada perubahan.
+- [ ] Koneksi SSE atau WebSocket tidak memegang koneksi database atau transaction.
+- [ ] Ada cadangan saat koneksi panjang putus (reconnect atau polling jarang).
+- [ ] Notifikasi penting lewat push dengan prioritas yang tepat; token perangkat yang kedaluwarsa dibersihkan.
+
+## Bacaan lanjut
+
+- [MDN: Using server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
+- [FCM: Message priority](https://firebase.google.com/docs/cloud-messaging/android/message-priority)
+- [RFC 6455: WebSocket](https://www.rfc-editor.org/rfc/rfc6455.html)
+
+<div data-bb="umpan-balik"></div>

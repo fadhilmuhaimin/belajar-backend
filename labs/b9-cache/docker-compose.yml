@@ -1,0 +1,6 @@
+# Lab B9: Redis untuk cache. PostgreSQL memakai lab b3-race.
+services:
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "127.0.0.1:56379:6379"

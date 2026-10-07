@@ -1,0 +1,15 @@
+{
+  "judul": "Fitur transfer Rekeningo: siapa yang mengerjakan?",
+  "kelompok": ["App", "Backend", "Keduanya"],
+  "item": [
+    { "teks": "Menampilkan saldo dengan format Rp1.250.000", "jawab": 0, "kenapa": "Format tampilan adalah urusan app. Angka saldonya sendiri datang dari backend." },
+    { "teks": "Menyimpan saldo yang sah", "jawab": 1, "kenapa": "Saldo harus sama di semua HP Budi dan terlihat oleh Ani. Hanya database di backend yang dilihat semua perangkat." },
+    { "teks": "Memeriksa nominal harus angka dan lebih dari 0", "jawab": 2, "kenapa": "App memeriksa supaya Budi langsung tahu salahnya. Backend memeriksa ulang, karena request bisa dikirim tanpa lewat app." },
+    { "teks": "Memutuskan saldo cukup untuk transfer", "jawab": 1, "kenapa": "Kalau app yang memutuskan, app yang dimodifikasi bisa selalu menjawab 'cukup'." },
+    { "teks": "Menyimpan draft nominal saat app ditutup", "jawab": 0, "kenapa": "Draft hanya milik HP itu dan belum berarti apa-apa bagi orang lain. Cukup disimpan lokal." },
+    { "teks": "Mengirim notifikasi ke HP Ani saat uang masuk", "jawab": 1, "kenapa": "HP Budi tidak tahu HP Ani. Backend yang tahu siapa penerimanya dan memanggil layanan push." },
+    { "teks": "Memastikan Budi hanya melihat riwayatnya sendiri", "jawab": 1, "kenapa": "Menyembunyikan tombol di app tidak cukup. Backend harus menolak request riwayat milik orang lain." },
+    { "teks": "Menampilkan loading saat menunggu respons", "jawab": 0, "kenapa": "Ini keadaan layar. Backend tidak tahu dan tidak perlu tahu." }
+  ],
+  "penutup": "Pola umumnya: yang menyangkut tampilan di satu HP ada di app. Yang menyangkut data bersama, uang, dan izin ada di backend."
+}

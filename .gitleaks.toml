@@ -1,0 +1,7 @@
+# Aturan bawaan gitleaks + abaikan folder lingkungan lokal yang tidak di-commit.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "folder lokal yang di-.gitignore"
+paths = ['''^\.venv/''', '''^site/''']

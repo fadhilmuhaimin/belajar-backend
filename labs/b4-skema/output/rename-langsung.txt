@@ -1,0 +1,19 @@
+-- 90-rename.sql
+ALTER TABLE akun RENAME COLUMN telp TO no_hp;
+ALTER TABLE
+SELECT json_build_object('nama', nama, 'telp', telp) AS response FROM akun WHERE id = 1;
+ERROR:  column "telp" does not exist
+LINE 1: SELECT json_build_object('nama', nama, 'telp', telp) AS resp...
+                                                       ^
+SELECT json_build_object('nama', nama, 'no_hp', no_hp) AS response FROM akun WHERE id = 1;
+                  response                   
+---------------------------------------------
+ {"nama" : "Budi", "no_hp" : "081200000001"}
+(1 row)
+
+
+$ dart run app/profil_v14.dart '{"nama" : "Budi", "no_hp" : "081200000001"}'
+Unhandled exception:
+type 'Null' is not a subtype of type 'String' in type cast
+(exit code 255)
+

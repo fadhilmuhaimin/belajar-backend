@@ -1,0 +1,109 @@
+---
+title: Glosarium
+---
+
+# Glosarium
+
+Satu kalimat per istilah. Kolom "Halaman" menunjuk halaman yang menjelaskan istilah itu, dan berubah jadi link begitu halamannya ada.
+{: .meta }
+
+Halaman ini juga sumber **tooltip**. Istilah bergaris titik-titik di halaman mana pun menampilkan definisi dari tabel ini saat disentuh atau diarahkan kursor.
+
+## Istilah inti
+
+Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebelum masuk Bagian B.
+
+| Istilah | Definisi | Halaman |
+|---|---|---|
+| **API** (Application Programming Interface) | Sekumpulan endpoint yang disediakan server supaya program lain, mis. app Flutter, bisa membaca dan mengubah data. | [[A1]] |
+| **Endpoint** | Pasangan method dan path yang dilayani server, mis. `POST /transfers`. | [[B1.1]] |
+| **HTTP method** | Kata kerja request (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) yang menyatakan maksud request terhadap resource. | [[B1.1]] |
+| **Status code** | Angka tiga digit di response yang menyatakan hasil request, mis. `201` berhasil dibuat atau `401` belum login. | [[B1.1]] |
+| **Header** | Pasangan nama-nilai di request atau response yang membawa informasi tambahan, mis. token atau tipe konten. | [[B1.1]] |
+| **Payload** | Isi data yang dikirim di body request atau response, biasanya JSON. | [[E5]] |
+| **Handler** | Fungsi di server yang menerima satu request, memeriksa formatnya, lalu memanggil logika bisnis. | [[A2]] |
+| **Database** | Program yang menyimpan data secara permanen dan menjamin aturan seperti constraint dan transaction. | [[B2.1]] |
+| **Transaction** | Sekelompok perintah database yang berhasil semua atau batal semua. | [[B3.1]] |
+| **Constraint** | Aturan yang dipaksakan database pada data, mis. `UNIQUE`, `CHECK`, atau `NOT NULL`. | [[B2.1]] |
+| **Migration** | File berurutan yang mengubah skema database, disimpan dan direview seperti kode. | [[B4.1]] |
+| **Authentication** | Proses memastikan siapa yang mengirim request, mis. lewat token login. | [[B5.1]] |
+| **Authorization** | Proses memastikan user yang sudah dikenal boleh melakukan aksi itu pada data itu. | [[B5.3]] |
+| **Idempotent** | Sifat operasi yang hasil akhirnya sama walau dijalankan sekali atau berkali-kali. | [[B1.3]] |
+| **Trade-off** | Pilihan yang memberi satu kelebihan dengan membayar satu kekurangan. | [[D1]] |
+
+## Semua istilah
+
+| Istilah | Definisi | Halaman |
+|---|---|---|
+| **ACID** | Empat jaminan transaction di database relasional: atomicity, consistency, isolation, durability. | [[B3.1]] |
+| **ADR** (Architecture Decision Record) | Catatan pendek tentang satu keputusan desain: konteks, pilihan, alasan, dan akibatnya. | [[D5]] |
+| **Atomicity** | Jaminan bahwa semua perubahan dalam satu transaction terjadi seluruhnya atau tidak sama sekali. | [[B3.1]] |
+| **Backfill** | Script sekali jalan yang mengisi kolom baru untuk baris lama, biasanya bertahap per batch. | [[B4.2]] |
+| **Backoff** | Jeda yang makin panjang di antara percobaan ulang, supaya server yang sedang kesulitan tidak dibanjiri. | [[E3]] |
+| **BaaS** (Backend-as-a-Service) | Layanan yang menyediakan database, auth, dan API siap pakai, mis. Supabase dan Firebase. | [[A4]] |
+| **BFF** (Backend for Frontend) | Endpoint atau service yang dibentuk khusus untuk satu jenis client, mis. satu endpoint beranda untuk app mobile. | [[B11.2]] |
+| **Cache** | Salinan data di tempat yang lebih cepat dibaca, dengan risiko isinya tertinggal dari data asli. | [[B9]] |
+| **Circuit breaker** | Mekanisme yang berhenti memanggil layanan yang sedang gagal untuk sementara, lalu mencoba lagi setelah jeda. | [[B11]] |
+| **COMMIT** | Perintah yang membuat semua perubahan dalam transaction menjadi permanen dan terlihat oleh koneksi lain. | [[B3.1]] |
+| **Connection pool** | Sekumpulan koneksi database yang dibuka sekali lalu dipinjamkan bergantian ke request. | [[B2.5]] |
+| **Container** | Paket aplikasi beserta semua dependensinya yang berjalan dengan cara sama di laptop maupun server. | [[C3]] |
+| **Cursor pagination** | Pagination yang meminta "data sesudah item X", bukan "halaman ke-N", jadi tetap stabil saat data bertambah. | [[B1.3]] |
+| **Dead-letter queue** | Tempat job yang terus gagal setelah batas retry, supaya bisa diperiksa manusia dan tidak diulang selamanya. | [[B10.1]] |
+| **Deadlock** | Dua transaction saling menunggu lock milik yang lain, sehingga database harus membatalkan salah satunya. | [[B3.2]] |
+| **Eventual consistency** | Data di beberapa tempat boleh berbeda sesaat, tapi akan sama setelah perubahan selesai menyebar. | [[D3]] |
+| **Expand-migrate-contract** | Urutan mengubah skema tanpa downtime: tambah yang baru, pindahkan data dan kode, baru hapus yang lama. | [[B4.2]] |
+| **Foreign key** | Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada. | [[B2.1]] |
+| **Index** | Struktur data tambahan yang mempercepat pencarian baris, dengan biaya tulis dan ruang disk. | [[B2.3]] |
+| **Isolation level** | Seberapa banyak perubahan dari transaction lain yang boleh terlihat oleh satu transaction yang sedang berjalan. | [[B3.3]] |
+| **JWT** (JSON Web Token) | Token berisi data JSON plus signature, sehingga server bisa memeriksa keasliannya tanpa query ke database. | [[B5.1]] |
+| **Latency** | Lama waktu satu request dari dikirim sampai response diterima. | [[C2]] |
+| **Little's Law** | Rumus L = λ × W: jumlah yang sedang diproses sama dengan laju kedatangan dikali lama tiap item tinggal. | [[B2.5]] |
+| **Load balancer** | Komponen yang membagi request ke beberapa instance server yang sama. | [[D2]] |
+| **Lock** | Tanda di database bahwa satu transaction sedang memakai baris atau tabel, sehingga transaction lain harus menunggu. | [[B3.2]] |
+| **Log** | Catatan kejadian per request atau per peristiwa, ditulis aplikasi untuk dibaca saat menyelidiki masalah. | [[C2]] |
+| **Lost update** | Perubahan yang hilang karena dua transaction membaca nilai lama yang sama lalu saling menimpa. | [[B3.2]] |
+| **Metric** | Angka yang dihitung terus-menerus, mis. jumlah request per detik atau persentase error. | [[C2]] |
+| **Middleware** | Fungsi yang dijalankan sebelum atau sesudah semua handler, mis. pemeriksa token atau pencatat log. | [[B7.1]] |
+| **Modular monolith** | Satu aplikasi yang di-deploy sebagai satu unit, tapi kodenya dibagi ke modul dengan batas yang tegas. | [[B7.2]] |
+| **Monolith** | Satu aplikasi backend yang memuat semua fitur dan di-deploy sebagai satu unit. | [[A1]] |
+| **MVCC** (Multi-Version Concurrency Control) | Cara database menyimpan beberapa versi baris, supaya pembaca tidak perlu menunggu penulis. | [[B3.3]] |
+| **N+1 query** | Pola satu query untuk daftar lalu satu query lagi untuk setiap item di daftar itu. | [[B2.4]] |
+| **OAuth 2.0** | Standar untuk memberi aplikasi akses terbatas ke akun user di layanan lain tanpa memberikan password. | [[B5.2]] |
+| **OIDC** (OpenID Connect) | Lapisan di atas OAuth 2.0 untuk login, yang memberi tahu aplikasi siapa user-nya. | [[B5.2]] |
+| **Object storage** | Layanan penyimpanan file besar per objek, diakses lewat HTTP, mis. layanan kompatibel S3. | [[B11.2]] |
+| **Offline-first** | Desain app yang menyimpan perubahan di HP dulu, lalu menyinkronkannya ke server saat sinyal ada. | [[E2]] |
+| **OpenAPI** | Format standar untuk menulis kontrak API (endpoint, request, response) yang bisa dibaca manusia dan mesin. | [[B1.4]] |
+| **Optimistic lock** | Cara mencegah lost update dengan mengecek nomor versi saat menulis, tanpa mengunci baris saat membaca. | [[B3.2]] |
+| **Outbox** | Tabel tempat event ditulis dalam transaction yang sama dengan perubahan data, lalu dikirim oleh worker. | [[B10.2]] |
+| **Pagination** | Membagi daftar panjang menjadi potongan kecil yang diminta satu per satu. | [[B1.3]] |
+| **PKCE** | Tambahan pada alur OAuth untuk app mobile yang mencegah authorization code dipakai oleh aplikasi lain. | [[B5.2]] |
+| **Polling** | App menanyakan status ke server berulang kali dengan jeda tetap. | [[E4]] |
+| **Primary key** | Kolom yang nilainya unik dan dipakai untuk mengenali satu baris. | [[B2.1]] |
+| **Problem Details** | Format error JSON standar dari RFC 9457, dengan field seperti `type`, `title`, `status`, dan `detail`. | [[B1.2]] |
+| **Proxy** | Server perantara yang meneruskan request ke sistem lain sambil menambahkan hal yang tidak boleh dipegang client. | [[B11.2]] |
+| **Query plan** | Rencana langkah yang dipilih database untuk menjalankan satu query, dilihat dengan `EXPLAIN`. | [[B2.3]] |
+| **Queue** | Daftar pekerjaan yang menunggu diproses oleh worker, satu per satu atau paralel. | [[B10.1]] |
+| **Race condition** | Hasil yang bergantung pada urutan dua proses yang berjalan bersamaan. | [[B3.2]] |
+| **Rate limit** | Batas jumlah request per waktu dari satu sumber, mis. lima percobaan login per menit. | [[C4]] |
+| **RBAC** (Role-Based Access Control) | Authorization berdasarkan peran, mis. hanya peran admin yang boleh membekukan akun. | [[B5.3]] |
+| **Read replica** | Salinan database yang hanya melayani baca dan selalu sedikit tertinggal dari database utama. | [[D2]] |
+| **Replication lag** | Jeda antara perubahan di database utama dan munculnya perubahan itu di replica. | [[D3]] |
+| **Retry** | Mengirim ulang request yang gagal atau tidak dijawab. | [[E3]] |
+| **RLS** (Row Level Security) | Fitur PostgreSQL yang menyaring baris berdasarkan aturan per user, dijalankan di dalam database. | [[B5.3]] |
+| **ROLLBACK** | Perintah yang membatalkan semua perubahan sejak `BEGIN`. | [[B3.1]] |
+| **Rolling deploy** | Mengganti instance satu per satu, supaya selalu ada instance yang melayani request. | [[C3]] |
+| **Sharding** | Membagi data ke beberapa database berdasarkan kunci, mis. per wilayah. | [[D2]] |
+| **Signature** | Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah. | [[B5.1]] |
+| **Signed URL** | URL berbatas waktu yang memberi akses langsung ke satu file di object storage. | [[B11.2]] |
+| **SSE** (Server-Sent Events) | Koneksi HTTP yang dibiarkan terbuka sehingga server bisa mengirim pesan satu arah ke client. | [[E4]] |
+| **Stale** | Data yang sudah tidak terbaru, mis. harga lama yang masih tersimpan di cache. | [[B9]] |
+| **Stateless** | Server tidak menyimpan keadaan antar-request di memorinya, jadi request mana pun bisa dilayani instance mana pun. | [[D2]] |
+| **Throughput** | Jumlah pekerjaan yang selesai per satuan waktu, mis. request per detik. | [[C2]] |
+| **Timeout** | Batas waktu menunggu sebelum sebuah panggilan dianggap gagal. | [[B11]] |
+| **Trace** | Rekaman perjalanan satu request melewati beberapa komponen, lengkap dengan durasi tiap bagian. | [[C2]] |
+| **TTL** (Time To Live) | Masa berlaku sebuah data di cache sebelum dianggap kedaluwarsa. | [[B9]] |
+| **Webhook** | HTTP request yang dikirim sistem lain ke API kita saat ada kejadian, mis. pembayaran berhasil. | [[B10.2]] |
+| **WebSocket** | Koneksi dua arah yang tetap terbuka antara app dan server. | [[E4]] |
+| **Worker** | Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request. | [[B10.1]] |
+
+<div data-bb="umpan-balik"></div>

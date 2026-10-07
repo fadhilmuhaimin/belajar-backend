@@ -1,0 +1,19 @@
+== B. Queue berisi nilai akhir (stok=35), dikirim dengan PUT
+--- Ani offline
+app      offline. Ani menambah 10 porsi (layar 25 → 35). Queue: set_stok=35
+--- selama Ani offline, pembeli lain memesan lewat app
+server   POST /pesanan nasgor -1          → stok 24
+server   POST /pesanan nasgor -1          → stok 23
+server   POST /pesanan nasgor -1          → stok 22
+--- sinyal kembali
+app      online. Queue berisi 1 perubahan
+server   PUT /produk/nasgor/stok 35       → stok 35
+app      ← 200 stok 35
+app      queue kosong. Layar Ani sekarang: stok 35, harga 25.000
+
+-- PostgreSQL 17 sesudahnya (stok yang benar: 25 + 10 − 3 = 32)
+ stok | harga | versi 
+------+-------+-------
+   35 | 25000 |     1
+(1 row)
+

@@ -1,0 +1,26 @@
+ERROR:  new row for relation "akun" violates check constraint "akun_check"
+DETAIL:  Failing row contains (ani, 1050, 1000).
+CONTEXT:  SQL statement "update akun set saldo = saldo + jumlah where nama = ke"
+PL/pgSQL function transfer(text,text,integer) line 4 at SQL statement
+ nama | saldo 
+------+-------
+ budi |   100
+ ani  |   980
+(2 rows)
+
+ tarik_70 
+----------
+ t
+(1 row)
+
+ tarik_50 
+----------
+ f
+(1 row)
+
+ nama | saldo 
+------+-------
+ budi |    30
+ ani  |   980
+(2 rows)
+

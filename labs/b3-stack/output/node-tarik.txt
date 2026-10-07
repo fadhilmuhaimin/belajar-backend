@@ -1,0 +1,8 @@
+$ node main.js tarik
+tarik 70000: sukses
+tarik 50000: saldo tidak cukup
+budi=30000 ani=980000 total=1010000
+
+-- diterima PostgreSQL 17.11 (log_statement=all), urut saat diterima:
+[A] UPDATE akun SET saldo = saldo - 70000 WHERE nama = 'budi' AND saldo >= 70000
+[B] UPDATE akun SET saldo = saldo - 50000 WHERE nama = 'budi' AND saldo >= 50000

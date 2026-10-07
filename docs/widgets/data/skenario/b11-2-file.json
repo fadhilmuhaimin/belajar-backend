@@ -1,0 +1,208 @@
+{
+ "versi": 2,
+ "judul": "Budi membuka bukti pembayarannya",
+ "sumber": {
+  "jenis": "rekaman",
+  "file": "labs/b11-2-proxy/output/d-file.txt",
+  "fileVarian": "labs/b11-2-proxy/output/d-file.txt",
+  "catatan": "Monolith API Go dan object storage tiruan dengan URL bertanda tangan (HMAC), direkam 2026-10-07 (labs/b11-2-proxy). Bukan S3; perilaku signed URL S3 dirujuk ke dokumentasi AWS di halaman."
+ },
+ "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': app memakai signed URL.",
+ "komponen": [
+  {
+   "id": "budi",
+   "label": "HP Budi"
+  },
+  {
+   "id": "ani",
+   "label": "HP Ani"
+  },
+  {
+   "id": "api",
+   "label": "Monolith API"
+  },
+  {
+   "id": "storage",
+   "label": "Object storage"
+  }
+ ],
+ "perangkat": [
+  {
+   "id": "budi",
+   "label": "HP Budi"
+  },
+  {
+   "id": "ani",
+   "label": "HP Ani"
+  }
+ ],
+ "layarAwal": {
+  "budi": {
+   "judul": "Riwayat",
+   "waktu": "12.00",
+   "isi": [
+    {
+     "jenis": "baris",
+     "kiri": "Bayar Warung Ani",
+     "kanan": "Rp25.000"
+    },
+    {
+     "jenis": "tombol",
+     "teks": "Lihat bukti"
+    }
+   ]
+  },
+  "ani": {
+   "judul": "Rekeningo",
+   "waktu": "12.00",
+   "isi": [
+    {
+     "jenis": "proses",
+     "teks": "Membuka tautan..."
+    }
+   ]
+  }
+ },
+ "predict": {
+  "q": "Nanti kamu akan mengubah satu hal: app memakai signed URL. Budi meneruskan URL itu ke Ani lewat chat. Apa yang Ani dapat?",
+  "options": [
+   "404, sama seperti lewat API",
+   "File bukti milik Budi",
+   "403 tanda tangan salah"
+  ],
+  "answer": 1,
+  "varian": true,
+  "explain": "Storage hanya memeriksa tanda tangan dan waktu kedaluwarsa, bukan siapa yang memakai URL. Rekaman lab: Ani mendapat 245760 byte milik Budi. Dokumentasi AWS menyebut presigned URL sebagai bearer token. Setelah kedaluwarsa, URL yang sama dijawab 403."
+ },
+ "langkah": [
+  {
+   "dari": "budi",
+   "ke": "api",
+   "judul": "Budi membuka bukti bayar",
+   "kirim": "GET /bukti/123\nAuthorization: Bearer token-budi",
+   "jelas": "File tidak disimpan di database, tapi di object storage."
+  },
+  {
+   "dari": "api",
+   "judul": "Cek pemilik di setiap unduhan",
+   "kirim": "pemilik bukti 123 = budi ✓",
+   "jelas": "Sama dengan cek pemilik data di [[B5.3]], dijalankan setiap kali file diminta."
+  },
+  {
+   "dari": "api",
+   "ke": "storage",
+   "judul": "API mengambil file dari storage",
+   "kirim": "GET /obj/bukti/123.jpg?exp=…&sig=…",
+   "jelas": "URL internal ini hanya dipakai API, berlaku 10 detik."
+  },
+  {
+   "dari": "storage",
+   "ke": "api",
+   "judul": "Storage mengirim isi file",
+   "kirim": "200 · 245760 byte",
+   "jelas": "Semua byte masuk ke API dulu."
+  },
+  {
+   "dari": "api",
+   "ke": "budi",
+   "judul": "API meneruskan file ke Budi",
+   "kirim": "200 · 245760 byte lewat API",
+   "jelas": "Kontrol penuh: akses bisa dicabut seketika dan setiap unduhan tercatat. Biayanya, bandwidth file lewat server API.",
+   "layar": {
+    "budi": {
+     "judul": "Bukti bayar",
+     "waktu": "12.00",
+     "isi": [
+      {
+       "jenis": "baris",
+       "kiri": "bukti_123.jpg",
+       "kanan": "240 KB"
+      },
+      {
+       "jenis": "toast",
+       "teks": "Bukti ditampilkan",
+       "nada": "good"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "dari": "ani",
+   "ke": "api",
+   "judul": "Ani mencoba membuka bukti yang sama",
+   "kirim": "GET /bukti/123\nAuthorization: Bearer token-ani\n→ 404 {\"title\":\"Bukti tidak ditemukan\"}",
+   "jelas": "Ani bukan pemilik. Ia mendapat 404, tidak tahu bukti itu ada.",
+   "layar": {
+    "ani": {
+     "judul": "Rekeningo",
+     "waktu": "12.00",
+     "isi": [
+      {
+       "jenis": "toast",
+       "teks": "Bukti tidak ditemukan",
+       "nada": "warn"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "varian": {
+  "label": "app memakai signed URL, lalu Budi meneruskannya ke Ani",
+  "mulai": 0,
+  "langkah": [
+   {
+    "dari": "budi",
+    "ke": "api",
+    "judul": "Budi meminta signed URL",
+    "kirim": "GET /bukti/123/url\n→ 200 {\"url\":\"http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…\"}",
+    "jelas": "Pemilik dicek sekali, saat URL dibuat. URL berlaku 3 detik."
+   },
+   {
+    "dari": "budi",
+    "ke": "storage",
+    "judul": "App mengunduh langsung dari storage",
+    "kirim": "GET http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…\n→ 200 · 245760 byte",
+    "jelas": "Byte file tidak lewat API. Itu kelebihan utama signed URL."
+   },
+   {
+    "dari": "budi",
+    "ke": "ani",
+    "judul": "Budi meneruskan URL ke Ani",
+    "kirim": "http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…",
+    "jelas": "Misalnya lewat chat, atau URL tersimpan di log dan riwayat browser."
+   },
+   {
+    "dari": "ani",
+    "ke": "storage",
+    "judul": "Ani membuka URL itu",
+    "kirim": "GET http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…\n→ 200 · 245760 byte",
+    "jelas": "Storage tidak tahu siapa Ani. Siapa pun yang memegang URL bisa memakainya sampai kedaluwarsa.",
+    "nada": "warn",
+    "layar": {
+     "ani": {
+      "judul": "Bukti bayar",
+      "waktu": "12.00",
+      "isi": [
+       {
+        "jenis": "baris",
+        "kiri": "bukti_123.jpg (milik Budi)",
+        "kanan": "240 KB",
+        "nada": "warn"
+       }
+      ],
+      "nada": "warn"
+     }
+    }
+   },
+   {
+    "dari": "ani",
+    "ke": "storage",
+    "judul": "3,5 detik kemudian: kedaluwarsa",
+    "kirim": "GET http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…\n→ 403 {\"error\":\"expired\"}",
+    "jelas": "Masa berlaku pendek membatasi kerusakan, tapi tidak menutupnya."
+   }
+  ]
+ }
+}

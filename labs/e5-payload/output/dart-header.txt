@@ -1,0 +1,2 @@
+Accept-Encoding diterima server: gzip
+HttpClient.autoUncompress bawaan: true

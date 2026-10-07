@@ -1,0 +1,11 @@
+{
+  "judul": "Perlu ADR, atau cukup komentar dan commit?",
+  "kelompok": ["Tulis ADR", "Tidak perlu ADR"],
+  "item": [
+    { "teks": "Memecah modul pembayaran jadi service sendiri.", "jawab": 0, "kenapa": "Sulit dibatalkan, memengaruhi deploy, data, dan tim. Orang yang datang setahun lagi pasti bertanya kenapa." },
+    { "teks": "Saldo kurang dijawab 422, bukan 400 atau 409.", "jawab": 0, "kenapa": "Ini kontrak API yang dipakai app. Alternatifnya masuk akal, dan mengubahnya nanti merusak app versi lama." },
+    { "teks": "Mengganti nama variabel total menjadi totalBayar.", "jawab": 1, "kenapa": "Mudah dibatalkan dan tidak ada alternatif yang perlu dijelaskan. Commit message sudah cukup." },
+    { "teks": "Memakai tabel outbox di PostgreSQL sebagai queue, bukan Redis.", "jawab": 0, "kenapa": "Ada dua pilihan yang sama-sama wajar, dan alasannya (atomik dengan transaction) tidak terlihat dari kode." },
+    { "teks": "Menaikkan versi patch library HTTP (1.4.2 ke 1.4.3).", "jawab": 1, "kenapa": "Rutin dan mudah dibatalkan. Catatan rilis library sudah menjelaskan perubahannya." }
+  ]
+}

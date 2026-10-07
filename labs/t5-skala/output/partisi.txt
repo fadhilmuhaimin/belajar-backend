@@ -1,0 +1,24 @@
+== C. Tabel transaksi dipartisi per bulan (300.000 baris, Agustus–Oktober 2026)
+
+-- Query satu bulan (September):
+EXPLAIN (COSTS OFF) SELECT sum(jumlah) FROM transaksi WHERE dibuat >= '2026-09-01' AND dibuat < '2026-10-01';
+Aggregate
+  ->  Seq Scan on transaksi_2026_09 transaksi
+        Filter: ((dibuat >= '2026-09-01'::date) AND (dibuat < '2026-10-01'::date))
+
+-- Query tanpa filter tanggal:
+EXPLAIN (COSTS OFF) SELECT sum(jumlah) FROM transaksi WHERE jumlah > 99000;
+Finalize Aggregate
+  ->  Gather
+        Workers Planned: 2
+        ->  Partial Aggregate
+              ->  Parallel Append
+                    ->  Parallel Seq Scan on transaksi_2026_08 transaksi_1
+                          Filter: (jumlah > 99000)
+                    ->  Parallel Seq Scan on transaksi_2026_10 transaksi_3
+                          Filter: (jumlah > 99000)
+                    ->  Parallel Seq Scan on transaksi_2026_09 transaksi_2
+                          Filter: (jumlah > 99000)
+
+-- Membuang data Agustus (101090 baris): DETACH + DROP partisi → 3 ms
+-- Pembanding: DELETE 97830 baris dari tabel biasa → 65 ms (satu mesin lab; ukur di sistemmu)

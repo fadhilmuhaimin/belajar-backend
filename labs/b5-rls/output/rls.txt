@@ -1,0 +1,26 @@
+-- PostgreSQL 17.11
+SELECT current_user, id, saldo FROM akun ORDER BY id;
+ current_user |  id  | saldo  
+--------------+------+--------
+ lab          | ani  | 250000
+ lab          | budi | 100000
+(2 rows)
+
+SELECT current_user, id, saldo FROM akun ORDER BY id;
+ current_user  |  id  | saldo  
+---------------+------+--------
+ app_rekeningo | budi | 100000
+(1 row)
+
+SELECT id, saldo FROM akun WHERE id = 'ani';
+ id | saldo 
+----+-------
+(0 rows)
+
+UPDATE akun SET saldo = 0 WHERE id = 'ani';
+UPDATE 0
+SELECT id, saldo FROM akun ORDER BY id;
+ id | saldo 
+----+-------
+(0 rows)
+

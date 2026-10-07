@@ -1,0 +1,11 @@
+{
+  "judul": "Aturan sync untuk setiap jenis data di app lapangan",
+  "kelompok": ["Tambah saja", "Selisih", "Nilai akhir + versi", "Hanya di server"],
+  "item": [
+    { "teks": "Surveyor membuat laporan inspeksi baru di desa tanpa sinyal.", "jawab": 0, "kenapa": "Id dibuat di HP (UUID), jadi laporan baru tidak pernah bentrok dengan apa pun. Kirim ulang aman dengan PUT /laporan/{id}." },
+    { "teks": "Surveyor menambahkan tiga foto ke laporan.", "jawab": 0, "kenapa": "Setiap foto punya id sendiri dan hanya ditambahkan. Foto yang terkirim dua kali dikenali dari id-nya." },
+    { "teks": "Tim logistik mencatat 4 meteran air terpakai hari ini.", "jawab": 1, "kenapa": "Sama seperti stok Ani di halaman offline-first: kirim −4, bukan sisa stok, supaya pemakaian dari HP lain tidak tertimpa." },
+    { "teks": "Surveyor mengubah catatan kondisi pipa, sementara supervisor juga mengeditnya dari laptop.", "jawab": 2, "kenapa": "Dua teks tidak bisa dijumlahkan. Server membandingkan versi; yang kedua mendapat konflik dan memilih sendiri." },
+    { "teks": "Laporan ditandai disetujui.", "jawab": 3, "kenapa": "Persetujuan adalah keputusan supervisor yang online. Kalau bisa diubah offline, dua orang bisa menyetujui dan menolak laporan yang sama." }
+  ]
+}

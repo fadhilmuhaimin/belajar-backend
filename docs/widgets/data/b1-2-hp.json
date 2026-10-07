@@ -1,0 +1,11 @@
+{
+  "layar": [
+    { "waktu": "12.20", "saldo": 100000, "isi": [ { "jenis": "input", "label": "Nominal", "nilai": "Rp150.000" }, { "jenis": "toast", "teks": "Error 422", "nada": "warn" } ],
+      "catatan": "Sebelum: app hanya tahu angka status." },
+    { "waktu": "12.20", "saldo": 100000, "isi": [ { "jenis": "input", "label": "Nominal", "nilai": "Rp150.000" }, { "jenis": "toast", "teks": "Saldo tidak cukup. Saldo kamu Rp100.000.", "nada": "warn" } ],
+      "catatan": "Sesudah: app membaca type saldo-kurang dan field saldo." },
+    { "waktu": "12.21", "saldo": 100000, "isi": [ { "jenis": "input", "label": "Kirim ke", "nilai": "cici" }, { "jenis": "teks", "teks": "Penerima tidak ditemukan" }, { "jenis": "tombol", "teks": "Kirim", "nonaktif": true } ],
+      "catatan": "Error per field tampil di bawah input yang salah." }
+  ],
+  "caption": "Tiga layar dari response yang sama-sama 422. Yang membedakan adalah isi body error."
+}

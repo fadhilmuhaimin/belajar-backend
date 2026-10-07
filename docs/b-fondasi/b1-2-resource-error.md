@@ -1,0 +1,140 @@
+---
+title: "1.5 Resource dan format error"
+---
+
+<div data-bb="kamu-di-sini" data-tahap="1"></div>
+
+# 1.5 Resource dan format error
+
+Baca 6 menit · coba 2 menit · Prasyarat: [[B1.1]] · Jalur inti
+{: .meta }
+
+<div data-bb="selesai"></div>
+
+??? question "Sudah tahu? Cek 3 pertanyaan"
+
+    1. Mana yang lebih baik: `POST /doTransfer` atau `POST /transfers`?
+    2. Field mana di error RFC 9457 yang dipakai app untuk memilih pesan: `type`, `title`, atau `detail`?
+    3. Boleh tidak menambah field sendiri, mis. `saldo`, di body error?
+
+    Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+## Inti
+
+URL menamai resource dengan kata benda, dan method yang menyatakan aksinya. Error memakai satu format yang sama di semua endpoint. App memilih pesan dari kode error yang stabil, bukan dari teks.
+
+<div data-bb="arsitektur" data-tahap="1"></div>
+
+## Lihat sendiri
+
+Tiga layar di bawah berasal dari response yang sama-sama `422`. Perbedaannya hanya isi body error yang dikirim server.
+
+<div data-bb="hp" data-src="data/b1-2-hp.json"></div>
+
+## Kenapa ini ada
+
+Setelah status code dibenahi ([[B1.1]]), muncul masalah baru. Setiap endpoint Rekeningo menulis error dengan bentuknya sendiri.
+
+Endpoint transfer menjawab `{"error": "saldo kurang"}`. Endpoint login menjawab `{"message": "PIN salah"}`. Endpoint profil menjawab `{"errors": {"telp": ["wajib diisi"]}}`.
+
+Di Flutter, Raka menulis tiga parser error. Lalu suatu hari teks "saldo kurang" diubah jadi "Saldo tidak cukup", dan `if (body['error'] == 'saldo kurang')` di app berhenti bekerja. App kembali menampilkan "Terjadi kesalahan".
+
+Raka butuh satu format error, dengan kode yang tidak berubah walau teksnya diperbaiki.
+
+## Cara kerjanya
+
+**Resource dan URL.** Path menamai *benda*, method menyatakan *aksi*:
+
+| Hindari | Pakai | Alasan |
+|---|---|---|
+| `POST /doTransfer` | `POST /transfers` | Aksi sudah dinyatakan oleh method |
+| `GET /getSaldo?user=budi` | `GET /akun/budi` | Satu resource, satu alamat |
+| `POST /transfers/hapus/7` | `DELETE /transfers/7` | Method yang tepat sudah ada |
+| `GET /akun/budi/transfers-terbaru` | `GET /akun/budi/transfers?urut=terbaru` | Variasi tampilan lewat query, bukan path baru |
+
+Ini konvensi, bukan aturan HTTP. Panduan yang banyak dirujuk, mis. [Google AIP-121](https://google.aip.dev/121), memakai pola resource yang sama.
+
+**Format error: RFC 9457 (Problem Details).** Satu objek JSON dengan `Content-Type: application/problem+json` ([RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)):
+
+| Field | Isi | Siapa yang membaca |
+|---|---|---|
+| `type` | URI yang mengenali jenis masalah, mis. `/problems/saldo-kurang` | **App.** RFC menyebutnya pengenal utama |
+| `title` | Ringkasan untuk manusia, tetap sama untuk jenis masalah yang sama | Developer, log |
+| `status` | Salinan status code | Log, alat debug |
+| `detail` | Penjelasan kejadian ini | Manusia saja. RFC melarang client mem-parse field ini |
+| `instance` | URI kejadian spesifik (opsional) | Pelacakan |
+
+RFC 9457 juga mengizinkan **extension member**, yaitu field tambahan milikmu sendiri ([§3.2](https://www.rfc-editor.org/rfc/rfc9457.html#name-extension-members)). Rekeningo memakai dua: `errors` untuk error per field, dan `saldo` untuk masalah saldo kurang. Dengan begitu app tidak perlu mengambil angka dari kalimat `detail`.
+
+Rekaman dari server lab:
+
+```text title="Output rekaman: labs/api-t1/output/b1-2-error.txt"
+--8<-- "labs/api-t1/output/b1-2-error.txt"
+```
+
+Satu catatan jujur tentang lab: `type` di sana memakai URI relatif (`/problems/...`) supaya ringkas. RFC 9457 mengingatkan URI relatif bisa membingungkan dan tidak selalu ditangani benar. Di production, pakai URI absolut di domainmu sendiri.
+
+Kode Go yang menulis error ini:
+
+```go
+--8<-- "labs/api-t1/handler.go:problem"
+```
+
+## Di stack lain
+
+Yang sama di semua stack: satu tempat yang mengubah error menjadi response. Yang berbeda: format bawaannya. Tidak semua framework memakai RFC 9457 secara bawaan.
+
+| Stack | Format error bawaan | Untuk RFC 9457 |
+|---|---|---|
+| Go (`net/http`) | Tidak ada; `http.Error` menulis teks biasa | Tulis sendiri, seperti di lab |
+| Express | Error handler bawaan menulis HTML di production, stack trace di development ([dokumentasi](https://expressjs.com/en/guide/error-handling.html)) | Tulis error handler sendiri |
+| Laravel | Validasi gagal: `422` dengan `{"message": ..., "errors": {...}}` ([dokumentasi](https://laravel.com/docs/12.x/validation)) | Ubah lewat exception handler |
+| Django | Tidak ada format JSON bawaan untuk error API | Tulis sendiri atau lewat library |
+| Spring | `ProblemDetail` bawaan, mengikuti RFC 9457 ([dokumentasi](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html)) | Sudah tersedia |
+| Supabase (PostgREST) | `{"code", "details", "hint", "message"}` dengan kode error PostgreSQL ([dokumentasi](https://docs.postgrest.org/en/stable/references/errors.html)) | Bentuknya tetap; app memetakan `code` |
+
+Hanya baris Go yang dijalankan di lab. Baris lain dicek ke dokumentasi dan tidak dijalankan.
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Format bawaan framework | Tanpa kerja tambahan | Bentuk error berbeda kalau tim memakai lebih dari satu stack |
+| RFC 9457 | Standar, sudah dikenal library di banyak bahasa | Perlu kesepakatan daftar `type` dan dokumentasinya |
+| Format buatan sendiri | Bebas | Harus didokumentasikan sendiri, dan tiap tim cenderung membuat versi berbeda |
+
+## Cek diri
+
+**1.** App menampilkan pesan dengan `if (body['detail'].contains('Saldo'))`. Apa yang salah?
+
+??? success "Jawaban"
+
+    `detail` ditulis untuk manusia dan bisa berubah kapan saja, mis. diterjemahkan atau dirapikan. RFC 9457 melarang client mem-parse-nya. App harus memilih pesan dari `type`, lalu mengambil angka dari extension member seperti `saldo`.
+
+**2.** Jelaskan kenapa `POST /transfers` lebih baik daripada `POST /doTransfer`, padahal keduanya bekerja.
+
+??? success "Jawaban"
+
+    Method sudah menyatakan aksinya. Dengan nama benda, satu path bisa melayani beberapa aksi: `POST /transfers` membuat, `GET /transfers/7` membaca. Pola URL jadi bisa ditebak, dan log serta metric per resource lebih mudah dikelompokkan.
+
+**3.** Transfer ke `cici` (akun tidak ada) dijawab `422` dengan `errors: [{"field": "ke", ...}]`. Bagaimana app memakainya?
+
+??? success "Jawaban"
+
+    App menampilkan pesan di bawah input "Kirim ke", bukan toast umum. Field `field` memberi tahu input mana yang salah. Lihat layar ketiga di widget.
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Path memakai kata benda jamak, tanpa kata kerja.
+- [ ] Semua endpoint memakai satu format error, termasuk error dari middleware dan router.
+- [ ] Ada `type` yang stabil untuk setiap kasus yang perlu ditangani berbeda oleh app.
+- [ ] Data yang dibutuhkan app (mis. saldo, field yang salah) ada di field sendiri, bukan di dalam kalimat.
+- [ ] Error `500` tidak membocorkan pesan database atau stack trace ke client.
+
+## Bacaan lanjut
+
+- [RFC 9457: Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457.html)
+- [Google AIP-121: Resource-oriented design](https://google.aip.dev/121)
+- [Zalando RESTful API Guidelines](https://opensource.zalando.com/restful-api-guidelines/)
+
+<div data-bb="umpan-balik"></div>

@@ -1,0 +1,155 @@
+site_name: Belajar Backend
+site_description: Konsep backend lintas stack untuk mobile engineer, lewat satu cerita aplikasi fiktif yang tumbuh
+docs_dir: docs
+strict: true
+
+theme:
+  name: material
+  language: id
+  font: false
+  palette:
+    scheme: default
+    primary: custom
+    accent: custom
+  features:
+    - navigation.top
+    - navigation.indexes
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+
+hooks:
+  - tools/mkdocs_hooks.py
+
+extra_css:
+  - stylesheets/extra.css
+  - widgets/widgets.css
+
+extra_javascript:
+  - javascripts/istilah-data.js
+  - javascripts/istilah.js
+  - widgets/core.js
+  - widgets/runsql-core.js
+  - widgets/runsql.js
+  - widgets/race.js
+  - widgets/cerita.js
+  - widgets/stackstep.js
+  - widgets/hp.js
+  - widgets/alur-core.js
+  - widgets/alur.js
+  - widgets/pilah.js
+  - widgets/banding.js
+  - widgets/kartu.js
+  - widgets/ember.js
+
+markdown_extensions:
+  - abbr
+  - pymdownx.snippets:
+      auto_append:
+        - includes/istilah.md
+      check_paths: true
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.fancylists
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+      clickable_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+validation:
+  links:
+    anchors: warn
+
+# NAV:MULAI (dibuat tools/sinkron_cerita.py dari cerita.json)
+nav:
+  - Mulai:
+      - "Cara pakai panduan ini": index.md
+      - "Cerita Rekeningo": cerita/index.md
+      - "Peta cerita": cerita/peta.md
+  - Tahap 1 · MVP:
+      - "Tahap 1 · Ceritanya": cerita/tahap-1.md
+      - "1.1 Apa yang dikerjakan backend": a-gambaran/a1-apa-yang-dikerjakan-backend.md
+      - "1.2 BaaS atau backend sendiri": a-gambaran/a4-baas-vs-backend-sendiri.md
+      - "1.3 Perjalanan satu request": a-gambaran/a2-perjalanan-request.md
+      - "1.4 HTTP: method, status, header": b-fondasi/b1-1-http.md
+      - "1.5 Resource dan format error": b-fondasi/b1-2-resource-error.md
+      - "1.6 Validation dan error handling": b-fondasi/b6-validation-error.md
+      - "1.7 Kontrak API dengan OpenAPI": b-fondasi/b1-4-openapi.md
+      - "1.8 Data modeling dan relasi": b-fondasi/b2-1-data-modeling.md
+      - "1.9 SQL atau NoSQL": b-fondasi/b2-2-sql-vs-nosql.md
+      - "1.10 Migration: skema sebagai kode": b-fondasi/b4-1-migration.md
+      - "1.11 Transaction": b-fondasi/b3-1-transaction.md
+      - "1.12 Authentication: session atau token": b-fondasi/b5-1-authentication.md
+      - "1.13 Authorization: siapa boleh apa": b-fondasi/b5-3-authorization.md
+      - "1.14 Lapisan dasar": b-fondasi/b7-1-lapisan-dasar.md
+      - "1.15 Testing: apa dites di level mana": c-operasional/c1-testing.md
+      - "1.16 Deployment dan rollback": c-operasional/c3-deployment.md
+      - "1.17 Kerangka berpikir dan estimasi": d-system-design/d1-kerangka-berpikir.md
+      - "1.18 Menulis spesifikasi untuk AI": f-ai-belajar/f1-spesifikasi-untuk-ai.md
+      - "1.19 Review kode backend buatan AI": f-ai-belajar/f2-review-kode-ai.md
+  - Tahap 2 · Saldo salah dan dobel bayar:
+      - "Tahap 2 · Ceritanya": cerita/tahap-2.md
+      - "2.1 Race condition dan lock": b-fondasi/b3-2-race-condition-lock.md
+      - "2.2 Isolation level secara praktis": b-fondasi/b3-3-isolation-level.md
+      - "2.3 Retry dan idempotency key dari app": e-mobile/e3-retry-idempotency.md
+      - "2.4 Pagination dan idempotent method": b-fondasi/b1-3-pagination-idempotent.md
+      - "2.5 N+1 query": b-fondasi/b2-4-n-plus-1.md
+      - "2.6 Index dan query plan": b-fondasi/b2-3-index.md
+      - "2.7 Ukuran payload dan kuota": e-mobile/e5-ukuran-payload.md
+      - "2.8 Ubah skema tanpa downtime": b-fondasi/b4-2-ubah-skema-tanpa-downtime.md
+      - "2.9 App versi lama yang tidak bisa dipaksa update": e-mobile/e1-app-versi-lama.md
+  - Tahap 3 · Lambat di jam sibuk:
+      - "Tahap 3 · Ceritanya": cerita/tahap-3.md
+      - "3.1 Observability: log, metric, trace": c-operasional/c2-observability.md
+      - "3.2 Connection pool": b-fondasi/b2-5-connection-pool.md
+      - "3.3 Background job, queue, retry": b-fondasi/b10-1-background-job.md
+      - "3.4 Concurrency dan async": b-fondasi/b8-concurrency.md
+      - "3.5 Push dan real-time": e-mobile/e4-push-real-time.md
+      - "3.6 Caching dan invalidation": b-fondasi/b9-caching.md
+      - "3.7 Security dasar dan rate limit": c-operasional/c4-security-dasar.md
+      - "3.8 Offline-first dan sync": e-mobile/e2-offline-first.md
+  - Tahap 4 · Integrasi pihak ketiga:
+      - "Tahap 4 · Ceritanya": cerita/tahap-4.md
+      - "4.1 Integrasi pihak ketiga": b-fondasi/b11-integrasi-pihak-ketiga.md
+      - "4.2 Proxy dan BFF": b-fondasi/b11-2-proxy-bff.md
+      - "4.3 Webhook dan outbox": b-fondasi/b10-2-webhook-outbox.md
+      - "4.4 OAuth dan login sosial": b-fondasi/b5-2-oauth-oidc.md
+      - "4.5 Modular monolith": b-fondasi/b7-2-batas-modul.md
+      - "4.6 Template ADR": d-system-design/d5-adr.md
+  - Tahap 5 · Satu database tidak cukup:
+      - "Tahap 5 · Ceritanya": cerita/tahap-5.md
+      - "5.1 Scaling": d-system-design/d2-scaling.md
+      - "5.2 Replica dan consistency": d-system-design/d3-consistency.md
+      - "5.3 Feed dan notifikasi": d-system-design/d4b-feed-notifikasi.md
+  - Studi sampingan:
+      - "Studi desain: laporan lapangan offline": d-system-design/d4c-laporan-lapangan-offline.md
+  - Alat:
+      - "Glosarium": alat/glosarium.md
+      - "Kamus lintas stack": alat/kamus-lintas-stack.md
+      - "Indeks per topik": alat/indeks-topik.md
+      - "Kartu ulang": alat/kartu-ulang.md
+      - "Belajar mandiri": alat/belajar-mandiri.md
+      - "Umpan balik": alat/umpan-balik.md
+# NAV:SELESAI

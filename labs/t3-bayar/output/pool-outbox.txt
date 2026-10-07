@@ -1,0 +1,18 @@
+# mode outbox · pool 10 koneksi · layanan notifikasi 2 detik per kiriman
+$ beban -rps 17 -durasi 10s
+beban: 17 request/detik selama 10s → 170 request
+hasil: map[201:170]
+latency yang dijawab: p50 5ms · p95 7ms · maks 17ms
+
+$ curl /debug/pool
+{"dipakai":0,"jumlah_menunggu":0,"maks_koneksi":10,"total_waktu_menunggu_ms":0}
+
+# worker selesai mengirim semua notifikasi ±21 detik setelah beban dimulai
+$ psql -c "SELECT status, count(*) FROM outbox GROUP BY 1"
+  status  | count 
+----------+-------
+ terkirim |   170
+(1 row)
+
+# contoh log terstruktur dari API (request paling lambat yang berhasil):
+{"time":"2026-10-06T20:01:51.791552+08:00","level":"INFO","msg":"bayar","request_id":19,"mode":"outbox","durasi_ms":16,"tunggu_koneksi_ms":13,"query_ms":3,"notifikasi_ms":0}

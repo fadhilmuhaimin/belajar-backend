@@ -1,0 +1,57 @@
+# golang-migrate v4.20.1 · PostgreSQL 17.11
+$ migrate up
+1/u buat_akun (9.022625ms)
+2/u buat_transfer (13.8915ms)
+
+$ migrate version
+2
+
+$ psql -c "SELECT * FROM schema_migrations"
+ version | dirty 
+---------+-------
+       2 | f
+(1 row)
+
+
+# Migration 3 ditambahkan, dengan salah ketik di statement kedua.
+$ migrate up
+error: migration failed: relation "akuns" does not exist in line 0: ALTER TABLE akun ADD COLUMN telp text;
+-- Salah ketik: tabelnya "akun", bukan "akuns".
+CREATE INDEX akun_telp_idx ON akuns (telp);
+ (details: pq: relation "akuns" does not exist)
+exit status 1
+
+$ migrate version
+3 (dirty)
+
+$ psql -c "SELECT * FROM schema_migrations"
+ version | dirty 
+---------+-------
+       3 | t
+(1 row)
+
+
+$ psql -c "SELECT column_name FROM information_schema.columns WHERE table_schema = 'b4m' AND table_name = 'akun' ORDER BY ordinal_position"
+ column_name 
+-------------
+ id
+ nama
+ saldo
+(3 rows)
+
+
+$ migrate up
+error: Dirty database version 3. Fix and force version.
+exit status 1
+
+# Kolom telp TIDAK ada: PostgreSQL menjalankan isi file ini sebagai satu transaction implisit,
+# jadi ALTER TABLE ikut dibatalkan. Yang tertinggal hanya tanda dirty. Tandai versi 2 sebagai bersih:
+$ migrate force 2
+
+# Salah ketik di file migration 3 diperbaiki.
+$ migrate up
+3/u tambah_telp (6.26ms)
+
+$ migrate version
+3
+

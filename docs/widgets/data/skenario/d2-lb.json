@@ -1,0 +1,161 @@
+{
+ "versi": 2,
+ "judul": "Budi login, lalu membuka riwayat, di belakang load balancer",
+ "sumber": {
+  "jenis": "rekaman",
+  "file": "labs/t5-skala/output/lb.txt",
+  "fileVarian": "labs/t5-skala/output/lb.txt",
+  "catatan": "Load balancer round robin dan dua instance API Go, direkam 2026-10-07 (labs/t5-skala). Token di rekaman disensor."
+ },
+ "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': sesi disimpan di memori instance.",
+ "komponen": [
+  {
+   "id": "budi",
+   "label": "App Budi"
+  },
+  {
+   "id": "lb",
+   "label": "Load balancer"
+  },
+  {
+   "id": "api1",
+   "label": "API #1"
+  },
+  {
+   "id": "api2",
+   "label": "API #2"
+  }
+ ],
+ "perangkat": [
+  {
+   "id": "budi",
+   "label": "HP Budi"
+  }
+ ],
+ "layarAwal": {
+  "budi": {
+   "judul": "Rekeningo",
+   "waktu": "20.00",
+   "isi": [
+    {
+     "jenis": "input",
+     "label": "Nomor HP",
+     "nilai": "0812…"
+    },
+    {
+     "jenis": "tombol",
+     "teks": "Masuk"
+    }
+   ]
+  }
+ },
+ "predict": {
+  "q": "Nanti kamu akan mengubah satu hal: sesi login disimpan di memori instance yang menerima login. Request berikutnya diarahkan ke instance lain. Apa yang Budi lihat?",
+  "options": [
+   "Riwayatnya",
+   "401, kembali ke layar login",
+   "Riwayat kosong"
+  ],
+  "answer": 1,
+  "varian": true,
+  "explain": "Instance lain tidak pernah melihat sesi itu. Rekaman lab: request pertama ke API #1 dijawab 401, request kedua ke API #2 (tempat login) dijawab 200. Bagi Budi, app tiba-tiba keluar sendiri, lalu kadang masuk lagi."
+ },
+ "langkah": [
+  {
+   "dari": "budi",
+   "ke": "lb",
+   "judul": "Budi login",
+   "kirim": "POST /login",
+   "jelas": "Load balancer membagi request bergantian ke dua instance (round robin)."
+  },
+  {
+   "dari": "lb",
+   "ke": "api2",
+   "judul": "Diteruskan ke API #2",
+   "kirim": "lb  POST /login → 127.0.0.1:18142\n→ 200, token budi.…(disensor)",
+   "jelas": "Token ditandatangani dengan secret yang sama di kedua instance ([[B5.1]])."
+  },
+  {
+   "dari": "budi",
+   "ke": "lb",
+   "judul": "Budi membuka riwayat",
+   "kirim": "GET /riwayat\nAuthorization: Bearer budi.…(disensor)",
+   "jelas": "App tidak tahu, dan tidak perlu tahu, instance mana yang akan menjawab."
+  },
+  {
+   "dari": "lb",
+   "ke": "api1",
+   "judul": "Kali ini ke API #1",
+   "kirim": "lb  GET /riwayat → 127.0.0.1:18141\napi:18141 → 200 untuk budi",
+   "jelas": "API #1 memeriksa signature token sendiri. Tidak perlu bertanya ke API #2."
+  },
+  {
+   "dari": "api1",
+   "ke": "budi",
+   "judul": "Riwayat tampil",
+   "kirim": "200",
+   "jelas": "Instance mana pun bisa menjawab. Inilah arti stateless: menambah instance ketiga tidak mengubah apa pun di app.",
+   "layar": {
+    "budi": {
+     "judul": "Riwayat",
+     "waktu": "20.01",
+     "isi": [
+      {
+       "jenis": "baris",
+       "kiri": "Bayar Warung Ani",
+       "kanan": "Rp25.000"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "varian": {
+  "label": "sesi disimpan di memori instance yang menerima login",
+  "mulai": 1,
+  "langkah": [
+   {
+    "dari": "lb",
+    "ke": "api2",
+    "judul": "Login di API #2, sesi disimpan di memorinya",
+    "kirim": "lb  POST /login → 127.0.0.1:18142\nsesi[a1c1b8…] = budi   (hanya di API #2)",
+    "jelas": "Sesi hanya ada di memori proses API #2.",
+    "nada": "warn"
+   },
+   {
+    "dari": "lb",
+    "ke": "api1",
+    "judul": "Riwayat diarahkan ke API #1",
+    "kirim": "lb  GET /riwayat → 127.0.0.1:18141\napi:18141 → 401 (sesi tidak dikenal di instance ini)",
+    "jelas": "API #1 tidak pernah melihat sesi itu.",
+    "nada": "warn"
+   },
+   {
+    "dari": "api1",
+    "ke": "budi",
+    "judul": "Budi kembali ke layar login",
+    "kirim": "401",
+    "jelas": "Request berikutnya ke API #2 dijawab 200 (rekaman). Gejalanya acak: kadang masuk, kadang keluar. Restart atau deploy API #2 juga menghapus semua sesi di sana.",
+    "nada": "warn",
+    "layar": {
+     "budi": {
+      "judul": "Rekeningo",
+      "waktu": "20.01",
+      "isi": [
+       {
+        "jenis": "toast",
+        "teks": "Sesi berakhir, silakan masuk lagi",
+        "nada": "warn"
+       },
+       {
+        "jenis": "tombol",
+        "teks": "Masuk"
+       }
+      ],
+      "nada": "warn"
+     }
+    }
+   }
+  ]
+ }
+}

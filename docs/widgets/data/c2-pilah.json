@@ -1,0 +1,13 @@
+{
+  "judul": "Pertanyaan ini paling cepat dijawab oleh apa?",
+  "kelompok": ["Log", "Metric", "Trace"],
+  "item": [
+    { "teks": "Berapa persen pembayaran yang gagal dalam 5 menit terakhir?", "jawab": 1, "kenapa": "Angka yang dihitung terus-menerus dan bisa dipasangi alert. Menghitungnya dari log bisa, tapi lambat dan butuh ruang simpan besar." },
+    { "teks": "Kenapa pembayaran request_id 11 gagal?", "jawab": 0, "kenapa": "Satu kejadian, dengan detail error-nya. Rekaman lab: \"tunggu_koneksi_ms\":4999, \"error\":\"context canceled\"." },
+    { "teks": "Bagian mana dari endpoint bayar yang paling lama: query, menunggu koneksi, atau notifikasi?", "jawab": 2, "kenapa": "Trace memecah satu request menjadi span per langkah dan per komponen, lengkap dengan durasinya." },
+    { "teks": "Apakah pool koneksi sering penuh di jam 12.00?", "jawab": 1, "kenapa": "Saturation adalah salah satu golden signal. Rekaman lab: jumlah_menunggu 160 dalam 10 detik." },
+    { "teks": "Request lambat ini melewati layanan pembayaran dan payment gateway. Di mana waktunya habis?", "jawab": 2, "kenapa": "Trace mengikuti satu request lintas service (Tahap 4). Log per service sulit digabung tanpa id yang sama." },
+    { "teks": "Akun mana yang mencoba login 300 kali tadi malam?", "jawab": 0, "kenapa": "Detail per kejadian. Metric hanya menunjukkan lonjakan, log menunjukkan siapa ([[C4]])." }
+  ],
+  "penutup": "Metric memberi tahu ada masalah, trace menunjukkan di mana, log menjelaskan kenapa. Ketiganya dihubungkan oleh id yang sama, mis. request_id."
+}

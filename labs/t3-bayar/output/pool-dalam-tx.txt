@@ -1,0 +1,13 @@
+# mode dalam-tx · pool 10 koneksi · layanan notifikasi 2 detik per kiriman
+$ beban -rps 17 -durasi 10s
+beban: 17 request/detik selama 10s → 170 request
+hasil: map[201:54 timeout (5 s):116]
+latency yang dijawab: p50 3.133s · p95 4.733s · maks 4.903s
+
+$ curl /debug/pool
+{"dipakai":0,"jumlah_menunggu":160,"maks_koneksi":10,"total_waktu_menunggu_ms":609031}
+
+# contoh log terstruktur dari API (request paling lambat yang berhasil):
+{"time":"2026-10-06T20:01:48.661898+08:00","level":"INFO","msg":"bayar","request_id":145,"mode":"dalam-tx","durasi_ms":4902,"tunggu_koneksi_ms":2899,"query_ms":1,"notifikasi_ms":2000}
+# contoh log request yang gagal:
+{"time":"2026-10-06T20:01:40.876238+08:00","level":"ERROR","msg":"bayar gagal","request_id":11,"mode":"dalam-tx","durasi_ms":4999,"tunggu_koneksi_ms":4999,"query_ms":0,"notifikasi_ms":0,"error":"context canceled"}

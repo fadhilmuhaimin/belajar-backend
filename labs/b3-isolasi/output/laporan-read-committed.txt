@@ -1,0 +1,11 @@
+-- PostgreSQL 17.11 · laporan saldo Ani di READ COMMITTED
+A> BEGIN ISOLATION LEVEL READ COMMITTED
+   BEGIN
+A> SELECT saldo FROM akun WHERE id = 'ani'
+   250000
+B> UPDATE akun SET saldo = saldo + 25000 WHERE id = 'ani'
+   UPDATE 1
+A> SELECT saldo FROM akun WHERE id = 'ani'
+   275000
+A> COMMIT
+   COMMIT

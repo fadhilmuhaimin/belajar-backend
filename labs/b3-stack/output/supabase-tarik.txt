@@ -1,0 +1,9 @@
+$ psql -f supabase/uji-tarik.sql
+tarik 70000: sukses
+tarik 50000: saldo tidak cukup
+budi=30000
+ani=980000
+
+-- diterima PostgreSQL 17.11 (log_statement=all), urut saat diterima:
+select 'tarik 70000: ' || case when tarik('budi', 70000) then 'sukses' else 'saldo tidak cukup' end
+select 'tarik 50000: ' || case when tarik('budi', 50000) then 'sukses' else 'saldo tidak cukup' end

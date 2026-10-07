@@ -1,0 +1,59 @@
+{
+  "id": "b3-1-transfer",
+  "title": "Transfer Rp70.000 dari Budi ke Ani",
+  "setup": "CREATE TABLE akun (nama TEXT PRIMARY KEY, saldo INTEGER NOT NULL, batas INTEGER NOT NULL, CHECK (saldo >= 0 AND saldo <= batas));\nINSERT INTO akun VALUES ('budi', 100000, 1000000), ('ani', 980000, 1000000);",
+  "check": "SELECT nama, saldo FROM (SELECT nama, saldo, 0 AS urut FROM akun UNION ALL SELECT 'TOTAL', SUM(saldo), 1 FROM akun) ORDER BY urut, nama DESC",
+  "predict": {
+    "q": "Di panel Before, UPDATE kedua gagal karena saldo Ani melewati batas Rp1.000.000. Berapa total saldo Budi + Ani sesudahnya? Awalnya Rp1.080.000.",
+    "options": [
+      "Rp1.080.000",
+      "Rp1.010.000",
+      "Rp1.150.000"
+    ],
+    "answer": 1,
+    "explain": "Before: UPDATE pertama sudah permanen begitu selesai, jadi Rp70.000 milik Budi hilang dan total jadi Rp1.010.000. After: ROLLBACK membatalkan UPDATE pertama, jadi total tetap Rp1.080.000."
+  },
+  "panels": {
+    "before": {
+      "label": "Before: tanpa transaction",
+      "onError": "stop",
+      "steps": [
+        {
+          "sql": "UPDATE akun SET saldo = saldo - 70000 WHERE nama = 'budi'"
+        },
+        {
+          "sql": "UPDATE akun SET saldo = saldo + 70000 WHERE nama = 'ani'"
+        }
+      ]
+    },
+    "after": {
+      "label": "After: dengan transaction",
+      "onError": "rollback",
+      "steps": [
+        {
+          "sql": "BEGIN"
+        },
+        {
+          "sql": "UPDATE akun SET saldo = saldo - 70000 WHERE nama = 'budi'"
+        },
+        {
+          "sql": "UPDATE akun SET saldo = saldo + 70000 WHERE nama = 'ani'"
+        },
+        {
+          "sql": "COMMIT"
+        }
+      ]
+    }
+  },
+  "toggles": [
+    {
+      "label": "Naikkan batas saldo Ani jadi Rp2.000.000 (tidak ada error)",
+      "pairs": [
+        [
+          "('ani', 980000, 1000000)",
+          "('ani', 980000, 2000000)"
+        ]
+      ]
+    }
+  ]
+}

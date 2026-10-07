@@ -1,0 +1,122 @@
+{
+ "id": "atomic",
+ "title": "UPDATE atomik dengan syarat",
+ "summary": "Hanya A yang sukses. UPDATE milik B menunggu lock, lalu syarat WHERE dicek ulang ke saldo terbaru: 0 baris berubah.",
+ "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+ "isolation": "read committed",
+ "start": 100000,
+ "withdraw": {
+  "A": 70000,
+  "B": 50000
+ },
+ "final": 30000,
+ "recorded": "2026-10-06",
+ "steps": [
+  {
+   "actor": "A",
+   "sql": "BEGIN",
+   "result": "BEGIN",
+   "note": "",
+   "committed": 100000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {},
+    "B": {}
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "BEGIN",
+   "result": "BEGIN",
+   "note": "",
+   "committed": 100000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {},
+    "B": {}
+   }
+  },
+  {
+   "actor": "A",
+   "sql": "UPDATE akun SET saldo = saldo - 70000 WHERE id = 1 AND saldo >= 70000",
+   "result": "UPDATE 1",
+   "note": "",
+   "committed": 100000,
+   "lock": "A",
+   "waiting": [],
+   "vars": {
+    "A": {},
+    "B": {}
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "UPDATE akun SET saldo = saldo - 50000 WHERE id = 1 AND saldo >= 50000",
+   "result": "MENUNGGU lock",
+   "note": "",
+   "committed": 100000,
+   "lock": "A",
+   "waiting": [
+    "B"
+   ],
+   "vars": {
+    "A": {},
+    "B": {}
+   }
+  },
+  {
+   "actor": "A",
+   "sql": "COMMIT",
+   "result": "COMMIT",
+   "note": "lock A dilepas, B yang sedang menunggu langsung mendapat lock",
+   "committed": 30000,
+   "lock": "B",
+   "waiting": [],
+   "vars": {
+    "A": {},
+    "B": {}
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "UPDATE akun SET saldo = saldo - 50000 WHERE id = 1 AND saldo >= 50000",
+   "result": "UPDATE 0",
+   "note": "lanjut setelah lock dilepas; kondisi WHERE dicek ulang ke saldo terbaru",
+   "committed": 30000,
+   "lock": "B",
+   "waiting": [],
+   "vars": {
+    "A": {},
+    "B": {}
+   }
+  },
+  {
+   "actor": "B",
+   "sql": null,
+   "result": "0 baris berubah, berarti saldo tidak cukup. Tolak penarikan",
+   "note": "kode aplikasi",
+   "committed": 30000,
+   "lock": "B",
+   "waiting": [],
+   "vars": {
+    "A": {},
+    "B": {}
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "COMMIT",
+   "result": "COMMIT",
+   "note": "",
+   "committed": 30000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {},
+    "B": {}
+   }
+  }
+ ]
+}

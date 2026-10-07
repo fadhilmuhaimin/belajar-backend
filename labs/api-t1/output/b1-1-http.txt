@@ -1,0 +1,57 @@
+# Bagian signature token disensor sebagai <signature>.
+# server: ./api-t1
+
+$ curl -i -X POST /login -d '{"id": "budi", "pin": "123456"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 182
+
+{"kedaluwarsa_detik":900,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJidWRpIiwiaWF0IjoxNzkxMjg3NDQxLCJleHAiOjE3OTEyODgzNDF9.<signature>"}
+
+$ curl -i -X GET /akun/budi -H 'Authorization: Bearer <token Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 43
+
+{"id":"budi","nama":"Budi","saldo":100000}
+
+$ curl -i -X POST /transfers -H 'Authorization: Bearer <token Budi>' -d '{"ke":"ani","jumlah":70000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/1
+Content-Length: 23
+
+{"id":1,"saldo":30000}
+
+$ curl -i -X POST /transfers -d '{"ke":"ani","jumlah":70000}'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+Www-Authenticate: Bearer error="invalid_token"
+Content-Length: 136
+
+{"type":"/problems/belum-login","title":"Belum login","status":401,"detail":"header Authorization: Bearer \u003ctoken\u003e tidak ada"}
+
+$ curl -i -X POST /transfers -H 'Authorization: Bearer <token Budi>' -d '{"ke":"ani","jumlah":"tujuh puluh ribu"}'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+Content-Length: 166
+
+{"type":"/problems/json-rusak","title":"Body bukan JSON yang valid","status":400,"detail":"json: cannot unmarshal string into Go struct field .jumlah of type int64"}
+
+$ curl -i -X DELETE /akun/budi -H 'Authorization: Bearer <token Budi>'
+HTTP/1.1 405 Method Not Allowed
+Allow: GET, HEAD
+Content-Type: text/plain; charset=utf-8
+X-Content-Type-Options: nosniff
+Content-Length: 19
+
+Method Not Allowed
+
+$ curl -i -X GET /akun/budi -H 'Authorization: Bearer <token Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 42
+
+{"id":"budi","nama":"Budi","saldo":30000}
+
+server log: api-t1 dev mendengarkan di 127.0.0.1:18081

@@ -1,0 +1,13 @@
+{
+  "judul": "Pekerjaan backend Rekeningo: lebih banyak menunggu, atau lebih banyak menghitung?",
+  "kelompok": ["Menunggu I/O", "Kerja CPU"],
+  "item": [
+    { "teks": "Query saldo ke PostgreSQL", "jawab": 0, "kenapa": "Proses aplikasi hampir tidak bekerja: ia menunggu jawaban database lewat jaringan." },
+    { "teks": "Memanggil layanan notifikasi (500 ms)", "jawab": 0, "kenapa": "Menunggu jaringan. Rekaman: 10 panggilan berurutan 5 detik, paralel 0,5 detik, di Go maupun Node.js." },
+    { "teks": "Mencocokkan PIN dengan hash bcrypt saat login", "jawab": 1, "kenapa": "bcrypt sengaja lambat dan menghitung di CPU ([[B5.1]]). Di Node.js, kerja seperti ini perlu dikeluarkan dari event loop." },
+    { "teks": "Mengecilkan foto bukti bayar sebelum disimpan", "jawab": 1, "kenapa": "Mengolah piksel adalah kerja CPU. Kandidat kuat untuk worker ([[B10.1]])." },
+    { "teks": "Menunggu webhook payment gateway", "jawab": 0, "kenapa": "Menunggu sistem lain. Tidak memakai CPU selama menunggu." },
+    { "teks": "Menjumlahkan 1 juta transaksi di kode aplikasi untuk laporan", "jawab": 1, "kenapa": "Kerja CPU di aplikasi. Lebih baik dikerjakan database dengan SUM/GROUP BY, atau di worker." }
+  ],
+  "penutup": "Sebagian besar request backend menunggu I/O. Model mana pun (goroutine, event loop, thread) menangani itu dengan baik. Perbedaannya terasa saat ada kerja CPU di jalur request."
+}

@@ -1,0 +1,176 @@
+/* Widget alur: pola skenario bertahap. Paket data bergerak di antara komponen,
+ * lapisan yang bekerja tersorot, layar perangkat berubah per langkah.
+ *
+ * Pakai di Markdown:
+ *   <div data-bb="alur" data-src="data/a2-alur.json"></div>
+ *
+ * Format data (v1 dan v2) dan semua logika murni ada di alur-core.js (BB.alurCore).
+ * File ini hanya mengurus DOM. Skema divalidasi saat build (tools/validasi_skenario.mjs).
+ * Butuh hp.js (BB.phone).
+ */
+(function () {
+  "use strict";
+  var BB = window.BB;
+  var core = BB.alurCore;
+  var LEBAR_MIN = 110;  // px per komponen; di bawah ini jalur menjadi rel vertikal
+
+  BB.mounts.alur = function (host) {
+    BB.fetchJSON(host.dataset.src).then(function (raw) {
+      var d = core.normalize(raw);
+      var salah = core.validate(d);
+      if (salah.length) throw new Error(salah.join("; "));
+
+      var i = 0, varianOn = false, guessed = !d.predict, revealed = false;
+      var list = core.steps(d, false);
+      var n = d.komponen.length;
+
+      var lanes = BB.el("div", { class: "bb-alur__lanes", style: "grid-template-columns: repeat(" + n + ", 1fr)" });
+      var laneEls = d.komponen.map(function (k) {
+        var lane = BB.el("div", { class: "bb-alur__lane", "data-k": k.id }, [BB.el("strong", { text: k.label })]);
+        if (k.lapisan && k.lapisan.length) {
+          var ul = BB.el("ol", { class: "bb-alur__layers" });
+          k.lapisan.forEach(function (l) { ul.appendChild(BB.el("li", { "data-l": l, text: l })); });
+          lane.appendChild(ul);
+        }
+        lanes.appendChild(lane);
+        return lane;
+      });
+      var packet = BB.el("div", { class: "bb-alur__packet", "aria-hidden": "true" });
+      var track = BB.el("div", { class: "bb-alur__track" }, [packet]);
+
+      var phoneBox = BB.el("div", { class: "bb-alur__phone" });
+      var title = BB.el("p", { class: "bb-alur__title" });
+      var payload = BB.el("pre", { class: "bb-alur__payload" });
+      var explain = BB.el("p", { class: "bb-alur__explain" });
+      var detail = BB.el("div", { class: "bb-alur__detail", "aria-live": "polite" }, [title, payload, explain]);
+
+      var prev = BB.el("button", { type: "button", class: "bb-btn", text: "← Sebelumnya", onclick: function () { go(i - 1); } });
+      var next = BB.el("button", { type: "button", class: "bb-btn bb-btn--primary", text: "Berikutnya →", onclick: function () { go(i + 1); } });
+      var counter = BB.el("span", { class: "bb-muted bb-alur__count" });
+      var controls = BB.el("div", { class: "bb-row" }, [prev, next, counter]);
+
+      var head = BB.el("div", { class: "bb-widget__head" }, [BB.el("strong", { text: d.judul }),
+        BB.el("span", { class: "bb-muted", text: "Langkah demi langkah · panah kiri/kanan" })]);
+      var chip = BB.sumberChip(d.sumber);
+      if (chip) head.appendChild(chip);
+      var root = BB.el("div", { class: "bb-widget bb-alur", tabindex: "0", role: "group", "aria-label": d.judul }, [head]);
+
+      var pBox = null;
+      if (d.predict) {
+        pBox = BB.predict(d.predict, function () { guessed = true; render(); });
+        root.appendChild(pBox);
+      }
+      if (d.varian) {
+        var cb = BB.el("input", { type: "checkbox" });
+        cb.addEventListener("change", function () {
+          varianOn = cb.checked;
+          list = core.steps(d, varianOn);
+          // Jawaban tebakan dibuka lagi di akhir jalur yang baru.
+          revealed = false;
+          if (pBox) pBox.querySelectorAll(".bb-predict__a").forEach(function (a) { a.remove(); });
+          // Lompat ke langkah pertama yang berbeda: di situlah pelajarannya.
+          if (guessed) i = Math.min(list.length, d.varian.mulai + 1);
+          render();
+        });
+        root.appendChild(BB.el("label", { class: "bb-alur__varian" }, [cb, " Ubah satu hal: " + d.varian.label]));
+      }
+      root.appendChild(lanes);
+      root.appendChild(track);
+      var rail = null;  // dibuat saat pertama kali beralih ke rel vertikal
+      root.appendChild(BB.el("div", { class: "bb-alur__body" }, [phoneBox, detail]));
+      root.appendChild(controls);
+      root.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight") { go(i + 1); e.preventDefault(); }
+        if (e.key === "ArrowLeft") { go(i - 1); e.preventDefault(); }
+      });
+
+      // Rel vertikal kalau lebar per komponen < LEBAR_MIN px. Tata letak horizontal
+      // tidak disentuh sama sekali: DOM hanya berubah saat beralih ke vertikal.
+      var vertikal = false;
+      function tata() {
+        var w = root.clientWidth;
+        var mau = w > 0 && w / n < LEBAR_MIN;
+        if (mau === vertikal) return;
+        vertikal = mau;
+        if (vertikal) {
+          if (!rail) rail = BB.el("div", { class: "bb-alur__rail" });
+          root.insertBefore(rail, lanes);
+          rail.appendChild(lanes);
+          rail.appendChild(track);
+        } else if (rail) {
+          root.insertBefore(lanes, rail);
+          root.insertBefore(track, rail);
+          rail.remove();
+        }
+        root.classList.toggle("is-vertikal", vertikal);
+        render();
+      }
+
+      function go(k) {
+        if (!guessed && k > 0) return;
+        i = Math.max(0, Math.min(list.length, k));
+        render();
+      }
+
+      function renderPhones() {
+        phoneBox.innerHTML = "";
+        var shown = d.perangkat.map(function (p) { return { p: p, layar: core.layarAt(d, list, i - 1, p.id) }; })
+          .filter(function (x) { return x.layar; });
+        if (shown.length === 1 && d.perangkat.length === 1) { phoneBox.appendChild(BB.phone(shown[0].layar)); return; }
+        // Beberapa perangkat: berdampingan, masing-masing berlabel.
+        shown.forEach(function (x) {
+          phoneBox.appendChild(BB.el("figure", { class: "bb-alur__device" }, [BB.phone(x.layar),
+            BB.el("figcaption", { text: x.p.label })]));
+        });
+      }
+
+      function render() {
+        var st = i > 0 ? list[i - 1] : null;
+        var owner = core.pemilikLapisan(d, st);
+        var a = st ? core.indexOf(d, st.dari) : -1, b = st && st.ke != null ? core.indexOf(d, st.ke) : -1;
+        laneEls.forEach(function (lane, j) {
+          lane.classList.toggle("is-active", !!st && (a === j || b === j));
+          lane.classList.toggle("is-warn", !!st && st.nada === "warn" && (b < 0 ? a === j : b === j));
+          lane.querySelectorAll("[data-l]").forEach(function (li) {
+            li.classList.toggle("is-on", !!st && owner === d.komponen[j].id && st.lapisan === li.dataset.l);
+          });
+        });
+        packet.hidden = !st;
+        if (st && !vertikal) {
+          packet.style.left = core.packetPos(d, st) + "%";
+          packet.className = "bb-alur__packet" + (b < 0 ? " is-local" : b > a ? " is-right" : " is-left") +
+            (st.nada ? " is-" + st.nada : "");
+          packet.textContent = b < 0 ? "●" : b > a ? "→" : "←";
+        }
+        if (st && vertikal) {
+          // Posisi dari tinggi baris sebenarnya: tengah komponen, atau di antara dua komponen.
+          var mid = function (j) { var e = laneEls[j]; return e.offsetTop + e.offsetHeight / 2; };
+          packet.style.top = (b < 0 ? mid(a) : (mid(a) + mid(b)) / 2) + "px";
+          packet.className = "bb-alur__packet" + (b < 0 ? " is-local" : b > a ? " is-down" : " is-up") +
+            (st.nada ? " is-" + st.nada : "");
+          packet.textContent = b < 0 ? "●" : b > a ? "↓" : "↑";
+        }
+        renderPhones();
+        title.textContent = st ? i + ". " + st.judul : (guessed ? "Tekan Berikutnya untuk mulai." : "Tebak dulu, lalu tekan Berikutnya.");
+        title.className = "bb-alur__title" + (st && st.nada ? " is-" + st.nada : "");
+        payload.textContent = st && st.kirim ? st.kirim : "";
+        payload.hidden = !(st && st.kirim);
+        explain.textContent = st ? st.jelas : (d.pengantar || "");
+        counter.textContent = "Langkah " + i + " dari " + list.length;
+        prev.disabled = i === 0;
+        next.disabled = !guessed || i >= list.length;
+        if (i === list.length && pBox && !revealed && (!d.predict.varian || varianOn)) {
+          pBox.reveal(d.predict.answer, d.predict.explain);
+          revealed = true;
+        }
+      }
+      host.appendChild(root);
+      render();
+      tata();
+      if (window.ResizeObserver) new ResizeObserver(tata).observe(root);
+      else window.addEventListener("resize", tata);
+    }).catch(function (e) { host.textContent = "Alur gagal dimuat: " + e.message; });
+  };
+
+  BB.mountAll();
+})();

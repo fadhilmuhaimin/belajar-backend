@@ -1,0 +1,57 @@
+{
+  "versi": 2,
+  "judul": "Transfer Rp−70.000 dikirim tanpa lewat app",
+  "sumber": { "jenis": "rekaman", "file": "labs/api-t1/output/b6-validasi.txt", "fileVarian": "labs/api-t1/output/b6-validasi.txt",
+    "catatan": "Server Go 1.27 (labs/api-t1) + PostgreSQL 17.11, direkam dengan curl -i 2026-10-06. Varian: flag -tanpa-validasi dan CHECK constraint dihapus." },
+  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal' dan perhatikan saldo Budi.",
+  "komponen": [
+    { "id": "curl", "label": "curl (tanpa app)" },
+    { "id": "api", "label": "Monolith API", "lapisan": ["handler", "logika bisnis", "akses data"] },
+    { "id": "db", "label": "PostgreSQL" }
+  ],
+  "layarAwal": { "hp": { "judul": "Rekeningo · Budi", "waktu": "21.00", "saldo": 100000, "isi": [ { "jenis": "teks", "teks": "App menolak nominal negatif. Tapi request tidak harus lewat app." } ] } },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: server tidak memvalidasi, dan tabel tidak punya CHECK constraint. Saldo Budi Rp100.000. Berapa saldonya setelah transfer Rp−70.000 ke Ani?",
+    "options": ["Rp30.000", "Rp100.000", "Rp170.000"],
+    "answer": 2,
+    "explain": "saldo − (−70.000) = saldo + 70.000. Rekaman lab: saldo Budi Rp170.000, saldo Ani turun jadi Rp180.000. Validasi di app tidak melindungi apa pun dari request yang dikirim langsung.",
+    "varian": true
+  },
+  "langkah": [
+    { "dari": "curl", "ke": "api", "lapisan": "handler", "judul": "Budi mengirim request langsung",
+      "kirim": "POST /transfers\nAuthorization: Bearer <token Budi>\n{\"ke\":\"ani\",\"jumlah\":-70000}",
+      "jelas": "Token Budi asli. Siapa pun bisa mengambil token dari app miliknya sendiri lalu mengirim request dengan curl." },
+    { "dari": "api", "lapisan": "handler", "judul": "Handler: format benar, lanjut",
+      "kirim": "json.Decode → jumlah = -70000 (int64)  ✓ tipe benar",
+      "jelas": "Handler hanya memeriksa format dan tipe. Angka negatif tetap angka, jadi lolos." },
+    { "dari": "api", "lapisan": "logika bisnis", "judul": "Logika bisnis: aturan dilanggar",
+      "kirim": "jumlah <= 0 → ErrValidasi{field: \"jumlah\", pesan: \"harus lebih dari 0\"}",
+      "jelas": "Aturan Rekeningo ada di satu tempat, jadi berlaku untuk semua jalur masuk: app, curl, atau service lain.", "nada": "good" },
+    { "dari": "api", "ke": "curl", "lapisan": "handler", "judul": "422 dengan error per field",
+      "kirim": "HTTP/1.1 422 Unprocessable Entity\nContent-Type: application/problem+json\n{\"type\":\"/problems/validasi\", ...,\n \"errors\":[{\"field\":\"jumlah\",\"pesan\":\"harus lebih dari 0\"}]}",
+      "jelas": "Database tidak disentuh sama sekali." },
+    { "dari": "api", "ke": "db", "lapisan": "akses data", "judul": "Saldo tidak berubah",
+      "kirim": "SELECT id, saldo FROM akun;\n ani  | 250000\n budi | 100000",
+      "jelas": "Rekaman lab setelah request ditolak.", "nada": "good",
+      "layar": { "hp": { "judul": "Rekeningo · Budi", "waktu": "21.01", "saldo": 100000, "nada": "good", "isi": [ { "jenis": "teks", "teks": "Saldo tetap." } ] } } }
+  ],
+  "varian": {
+    "label": "server tanpa validasi, tabel tanpa CHECK constraint",
+    "mulai": 2,
+    "langkah": [
+      { "dari": "api", "lapisan": "logika bisnis", "judul": "Logika bisnis percaya pada app",
+        "kirim": "(tidak ada pemeriksaan jumlah)",
+        "jelas": "Pemikirannya: \"app sudah memvalidasi\". Padahal request ini tidak lewat app.", "nada": "warn" },
+      { "dari": "api", "ke": "db", "lapisan": "akses data", "judul": "UPDATE dengan jumlah negatif",
+        "kirim": "UPDATE akun SET saldo = saldo - (-70000)\n  WHERE id = 'budi' AND saldo >= -70000;\nUPDATE akun SET saldo = saldo + (-70000) WHERE id = 'ani';\nCOMMIT;",
+        "jelas": "Syarat saldo >= jumlah juga lolos, karena jumlahnya negatif.", "nada": "warn" },
+      { "dari": "api", "ke": "curl", "lapisan": "handler", "judul": "201 Created",
+        "kirim": "HTTP/1.1 201 Created\n{\"id\":2,\"saldo\":170000}",
+        "jelas": "Server melaporkan sukses." },
+      { "dari": "api", "ke": "db", "judul": "Uang Ani pindah ke Budi",
+        "kirim": "SELECT id, saldo FROM akun;\n ani  | 180000\n budi | 170000",
+        "jelas": "Budi \"mentransfer\" Rp−70.000 dan justru menerima Rp70.000 dari Ani. Dengan CHECK (jumlah > 0) di tabel, rekaman lab menunjukkan request yang sama berakhir 500, bukan sukses.", "nada": "warn",
+        "layar": { "hp": { "judul": "Rekeningo · Budi", "waktu": "21.01", "saldo": 170000, "nada": "warn", "isi": [ { "jenis": "toast", "teks": "Transfer berhasil", "nada": "good" } ] } } }
+    ]
+  }
+}

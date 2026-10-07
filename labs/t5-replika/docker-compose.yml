@@ -1,0 +1,38 @@
+# Lab Tahap 5: satu primary, satu read replica (streaming replication PostgreSQL 17).
+# Replica sengaja ditunda 2 detik (recovery_min_apply_delay) supaya replication lag terlihat jelas.
+# Jalankan: make -C labs/t5-replika run
+services:
+  primary:
+    image: postgres:17
+    command: ["postgres", "-c", "wal_level=replica", "-c", "max_wal_senders=5"]
+    environment:
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD: lab   # kredensial lab lokal, bukan rahasia
+      POSTGRES_DB: lab
+    volumes:
+      - ./init-primary.sh:/docker-entrypoint-initdb.d/init-primary.sh:ro
+    ports:
+      - "127.0.0.1:54340:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab -d lab"]
+      interval: 1s
+      timeout: 2s
+      retries: 30
+  replica:
+    image: postgres:17
+    depends_on:
+      primary:
+        condition: service_healthy
+    user: postgres
+    environment:
+      PGPASSWORD: lab
+    command:
+      - bash
+      - -c
+      - |
+        rm -rf /var/lib/postgresql/data/*
+        until pg_basebackup -h primary -U replikator -D /var/lib/postgresql/data -R -X stream; do sleep 1; done
+        chmod 700 /var/lib/postgresql/data
+        exec postgres -c hot_standby=on -c recovery_min_apply_delay=2s
+    ports:
+      - "127.0.0.1:54341:5432"

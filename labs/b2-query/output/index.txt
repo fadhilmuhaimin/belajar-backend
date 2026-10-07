@@ -1,0 +1,74 @@
+-- PostgreSQL 17.11 · 200.000 pesanan, 600.000 item, data dari data.sql
+EXPLAIN (ANALYZE, COSTS OFF, TIMING ON, SUMMARY ON)
+SELECT id, total, dibuat FROM pesanan WHERE toko_id = 1 ORDER BY dibuat DESC LIMIT 20;
+                                         QUERY PLAN                                          
+ Limit (actual time=3.631..4.271 rows=20 loops=1)
+   ->  Gather Merge (actual time=3.630..4.269 rows=20 loops=1)
+         Workers Planned: 1
+         Workers Launched: 1
+         ->  Sort (actual time=3.130..3.130 rows=14 loops=2)
+               Sort Key: dibuat DESC
+               Sort Method: top-N heapsort  Memory: 27kB
+               Worker 0:  Sort Method: top-N heapsort  Memory: 27kB
+               ->  Parallel Seq Scan on pesanan (actual time=0.332..3.022 rows=2000 loops=2)
+                     Filter: (toko_id = 1)
+                     Rows Removed by Filter: 98000
+ Planning Time: 0.142 ms
+ Execution Time: 4.286 ms
+(13 rows)
+
+EXPLAIN (ANALYZE, COSTS OFF, TIMING ON, SUMMARY ON)
+SELECT nama, jumlah, harga FROM item_pesanan WHERE pesanan_id = 199951;
+                                    QUERY PLAN                                     
+ Gather (actual time=5.904..6.670 rows=3 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   ->  Parallel Seq Scan on item_pesanan (actual time=3.471..5.253 rows=1 loops=3)
+         Filter: (pesanan_id = 199951)
+         Rows Removed by Filter: 199999
+ Planning Time: 0.057 ms
+ Execution Time: 6.675 ms
+(8 rows)
+
+CREATE INDEX pesanan_toko_dibuat_idx ON pesanan (toko_id, dibuat DESC);
+Time: 37.365 ms
+CREATE INDEX item_pesanan_pesanan_idx ON item_pesanan (pesanan_id);
+Time: 83.911 ms
+SELECT relname AS index, pg_size_pretty(pg_relation_size(oid)) AS ukuran
+FROM pg_class WHERE relname IN ('pesanan_toko_dibuat_idx', 'item_pesanan_pesanan_idx') ORDER BY relname;
+          index           | ukuran  
+ item_pesanan_pesanan_idx | 9640 kB
+ pesanan_toko_dibuat_idx  | 6184 kB
+(2 rows)
+
+EXPLAIN (ANALYZE, COSTS OFF, TIMING ON, SUMMARY ON)
+SELECT id, total, dibuat FROM pesanan WHERE toko_id = 1 ORDER BY dibuat DESC LIMIT 20;
+                                              QUERY PLAN                                              
+ Limit (actual time=0.016..0.033 rows=20 loops=1)
+   ->  Index Scan using pesanan_toko_dibuat_idx on pesanan (actual time=0.015..0.032 rows=20 loops=1)
+         Index Cond: (toko_id = 1)
+ Planning Time: 0.035 ms
+ Execution Time: 0.037 ms
+(5 rows)
+
+EXPLAIN (ANALYZE, COSTS OFF, TIMING ON, SUMMARY ON)
+SELECT nama, jumlah, harga FROM item_pesanan WHERE pesanan_id = 199951;
+                                             QUERY PLAN                                              
+ Index Scan using item_pesanan_pesanan_idx on item_pesanan (actual time=0.014..0.016 rows=3 loops=1)
+   Index Cond: (pesanan_id = 199951)
+ Planning Time: 0.028 ms
+ Execution Time: 0.019 ms
+(4 rows)
+
+EXPLAIN (COSTS OFF)
+SELECT id, total FROM pesanan WHERE dibuat > '2026-12-01' ORDER BY dibuat DESC LIMIT 20;
+                                        QUERY PLAN                                         
+ Limit
+   ->  Gather Merge
+         Workers Planned: 1
+         ->  Sort
+               Sort Key: dibuat DESC
+               ->  Parallel Seq Scan on pesanan
+                     Filter: (dibuat > '2026-12-01 00:00:00+00'::timestamp with time zone)
+(7 rows)
+

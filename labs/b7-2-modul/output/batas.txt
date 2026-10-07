@@ -1,0 +1,32 @@
+== A. Semua modul memakai API publik
+$ go build ./...
+(tidak ada output: lolos)
+exit 0
+
+== B. katalog mengimpor rekeningo/modul/pembayaran/internal/gateway
+$ go build ./...
+package rekeningo/modul/katalog
+	modul/katalog/promo.go:3:8: use of internal package rekeningo/modul/pembayaran/internal/gateway not allowed
+exit 1
+
+== C. pembayaran mengimpor pesanan (pesanan sudah mengimpor pembayaran)
+$ go build ./...
+package rekeningo/modul/pembayaran
+	imports rekeningo/modul/pesanan from status.go
+	imports rekeningo/modul/pembayaran from pesanan.go: import cycle not allowed
+exit 1
+
+== D. modul pesanan (role modul_pesanan) membaca tabel pembayaran.transaksi
+$ psql -U modul_pesanan -d lab -c SELECT p.id, t.id AS transaksi FROM pesanan.pesanan p JOIN pembayaran.transaksi t ON t.pesanan_id = p.id;
+ERROR:  permission denied for schema pembayaran
+LINE 1: ...id, t.id AS transaksi FROM pesanan.pesanan p JOIN pembayaran...
+                                                             ^
+exit 1
+
+== E. modul pesanan membaca tabel miliknya sendiri
+$ psql -U modul_pesanan -d lab -c SELECT id, total FROM pesanan.pesanan;
+id  | total 
+-----+-------
+ 812 | 25000
+(1 row)
+exit 0

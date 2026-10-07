@@ -1,0 +1,14 @@
+{
+  "judul": "Status code apa untuk tiap kejadian di Rekeningo?",
+  "kelompok": ["2xx", "400", "401", "404", "422", "500"],
+  "item": [
+    { "teks": "Transfer berhasil dibuat", "jawab": 0, "kenapa": "201 Created: resource baru dibuat. Header Location menunjuk alamatnya. Di rekaman lab: Location: /transfers/1." },
+    { "teks": "Body berisi \"jumlah\": \"tujuh puluh ribu\" (teks, bukan angka)", "jawab": 1, "kenapa": "Format atau tipe data salah: request tidak bisa dibaca sebagaimana mestinya. Handler menolaknya sebelum logika bisnis jalan." },
+    { "teks": "Header Authorization tidak dikirim", "jawab": 2, "kenapa": "401 berarti server belum tahu siapa pengirimnya. RFC 9110 mewajibkan header WWW-Authenticate di response 401." },
+    { "teks": "Budi meminta GET /akun/ani", "jawab": 3, "kenapa": "Rekeningo menjawab 404, bukan 403, supaya penanya tidak tahu akun itu ada. Ini keputusan desain, dibahas di [[B5.3]]." },
+    { "teks": "Saldo Budi Rp30.000, transfer Rp50.000", "jawab": 4, "kenapa": "Request-nya benar secara format, tapi aturan bisnis menolaknya. Keputusan 422 ini dibahas di [[A2]]." },
+    { "teks": "Database tidak bisa dihubungi", "jawab": 5, "kenapa": "Kesalahan di sisi server. Detail error hanya masuk log server, app menerima pesan umum." },
+    { "teks": "GET /akun/budi dengan token yang valid", "jawab": 0, "kenapa": "200 OK dengan data akun di body." }
+  ],
+  "penutup": "Pola umumnya: 2xx berhasil, 4xx kesalahan yang bisa diperbaiki pengirim, 5xx kesalahan server. App bisa memutuskan apa yang ditampilkan hanya dari angka pertamanya."
+}

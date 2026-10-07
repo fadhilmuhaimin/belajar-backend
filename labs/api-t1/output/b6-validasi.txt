@@ -1,0 +1,61 @@
+# Bagian signature token disensor sebagai <signature>.
+# server: ./api-t1
+
+$ curl -i -X POST /login -d '{"id": "budi", "pin": "123456"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 182
+
+{"kedaluwarsa_detik":900,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJidWRpIiwiaWF0IjoxNzkxMjg3NDQyLCJleHAiOjE3OTEyODgzNDJ9.<signature>"}
+
+$ curl -i -X POST /transfers -H 'Authorization: Bearer <token Budi>' -d '{"ke":"ani","jumlah":-70000}'
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+Content-Length: 130
+
+{"type":"/problems/validasi","title":"Input tidak valid","status":422,"errors":[{"field":"jumlah","pesan":"harus lebih dari 0"}]}
+
+$ psql -c "SELECT id, saldo FROM akun ORDER BY id"
+  id  | saldo  
+------+--------
+ ani  | 250000
+ budi | 100000
+(2 rows)
+
+
+server log: api-t1 dev mendengarkan di 127.0.0.1:18081
+
+# server: ./api-t1 -tanpa-validasi
+
+$ curl -i -X POST /transfers -H 'Authorization: Bearer <token Budi>' -d '{"ke":"ani","jumlah":-70000}'
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/problem+json
+Content-Length: 81
+
+{"type":"/problems/internal","title":"Terjadi kesalahan di server","status":500}
+
+server log: api-t1 dev mendengarkan di 127.0.0.1:18081
+
+server log: error internal: ERROR: new row for relation "transfer" violates check constraint "transfer_jumlah_check" (SQLSTATE 23514)
+
+$ psql -c "ALTER TABLE transfer DROP CONSTRAINT transfer_jumlah_check"
+
+# server: ./api-t1 -tanpa-validasi
+
+$ curl -i -X POST /transfers -H 'Authorization: Bearer <token Budi>' -d '{"ke":"ani","jumlah":-70000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/2
+Content-Length: 24
+
+{"id":2,"saldo":170000}
+
+$ psql -c "SELECT id, saldo FROM akun ORDER BY id"
+  id  | saldo  
+------+--------
+ ani  | 180000
+ budi | 170000
+(2 rows)
+
+
+server log: api-t1 dev mendengarkan di 127.0.0.1:18081

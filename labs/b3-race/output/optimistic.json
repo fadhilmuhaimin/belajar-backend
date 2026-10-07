@@ -1,0 +1,184 @@
+{
+ "id": "optimistic",
+ "title": "Optimistic lock (kolom version)",
+ "summary": "Hanya A yang sukses. Tidak ada yang menunggu lock. UPDATE milik B gagal karena version sudah berubah, lalu B membaca ulang dan menolak.",
+ "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+ "isolation": "read committed",
+ "start": 100000,
+ "withdraw": {
+  "A": 70000,
+  "B": 50000
+ },
+ "final": 30000,
+ "recorded": "2026-10-06",
+ "steps": [
+  {
+   "actor": "A",
+   "sql": "SELECT saldo, version FROM akun WHERE id = 1",
+   "result": "(100000, 1)",
+   "note": "",
+   "committed": 100000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    },
+    "B": {}
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "SELECT saldo, version FROM akun WHERE id = 1",
+   "result": "(100000, 1)",
+   "note": "",
+   "committed": 100000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    },
+    "B": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    }
+   }
+  },
+  {
+   "actor": "A",
+   "sql": null,
+   "result": "saldo Rp100.000 >= Rp70.000, lanjut. Simpan dengan syarat version masih 1",
+   "note": "kode aplikasi",
+   "committed": 100000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    },
+    "B": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    }
+   }
+  },
+  {
+   "actor": "B",
+   "sql": null,
+   "result": "saldo Rp100.000 >= Rp50.000, lanjut. Simpan dengan syarat version masih 1",
+   "note": "kode aplikasi",
+   "committed": 100000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    },
+    "B": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    }
+   }
+  },
+  {
+   "actor": "A",
+   "sql": "UPDATE akun SET saldo = 30000, version = version + 1 WHERE id = 1 AND version = 1",
+   "result": "UPDATE 1",
+   "note": "",
+   "committed": 30000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    },
+    "B": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    }
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "UPDATE akun SET saldo = 50000, version = version + 1 WHERE id = 1 AND version = 1",
+   "result": "UPDATE 0",
+   "note": "",
+   "committed": 30000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    },
+    "B": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    }
+   }
+  },
+  {
+   "actor": "B",
+   "sql": null,
+   "result": "0 baris berubah: ada yang mengubah data duluan. Baca ulang",
+   "note": "kode aplikasi",
+   "committed": 30000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    },
+    "B": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    }
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "SELECT saldo, version FROM akun WHERE id = 1",
+   "result": "(30000, 2)",
+   "note": "",
+   "committed": 30000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    },
+    "B": {
+     "saldo_dibaca": 30000,
+     "version": 2
+    }
+   }
+  },
+  {
+   "actor": "B",
+   "sql": null,
+   "result": "saldo Rp30.000 < Rp50.000, tolak penarikan",
+   "note": "kode aplikasi",
+   "committed": 30000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000,
+     "version": 1
+    },
+    "B": {
+     "saldo_dibaca": 30000,
+     "version": 2
+    }
+   }
+  }
+ ]
+}

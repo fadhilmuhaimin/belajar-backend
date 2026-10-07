@@ -1,0 +1,61 @@
+{
+  "versi": 2,
+  "judul": "Raka men-deploy versi baru API",
+  "sumber": { "jenis": "rekaman", "file": "labs/api-t1/output/c3-deploy.txt", "fileVarian": "labs/api-t1/output/c3-deploy.txt",
+    "catatan": "Docker di laptop lab, image dari labs/api-t1/Dockerfile, PostgreSQL 17.11. Prober mengirim GET /sehat setiap 100 ms. Direkam 2026-10-06." },
+  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': konfigurasi deploy lupa satu variabel.",
+  "komponen": [
+    { "id": "ci", "label": "Build (CI)" },
+    { "id": "server", "label": "Server" },
+    { "id": "app", "label": "App Budi" }
+  ],
+  "layarAwal": { "hp": { "waktu": "22.00", "isi": [ { "jenis": "baris", "kiri": "Rekeningo", "kanan": "normal" } ] } },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: deploy v3 lupa variabel TOKEN_SECRET. Aplikasi menolak start tanpa itu. Kira-kira berapa lama Rekeningo tidak bisa dipakai, kalau deploy menunggu health check 5 detik lalu rollback?",
+    "options": ["Sekitar 0,2 detik", "Sekitar 5–6 detik", "Sampai Raka bangun besok pagi"],
+    "answer": 1,
+    "varian": true,
+    "explain": "Rekaman lab: 49 dari 69 request gagal, sekitar 5,6 detik. Health check memberi tahu deploy bahwa v3 tidak sehat, lalu rollback ke image v2 yang masih ada. Tanpa health check dan rollback otomatis, jawabannya bisa jadi pilihan ketiga."
+  },
+  "langkah": [
+    { "dari": "ci", "judul": "Kode dibangun menjadi image",
+      "kirim": "docker build --build-arg VERSI=v2 -t rekeningo-api:v2 .\nrekeningo-api:v2  28.9MB",
+      "jelas": "Image berisi binary dan semua yang dibutuhkannya. Image yang sama dipakai di staging dan production. Konfigurasi tidak ikut di dalamnya." },
+    { "dari": "ci", "ke": "server", "judul": "Versi lama dihentikan",
+      "kirim": "$ docker rm -f rekeningo-api   (v1)",
+      "jelas": "Tahap 1 hanya punya satu instance. Mulai detik ini, request gagal.", "nada": "warn" },
+    { "dari": "ci", "ke": "server", "judul": "Versi baru dijalankan dengan konfigurasi dari environment",
+      "kirim": "$ docker run -d --name rekeningo-api -p 18082:8080\n    -e DATABASE_URL=... -e TOKEN_SECRET=... rekeningo-api:v2",
+      "jelas": "Secret dan alamat database datang dari environment, bukan dari kode atau image." },
+    { "dari": "ci", "ke": "server", "judul": "Health check",
+      "kirim": "$ curl /sehat\n200 {\"status\": \"ok\", \"versi\": \"v2\"}",
+      "jelas": "Endpoint /sehat memeriksa koneksi database. Deploy dianggap selesai hanya kalau ini 200.", "nada": "good" },
+    { "dari": "server", "ke": "app", "judul": "Downtime terukur",
+      "kirim": "prober: 18 request, 2 gagal\ntidak bisa dipakai sekitar 0,2 detik",
+      "jelas": "Binary Go start dalam milidetik. Aplikasi yang start lebih lama punya downtime lebih panjang dengan cara deploy yang sama.", "nada": "good",
+      "layar": { "hp": { "waktu": "22.01", "isi": [ { "jenis": "baris", "kiri": "Rekeningo", "kanan": "normal" } ] } } }
+  ],
+  "varian": {
+    "label": "konfigurasi deploy v3 lupa TOKEN_SECRET",
+    "mulai": 2,
+    "langkah": [
+      { "dari": "ci", "ke": "server", "judul": "v3 dijalankan tanpa TOKEN_SECRET",
+        "kirim": "$ docker run -d --name rekeningo-api -p 18082:8080\n    -e DATABASE_URL=... rekeningo-api:v3",
+        "jelas": "Kesalahan konfigurasi, bukan kesalahan kode. Test di CI tidak akan menangkapnya.", "nada": "warn" },
+      { "dari": "server", "judul": "Aplikasi menolak start (fail-fast)",
+        "kirim": "$ docker logs rekeningo-api\nkonfigurasi salah: TOKEN_SECRET kosong atau kurang dari 16 karakter",
+        "jelas": "Lebih baik mati saat start daripada jalan lalu menerbitkan token yang ditandatangani secret kosong." },
+      { "dari": "ci", "ke": "server", "judul": "Health check gagal selama 5 detik",
+        "kirim": "$ curl /sehat\ntidak ada jawaban selama 5 detik",
+        "jelas": "Batas waktu health check menentukan berapa lama user menunggu sebelum rollback.", "nada": "warn",
+        "layar": { "hp": { "waktu": "22.10", "isi": [ { "jenis": "toast", "teks": "Tidak dapat terhubung", "nada": "warn" } ] } } },
+      { "dari": "ci", "ke": "server", "judul": "Rollback ke image v2",
+        "kirim": "$ docker run ... rekeningo-api:v2\n$ curl /sehat → 200 {\"versi\": \"v2\"}",
+        "jelas": "Rollback cepat karena image lama masih ada dan skema database masih kompatibel ([[B4.2]])." },
+      { "dari": "server", "ke": "app", "judul": "Total gangguan sekitar 5,6 detik",
+        "kirim": "prober: 69 request, 49 gagal\ntidak bisa dipakai sekitar 5,6 detik",
+        "jelas": "Di Tahap 3, dua instance dan rolling deploy membuat instance lama tetap melayani selama versi baru belum sehat.", "nada": "warn",
+        "layar": { "hp": { "waktu": "22.10", "isi": [ { "jenis": "baris", "kiri": "Rekeningo", "kanan": "normal" } ] } } }
+    ]
+  }
+}

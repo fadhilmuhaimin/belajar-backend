@@ -1,0 +1,52 @@
+{
+ "id": "b2-3-index",
+ "title": "Riwayat penjualan Warung Ani: 20 pesanan terbaru dari 20.000",
+ "setup": "CREATE TABLE pesanan (id INTEGER PRIMARY KEY, toko_id INTEGER NOT NULL, total INTEGER NOT NULL, dibuat TEXT NOT NULL);\nWITH RECURSIVE g(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM g WHERE x < 20000)\nINSERT INTO pesanan SELECT x, 1 + (x % 50), 35000, datetime('2026-01-01', '+' || (x * 1570) || ' seconds') FROM g;",
+ "check": "SELECT name AS index_yang_ada, sql FROM sqlite_master WHERE type = 'index' AND sql IS NOT NULL",
+ "predict": {
+  "q": "Panel After membuat index (toko_id, dibuat) sebelum menjalankan query yang sama. Kata pertama di rencana query After menjadi apa?",
+  "options": [
+   "SCAN",
+   "SEARCH",
+   "USE TEMP B-TREE"
+  ],
+  "answer": 1,
+  "explain": "Before: SCAN pesanan (memindai 20.000 baris) lalu USE TEMP B-TREE untuk mengurutkan. After: SEARCH pesanan USING INDEX (toko_id=?): langsung lompat ke baris toko 1, yang sudah terurut menurut dibuat. Centang 'Ubah satu hal' untuk index yang hanya berisi dibuat."
+ },
+ "panels": {
+  "before": {
+   "label": "Before: tanpa index",
+   "onError": "stop",
+   "steps": [
+    {
+     "sql": "EXPLAIN QUERY PLAN SELECT id, total, dibuat FROM pesanan WHERE toko_id = 1 ORDER BY dibuat DESC LIMIT 20",
+     "note": "rencana query"
+    }
+   ]
+  },
+  "after": {
+   "label": "After: index sesuai pola query",
+   "onError": "stop",
+   "steps": [
+    {
+     "sql": "CREATE INDEX idx_riwayat ON pesanan (toko_id, dibuat)"
+    },
+    {
+     "sql": "EXPLAIN QUERY PLAN SELECT id, total, dibuat FROM pesanan WHERE toko_id = 1 ORDER BY dibuat DESC LIMIT 20",
+     "note": "rencana query"
+    }
+   ]
+  }
+ },
+ "toggles": [
+  {
+   "label": "index hanya di kolom dibuat",
+   "pairs": [
+    [
+     "ON pesanan (toko_id, dibuat)",
+     "ON pesanan (dibuat)"
+    ]
+   ]
+  }
+ ]
+}

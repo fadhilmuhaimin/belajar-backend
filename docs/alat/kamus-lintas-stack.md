@@ -1,0 +1,49 @@
+---
+title: Kamus lintas stack
+---
+
+# Kamus lintas stack
+
+Rujukan cepat · nama API dicek ke dokumentasi resmi 2026-10-06, tidak dijalankan
+{: .meta }
+
+Konsepnya sama di semua stack. Tabel ini hanya menerjemahkan **nama**. Setiap baris menaut ke halaman konsepnya. Tanda "lib" berarti bukan bawaan framework, tapi library pihak ketiga yang umum dipakai.
+
+## Request dan lapisan
+
+| Konsep | Go | Node.js (Express) | Laravel | Django | Spring | Supabase / Firebase |
+|---|---|---|---|---|---|---|
+| Handler ([[A2]]) | `http.HandlerFunc` | route handler `app.post(...)` | Controller | View | `@RestController` | PostgREST otomatis, Edge Function / Cloud Functions |
+| Middleware | `func(http.Handler) http.Handler` | `app.use(...)` | Middleware | `MIDDLEWARE` di settings | `Filter`, `HandlerInterceptor` | – |
+| Validasi input | lib `go-playground/validator` | lib `zod` | `$request->validate()` | Form, serializer (DRF, lib) | Bean Validation `@Valid` | `CHECK` constraint, aturan RLS / Security Rules |
+| Test HTTP | `net/http/httptest` | lib `supertest` | HTTP tests `$this->postJson()` | `django.test.Client` | `MockMvc` | – |
+
+## Database
+
+| Konsep | Go | Node.js | Laravel | Django | Spring | Supabase / Firebase |
+|---|---|---|---|---|---|---|
+| Transaction ([[B3.1]]) | `db.BeginTx` | `client.query('BEGIN')` (`pg`) | `DB::transaction()` | `transaction.atomic()` | `@Transactional` | fungsi SQL lewat `rpc()` / `runTransaction()` |
+| Row lock ([[B3.2]]) | SQL `FOR UPDATE` | SQL `FOR UPDATE` | `lockForUpdate()` | `select_for_update()` | `@Lock(PESSIMISTIC_WRITE)` | SQL `FOR UPDATE` di fungsi / SDK mobile Firestore: optimistic + retry |
+| Migration | lib `golang-migrate`, `goose` | lib Prisma Migrate, `knex` | `php artisan migrate` | `manage.py migrate` | lib Flyway, Liquibase | `supabase migration new` / – |
+| Connection pool | bawaan `database/sql`, `pgxpool` | `pg.Pool` | tidak ada pool antar-request di PHP-FPM [perlu verifikasi] | `CONN_MAX_AGE`, opsi `pool` (psycopg) | HikariCP (bawaan Spring Boot) | Supavisor / – |
+
+## Di luar jalur request
+
+| Konsep | Go | Node.js | Laravel | Django | Spring | Supabase / Firebase |
+|---|---|---|---|---|---|---|
+| Background job | lib `river`, `asynq` | lib BullMQ | Queues | Tasks framework (worker dari luar Django) | `@Async`, lib Spring Batch | – / Cloud Functions trigger |
+| Cache | lib `go-redis` | lib `node-redis` | `Cache` facade | cache framework | `@Cacheable` | – |
+| Login dan token | lib `golang-jwt` | lib `jsonwebtoken`, `passport` | Sanctum | `django.contrib.auth` | Spring Security | Supabase Auth / Firebase Auth |
+
+## Dokumentasi resmi per stack
+
+- **Go:** [database/sql](https://pkg.go.dev/database/sql) · [httptest](https://pkg.go.dev/net/http/httptest) · [golang-migrate](https://github.com/golang-migrate/migrate) · [River](https://riverqueue.com/docs)
+- **Node.js:** [Express middleware](https://expressjs.com/en/guide/using-middleware.html) · [node-postgres Pool](https://node-postgres.com/apis/pool) · [Prisma Migrate](https://www.prisma.io/docs/orm/prisma-migrate) · [BullMQ](https://docs.bullmq.io/)
+- **Laravel:** [Middleware](https://laravel.com/docs/12.x/middleware) · [Validation](https://laravel.com/docs/12.x/validation) · [Migrations](https://laravel.com/docs/12.x/migrations) · [Queues](https://laravel.com/docs/12.x/queues) · [HTTP tests](https://laravel.com/docs/12.x/http-tests) · [Sanctum](https://laravel.com/docs/12.x/sanctum)
+- **Django:** [Middleware](https://docs.djangoproject.com/en/stable/topics/http/middleware/) · [Migrations](https://docs.djangoproject.com/en/stable/topics/migrations/) · [Databases (pool)](https://docs.djangoproject.com/en/stable/ref/databases/) · [Tasks](https://docs.djangoproject.com/en/stable/topics/tasks/) · [Testing tools](https://docs.djangoproject.com/en/stable/topics/testing/tools/)
+- **Spring:** [Bean Validation](https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html) · [MockMvc](https://docs.spring.io/spring-framework/reference/testing/mockmvc.html) · [Resource server JWT](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html)
+- **Supabase / Firebase:** [Connecting (Supavisor)](https://supabase.com/docs/guides/database/connecting-to-postgres) · [Migrations](https://supabase.com/docs/guides/deployment/database-migrations) · [Supabase Auth](https://supabase.com/docs/guides/auth) · [Cloud Functions](https://firebase.google.com/docs/functions) · [Firestore: concurrency mode](https://firebase.google.com/docs/firestore/transaction-data-contention)
+
+Django Tasks framework hanya mendefinisikan dan memasukkan task ke queue. Dokumentasinya menyebut eksekusi harus dikerjakan worker di luar Django.
+
+<div data-bb="umpan-balik"></div>

@@ -1,0 +1,145 @@
+{
+  "skenario": "Budi kirim Rp70.000 ke Ani. UPDATE kedua gagal karena saldo Ani melewati batas Rp1.000.000.",
+  "langkah": [
+    {
+      "id": "begin",
+      "label": "BEGIN"
+    },
+    {
+      "id": "u1",
+      "label": "UPDATE Budi −Rp70.000"
+    },
+    {
+      "id": "u2",
+      "label": "UPDATE Ani +Rp70.000 gagal"
+    },
+    {
+      "id": "rb",
+      "label": "ROLLBACK"
+    }
+  ],
+  "stack": {
+    "Go": {
+      "src": "labs/b3-stack/go/main.go#transfer",
+      "pola": {
+        "begin": [
+          "db.BeginTx"
+        ],
+        "u1": [
+          "saldo - $1"
+        ],
+        "u2": [
+          "saldo + $1"
+        ],
+        "rb": [
+          "defer tx.Rollback()"
+        ]
+      },
+      "catatan": {
+        "rb": "Dipasang sekali di awal; jalan saat fungsi keluar lewat return err"
+      }
+    },
+    "Node.js": {
+      "src": "labs/b3-stack/node/main.js#transfer",
+      "pola": {
+        "begin": [
+          "'BEGIN'"
+        ],
+        "u1": [
+          "saldo - $1"
+        ],
+        "u2": [
+          "saldo + $1"
+        ],
+        "rb": [
+          "'ROLLBACK'"
+        ]
+      },
+      "catatan": {
+        "rb": "Ditulis manual di catch"
+      }
+    },
+    "Laravel": {
+      "src": "labs/b3-stack/laravel/main.php#transfer",
+      "pola": {
+        "begin": [
+          "$db->transaction("
+        ],
+        "u1": [
+          "->decrement("
+        ],
+        "u2": [
+          "->increment("
+        ],
+        "rb": [
+          "$db->transaction("
+        ]
+      },
+      "catatan": {
+        "begin": "BEGIN dikirim saat closure mulai",
+        "rb": "Tidak ditulis di kode: exception dari closure membuat Laravel mengirim ROLLBACK"
+      }
+    },
+    "Django": {
+      "src": "labs/b3-stack/django/main.py#transfer",
+      "pola": {
+        "begin": [
+          "transaction.atomic()"
+        ],
+        "u1": [
+          "F(\"saldo\") - jumlah"
+        ],
+        "u2": [
+          "F(\"saldo\") + jumlah"
+        ],
+        "rb": [
+          "transaction.atomic()"
+        ]
+      },
+      "catatan": {
+        "begin": "BEGIN dikirim saat masuk blok with",
+        "rb": "Tidak ditulis di kode: exception yang keluar dari blok membuat Django mengirim ROLLBACK"
+      }
+    },
+    "Spring": {
+      "md": "docs/b-fondasi/b3-1-transaction.md",
+      "pola": {
+        "begin": [
+          "@Transactional"
+        ],
+        "u1": [
+          "saldo - ?"
+        ],
+        "u2": [
+          "saldo + ?"
+        ],
+        "rb": [
+          "@Transactional"
+        ]
+      },
+      "catatan": {
+        "rb": "Tidak ditulis di kode: Spring rollback untuk unchecked exception (tidak dijalankan di lab)"
+      }
+    },
+    "Supabase": {
+      "src": "labs/b3-stack/supabase/fungsi.sql#transfer",
+      "pola": {
+        "begin": [
+          "supabase.rpc("
+        ],
+        "u1": [
+          "saldo - jumlah"
+        ],
+        "u2": [
+          "saldo + jumlah"
+        ],
+        "rb": []
+      },
+      "catatan": {
+        "begin": "Tidak ada BEGIN dari app: satu panggilan rpc = satu transaction implisit",
+        "rb": "Tidak ada ROLLBACK dari app maupun dari fungsi: error membatalkan seluruh panggilan (lihat output rekaman)"
+      },
+      "md": "docs/b-fondasi/b3-1-transaction.md"
+    }
+  }
+}

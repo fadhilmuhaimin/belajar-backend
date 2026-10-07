@@ -1,0 +1,274 @@
+{
+  "versi": 2,
+  "judul": "Dua penarikan baca-hitung-tulis, dengan isolation level berbeda",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/b3-isolasi/output/tarik-repeatable-read.txt",
+    "fileVarian": "labs/b3-race/output/tx-tanpa-lock.txt",
+    "catatan": "PostgreSQL 17.11, dua sesi psycopg, direkam 2026-10-06 (labs/b3-isolasi). Varian memakai rekaman [[B3.2]] di READ COMMITTED."
+  },
+  "pengantar": "Kode aplikasinya sama dengan [[B3.2]] versi salah: baca saldo, hitung di aplikasi, tulis. Yang berbeda hanya isolation level.",
+  "komponen": [
+    {
+      "id": "hp",
+      "label": "HP Budi"
+    },
+    {
+      "id": "tablet",
+      "label": "Tablet Budi"
+    },
+    {
+      "id": "api",
+      "label": "Monolith API",
+      "lapisan": [
+        "logika bisnis",
+        "akses data"
+      ]
+    },
+    {
+      "id": "db",
+      "label": "PostgreSQL"
+    }
+  ],
+  "perangkat": [
+    {
+      "id": "hp",
+      "label": "HP Budi"
+    },
+    {
+      "id": "tablet",
+      "label": "Tablet Budi"
+    }
+  ],
+  "layarAwal": {
+    "hp": {
+      "waktu": "12.30",
+      "saldo": 100000,
+      "isi": [
+        {
+          "jenis": "input",
+          "label": "Tarik ke rekening bank",
+          "nilai": "Rp70.000"
+        },
+        {
+          "jenis": "tombol",
+          "teks": "Tarik"
+        }
+      ]
+    },
+    "tablet": {
+      "waktu": "12.30",
+      "saldo": 100000,
+      "isi": [
+        {
+          "jenis": "input",
+          "label": "Tarik ke rekening bank",
+          "nilai": "Rp50.000"
+        },
+        {
+          "jenis": "tombol",
+          "teks": "Tarik"
+        }
+      ]
+    }
+  },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: isolation level kembali ke bawaan PostgreSQL (READ COMMITTED). Kode aplikasi tidak berubah. Berapa saldo tercatat di akhir?",
+    "options": [
+      "Rp30.000",
+      "Rp50.000",
+      "Error di kedua request"
+    ],
+    "answer": 1,
+    "varian": true,
+    "explain": "Di READ COMMITTED, UPDATE milik B menunggu A, lalu tetap jalan dengan angka yang dihitung dari bacaan lama: lost update, saldo Rp50.000 (rekaman [[B3.2]]). Di REPEATABLE READ, PostgreSQL menolak UPDATE B dengan 'could not serialize access', dan aplikasi wajib mengulang."
+  },
+  "langkah": [
+    {
+      "dari": "hp",
+      "ke": "api",
+      "judul": "HP menarik Rp70.000 (A)",
+      "kirim": "POST /penarikan {\"jumlah\": 70000}",
+      "jelas": "Request A.",
+      "layar": {
+        "hp": {
+          "waktu": "12.30",
+          "saldo": 100000,
+          "isi": [
+            {
+              "jenis": "proses",
+              "teks": "Memproses..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "tablet",
+      "ke": "api",
+      "judul": "Tablet menarik Rp50.000 (B)",
+      "kirim": "POST /penarikan {\"jumlah\": 50000}",
+      "jelas": "Request B, beberapa milidetik kemudian.",
+      "layar": {
+        "tablet": {
+          "waktu": "12.30",
+          "saldo": 100000,
+          "isi": [
+            {
+              "jenis": "proses",
+              "teks": "Memproses..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "akses data",
+      "judul": "Keduanya membuka REPEATABLE READ dan membaca",
+      "kirim": "A> BEGIN ISOLATION LEVEL REPEATABLE READ\nB> BEGIN ISOLATION LEVEL REPEATABLE READ\nA> SELECT saldo ... → 100000\nB> SELECT saldo ... → 100000",
+      "jelas": "Setiap transaction bekerja dengan snapshot sejak query pertamanya. Tidak ada lock di sini."
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "akses data",
+      "judul": "A menulis dan COMMIT",
+      "kirim": "A> UPDATE akun SET saldo = 30000 WHERE id = 'budi'\nA> COMMIT",
+      "jelas": "Baris ini kini diubah oleh transaction yang commit setelah snapshot B dibuat."
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "akses data",
+      "judul": "UPDATE milik B ditolak",
+      "kirim": "B> UPDATE akun SET saldo = 50000 WHERE id = 'budi'\n   ERROR:  could not serialize access due to concurrent update",
+      "jelas": "REPEATABLE READ tidak mengizinkan B mengubah baris yang sudah diubah transaction lain setelah snapshot B. Data aman, tapi B gagal.",
+      "nada": "warn"
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "logika bisnis",
+      "judul": "Aplikasi mengulang transaction B dari awal",
+      "kirim": "B> ROLLBACK\nB> BEGIN ISOLATION LEVEL REPEATABLE READ\nB> SELECT saldo ... → 30000",
+      "jelas": "Dokumentasi PostgreSQL: aplikasi harus membatalkan dan mengulang seluruh transaction. Percobaan kedua melihat saldo terbaru."
+    },
+    {
+      "dari": "api",
+      "lapisan": "logika bisnis",
+      "judul": "B ditolak dengan benar",
+      "kirim": "B: Rp30.000 < Rp50.000, tolak\nB> ROLLBACK",
+      "jelas": "Hasil akhirnya sama dengan FOR UPDATE di [[B3.2]], dengan cara berbeda: bukan menunggu, tapi gagal lalu mengulang.",
+      "nada": "good"
+    },
+    {
+      "dari": "api",
+      "ke": "hp",
+      "judul": "HP: berhasil",
+      "kirim": "201 {\"saldo\": 30000}",
+      "jelas": "Request A sukses.",
+      "nada": "good",
+      "layar": {
+        "hp": {
+          "waktu": "12.30",
+          "saldo": 30000,
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Rp70.000 ditarik",
+              "nada": "good"
+            }
+          ],
+          "nada": "good"
+        }
+      }
+    },
+    {
+      "dari": "api",
+      "ke": "tablet",
+      "judul": "Tablet: saldo tidak cukup",
+      "kirim": "422 {\"error\": \"saldo_kurang\", \"saldo\": 30000}",
+      "jelas": "Saldo akhir Rp30.000. Tanpa kode retry, B akan menerima 500, bukan 422.",
+      "nada": "good",
+      "layar": {
+        "tablet": {
+          "waktu": "12.30",
+          "saldo": 30000,
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Saldo tidak cukup",
+              "nada": "warn"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "varian": {
+    "label": "isolation level bawaan: READ COMMITTED",
+    "mulai": 2,
+    "langkah": [
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "akses data",
+        "judul": "Keduanya membaca di READ COMMITTED",
+        "kirim": "A> BEGIN\nB> BEGIN\nA> SELECT saldo ... → 100000\nB> SELECT saldo ... → 100000",
+        "jelas": "Bawaan PostgreSQL. Setiap query melihat data yang sudah commit saat query itu dimulai."
+      },
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "akses data",
+        "judul": "A menulis dan COMMIT",
+        "kirim": "A> UPDATE akun SET saldo = 30000 WHERE id = 1\nA> COMMIT",
+        "jelas": "Sama seperti jalur utama."
+      },
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "akses data",
+        "judul": "UPDATE milik B tetap jalan",
+        "kirim": "B> UPDATE akun SET saldo = 50000 WHERE id = 1\n   (menunggu lock A, lalu) UPDATE 1\nB> COMMIT",
+        "jelas": "READ COMMITTED tidak menolak. Angka Rp50.000 dihitung dari bacaan lama, jadi tulisan A hilang.",
+        "nada": "warn"
+      },
+      {
+        "dari": "api",
+        "ke": "tablet",
+        "judul": "Lost update: saldo Rp50.000",
+        "kirim": "201 {\"saldo\": 50000}",
+        "jelas": "Rekaman [[B3.2]]: dua penarikan sukses, Rp120.000 keluar dari saldo Rp100.000.",
+        "nada": "warn",
+        "layar": {
+          "tablet": {
+            "waktu": "12.30",
+            "saldo": 50000,
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Rp50.000 ditarik",
+                "nada": "good"
+              }
+            ],
+            "nada": "warn"
+          },
+          "hp": {
+            "waktu": "12.30",
+            "saldo": 30000,
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Rp70.000 ditarik",
+                "nada": "good"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

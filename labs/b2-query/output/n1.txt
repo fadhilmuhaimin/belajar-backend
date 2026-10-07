@@ -1,0 +1,5 @@
+-- PostgreSQL 17.11 di localhost (tanpa latency jaringan), psycopg 3, median 5 kali
+ 20 pesanan · N+1        ·  21 query ·    4.5 ms
+ 20 pesanan · satu query ·   1 query ·    0.5 ms
+100 pesanan · N+1        · 101 query ·   20.8 ms
+100 pesanan · satu query ·   1 query ·    0.4 ms

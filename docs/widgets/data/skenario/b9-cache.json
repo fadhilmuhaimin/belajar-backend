@@ -1,0 +1,50 @@
+{
+  "versi": 2,
+  "judul": "Ani menaikkan harga nasi goreng, Budi membuka katalog",
+  "sumber": { "jenis": "rekaman", "file": "labs/b9-cache/output/cache.txt", "fileVarian": "labs/b9-cache/output/cache.txt",
+    "catatan": "Redis 8 dan PostgreSQL 17.11, cache-aside dengan TTL 300 detik, direkam 2026-10-06 (labs/b9-cache)." },
+  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': cache hanya mengandalkan TTL.",
+  "komponen": [
+    { "id": "ani", "label": "HP Ani" },
+    { "id": "budi", "label": "HP Budi" },
+    { "id": "api", "label": "Monolith API" },
+    { "id": "redis", "label": "Redis (cache)" },
+    { "id": "db", "label": "PostgreSQL" }
+  ],
+  "perangkat": [ { "id": "budi", "label": "HP Budi" }, { "id": "ani", "label": "HP Ani" } ],
+  "layarAwal": {
+    "budi": { "judul": "Warung Ani", "waktu": "11.55", "isi": [ { "jenis": "proses", "teks": "Memuat katalog..." } ] },
+    "ani": { "judul": "Toko saya", "waktu": "11.55", "isi": [ { "jenis": "baris", "kiri": "Nasi goreng", "kanan": "Rp25.000" } ] }
+  },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: cache tidak dihapus saat harga berubah, hanya kedaluwarsa setelah 5 menit. Ani menaikkan harga jadi Rp28.000. Satu detik kemudian, harga berapa yang dilihat Budi?",
+    "options": ["Rp28.000", "Rp25.000", "Error"],
+    "answer": 1,
+    "varian": true,
+    "explain": "Cache masih berisi Rp25.000 dengan sisa TTL 299 detik, jadi request Budi dijawab dari cache (HIT) tanpa melihat database. Rekaman lab: database Rp28.000, Budi melihat Rp25.000. Selama hampir 5 menit, pesanan dibayar dengan harga lama."
+  },
+  "langkah": [
+    { "dari": "budi", "ke": "api", "judul": "Budi membuka katalog Warung Ani", "kirim": "GET /toko/1/katalog", "jelas": "Katalog dibaca ribuan kali di jam makan siang, dengan isi yang hampir selalu sama." },
+    { "dari": "api", "ke": "redis", "judul": "Cek cache dulu", "kirim": "GET produk:1:harga  → (nil)   MISS", "jelas": "Cache-aside: aplikasi yang memeriksa cache, lalu database kalau tidak ada." },
+    { "dari": "api", "ke": "db", "judul": "Ambil dari database, simpan ke cache", "kirim": "SELECT harga FROM produk WHERE id = 1;  → 25000\nSET produk:1:harga 25000 EX 300", "jelas": "TTL 300 detik: kalau tidak dihapus, cache kedaluwarsa sendiri setelah 5 menit." },
+    { "dari": "api", "ke": "budi", "judul": "Budi melihat Rp25.000", "kirim": "Budi baca harga → Rp25.000 (MISS, sisa TTL 300 detik)", "jelas": "Request berikutnya dalam 5 menit dijawab dari Redis.",
+      "layar": { "budi": { "judul": "Warung Ani", "waktu": "11.55", "isi": [ { "jenis": "baris", "kiri": "Nasi goreng", "kanan": "Rp25.000" }, { "jenis": "tombol", "teks": "Pesan" } ] } } },
+    { "dari": "ani", "ke": "api", "judul": "Ani menaikkan harga", "kirim": "PATCH /produk/1 {\"harga\": 28000}", "jelas": "Harga bahan naik, Ani menyesuaikan harga dari HP-nya.",
+      "layar": { "ani": { "judul": "Toko saya", "waktu": "11.56", "isi": [ { "jenis": "baris", "kiri": "Nasi goreng", "kanan": "Rp28.000" }, { "jenis": "toast", "teks": "Harga disimpan", "nada": "good" } ] } } },
+    { "dari": "api", "ke": "db", "judul": "Database diperbarui", "kirim": "UPDATE produk SET harga = 28000 WHERE id = 1;", "jelas": "Database adalah sumber kebenaran. Cache hanya salinan." },
+    { "dari": "api", "ke": "redis", "judul": "Cache dihapus", "kirim": "DEL produk:1:harga", "jelas": "Invalidation: salinan lama dibuang saat data aslinya berubah.", "nada": "good" },
+    { "dari": "api", "ke": "db", "judul": "Budi membuka katalog lagi: MISS, isi ulang", "kirim": "GET produk:1:harga → (nil)  MISS\nSELECT harga ... → 28000;  SET ... EX 300", "jelas": "Satu query ke database, lalu cache terisi dengan harga baru." },
+    { "dari": "api", "ke": "budi", "judul": "Budi melihat harga baru", "kirim": "Budi baca harga → Rp28.000 (MISS, sisa TTL 300 detik)", "jelas": "Rekaman lab bagian B.", "nada": "good",
+      "layar": { "budi": { "judul": "Warung Ani", "waktu": "11.56", "isi": [ { "jenis": "baris", "kiri": "Nasi goreng", "kanan": "Rp28.000" }, { "jenis": "tombol", "teks": "Pesan" } ] } } }
+  ],
+  "varian": {
+    "label": "cache hanya mengandalkan TTL 5 menit, tidak dihapus saat harga berubah",
+    "mulai": 6,
+    "langkah": [
+      { "dari": "api", "judul": "Tidak ada DEL", "kirim": "(cache tetap: produk:1:harga = 25000, sisa TTL 299 detik)", "jelas": "Kodenya lebih sederhana: menulis ke database saja.", "nada": "warn" },
+      { "dari": "api", "ke": "redis", "judul": "Budi membuka katalog lagi: HIT", "kirim": "GET produk:1:harga → 25000   HIT", "jelas": "Database tidak ditanya sama sekali, jadi harga baru tidak terlihat." },
+      { "dari": "api", "ke": "budi", "judul": "Budi melihat harga lama (stale)", "kirim": "Budi baca harga → Rp25.000 (HIT, sisa TTL 299 detik)\ndatabase: Rp28.000", "jelas": "Sampai TTL habis, setiap pesanan dibayar Rp25.000. Ani rugi Rp3.000 per porsi. Data yang tertinggal seperti ini muncul lagi di Tahap 5 sebagai masalah consistency ([[D3]]).", "nada": "warn",
+        "layar": { "budi": { "judul": "Warung Ani", "waktu": "11.56", "isi": [ { "jenis": "baris", "kiri": "Nasi goreng", "kanan": "Rp25.000", "nada": "warn" }, { "jenis": "tombol", "teks": "Pesan" } ] } } }
+    ]
+  }
+}

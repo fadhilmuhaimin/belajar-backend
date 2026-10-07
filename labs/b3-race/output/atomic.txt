@@ -1,0 +1,14 @@
+-- UPDATE atomik dengan syarat
+-- PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2), isolation: read committed, saldo awal 100000, A tarik 70000, B tarik 50000
+-- direkam 2026-10-06 oleh labs/b3-race/run.py
+
+ 1 [A] BEGIN  -> BEGIN
+ 2 [B] BEGIN  -> BEGIN
+ 3 [A] UPDATE akun SET saldo = saldo - 70000 WHERE id = 1 AND saldo >= 70000  -> UPDATE 1   [lock: A]
+ 4 [B] UPDATE akun SET saldo = saldo - 50000 WHERE id = 1 AND saldo >= 50000  -> MENUNGGU lock   [lock: A]
+ 5 [A] COMMIT  -> COMMIT   [lock: B]
+ 6 [B] UPDATE akun SET saldo = saldo - 50000 WHERE id = 1 AND saldo >= 50000  -> UPDATE 0   [lock: B]
+ 7 [B] (0 baris berubah, berarti saldo tidak cukup. Tolak penarikan)   [lock: B]
+ 8 [B] COMMIT  -> COMMIT
+
+-- saldo akhir: 30000

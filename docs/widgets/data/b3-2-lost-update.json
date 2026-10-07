@@ -1,0 +1,81 @@
+{
+  "id": "b3-2-lost-update",
+  "title": "A tarik Rp70.000, B tarik Rp50.000, saldo Rp100.000",
+  "setup": "CREATE TABLE akun (id INTEGER PRIMARY KEY, saldo INTEGER NOT NULL);\nINSERT INTO akun VALUES (1, 100000);",
+  "check": "SELECT id, saldo FROM akun",
+  "predict": {
+    "q": "Di panel Before, A dan B sama-sama membaca saldo Rp100.000, lalu masing-masing menulis hasil hitungannya. Berapa saldo akhir?",
+    "options": [
+      "-Rp20.000",
+      "Rp30.000",
+      "Rp50.000"
+    ],
+    "answer": 2,
+    "explain": "Before: tulisan B (Rp100.000 - Rp50.000 = Rp50.000) menimpa tulisan A (Rp30.000). Dua penarikan dianggap sukses, total Rp120.000 keluar dari saldo Rp100.000. After: UPDATE kedua menghitung dari saldo terbaru (Rp30.000), syaratnya gagal, 0 baris berubah, jadi B ditolak."
+  },
+  "panels": {
+    "before": {
+      "label": "Before: baca dulu, hitung di aplikasi",
+      "onError": "stop",
+      "steps": [
+        {
+          "actor": "A",
+          "sql": "SELECT saldo FROM akun WHERE id = 1",
+          "store": "a"
+        },
+        {
+          "actor": "B",
+          "sql": "SELECT saldo FROM akun WHERE id = 1",
+          "store": "b"
+        },
+        {
+          "actor": "A",
+          "sql": "UPDATE akun SET saldo = ${a - 70000} WHERE id = 1",
+          "note": "A: Rp100.000 >= Rp70.000, lanjut"
+        },
+        {
+          "actor": "B",
+          "sql": "UPDATE akun SET saldo = ${b - 50000} WHERE id = 1",
+          "note": "B: Rp100.000 >= Rp50.000, lanjut"
+        }
+      ]
+    },
+    "after": {
+      "label": "After: UPDATE atomik dengan syarat",
+      "onError": "stop",
+      "steps": [
+        {
+          "actor": "A",
+          "sql": "UPDATE akun SET saldo = saldo - 70000 WHERE id = 1 AND saldo >= 70000",
+          "rowsLabel": {
+            "0": "ditolak",
+            "1": "sukses"
+          }
+        },
+        {
+          "actor": "B",
+          "sql": "UPDATE akun SET saldo = saldo - 50000 WHERE id = 1 AND saldo >= 50000",
+          "rowsLabel": {
+            "0": "ditolak",
+            "1": "sukses"
+          }
+        }
+      ]
+    }
+  },
+  "toggles": [
+    {
+      "label": "Hapus syarat AND saldo >= ... di After",
+      "pairs": [
+        [
+          " AND saldo >= 70000",
+          ""
+        ],
+        [
+          " AND saldo >= 50000",
+          ""
+        ]
+      ]
+    }
+  ]
+}

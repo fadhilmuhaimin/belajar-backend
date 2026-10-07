@@ -1,0 +1,1275 @@
+// Dibuat oleh tools/build_istilah.py dari docs/alat/glosarium.md. Jangan diedit langsung.
+window.ISTILAH = {
+ "ACID": {
+  "b": "B3.1",
+  "d": "Empat jaminan transaction di database relasional: atomicity, consistency, isolation, durability.",
+  "n": "1.11 Transaction",
+  "s": "istilah-acid",
+  "t": "ACID",
+  "u": "b-fondasi/b3-1-transaction/"
+ },
+ "ADR": {
+  "b": "D5",
+  "d": "Catatan pendek tentang satu keputusan desain: konteks, pilihan, alasan, dan akibatnya.",
+  "n": "4.6 Template ADR",
+  "s": "istilah-adr",
+  "t": "ADR (Architecture Decision Record)",
+  "u": "d-system-design/d5-adr/"
+ },
+ "API": {
+  "b": "A1",
+  "d": "Sekumpulan endpoint yang disediakan server supaya program lain, mis. app Flutter, bisa membaca dan mengubah data.",
+  "n": "1.1 Apa yang dikerjakan backend",
+  "s": "istilah-api",
+  "t": "API (Application Programming Interface)",
+  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+ },
+ "Application Programming Interface": {
+  "b": "A1",
+  "d": "Sekumpulan endpoint yang disediakan server supaya program lain, mis. app Flutter, bisa membaca dan mengubah data.",
+  "n": "1.1 Apa yang dikerjakan backend",
+  "s": "istilah-api",
+  "t": "API (Application Programming Interface)",
+  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+ },
+ "Architecture Decision Record": {
+  "b": "D5",
+  "d": "Catatan pendek tentang satu keputusan desain: konteks, pilihan, alasan, dan akibatnya.",
+  "n": "4.6 Template ADR",
+  "s": "istilah-adr",
+  "t": "ADR (Architecture Decision Record)",
+  "u": "d-system-design/d5-adr/"
+ },
+ "Atomicity": {
+  "b": "B3.1",
+  "d": "Jaminan bahwa semua perubahan dalam satu transaction terjadi seluruhnya atau tidak sama sekali.",
+  "n": "1.11 Transaction",
+  "s": "istilah-atomicity",
+  "t": "Atomicity",
+  "u": "b-fondasi/b3-1-transaction/"
+ },
+ "Auth": {
+  "b": "B5.1",
+  "d": "Proses memastikan siapa yang mengirim request, mis. lewat token login.",
+  "n": "1.12 Authentication",
+  "s": "istilah-authentication",
+  "t": "Authentication",
+  "u": "b-fondasi/b5-1-authentication/"
+ },
+ "Authentication": {
+  "b": "B5.1",
+  "d": "Proses memastikan siapa yang mengirim request, mis. lewat token login.",
+  "n": "1.12 Authentication",
+  "s": "istilah-authentication",
+  "t": "Authentication",
+  "u": "b-fondasi/b5-1-authentication/"
+ },
+ "Authorization": {
+  "b": "B5.3",
+  "d": "Proses memastikan user yang sudah dikenal boleh melakukan aksi itu pada data itu.",
+  "n": "1.13 Authorization",
+  "s": "istilah-authorization",
+  "t": "Authorization",
+  "u": "b-fondasi/b5-3-authorization/"
+ },
+ "BFF": {
+  "b": "B11.2",
+  "d": "Endpoint atau service yang dibentuk khusus untuk satu jenis client, mis. satu endpoint beranda untuk app mobile.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-bff",
+  "t": "BFF (Backend for Frontend)",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
+ "BaaS": {
+  "b": "A4",
+  "d": "Layanan yang menyediakan database, auth, dan API siap pakai, mis. Supabase dan Firebase.",
+  "n": "1.2 BaaS atau backend sendiri",
+  "s": "istilah-baas",
+  "t": "BaaS (Backend-as-a-Service)",
+  "u": "a-gambaran/a4-baas-vs-backend-sendiri/"
+ },
+ "Backend for Frontend": {
+  "b": "B11.2",
+  "d": "Endpoint atau service yang dibentuk khusus untuk satu jenis client, mis. satu endpoint beranda untuk app mobile.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-bff",
+  "t": "BFF (Backend for Frontend)",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
+ "Backfill": {
+  "b": "B4.2",
+  "d": "Script sekali jalan yang mengisi kolom baru untuk baris lama, biasanya bertahap per batch.",
+  "n": "2.8 Ubah skema tanpa downtime",
+  "s": "istilah-backfill",
+  "t": "Backfill",
+  "u": "b-fondasi/b4-2-ubah-skema-tanpa-downtime/"
+ },
+ "Backoff": {
+  "b": "E3",
+  "d": "Jeda yang makin panjang di antara percobaan ulang, supaya server yang sedang kesulitan tidak dibanjiri.",
+  "n": "2.3 Retry dan idempotency key",
+  "s": "istilah-backoff",
+  "t": "Backoff",
+  "u": "e-mobile/e3-retry-idempotency/"
+ },
+ "COMMIT": {
+  "b": "B3.1",
+  "d": "Perintah yang membuat semua perubahan dalam transaction menjadi permanen dan terlihat oleh koneksi lain.",
+  "n": "1.11 Transaction",
+  "s": "istilah-commit",
+  "t": "COMMIT",
+  "u": "b-fondasi/b3-1-transaction/"
+ },
+ "Cache": {
+  "b": "B9",
+  "d": "Salinan data di tempat yang lebih cepat dibaca, dengan risiko isinya tertinggal dari data asli.",
+  "n": "3.6 Caching dan invalidation",
+  "s": "istilah-cache",
+  "t": "Cache",
+  "u": "b-fondasi/b9-caching/"
+ },
+ "Circuit breaker": {
+  "b": "B11",
+  "d": "Mekanisme yang berhenti memanggil layanan yang sedang gagal untuk sementara, lalu mencoba lagi setelah jeda.",
+  "n": "4.1 Integrasi pihak ketiga",
+  "s": "istilah-circuit-breaker",
+  "t": "Circuit breaker",
+  "u": "b-fondasi/b11-integrasi-pihak-ketiga/"
+ },
+ "Connection pool": {
+  "b": "B2.5",
+  "d": "Sekumpulan koneksi database yang dibuka sekali lalu dipinjamkan bergantian ke request.",
+  "n": "3.2 Connection pool",
+  "s": "istilah-connection-pool",
+  "t": "Connection pool",
+  "u": "b-fondasi/b2-5-connection-pool/"
+ },
+ "Constraint": {
+  "b": "B2.1",
+  "d": "Aturan yang dipaksakan database pada data, mis. UNIQUE, CHECK, atau NOT NULL.",
+  "n": "1.8 Data modeling dan relasi",
+  "s": "istilah-constraint",
+  "t": "Constraint",
+  "u": "b-fondasi/b2-1-data-modeling/"
+ },
+ "Container": {
+  "b": "C3",
+  "d": "Paket aplikasi beserta semua dependensinya yang berjalan dengan cara sama di laptop maupun server.",
+  "n": "1.16 Deployment dan rollback",
+  "s": "istilah-container",
+  "t": "Container",
+  "u": "c-operasional/c3-deployment/"
+ },
+ "Cursor pagination": {
+  "b": "B1.3",
+  "d": "Pagination yang meminta \"data sesudah item X\", bukan \"halaman ke-N\", jadi tetap stabil saat data bertambah.",
+  "n": "2.4 Pagination dan idempotent method",
+  "s": "istilah-cursor-pagination",
+  "t": "Cursor pagination",
+  "u": "b-fondasi/b1-3-pagination-idempotent/"
+ },
+ "Database": {
+  "b": "B2.1",
+  "d": "Program yang menyimpan data secara permanen dan menjamin aturan seperti constraint dan transaction.",
+  "n": "1.8 Data modeling dan relasi",
+  "s": "istilah-database",
+  "t": "Database",
+  "u": "b-fondasi/b2-1-data-modeling/"
+ },
+ "Dead-letter queue": {
+  "b": "B10.1",
+  "d": "Tempat job yang terus gagal setelah batas retry, supaya bisa diperiksa manusia dan tidak diulang selamanya.",
+  "n": "3.3 Background job, queue, retry",
+  "s": "istilah-dead-letter-queue",
+  "t": "Dead-letter queue",
+  "u": "b-fondasi/b10-1-background-job/"
+ },
+ "Deadlock": {
+  "b": "B3.2",
+  "d": "Dua transaction saling menunggu lock milik yang lain, sehingga database harus membatalkan salah satunya.",
+  "n": "2.1 Race condition",
+  "s": "istilah-deadlock",
+  "t": "Deadlock",
+  "u": "b-fondasi/b3-2-race-condition-lock/"
+ },
+ "Endpoint": {
+  "b": "B1.1",
+  "d": "Pasangan method dan path yang dilayani server, mis. POST /transfers.",
+  "n": "1.4 HTTP",
+  "s": "istilah-endpoint",
+  "t": "Endpoint",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "Eventual consistency": {
+  "b": "D3",
+  "d": "Data di beberapa tempat boleh berbeda sesaat, tapi akan sama setelah perubahan selesai menyebar.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-eventual-consistency",
+  "t": "Eventual consistency",
+  "u": "d-system-design/d3-consistency/"
+ },
+ "Expand-migrate-contract": {
+  "b": "B4.2",
+  "d": "Urutan mengubah skema tanpa downtime: tambah yang baru, pindahkan data dan kode, baru hapus yang lama.",
+  "n": "2.8 Ubah skema tanpa downtime",
+  "s": "istilah-expand-migrate-contract",
+  "t": "Expand-migrate-contract",
+  "u": "b-fondasi/b4-2-ubah-skema-tanpa-downtime/"
+ },
+ "Foreign key": {
+  "b": "B2.1",
+  "d": "Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada.",
+  "n": "1.8 Data modeling dan relasi",
+  "s": "istilah-foreign-key",
+  "t": "Foreign key",
+  "u": "b-fondasi/b2-1-data-modeling/"
+ },
+ "GET": {
+  "b": "B1.1",
+  "d": "Kata kerja request (GET, POST, PUT, PATCH, DELETE) yang menyatakan maksud request terhadap resource.",
+  "n": "1.4 HTTP",
+  "s": "istilah-http-method",
+  "t": "HTTP method",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "HTTP method": {
+  "b": "B1.1",
+  "d": "Kata kerja request (GET, POST, PUT, PATCH, DELETE) yang menyatakan maksud request terhadap resource.",
+  "n": "1.4 HTTP",
+  "s": "istilah-http-method",
+  "t": "HTTP method",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "Handler": {
+  "b": "A2",
+  "d": "Fungsi di server yang menerima satu request, memeriksa formatnya, lalu memanggil logika bisnis.",
+  "n": "1.3 Perjalanan satu request",
+  "s": "istilah-handler",
+  "t": "Handler",
+  "u": "a-gambaran/a2-perjalanan-request/"
+ },
+ "Header": {
+  "b": "B1.1",
+  "d": "Pasangan nama-nilai di request atau response yang membawa informasi tambahan, mis. token atau tipe konten.",
+  "n": "1.4 HTTP",
+  "s": "istilah-header",
+  "t": "Header",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "Idempotent": {
+  "b": "B1.3",
+  "d": "Sifat operasi yang hasil akhirnya sama walau dijalankan sekali atau berkali-kali.",
+  "n": "2.4 Pagination dan idempotent method",
+  "s": "istilah-idempotent",
+  "t": "Idempotent",
+  "u": "b-fondasi/b1-3-pagination-idempotent/"
+ },
+ "Isolation level": {
+  "b": "B3.3",
+  "d": "Seberapa banyak perubahan dari transaction lain yang boleh terlihat oleh satu transaction yang sedang berjalan.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-isolation-level",
+  "t": "Isolation level",
+  "u": "b-fondasi/b3-3-isolation-level/"
+ },
+ "JSON Web Token": {
+  "b": "B5.1",
+  "d": "Token berisi data JSON plus signature, sehingga server bisa memeriksa keasliannya tanpa query ke database.",
+  "n": "1.12 Authentication",
+  "s": "istilah-jwt",
+  "t": "JWT (JSON Web Token)",
+  "u": "b-fondasi/b5-1-authentication/"
+ },
+ "JWT": {
+  "b": "B5.1",
+  "d": "Token berisi data JSON plus signature, sehingga server bisa memeriksa keasliannya tanpa query ke database.",
+  "n": "1.12 Authentication",
+  "s": "istilah-jwt",
+  "t": "JWT (JSON Web Token)",
+  "u": "b-fondasi/b5-1-authentication/"
+ },
+ "Latency": {
+  "b": "C2",
+  "d": "Lama waktu satu request dari dikirim sampai response diterima.",
+  "n": "3.1 Observability",
+  "s": "istilah-latency",
+  "t": "Latency",
+  "u": "c-operasional/c2-observability/"
+ },
+ "Load balancer": {
+  "b": "D2",
+  "d": "Komponen yang membagi request ke beberapa instance server yang sama.",
+  "n": "5.1 Scaling",
+  "s": "istilah-load-balancer",
+  "t": "Load balancer",
+  "u": "d-system-design/d2-scaling/"
+ },
+ "Lock": {
+  "b": "B3.2",
+  "d": "Tanda di database bahwa satu transaction sedang memakai baris atau tabel, sehingga transaction lain harus menunggu.",
+  "n": "2.1 Race condition",
+  "s": "istilah-lock",
+  "t": "Lock",
+  "u": "b-fondasi/b3-2-race-condition-lock/"
+ },
+ "Log": {
+  "b": "C2",
+  "d": "Catatan kejadian per request atau per peristiwa, ditulis aplikasi untuk dibaca saat menyelidiki masalah.",
+  "n": "3.1 Observability",
+  "s": "istilah-log",
+  "t": "Log",
+  "u": "c-operasional/c2-observability/"
+ },
+ "Lost update": {
+  "b": "B3.2",
+  "d": "Perubahan yang hilang karena dua transaction membaca nilai lama yang sama lalu saling menimpa.",
+  "n": "2.1 Race condition",
+  "s": "istilah-lost-update",
+  "t": "Lost update",
+  "u": "b-fondasi/b3-2-race-condition-lock/"
+ },
+ "MVCC": {
+  "b": "B3.3",
+  "d": "Cara database menyimpan beberapa versi baris, supaya pembaca tidak perlu menunggu penulis.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-mvcc",
+  "t": "MVCC (Multi-Version Concurrency Control)",
+  "u": "b-fondasi/b3-3-isolation-level/"
+ },
+ "Metric": {
+  "b": "C2",
+  "d": "Angka yang dihitung terus-menerus, mis. jumlah request per detik atau persentase error.",
+  "n": "3.1 Observability",
+  "s": "istilah-metric",
+  "t": "Metric",
+  "u": "c-operasional/c2-observability/"
+ },
+ "Middleware": {
+  "b": "B7.1",
+  "d": "Fungsi yang dijalankan sebelum atau sesudah semua handler, mis. pemeriksa token atau pencatat log.",
+  "n": "1.14 Lapisan dasar",
+  "s": "istilah-middleware",
+  "t": "Middleware",
+  "u": "b-fondasi/b7-1-lapisan-dasar/"
+ },
+ "Migration": {
+  "b": "B4.1",
+  "d": "File berurutan yang mengubah skema database, disimpan dan direview seperti kode.",
+  "n": "1.10 Migration",
+  "s": "istilah-migration",
+  "t": "Migration",
+  "u": "b-fondasi/b4-1-migration/"
+ },
+ "Modular monolith": {
+  "b": "B7.2",
+  "d": "Satu aplikasi yang di-deploy sebagai satu unit, tapi kodenya dibagi ke modul dengan batas yang tegas.",
+  "n": "4.5 Modular monolith",
+  "s": "istilah-modular-monolith",
+  "t": "Modular monolith",
+  "u": "b-fondasi/b7-2-batas-modul/"
+ },
+ "Monolith": {
+  "b": "A1",
+  "d": "Satu aplikasi backend yang memuat semua fitur dan di-deploy sebagai satu unit.",
+  "n": "1.1 Apa yang dikerjakan backend",
+  "s": "istilah-monolith",
+  "t": "Monolith",
+  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+ },
+ "N+1": {
+  "b": "B2.4",
+  "d": "Pola satu query untuk daftar lalu satu query lagi untuk setiap item di daftar itu.",
+  "n": "2.5 N+1 query",
+  "s": "istilah-n-1-query",
+  "t": "N+1 query",
+  "u": "b-fondasi/b2-4-n-plus-1/"
+ },
+ "N+1 query": {
+  "b": "B2.4",
+  "d": "Pola satu query untuk daftar lalu satu query lagi untuk setiap item di daftar itu.",
+  "n": "2.5 N+1 query",
+  "s": "istilah-n-1-query",
+  "t": "N+1 query",
+  "u": "b-fondasi/b2-4-n-plus-1/"
+ },
+ "OAuth 2.0": {
+  "b": "B5.2",
+  "d": "Standar untuk memberi aplikasi akses terbatas ke akun user di layanan lain tanpa memberikan password.",
+  "n": "4.4 OAuth dan login sosial",
+  "s": "istilah-oauth-2-0",
+  "t": "OAuth 2.0",
+  "u": "b-fondasi/b5-2-oauth-oidc/"
+ },
+ "OIDC": {
+  "b": "B5.2",
+  "d": "Lapisan di atas OAuth 2.0 untuk login, yang memberi tahu aplikasi siapa user-nya.",
+  "n": "4.4 OAuth dan login sosial",
+  "s": "istilah-oidc",
+  "t": "OIDC (OpenID Connect)",
+  "u": "b-fondasi/b5-2-oauth-oidc/"
+ },
+ "Object storage": {
+  "b": "B11.2",
+  "d": "Layanan penyimpanan file besar per objek, diakses lewat HTTP, mis. layanan kompatibel S3.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-object-storage",
+  "t": "Object storage",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
+ "Offline-first": {
+  "b": "E2",
+  "d": "Desain app yang menyimpan perubahan di HP dulu, lalu menyinkronkannya ke server saat sinyal ada.",
+  "n": "3.8 Offline-first dan sync",
+  "s": "istilah-offline-first",
+  "t": "Offline-first",
+  "u": "e-mobile/e2-offline-first/"
+ },
+ "OpenAPI": {
+  "b": "B1.4",
+  "d": "Format standar untuk menulis kontrak API (endpoint, request, response) yang bisa dibaca manusia dan mesin.",
+  "n": "1.7 Kontrak API dengan OpenAPI",
+  "s": "istilah-openapi",
+  "t": "OpenAPI",
+  "u": "b-fondasi/b1-4-openapi/"
+ },
+ "OpenID Connect": {
+  "b": "B5.2",
+  "d": "Lapisan di atas OAuth 2.0 untuk login, yang memberi tahu aplikasi siapa user-nya.",
+  "n": "4.4 OAuth dan login sosial",
+  "s": "istilah-oidc",
+  "t": "OIDC (OpenID Connect)",
+  "u": "b-fondasi/b5-2-oauth-oidc/"
+ },
+ "Optimistic lock": {
+  "b": "B3.2",
+  "d": "Cara mencegah lost update dengan mengecek nomor versi saat menulis, tanpa mengunci baris saat membaca.",
+  "n": "2.1 Race condition",
+  "s": "istilah-optimistic-lock",
+  "t": "Optimistic lock",
+  "u": "b-fondasi/b3-2-race-condition-lock/"
+ },
+ "Outbox": {
+  "b": "B10.2",
+  "d": "Tabel tempat event ditulis dalam transaction yang sama dengan perubahan data, lalu dikirim oleh worker.",
+  "n": "4.3 Webhook dan outbox",
+  "s": "istilah-outbox",
+  "t": "Outbox",
+  "u": "b-fondasi/b10-2-webhook-outbox/"
+ },
+ "PATCH": {
+  "b": "B1.1",
+  "d": "Kata kerja request (GET, POST, PUT, PATCH, DELETE) yang menyatakan maksud request terhadap resource.",
+  "n": "1.4 HTTP",
+  "s": "istilah-http-method",
+  "t": "HTTP method",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "PKCE": {
+  "b": "B5.2",
+  "d": "Tambahan pada alur OAuth untuk app mobile yang mencegah authorization code dipakai oleh aplikasi lain.",
+  "n": "4.4 OAuth dan login sosial",
+  "s": "istilah-pkce",
+  "t": "PKCE",
+  "u": "b-fondasi/b5-2-oauth-oidc/"
+ },
+ "POST": {
+  "b": "B1.1",
+  "d": "Kata kerja request (GET, POST, PUT, PATCH, DELETE) yang menyatakan maksud request terhadap resource.",
+  "n": "1.4 HTTP",
+  "s": "istilah-http-method",
+  "t": "HTTP method",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "PUT": {
+  "b": "B1.1",
+  "d": "Kata kerja request (GET, POST, PUT, PATCH, DELETE) yang menyatakan maksud request terhadap resource.",
+  "n": "1.4 HTTP",
+  "s": "istilah-http-method",
+  "t": "HTTP method",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "Pagination": {
+  "b": "B1.3",
+  "d": "Membagi daftar panjang menjadi potongan kecil yang diminta satu per satu.",
+  "n": "2.4 Pagination dan idempotent method",
+  "s": "istilah-pagination",
+  "t": "Pagination",
+  "u": "b-fondasi/b1-3-pagination-idempotent/"
+ },
+ "Payload": {
+  "b": "E5",
+  "d": "Isi data yang dikirim di body request atau response, biasanya JSON.",
+  "n": "2.7 Ukuran payload dan kuota",
+  "s": "istilah-payload",
+  "t": "Payload",
+  "u": "e-mobile/e5-ukuran-payload/"
+ },
+ "Polling": {
+  "b": "E4",
+  "d": "App menanyakan status ke server berulang kali dengan jeda tetap.",
+  "n": "3.5 Push dan real-time",
+  "s": "istilah-polling",
+  "t": "Polling",
+  "u": "e-mobile/e4-push-real-time/"
+ },
+ "Primary key": {
+  "b": "B2.1",
+  "d": "Kolom yang nilainya unik dan dipakai untuk mengenali satu baris.",
+  "n": "1.8 Data modeling dan relasi",
+  "s": "istilah-primary-key",
+  "t": "Primary key",
+  "u": "b-fondasi/b2-1-data-modeling/"
+ },
+ "Problem Details": {
+  "b": "B1.2",
+  "d": "Format error JSON standar dari RFC 9457, dengan field seperti type, title, status, dan detail.",
+  "n": "1.5 Resource dan format error",
+  "s": "istilah-problem-details",
+  "t": "Problem Details",
+  "u": "b-fondasi/b1-2-resource-error/"
+ },
+ "Proxy": {
+  "b": "B11.2",
+  "d": "Server perantara yang meneruskan request ke sistem lain sambil menambahkan hal yang tidak boleh dipegang client.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-proxy",
+  "t": "Proxy",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
+ "Query plan": {
+  "b": "B2.3",
+  "d": "Rencana langkah yang dipilih database untuk menjalankan satu query, dilihat dengan EXPLAIN.",
+  "n": "2.6 Index dan query plan",
+  "s": "istilah-query-plan",
+  "t": "Query plan",
+  "u": "b-fondasi/b2-3-index/"
+ },
+ "Queue": {
+  "b": "B10.1",
+  "d": "Daftar pekerjaan yang menunggu diproses oleh worker, satu per satu atau paralel.",
+  "n": "3.3 Background job, queue, retry",
+  "s": "istilah-queue",
+  "t": "Queue",
+  "u": "b-fondasi/b10-1-background-job/"
+ },
+ "RBAC": {
+  "b": "B5.3",
+  "d": "Authorization berdasarkan peran, mis. hanya peran admin yang boleh membekukan akun.",
+  "n": "1.13 Authorization",
+  "s": "istilah-rbac",
+  "t": "RBAC (Role-Based Access Control)",
+  "u": "b-fondasi/b5-3-authorization/"
+ },
+ "RLS": {
+  "b": "B5.3",
+  "d": "Fitur PostgreSQL yang menyaring baris berdasarkan aturan per user, dijalankan di dalam database.",
+  "n": "1.13 Authorization",
+  "s": "istilah-rls",
+  "t": "RLS (Row Level Security)",
+  "u": "b-fondasi/b5-3-authorization/"
+ },
+ "ROLLBACK": {
+  "b": "B3.1",
+  "d": "Perintah yang membatalkan semua perubahan sejak BEGIN.",
+  "n": "1.11 Transaction",
+  "s": "istilah-rollback",
+  "t": "ROLLBACK",
+  "u": "b-fondasi/b3-1-transaction/"
+ },
+ "Race condition": {
+  "b": "B3.2",
+  "d": "Hasil yang bergantung pada urutan dua proses yang berjalan bersamaan.",
+  "n": "2.1 Race condition",
+  "s": "istilah-race-condition",
+  "t": "Race condition",
+  "u": "b-fondasi/b3-2-race-condition-lock/"
+ },
+ "Rate limit": {
+  "b": "C4",
+  "d": "Batas jumlah request per waktu dari satu sumber, mis. lima percobaan login per menit.",
+  "n": "3.7 Security dasar dan rate limit",
+  "s": "istilah-rate-limit",
+  "t": "Rate limit",
+  "u": "c-operasional/c4-security-dasar/"
+ },
+ "Read replica": {
+  "b": "D2",
+  "d": "Salinan database yang hanya melayani baca dan selalu sedikit tertinggal dari database utama.",
+  "n": "5.1 Scaling",
+  "s": "istilah-read-replica",
+  "t": "Read replica",
+  "u": "d-system-design/d2-scaling/"
+ },
+ "Replication lag": {
+  "b": "D3",
+  "d": "Jeda antara perubahan di database utama dan munculnya perubahan itu di replica.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-replication-lag",
+  "t": "Replication lag",
+  "u": "d-system-design/d3-consistency/"
+ },
+ "Retry": {
+  "b": "E3",
+  "d": "Mengirim ulang request yang gagal atau tidak dijawab.",
+  "n": "2.3 Retry dan idempotency key",
+  "s": "istilah-retry",
+  "t": "Retry",
+  "u": "e-mobile/e3-retry-idempotency/"
+ },
+ "Rolling deploy": {
+  "b": "C3",
+  "d": "Mengganti instance satu per satu, supaya selalu ada instance yang melayani request.",
+  "n": "1.16 Deployment dan rollback",
+  "s": "istilah-rolling-deploy",
+  "t": "Rolling deploy",
+  "u": "c-operasional/c3-deployment/"
+ },
+ "Row Level Security": {
+  "b": "B5.3",
+  "d": "Fitur PostgreSQL yang menyaring baris berdasarkan aturan per user, dijalankan di dalam database.",
+  "n": "1.13 Authorization",
+  "s": "istilah-rls",
+  "t": "RLS (Row Level Security)",
+  "u": "b-fondasi/b5-3-authorization/"
+ },
+ "SSE": {
+  "b": "E4",
+  "d": "Koneksi HTTP yang dibiarkan terbuka sehingga server bisa mengirim pesan satu arah ke client.",
+  "n": "3.5 Push dan real-time",
+  "s": "istilah-sse",
+  "t": "SSE (Server-Sent Events)",
+  "u": "e-mobile/e4-push-real-time/"
+ },
+ "Sharding": {
+  "b": "D2",
+  "d": "Membagi data ke beberapa database berdasarkan kunci, mis. per wilayah.",
+  "n": "5.1 Scaling",
+  "s": "istilah-sharding",
+  "t": "Sharding",
+  "u": "d-system-design/d2-scaling/"
+ },
+ "Signature": {
+  "b": "B5.1",
+  "d": "Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah.",
+  "n": "1.12 Authentication",
+  "s": "istilah-signature",
+  "t": "Signature",
+  "u": "b-fondasi/b5-1-authentication/"
+ },
+ "Signed URL": {
+  "b": "B11.2",
+  "d": "URL berbatas waktu yang memberi akses langsung ke satu file di object storage.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-signed-url",
+  "t": "Signed URL",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
+ "Stale": {
+  "b": "B9",
+  "d": "Data yang sudah tidak terbaru, mis. harga lama yang masih tersimpan di cache.",
+  "n": "3.6 Caching dan invalidation",
+  "s": "istilah-stale",
+  "t": "Stale",
+  "u": "b-fondasi/b9-caching/"
+ },
+ "Stateless": {
+  "b": "D2",
+  "d": "Server tidak menyimpan keadaan antar-request di memorinya, jadi request mana pun bisa dilayani instance mana pun.",
+  "n": "5.1 Scaling",
+  "s": "istilah-stateless",
+  "t": "Stateless",
+  "u": "d-system-design/d2-scaling/"
+ },
+ "Status code": {
+  "b": "B1.1",
+  "d": "Angka tiga digit di response yang menyatakan hasil request, mis. 201 berhasil dibuat atau 401 belum login.",
+  "n": "1.4 HTTP",
+  "s": "istilah-status-code",
+  "t": "Status code",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "TTL": {
+  "b": "B9",
+  "d": "Masa berlaku sebuah data di cache sebelum dianggap kedaluwarsa.",
+  "n": "3.6 Caching dan invalidation",
+  "s": "istilah-ttl",
+  "t": "TTL (Time To Live)",
+  "u": "b-fondasi/b9-caching/"
+ },
+ "Throughput": {
+  "b": "C2",
+  "d": "Jumlah pekerjaan yang selesai per satuan waktu, mis. request per detik.",
+  "n": "3.1 Observability",
+  "s": "istilah-throughput",
+  "t": "Throughput",
+  "u": "c-operasional/c2-observability/"
+ },
+ "Time To Live": {
+  "b": "B9",
+  "d": "Masa berlaku sebuah data di cache sebelum dianggap kedaluwarsa.",
+  "n": "3.6 Caching dan invalidation",
+  "s": "istilah-ttl",
+  "t": "TTL (Time To Live)",
+  "u": "b-fondasi/b9-caching/"
+ },
+ "Timeout": {
+  "b": "B11",
+  "d": "Batas waktu menunggu sebelum sebuah panggilan dianggap gagal.",
+  "n": "4.1 Integrasi pihak ketiga",
+  "s": "istilah-timeout",
+  "t": "Timeout",
+  "u": "b-fondasi/b11-integrasi-pihak-ketiga/"
+ },
+ "Trace": {
+  "b": "C2",
+  "d": "Rekaman perjalanan satu request melewati beberapa komponen, lengkap dengan durasi tiap bagian.",
+  "n": "3.1 Observability",
+  "s": "istilah-trace",
+  "t": "Trace",
+  "u": "c-operasional/c2-observability/"
+ },
+ "Trade-off": {
+  "b": "D1",
+  "d": "Pilihan yang memberi satu kelebihan dengan membayar satu kekurangan.",
+  "n": "1.17 Kerangka berpikir dan estimasi",
+  "s": "istilah-trade-off",
+  "t": "Trade-off",
+  "u": "d-system-design/d1-kerangka-berpikir/"
+ },
+ "Transaction": {
+  "b": "B3.1",
+  "d": "Sekelompok perintah database yang berhasil semua atau batal semua.",
+  "n": "1.11 Transaction",
+  "s": "istilah-transaction",
+  "t": "Transaction",
+  "u": "b-fondasi/b3-1-transaction/"
+ },
+ "WebSocket": {
+  "b": "E4",
+  "d": "Koneksi dua arah yang tetap terbuka antara app dan server.",
+  "n": "3.5 Push dan real-time",
+  "s": "istilah-websocket",
+  "t": "WebSocket",
+  "u": "e-mobile/e4-push-real-time/"
+ },
+ "Webhook": {
+  "b": "B10.2",
+  "d": "HTTP request yang dikirim sistem lain ke API kita saat ada kejadian, mis. pembayaran berhasil.",
+  "n": "4.3 Webhook dan outbox",
+  "s": "istilah-webhook",
+  "t": "Webhook",
+  "u": "b-fondasi/b10-2-webhook-outbox/"
+ },
+ "Worker": {
+  "b": "B10.1",
+  "d": "Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request.",
+  "n": "3.3 Background job, queue, retry",
+  "s": "istilah-worker",
+  "t": "Worker",
+  "u": "b-fondasi/b10-1-background-job/"
+ },
+ "atomicity": {
+  "b": "B3.1",
+  "d": "Jaminan bahwa semua perubahan dalam satu transaction terjadi seluruhnya atau tidak sama sekali.",
+  "n": "1.11 Transaction",
+  "s": "istilah-atomicity",
+  "t": "Atomicity",
+  "u": "b-fondasi/b3-1-transaction/"
+ },
+ "auth": {
+  "b": "B5.1",
+  "d": "Proses memastikan siapa yang mengirim request, mis. lewat token login.",
+  "n": "1.12 Authentication",
+  "s": "istilah-authentication",
+  "t": "Authentication",
+  "u": "b-fondasi/b5-1-authentication/"
+ },
+ "authentication": {
+  "b": "B5.1",
+  "d": "Proses memastikan siapa yang mengirim request, mis. lewat token login.",
+  "n": "1.12 Authentication",
+  "s": "istilah-authentication",
+  "t": "Authentication",
+  "u": "b-fondasi/b5-1-authentication/"
+ },
+ "authorization": {
+  "b": "B5.3",
+  "d": "Proses memastikan user yang sudah dikenal boleh melakukan aksi itu pada data itu.",
+  "n": "1.13 Authorization",
+  "s": "istilah-authorization",
+  "t": "Authorization",
+  "u": "b-fondasi/b5-3-authorization/"
+ },
+ "backfill": {
+  "b": "B4.2",
+  "d": "Script sekali jalan yang mengisi kolom baru untuk baris lama, biasanya bertahap per batch.",
+  "n": "2.8 Ubah skema tanpa downtime",
+  "s": "istilah-backfill",
+  "t": "Backfill",
+  "u": "b-fondasi/b4-2-ubah-skema-tanpa-downtime/"
+ },
+ "backoff": {
+  "b": "E3",
+  "d": "Jeda yang makin panjang di antara percobaan ulang, supaya server yang sedang kesulitan tidak dibanjiri.",
+  "n": "2.3 Retry dan idempotency key",
+  "s": "istilah-backoff",
+  "t": "Backoff",
+  "u": "e-mobile/e3-retry-idempotency/"
+ },
+ "cache": {
+  "b": "B9",
+  "d": "Salinan data di tempat yang lebih cepat dibaca, dengan risiko isinya tertinggal dari data asli.",
+  "n": "3.6 Caching dan invalidation",
+  "s": "istilah-cache",
+  "t": "Cache",
+  "u": "b-fondasi/b9-caching/"
+ },
+ "circuit breaker": {
+  "b": "B11",
+  "d": "Mekanisme yang berhenti memanggil layanan yang sedang gagal untuk sementara, lalu mencoba lagi setelah jeda.",
+  "n": "4.1 Integrasi pihak ketiga",
+  "s": "istilah-circuit-breaker",
+  "t": "Circuit breaker",
+  "u": "b-fondasi/b11-integrasi-pihak-ketiga/"
+ },
+ "connection pool": {
+  "b": "B2.5",
+  "d": "Sekumpulan koneksi database yang dibuka sekali lalu dipinjamkan bergantian ke request.",
+  "n": "3.2 Connection pool",
+  "s": "istilah-connection-pool",
+  "t": "Connection pool",
+  "u": "b-fondasi/b2-5-connection-pool/"
+ },
+ "constraint": {
+  "b": "B2.1",
+  "d": "Aturan yang dipaksakan database pada data, mis. UNIQUE, CHECK, atau NOT NULL.",
+  "n": "1.8 Data modeling dan relasi",
+  "s": "istilah-constraint",
+  "t": "Constraint",
+  "u": "b-fondasi/b2-1-data-modeling/"
+ },
+ "container": {
+  "b": "C3",
+  "d": "Paket aplikasi beserta semua dependensinya yang berjalan dengan cara sama di laptop maupun server.",
+  "n": "1.16 Deployment dan rollback",
+  "s": "istilah-container",
+  "t": "Container",
+  "u": "c-operasional/c3-deployment/"
+ },
+ "cursor pagination": {
+  "b": "B1.3",
+  "d": "Pagination yang meminta \"data sesudah item X\", bukan \"halaman ke-N\", jadi tetap stabil saat data bertambah.",
+  "n": "2.4 Pagination dan idempotent method",
+  "s": "istilah-cursor-pagination",
+  "t": "Cursor pagination",
+  "u": "b-fondasi/b1-3-pagination-idempotent/"
+ },
+ "database": {
+  "b": "B2.1",
+  "d": "Program yang menyimpan data secara permanen dan menjamin aturan seperti constraint dan transaction.",
+  "n": "1.8 Data modeling dan relasi",
+  "s": "istilah-database",
+  "t": "Database",
+  "u": "b-fondasi/b2-1-data-modeling/"
+ },
+ "dead-letter queue": {
+  "b": "B10.1",
+  "d": "Tempat job yang terus gagal setelah batas retry, supaya bisa diperiksa manusia dan tidak diulang selamanya.",
+  "n": "3.3 Background job, queue, retry",
+  "s": "istilah-dead-letter-queue",
+  "t": "Dead-letter queue",
+  "u": "b-fondasi/b10-1-background-job/"
+ },
+ "deadlock": {
+  "b": "B3.2",
+  "d": "Dua transaction saling menunggu lock milik yang lain, sehingga database harus membatalkan salah satunya.",
+  "n": "2.1 Race condition",
+  "s": "istilah-deadlock",
+  "t": "Deadlock",
+  "u": "b-fondasi/b3-2-race-condition-lock/"
+ },
+ "endpoint": {
+  "b": "B1.1",
+  "d": "Pasangan method dan path yang dilayani server, mis. POST /transfers.",
+  "n": "1.4 HTTP",
+  "s": "istilah-endpoint",
+  "t": "Endpoint",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "eventual consistency": {
+  "b": "D3",
+  "d": "Data di beberapa tempat boleh berbeda sesaat, tapi akan sama setelah perubahan selesai menyebar.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-eventual-consistency",
+  "t": "Eventual consistency",
+  "u": "d-system-design/d3-consistency/"
+ },
+ "expand-migrate-contract": {
+  "b": "B4.2",
+  "d": "Urutan mengubah skema tanpa downtime: tambah yang baru, pindahkan data dan kode, baru hapus yang lama.",
+  "n": "2.8 Ubah skema tanpa downtime",
+  "s": "istilah-expand-migrate-contract",
+  "t": "Expand-migrate-contract",
+  "u": "b-fondasi/b4-2-ubah-skema-tanpa-downtime/"
+ },
+ "foreign key": {
+  "b": "B2.1",
+  "d": "Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada.",
+  "n": "1.8 Data modeling dan relasi",
+  "s": "istilah-foreign-key",
+  "t": "Foreign key",
+  "u": "b-fondasi/b2-1-data-modeling/"
+ },
+ "handler": {
+  "b": "A2",
+  "d": "Fungsi di server yang menerima satu request, memeriksa formatnya, lalu memanggil logika bisnis.",
+  "n": "1.3 Perjalanan satu request",
+  "s": "istilah-handler",
+  "t": "Handler",
+  "u": "a-gambaran/a2-perjalanan-request/"
+ },
+ "header": {
+  "b": "B1.1",
+  "d": "Pasangan nama-nilai di request atau response yang membawa informasi tambahan, mis. token atau tipe konten.",
+  "n": "1.4 HTTP",
+  "s": "istilah-header",
+  "t": "Header",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "idempotent": {
+  "b": "B1.3",
+  "d": "Sifat operasi yang hasil akhirnya sama walau dijalankan sekali atau berkali-kali.",
+  "n": "2.4 Pagination dan idempotent method",
+  "s": "istilah-idempotent",
+  "t": "Idempotent",
+  "u": "b-fondasi/b1-3-pagination-idempotent/"
+ },
+ "isolation level": {
+  "b": "B3.3",
+  "d": "Seberapa banyak perubahan dari transaction lain yang boleh terlihat oleh satu transaction yang sedang berjalan.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-isolation-level",
+  "t": "Isolation level",
+  "u": "b-fondasi/b3-3-isolation-level/"
+ },
+ "latency": {
+  "b": "C2",
+  "d": "Lama waktu satu request dari dikirim sampai response diterima.",
+  "n": "3.1 Observability",
+  "s": "istilah-latency",
+  "t": "Latency",
+  "u": "c-operasional/c2-observability/"
+ },
+ "load balancer": {
+  "b": "D2",
+  "d": "Komponen yang membagi request ke beberapa instance server yang sama.",
+  "n": "5.1 Scaling",
+  "s": "istilah-load-balancer",
+  "t": "Load balancer",
+  "u": "d-system-design/d2-scaling/"
+ },
+ "lock": {
+  "b": "B3.2",
+  "d": "Tanda di database bahwa satu transaction sedang memakai baris atau tabel, sehingga transaction lain harus menunggu.",
+  "n": "2.1 Race condition",
+  "s": "istilah-lock",
+  "t": "Lock",
+  "u": "b-fondasi/b3-2-race-condition-lock/"
+ },
+ "log": {
+  "b": "C2",
+  "d": "Catatan kejadian per request atau per peristiwa, ditulis aplikasi untuk dibaca saat menyelidiki masalah.",
+  "n": "3.1 Observability",
+  "s": "istilah-log",
+  "t": "Log",
+  "u": "c-operasional/c2-observability/"
+ },
+ "lost update": {
+  "b": "B3.2",
+  "d": "Perubahan yang hilang karena dua transaction membaca nilai lama yang sama lalu saling menimpa.",
+  "n": "2.1 Race condition",
+  "s": "istilah-lost-update",
+  "t": "Lost update",
+  "u": "b-fondasi/b3-2-race-condition-lock/"
+ },
+ "metric": {
+  "b": "C2",
+  "d": "Angka yang dihitung terus-menerus, mis. jumlah request per detik atau persentase error.",
+  "n": "3.1 Observability",
+  "s": "istilah-metric",
+  "t": "Metric",
+  "u": "c-operasional/c2-observability/"
+ },
+ "middleware": {
+  "b": "B7.1",
+  "d": "Fungsi yang dijalankan sebelum atau sesudah semua handler, mis. pemeriksa token atau pencatat log.",
+  "n": "1.14 Lapisan dasar",
+  "s": "istilah-middleware",
+  "t": "Middleware",
+  "u": "b-fondasi/b7-1-lapisan-dasar/"
+ },
+ "migration": {
+  "b": "B4.1",
+  "d": "File berurutan yang mengubah skema database, disimpan dan direview seperti kode.",
+  "n": "1.10 Migration",
+  "s": "istilah-migration",
+  "t": "Migration",
+  "u": "b-fondasi/b4-1-migration/"
+ },
+ "modular monolith": {
+  "b": "B7.2",
+  "d": "Satu aplikasi yang di-deploy sebagai satu unit, tapi kodenya dibagi ke modul dengan batas yang tegas.",
+  "n": "4.5 Modular monolith",
+  "s": "istilah-modular-monolith",
+  "t": "Modular monolith",
+  "u": "b-fondasi/b7-2-batas-modul/"
+ },
+ "monolith": {
+  "b": "A1",
+  "d": "Satu aplikasi backend yang memuat semua fitur dan di-deploy sebagai satu unit.",
+  "n": "1.1 Apa yang dikerjakan backend",
+  "s": "istilah-monolith",
+  "t": "Monolith",
+  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+ },
+ "n+1 query": {
+  "b": "B2.4",
+  "d": "Pola satu query untuk daftar lalu satu query lagi untuk setiap item di daftar itu.",
+  "n": "2.5 N+1 query",
+  "s": "istilah-n-1-query",
+  "t": "N+1 query",
+  "u": "b-fondasi/b2-4-n-plus-1/"
+ },
+ "object storage": {
+  "b": "B11.2",
+  "d": "Layanan penyimpanan file besar per objek, diakses lewat HTTP, mis. layanan kompatibel S3.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-object-storage",
+  "t": "Object storage",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
+ "offline-first": {
+  "b": "E2",
+  "d": "Desain app yang menyimpan perubahan di HP dulu, lalu menyinkronkannya ke server saat sinyal ada.",
+  "n": "3.8 Offline-first dan sync",
+  "s": "istilah-offline-first",
+  "t": "Offline-first",
+  "u": "e-mobile/e2-offline-first/"
+ },
+ "optimistic lock": {
+  "b": "B3.2",
+  "d": "Cara mencegah lost update dengan mengecek nomor versi saat menulis, tanpa mengunci baris saat membaca.",
+  "n": "2.1 Race condition",
+  "s": "istilah-optimistic-lock",
+  "t": "Optimistic lock",
+  "u": "b-fondasi/b3-2-race-condition-lock/"
+ },
+ "outbox": {
+  "b": "B10.2",
+  "d": "Tabel tempat event ditulis dalam transaction yang sama dengan perubahan data, lalu dikirim oleh worker.",
+  "n": "4.3 Webhook dan outbox",
+  "s": "istilah-outbox",
+  "t": "Outbox",
+  "u": "b-fondasi/b10-2-webhook-outbox/"
+ },
+ "pagination": {
+  "b": "B1.3",
+  "d": "Membagi daftar panjang menjadi potongan kecil yang diminta satu per satu.",
+  "n": "2.4 Pagination dan idempotent method",
+  "s": "istilah-pagination",
+  "t": "Pagination",
+  "u": "b-fondasi/b1-3-pagination-idempotent/"
+ },
+ "payload": {
+  "b": "E5",
+  "d": "Isi data yang dikirim di body request atau response, biasanya JSON.",
+  "n": "2.7 Ukuran payload dan kuota",
+  "s": "istilah-payload",
+  "t": "Payload",
+  "u": "e-mobile/e5-ukuran-payload/"
+ },
+ "polling": {
+  "b": "E4",
+  "d": "App menanyakan status ke server berulang kali dengan jeda tetap.",
+  "n": "3.5 Push dan real-time",
+  "s": "istilah-polling",
+  "t": "Polling",
+  "u": "e-mobile/e4-push-real-time/"
+ },
+ "primary key": {
+  "b": "B2.1",
+  "d": "Kolom yang nilainya unik dan dipakai untuk mengenali satu baris.",
+  "n": "1.8 Data modeling dan relasi",
+  "s": "istilah-primary-key",
+  "t": "Primary key",
+  "u": "b-fondasi/b2-1-data-modeling/"
+ },
+ "proxy": {
+  "b": "B11.2",
+  "d": "Server perantara yang meneruskan request ke sistem lain sambil menambahkan hal yang tidak boleh dipegang client.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-proxy",
+  "t": "Proxy",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
+ "query plan": {
+  "b": "B2.3",
+  "d": "Rencana langkah yang dipilih database untuk menjalankan satu query, dilihat dengan EXPLAIN.",
+  "n": "2.6 Index dan query plan",
+  "s": "istilah-query-plan",
+  "t": "Query plan",
+  "u": "b-fondasi/b2-3-index/"
+ },
+ "queue": {
+  "b": "B10.1",
+  "d": "Daftar pekerjaan yang menunggu diproses oleh worker, satu per satu atau paralel.",
+  "n": "3.3 Background job, queue, retry",
+  "s": "istilah-queue",
+  "t": "Queue",
+  "u": "b-fondasi/b10-1-background-job/"
+ },
+ "race condition": {
+  "b": "B3.2",
+  "d": "Hasil yang bergantung pada urutan dua proses yang berjalan bersamaan.",
+  "n": "2.1 Race condition",
+  "s": "istilah-race-condition",
+  "t": "Race condition",
+  "u": "b-fondasi/b3-2-race-condition-lock/"
+ },
+ "rate limit": {
+  "b": "C4",
+  "d": "Batas jumlah request per waktu dari satu sumber, mis. lima percobaan login per menit.",
+  "n": "3.7 Security dasar dan rate limit",
+  "s": "istilah-rate-limit",
+  "t": "Rate limit",
+  "u": "c-operasional/c4-security-dasar/"
+ },
+ "read replica": {
+  "b": "D2",
+  "d": "Salinan database yang hanya melayani baca dan selalu sedikit tertinggal dari database utama.",
+  "n": "5.1 Scaling",
+  "s": "istilah-read-replica",
+  "t": "Read replica",
+  "u": "d-system-design/d2-scaling/"
+ },
+ "replication lag": {
+  "b": "D3",
+  "d": "Jeda antara perubahan di database utama dan munculnya perubahan itu di replica.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-replication-lag",
+  "t": "Replication lag",
+  "u": "d-system-design/d3-consistency/"
+ },
+ "retry": {
+  "b": "E3",
+  "d": "Mengirim ulang request yang gagal atau tidak dijawab.",
+  "n": "2.3 Retry dan idempotency key",
+  "s": "istilah-retry",
+  "t": "Retry",
+  "u": "e-mobile/e3-retry-idempotency/"
+ },
+ "rolling deploy": {
+  "b": "C3",
+  "d": "Mengganti instance satu per satu, supaya selalu ada instance yang melayani request.",
+  "n": "1.16 Deployment dan rollback",
+  "s": "istilah-rolling-deploy",
+  "t": "Rolling deploy",
+  "u": "c-operasional/c3-deployment/"
+ },
+ "sharding": {
+  "b": "D2",
+  "d": "Membagi data ke beberapa database berdasarkan kunci, mis. per wilayah.",
+  "n": "5.1 Scaling",
+  "s": "istilah-sharding",
+  "t": "Sharding",
+  "u": "d-system-design/d2-scaling/"
+ },
+ "signature": {
+  "b": "B5.1",
+  "d": "Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah.",
+  "n": "1.12 Authentication",
+  "s": "istilah-signature",
+  "t": "Signature",
+  "u": "b-fondasi/b5-1-authentication/"
+ },
+ "stale": {
+  "b": "B9",
+  "d": "Data yang sudah tidak terbaru, mis. harga lama yang masih tersimpan di cache.",
+  "n": "3.6 Caching dan invalidation",
+  "s": "istilah-stale",
+  "t": "Stale",
+  "u": "b-fondasi/b9-caching/"
+ },
+ "stateless": {
+  "b": "D2",
+  "d": "Server tidak menyimpan keadaan antar-request di memorinya, jadi request mana pun bisa dilayani instance mana pun.",
+  "n": "5.1 Scaling",
+  "s": "istilah-stateless",
+  "t": "Stateless",
+  "u": "d-system-design/d2-scaling/"
+ },
+ "status code": {
+  "b": "B1.1",
+  "d": "Angka tiga digit di response yang menyatakan hasil request, mis. 201 berhasil dibuat atau 401 belum login.",
+  "n": "1.4 HTTP",
+  "s": "istilah-status-code",
+  "t": "Status code",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "throughput": {
+  "b": "C2",
+  "d": "Jumlah pekerjaan yang selesai per satuan waktu, mis. request per detik.",
+  "n": "3.1 Observability",
+  "s": "istilah-throughput",
+  "t": "Throughput",
+  "u": "c-operasional/c2-observability/"
+ },
+ "timeout": {
+  "b": "B11",
+  "d": "Batas waktu menunggu sebelum sebuah panggilan dianggap gagal.",
+  "n": "4.1 Integrasi pihak ketiga",
+  "s": "istilah-timeout",
+  "t": "Timeout",
+  "u": "b-fondasi/b11-integrasi-pihak-ketiga/"
+ },
+ "trace": {
+  "b": "C2",
+  "d": "Rekaman perjalanan satu request melewati beberapa komponen, lengkap dengan durasi tiap bagian.",
+  "n": "3.1 Observability",
+  "s": "istilah-trace",
+  "t": "Trace",
+  "u": "c-operasional/c2-observability/"
+ },
+ "trade-off": {
+  "b": "D1",
+  "d": "Pilihan yang memberi satu kelebihan dengan membayar satu kekurangan.",
+  "n": "1.17 Kerangka berpikir dan estimasi",
+  "s": "istilah-trade-off",
+  "t": "Trade-off",
+  "u": "d-system-design/d1-kerangka-berpikir/"
+ },
+ "transaction": {
+  "b": "B3.1",
+  "d": "Sekelompok perintah database yang berhasil semua atau batal semua.",
+  "n": "1.11 Transaction",
+  "s": "istilah-transaction",
+  "t": "Transaction",
+  "u": "b-fondasi/b3-1-transaction/"
+ },
+ "webhook": {
+  "b": "B10.2",
+  "d": "HTTP request yang dikirim sistem lain ke API kita saat ada kejadian, mis. pembayaran berhasil.",
+  "n": "4.3 Webhook dan outbox",
+  "s": "istilah-webhook",
+  "t": "Webhook",
+  "u": "b-fondasi/b10-2-webhook-outbox/"
+ },
+ "worker": {
+  "b": "B10.1",
+  "d": "Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request.",
+  "n": "3.3 Background job, queue, retry",
+  "s": "istilah-worker",
+  "t": "Worker",
+  "u": "b-fondasi/b10-1-background-job/"
+ }
+};

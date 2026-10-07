@@ -1,0 +1,118 @@
+---
+title: "2.7 Ukuran payload dan kuota"
+---
+
+<div data-bb="kamu-di-sini" data-tahap="2"></div>
+
+# 2.7 Ukuran payload dan kuota
+
+Baca 6 menit · coba 2 menit · Prasyarat: [[B1.3]]
+{: .meta }
+
+<div data-bb="selesai"></div>
+
+??? question "Sudah tahu? Cek 3 pertanyaan"
+
+    1. Response sudah dikompres gzip. Apakah ukuran JSON-nya masih penting?
+    2. Apakah HTTP client Dart meminta gzip secara bawaan?
+    3. Kenapa banyak request kecil bisa lebih boros baterai daripada satu request besar?
+
+    Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+## Inti
+
+Bentuk response mengikuti layar, bukan bentuk tabel. Kompresi memperkecil transfer, tapi HP tetap mengurai JSON yang sudah dibuka.
+
+<div data-bb="arsitektur" data-tahap="2"></div>
+
+## Lihat sendiri
+
+Pilah field untuk layar daftar riwayat Ani, lalu cek. Angka ukuran di penutupnya berasal dari rekaman lab.
+
+<div data-bb="pilah" data-src="data/e5-pilah.json"></div>
+
+## Kenapa ini ada
+
+Endpoint riwayat Rekeningo awalnya mengirim apa pun yang ada di model: objek toko lengkap di setiap pesanan, data pembeli, dan semua item. Bagi Raka, ini praktis. Satu endpoint melayani daftar dan detail sekaligus.
+
+Ani memakai HP lama dengan paket data harian kecil. Ia mengeluh layar riwayat lambat terbuka, dan kuotanya cepat habis di hari ramai. Layar daftarnya hanya menampilkan jam, total, dan jumlah item.
+
+## Cara kerjanya
+
+Rekaman ukuran response dari data lab (200.000 pesanan di PostgreSQL 17):
+
+```text title="Output rekaman: labs/e5-payload/output/ukuran.txt"
+--8<-- "labs/e5-payload/output/ukuran.txt"
+```
+
+Tiga hal dari angka itu:
+
+1. **Bentuk ringkas ±6,5 kali lebih kecil** sebelum kompresi (52.931 B vs 8.110 B untuk 100 pesanan).
+2. **gzip sangat efektif untuk data berulang.** Objek toko yang sama di setiap pesanan hampir hilang setelah kompresi.
+3. **Tapi HP mengurai versi mentahnya.** Setelah dibuka, 52.931 B tetap harus di-parse dan disimpan di memori. Kompresi menghemat kuota, bukan kerja parsing.
+
+**Kompresi HTTP** dinegosiasikan lewat header: client mengirim `Accept-Encoding: gzip`, server menjawab dengan `Content-Encoding: gzip` ([RFC 9110 §8.4](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-encoding)). Di sisi app, client Dart sudah memintanya. Ini dicek langsung di lab:
+
+```text title="Output rekaman: labs/e5-payload/output/dart-header.txt"
+--8<-- "labs/e5-payload/output/dart-header.txt"
+```
+
+Di sisi server, `net/http` Go tidak mengompres response secara otomatis, jadi kompresi dipasang lewat middleware atau di reverse proxy.
+
+**Baterai dan radio.** Dokumentasi Android menyebut pemakaian radio untuk transfer data sebagai salah satu sumber pengurasan baterai terbesar di app. Radio tetap aktif beberapa saat setelah setiap transfer, jadi banyak request kecil yang tersebar menjaga radio tetap menyala ([Android: Optimize network access](https://developer.android.com/develop/connectivity/network-ops/network-access-optimization)). Satu response yang pas untuk satu layar lebih baik daripada lima request kecil. Endpoint gabungan untuk layar beranda dibahas di [[B11.2]] (BFF).
+
+## Di stack lain
+
+Yang sama di semua stack: pilih field per layar, batasi jumlah baris, dan aktifkan kompresi. Yang berbeda: tempat memasang kompresi dan cara memilih field. Baris di bawah dicek ke dokumentasi, tidak dijalankan.
+
+| Stack | Kompresi response | Memilih field |
+|---|---|---|
+| Go | Tidak otomatis; middleware atau reverse proxy | Struct response terpisah per layar |
+| Express | Middleware `compression` | Objek response disusun sendiri |
+| Laravel | Biasanya di web server di depan PHP | API Resource per layar |
+| Django | `GZipMiddleware` bawaan ([dokumentasi](https://docs.djangoproject.com/en/stable/ref/middleware/#module-django.middleware.gzip)) | Serializer per layar |
+| Spring | `server.compression.enabled` di Spring Boot ([dokumentasi](https://docs.spring.io/spring-boot/how-to/webserver.html#howto.webserver.enable-response-compression)) | DTO per layar |
+| Supabase | Dikelola platform | `select('id,total,dibuat')` memilih kolom |
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Satu bentuk lengkap untuk semua layar | Sedikit endpoint, mudah dibuat | Kuota dan parsing terbuang di layar daftar |
+| Bentuk per layar (daftar ringkas, detail lengkap) | Kecil dan cepat di setiap layar | Lebih banyak bentuk response yang dirawat |
+| Field dipilih app (mis. `?fields=id,total`) | Fleksibel | Kombinasi tak terbatas, sulit di-cache dan dites |
+
+## Cek diri
+
+**1.** Response 100 pesanan sudah gzip, hanya 2.486 B di jaringan. Kenapa bentuk ringkas tetap lebih baik?
+
+??? success "Jawaban"
+
+    Setelah dibuka, HP tetap mengurai 52.931 B JSON dan membuat ratusan objek di memori. Di HP lama, parsing ini yang terasa sebagai layar lambat. Bentuk ringkas hanya 8.110 B mentah.
+
+**2.** Jelaskan kenapa lima request kecil saat membuka beranda bisa lebih boros baterai daripada satu request.
+
+??? success "Jawaban"
+
+    Radio HP pindah ke mode daya tinggi untuk setiap transfer dan tetap aktif beberapa saat sesudahnya. Request yang tersebar membuat radio lebih lama di mode itu. Satu request gabungan memakai satu periode aktif.
+
+**3.** Server Go kamu belum memasang kompresi. App Flutter mengirim `Accept-Encoding: gzip`. Apakah response tetap terkompres?
+
+??? success "Jawaban"
+
+    Tidak. Header itu hanya menyatakan app sanggup menerima gzip. Server yang memutuskan, dan `net/http` tidak mengompres sendiri. Pasang middleware atau aktifkan di reverse proxy.
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Endpoint daftar mengirim field yang tampil di daftar, bukan seluruh model.
+- [ ] Objek yang sama tidak diulang di setiap elemen daftar.
+- [ ] Ada pagination dan batas maksimum per halaman ([[B1.3]]).
+- [ ] Kompresi aktif di server atau proxy, dan diuji dengan `curl -H 'Accept-Encoding: gzip' -I`.
+
+## Bacaan lanjut
+
+- [Android: Optimize network access](https://developer.android.com/develop/connectivity/network-ops/network-access-optimization)
+- [RFC 9110 §8.4: Content-Encoding](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-encoding)
+- [Dart: HttpClient.autoUncompress](https://api.dart.dev/dart-io/HttpClient/autoUncompress.html)
+
+<div data-bb="umpan-balik"></div>

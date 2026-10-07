@@ -1,0 +1,58 @@
+{
+ "id": "b2-4-n1",
+ "title": "Layar riwayat Ani: 5 pesanan beserta itemnya",
+ "setup": "CREATE TABLE pesanan (id INTEGER PRIMARY KEY, toko_id INTEGER NOT NULL, total INTEGER NOT NULL);\nCREATE TABLE item_pesanan (pesanan_id INTEGER NOT NULL REFERENCES pesanan(id), nama TEXT NOT NULL, jumlah INTEGER NOT NULL, harga INTEGER NOT NULL);\nINSERT INTO pesanan VALUES (101, 1, 35000), (102, 1, 30000), (103, 1, 45000), (104, 1, 25000), (105, 1, 33000);\nINSERT INTO item_pesanan VALUES (101,'Nasi goreng',1,25000),(101,'Es teh',2,5000),(102,'Mie ayam',1,20000),(102,'Es teh',2,5000),(103,'Nasi goreng',1,25000),(103,'Mie ayam',1,20000),(104,'Nasi goreng',1,25000),(105,'Kopi',1,8000),(105,'Nasi goreng',1,25000);",
+ "check": "SELECT p.id AS pesanan, COUNT(i.nama) AS jumlah_item FROM pesanan p JOIN item_pesanan i ON i.pesanan_id = p.id GROUP BY p.id ORDER BY p.id",
+ "predict": {
+  "q": "Untuk 5 pesanan, panel Before menjalankan berapa query? Kalau layar menampilkan 100 pesanan?",
+  "options": [
+   "2 dan 2",
+   "6 dan 101",
+   "5 dan 100"
+  ],
+  "answer": 1,
+  "explain": "Before: 1 query untuk daftar pesanan + 1 query per pesanan untuk itemnya. 5 pesanan = 6 query, 100 pesanan = 101 query. After: satu query dengan JOIN, berapa pun jumlah pesanannya. Rekaman PostgreSQL di halaman ini: 101 query ±20,8 ms vs 1 query ±0,4 ms, bahkan tanpa jaringan."
+ },
+ "panels": {
+  "before": {
+   "label": "Before: N+1 (1 + 5 query)",
+   "onError": "stop",
+   "steps": [
+    {
+     "sql": "SELECT id, total FROM pesanan WHERE toko_id = 1 ORDER BY id",
+     "note": "query daftar"
+    },
+    {
+     "sql": "SELECT nama, jumlah, harga FROM item_pesanan WHERE pesanan_id = 101",
+     "note": "1 query per pesanan"
+    },
+    {
+     "sql": "SELECT nama, jumlah, harga FROM item_pesanan WHERE pesanan_id = 102",
+     "note": "1 query per pesanan"
+    },
+    {
+     "sql": "SELECT nama, jumlah, harga FROM item_pesanan WHERE pesanan_id = 103",
+     "note": "1 query per pesanan"
+    },
+    {
+     "sql": "SELECT nama, jumlah, harga FROM item_pesanan WHERE pesanan_id = 104",
+     "note": "1 query per pesanan"
+    },
+    {
+     "sql": "SELECT nama, jumlah, harga FROM item_pesanan WHERE pesanan_id = 105",
+     "note": "1 query per pesanan"
+    }
+   ]
+  },
+  "after": {
+   "label": "After: satu query dengan JOIN",
+   "onError": "stop",
+   "steps": [
+    {
+     "sql": "SELECT p.id, p.total, i.nama, i.jumlah FROM pesanan p JOIN item_pesanan i ON i.pesanan_id = p.id WHERE p.toko_id = 1 ORDER BY p.id",
+     "note": "semua data sekaligus"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,25 @@
+-- PostgreSQL 17.11 · dua penarikan baca-hitung-tulis di REPEATABLE READ
+A> BEGIN ISOLATION LEVEL REPEATABLE READ
+   BEGIN
+B> BEGIN ISOLATION LEVEL REPEATABLE READ
+   BEGIN
+A> SELECT saldo FROM akun WHERE id = 'budi'
+   100000
+B> SELECT saldo FROM akun WHERE id = 'budi'
+   100000
+A> UPDATE akun SET saldo = 30000 WHERE id = 'budi'
+   UPDATE 1
+A> COMMIT
+   COMMIT
+B> UPDATE akun SET saldo = 50000 WHERE id = 'budi'
+   ERROR:  could not serialize access due to concurrent update
+B> ROLLBACK
+   ROLLBACK
+-- aplikasi B mengulang transaction dari awal:
+B> BEGIN ISOLATION LEVEL REPEATABLE READ
+   BEGIN
+B> SELECT saldo FROM akun WHERE id = 'budi'
+   30000
+   (B: Rp30.000 < Rp50.000, tolak penarikan)
+B> ROLLBACK
+   ROLLBACK

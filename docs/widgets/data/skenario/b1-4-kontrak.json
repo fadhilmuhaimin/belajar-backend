@@ -1,0 +1,54 @@
+{
+  "versi": 2,
+  "judul": "Pull request mengganti nama field saldo",
+  "sumber": { "jenis": "rekaman", "file": "labs/b1-openapi/output/kontrak.txt", "fileVarian": "labs/b4-skema/output/rename-langsung.txt",
+    "catatan": "Lint: Redocly CLI 2.58.2. Deteksi breaking change: oasdiff (image di-pin per digest). Direkam 2026-10-06. Crash app di varian merujuk rekaman [[B4.2]] (field telp), bukan field saldo." },
+  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': tidak ada pemeriksaan kontrak di CI.",
+  "komponen": [
+    { "id": "pr", "label": "Pull request" },
+    { "id": "ci", "label": "CI" },
+    { "id": "api", "label": "Monolith API" },
+    { "id": "app", "label": "App v1.4" }
+  ],
+  "layarAwal": { "hp": { "waktu": "09.00", "isi": [ { "jenis": "baris", "kiri": "Saldo", "kanan": "Rp100.000" } ] } },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: CI tidak membandingkan kontrak lama dan baru. Field saldo di response GET /akun/{id} diganti balance. Apa yang terjadi di app v1.4?",
+    "options": ["Tetap normal", "Crash saat membaca saldo", "Saldo tampil Rp0"],
+    "answer": 1,
+    "varian": true,
+    "explain": "App v1.4 masih membaca j['saldo']. Field itu hilang, jadi cast ke angka gagal, sama seperti rekaman [[B4.2]] dengan field telp. Dengan pemeriksaan kontrak, kesalahan ini tertangkap di pull request, sebelum ada user yang terkena."
+  },
+  "langkah": [
+    { "dari": "pr", "judul": "Developer merapikan nama field",
+      "kirim": "openapi.yaml (Akun):\n-  required: [id, nama, saldo]\n+  required: [id, nama, balance]\n-  saldo: { type: integer }\n+  balance: { type: integer }",
+      "jelas": "Kontrak ada di repo yang sama dengan kode, jadi perubahan API terlihat di diff pull request." },
+    { "dari": "pr", "ke": "ci", "judul": "CI memeriksa format kontrak",
+      "kirim": "$ redocly lint openapi.yaml\nopenapi.yaml: validated\nYou have 1 warning.  (info-license)",
+      "jelas": "Lint memastikan file valid dan mengikuti aturan gaya. Ia tidak tahu apakah perubahannya merusak client lama." },
+    { "dari": "ci", "judul": "CI membandingkan kontrak lama dan baru",
+      "kirim": "$ oasdiff breaking openapi.yaml v15-ganti-nama.yaml --fail-on ERR\nerror [response-required-property-removed]\n  in API GET /akun/{id}\n  removed the required property `saldo` from the response\n(exit code 1)",
+      "jelas": "Menghapus field wajib dari response adalah breaking change: client lama yang membacanya akan gagal.", "nada": "good" },
+    { "dari": "ci", "ke": "pr", "judul": "Pull request ditahan",
+      "kirim": "Check gagal: kontrak tidak kompatibel ke belakang.\nSaran: tambah balance, pertahankan saldo sampai v1.4 tidak dipakai ([[B4.2]]).",
+      "jelas": "Menambah field opsional lolos. Rekaman lab: \"No breaking changes to report\" untuk field baru no_hp." },
+    { "dari": "api", "ke": "app", "judul": "Production tetap mengirim saldo",
+      "kirim": "GET /akun/budi → 200 {\"id\":\"budi\",\"nama\":\"Budi\",\"saldo\":100000}",
+      "jelas": "Tidak ada user yang terkena. Kesalahan ditemukan oleh mesin, sebelum merge, saat perbaikannya hanya satu commit.", "nada": "good" }
+  ],
+  "varian": {
+    "label": "CI tanpa pemeriksaan kontrak",
+    "mulai": 2,
+    "langkah": [
+      { "dari": "pr", "ke": "api", "judul": "Pull request di-merge dan di-deploy",
+        "kirim": "review manusia: \"nama lebih rapi, setuju\"\ndeploy v1.5 API",
+        "jelas": "Perubahan satu kata di diff mudah lolos review. Reviewer tidak selalu ingat app versi mana yang membaca field itu." },
+      { "dari": "api", "ke": "app", "judul": "Response tanpa field saldo",
+        "kirim": "GET /akun/budi → 200 {\"id\":\"budi\",\"nama\":\"Budi\",\"balance\":100000}",
+        "jelas": "Bagi API baru, response ini benar. Bagi app v1.4, field yang ia butuhkan hilang.", "nada": "warn" },
+      { "dari": "app", "judul": "App v1.4 crash",
+        "kirim": "j['saldo'] → null → cast gagal\n(pola sama dengan rekaman [[B4.2]]:\n type 'Null' is not a subtype of type 'String')",
+        "jelas": "Semua user v1.4 tidak bisa membuka beranda sampai update. Lanjutannya ada di [[E1]] dan [[B4.2]].", "nada": "warn",
+        "layar": { "hp": { "waktu": "09.10", "isi": [ { "jenis": "toast", "teks": "Rekeningo berhenti bekerja", "nada": "warn" } ] } } }
+    ]
+  }
+}

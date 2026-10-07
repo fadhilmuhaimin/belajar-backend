@@ -1,0 +1,126 @@
+---
+title: "4.3 Webhook dan outbox"
+---
+
+<div data-bb="kamu-di-sini" data-tahap="4"></div>
+
+# 4.3 Webhook dan outbox
+
+Baca 7 menit · coba 3 menit · Prasyarat: [[B10.1]], [[E3]]
+{: .meta }
+
+<div data-bb="selesai"></div>
+
+??? question "Sudah tahu? Cek 3 pertanyaan"
+
+    1. Gateway mengirim webhook yang sama dua kali. Siapa yang salah?
+    2. Kenapa jumlah top-up sebaiknya tidak diambil dari isi webhook?
+    3. Saldo sudah ditambah, lalu pesan ke layanan lain gagal dikirim. Bagaimana mencegahnya?
+
+    Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+## Inti
+
+Webhook bisa datang dua kali atau palsu. Cek signature, catat id event, lalu jawab 200 dengan cepat.
+
+<div data-bb="arsitektur" data-tahap="4"></div>
+
+## Lihat sendiri
+
+Budi top-up Rp200.000 lewat payment gateway. Langkah 4 sampai 9 direkam dari API Go dan PostgreSQL 17.
+
+<div data-bb="alur" data-src="data/skenario/b10-2-webhook.json"></div>
+
+## Kenapa ini ada
+
+Top-up di [[B11]] berakhir dengan status pending. Rekeningo baru tahu Budi sudah membayar saat gateway mengirim webhook: HTTP request dari sistem gateway ke API Rekeningo.
+
+Seminggu setelah rilis, laporan keuangan tidak cocok. Tiga user mendapat saldo dua kali dari satu top-up. Log menunjukkan gateway mengirim webhook yang sama dua kali, karena handler Rekeningo lambat menjawab.
+
+## Cara kerjanya
+
+Spesifikasi Standard Webhooks menyebut tiga hal yang harus dikerjakan penerima ([spesifikasi](https://github.com/standard-webhooks/standard-webhooks/blob/main/spec/standard-webhooks.md)):
+
+1. **Verifikasi signature.** URL webhook bisa dikirimi request oleh siapa pun. Signature dihitung dari id, timestamp, dan body dengan secret bersama.
+2. **Tolak timestamp lama.** Kiriman sah yang direkam lalu diputar ulang (replay) punya signature yang benar, tapi timestamp-nya lama.
+3. **Pakai id event sebagai idempotency key.** Pengirim mengulang kiriman yang tidak dijawab `2xx`. Id event tetap sama di setiap pengulangan.
+
+```go title="labs/b10-2-webhook/main.go"
+--8<-- "labs/b10-2-webhook/main.go:verifikasi"
+```
+
+Setelah sah, semua perubahan masuk satu transaction: catat id event, ubah status top-up, tambah saldo, tulis outbox.
+
+```go title="labs/b10-2-webhook/main.go"
+--8<-- "labs/b10-2-webhook/main.go:proses"
+```
+
+```text title="Output rekaman: kiriman ganda (B) dan webhook palsu (D)"
+--8<-- "labs/b10-2-webhook/output/b-duplikat.txt:1:6"
+
+--8<-- "labs/b10-2-webhook/output/d-palsu.txt:1:5"
+```
+
+Jumlah top-up diambil dari tabel `topup` milik Rekeningo, bukan dari isi webhook. Isi webhook hanya memberi tahu "tagihan tp_5521 sudah dibayar". Status `menunggu` di `UPDATE` juga menjadi pengaman kedua: top-up yang sudah dibayar tidak bisa dibayar lagi.
+
+**Outbox.** Setelah saldo bertambah, Budi harus menerima notifikasi. Kalau API mengirim notifikasi langsung setelah `COMMIT`, lalu mati di antaranya, notifikasi hilang. Kalau dikirim sebelum `COMMIT`, lalu transaction batal, notifikasi terkirim untuk saldo yang tidak ada.
+
+Outbox menyelesaikannya: pesan ditulis ke tabel di transaction yang sama dengan saldo, lalu worker mengirimnya ([microservices.io](https://microservices.io/patterns/data/transactional-outbox.html)). Ini pola yang sama dengan notifikasi pembayaran di [[B10.1]]. Bedanya, di Tahap 4 penerimanya bisa service lain, mis. layanan pembayaran yang memberi tahu monolith.
+
+## Di stack lain
+
+Yang sama di semua stack: verifikasi signature dari body mentah, catat id event dengan constraint unik, jawab cepat. Yang berbeda: library verifikasinya. Hanya Go yang dijalankan di lab. Baris lain dicek ke dokumentasi.
+
+| Stack | Yang dipakai | Sumber |
+|---|---|---|
+| Go (lab) | `crypto/hmac` + `hmac.Equal` | [crypto/hmac](https://pkg.go.dev/crypto/hmac) |
+| Banyak bahasa | Library resmi Standard Webhooks (JavaScript, Python, Go, Java, PHP, dan lain-lain) | [Standard Webhooks](https://www.standardwebhooks.com/) |
+| SDK payment gateway | Biasanya menyediakan fungsi verifikasi sendiri, mis. SDK Stripe | [Stripe: webhooks](https://docs.stripe.com/webhooks) |
+| Express | `express.raw({ type: 'application/json' })` di route webhook, supaya signature dihitung dari byte asli | [body-parser: raw](https://github.com/expressjs/body-parser#bodyparserrawoptions) |
+
+Kesalahan yang sering muncul: framework mem-parse JSON lalu kode menghitung signature dari JSON yang di-serialize ulang. Urutan field atau spasi bisa berubah, dan signature tidak cocok.
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Proses langsung, tanpa catatan event | Paling sederhana | Saldo ganda saat gateway mengulang kiriman (rekaman C: Rp450.000) |
+| Catat id event dengan constraint unik | Kiriman ganda aman | Satu tabel lagi yang terus tumbuh; butuh pembersihan berkala |
+| Jawab 200, proses di worker | Gateway tidak pernah menunggu lama | Event harus disimpan dulu; hasil asinkron |
+| Outbox untuk pesan keluar | Pesan terkirim jika dan hanya jika transaction berhasil | Ada jeda sampai worker mengirim; penerima tetap harus tahan pesan ganda |
+
+## Cek diri
+
+**1.** Handler webhook mengirim email konfirmasi sebelum menjawab, dan email butuh 20 detik. Apa yang akan dilakukan gateway?
+
+??? success "Jawaban"
+
+    Kalau gateway punya timeout lebih pendek dari 20 detik, ia menganggap kiriman gagal lalu mengirim ulang. Spesifikasi Standard Webhooks menyarankan timeout 15–30 detik dan retry berhari-hari. Jawab 200 secepatnya, dan kirim email lewat outbox dan worker.
+
+**2.** Jelaskan kenapa memeriksa signature saja tidak cukup untuk mencegah saldo ganda.
+
+??? success "Jawaban"
+
+    Kiriman ulang dari gateway adalah kiriman sah dengan signature yang benar. Signature hanya membuktikan pengirimnya, bukan bahwa event itu baru. Yang mencegah pemrosesan ganda adalah catatan id event dengan constraint unik, di transaction yang sama dengan perubahan saldo.
+
+**3.** Outbox dan worker dipakai untuk notifikasi. Worker mati setelah mengirim push, sebelum menandai baris outbox terkirim. Apa yang terjadi?
+
+??? success "Jawaban"
+
+    Saat worker jalan lagi, baris itu masih belum terkirim, jadi push dikirim lagi. Outbox menjamin pesan terkirim setidaknya sekali (at-least-once), bukan tepat sekali. Penerima harus tahan pesan ganda, mis. app mengabaikan notifikasi dengan id top-up yang sudah ditampilkan.
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Signature diverifikasi dari body mentah, dengan perbandingan waktu-konstan (`hmac.Equal`, bukan `==`).
+- [ ] Timestamp diperiksa, kiriman lama ditolak.
+- [ ] Id event disimpan dengan constraint unik, di transaction yang sama dengan perubahan saldo.
+- [ ] Jumlah uang diambil dari data sendiri, bukan dari isi webhook.
+- [ ] Handler menjawab cepat; pekerjaan lambat dan pesan keluar lewat outbox.
+
+## Bacaan lanjut
+
+- [Standard Webhooks: spesifikasi](https://github.com/standard-webhooks/standard-webhooks/blob/main/spec/standard-webhooks.md)
+- [microservices.io: Transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html)
+- [Go: crypto/hmac](https://pkg.go.dev/crypto/hmac)
+
+<div data-bb="umpan-balik"></div>

@@ -1,0 +1,291 @@
+{
+  "versi": 2,
+  "judul": "Budi menarik saldo dari HP dan tablet hampir bersamaan",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/b3-race/output/for-update.txt",
+    "fileVarian": "labs/b3-race/output/tx-tanpa-lock.txt",
+    "catatan": "Statement dan hasil dari PostgreSQL 17.11 (read committed), direkam labs/b3-race/run.py 2026-10-06. Request A = HP, request B = tablet."
+  },
+  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal' dan bandingkan saldo akhirnya.",
+  "komponen": [
+    {
+      "id": "hp",
+      "label": "HP Budi"
+    },
+    {
+      "id": "tablet",
+      "label": "Tablet Budi"
+    },
+    {
+      "id": "api",
+      "label": "Monolith API",
+      "lapisan": [
+        "logika bisnis",
+        "akses data"
+      ]
+    },
+    {
+      "id": "db",
+      "label": "PostgreSQL"
+    }
+  ],
+  "perangkat": [
+    {
+      "id": "hp",
+      "label": "HP Budi"
+    },
+    {
+      "id": "tablet",
+      "label": "Tablet Budi"
+    }
+  ],
+  "layarAwal": {
+    "hp": {
+      "waktu": "12.30",
+      "saldo": 100000,
+      "isi": [
+        {
+          "jenis": "input",
+          "label": "Tarik ke rekening bank",
+          "nilai": "Rp70.000"
+        },
+        {
+          "jenis": "tombol",
+          "teks": "Tarik"
+        }
+      ]
+    },
+    "tablet": {
+      "waktu": "12.30",
+      "saldo": 100000,
+      "isi": [
+        {
+          "jenis": "input",
+          "label": "Tarik ke rekening bank",
+          "nilai": "Rp50.000"
+        },
+        {
+          "jenis": "tombol",
+          "teks": "Tarik"
+        }
+      ]
+    }
+  },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: SELECT tanpa FOR UPDATE. Saldo awal Rp100.000, HP menarik Rp70.000, tablet Rp50.000. Berapa saldo tercatat di akhir?",
+    "options": [
+      "Rp30.000",
+      "Rp50.000",
+      "−Rp20.000"
+    ],
+    "answer": 1,
+    "varian": true,
+    "explain": "Keduanya membaca Rp100.000 sebelum ada yang menulis. A menulis Rp30.000, lalu B menimpanya dengan Rp50.000. Dua penarikan sukses (Rp120.000 keluar), dan saldo tercatat Rp50.000. Angka ini dari rekaman PostgreSQL, tab pertama di widget berikutnya."
+  },
+  "langkah": [
+    {
+      "dari": "hp",
+      "ke": "api",
+      "judul": "HP mengirim penarikan Rp70.000 (request A)",
+      "kirim": "POST /penarikan\n{\"jumlah\": 70000}",
+      "jelas": "Budi menekan Tarik di HP.",
+      "layar": {
+        "hp": {
+          "waktu": "12.30",
+          "saldo": 100000,
+          "isi": [
+            {
+              "jenis": "proses",
+              "teks": "Memproses..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "tablet",
+      "ke": "api",
+      "judul": "Tablet mengirim penarikan Rp50.000 (request B)",
+      "kirim": "POST /penarikan\n{\"jumlah\": 50000}",
+      "jelas": "Beberapa milidetik kemudian. Bagi server, ini dua request yang berjalan bersamaan di dua koneksi database.",
+      "layar": {
+        "tablet": {
+          "waktu": "12.30",
+          "saldo": 100000,
+          "isi": [
+            {
+              "jenis": "proses",
+              "teks": "Memproses..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "akses data",
+      "judul": "A membaca saldo sambil mengunci baris",
+      "kirim": "A> BEGIN;\nA> SELECT saldo FROM akun WHERE id = 1 FOR UPDATE;\n   100000      -- row lock: A",
+      "jelas": "FOR UPDATE membaca sekaligus memasang row lock. Transaction lain yang ingin mengunci baris ini harus menunggu."
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "akses data",
+      "judul": "B ingin membaca baris yang sama: menunggu",
+      "kirim": "B> BEGIN;\nB> SELECT saldo FROM akun WHERE id = 1 FOR UPDATE;\n   MENUNGGU lock",
+      "jelas": "B tertahan di sini, sebelum sempat membaca dan memutuskan apa pun. Inilah bedanya dengan transaction tanpa lock.",
+      "nada": "warn"
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "logika bisnis",
+      "judul": "A lolos cek, menulis, lalu COMMIT",
+      "kirim": "A: Rp100.000 ≥ Rp70.000, saldo baru Rp30.000\nA> UPDATE akun SET saldo = 30000 WHERE id = 1;\nA> COMMIT;     -- lock A dilepas",
+      "jelas": "Setelah COMMIT, lock pindah ke B yang sedang menunggu."
+    },
+    {
+      "dari": "db",
+      "ke": "api",
+      "lapisan": "akses data",
+      "judul": "B melanjutkan dan membaca saldo terbaru",
+      "kirim": "B> SELECT ... FOR UPDATE\n   30000       -- lanjut setelah lock dilepas",
+      "jelas": "B membaca Rp30.000, bukan Rp100.000. Keputusannya dibuat dari data yang benar."
+    },
+    {
+      "dari": "api",
+      "lapisan": "logika bisnis",
+      "judul": "B ditolak",
+      "kirim": "B: Rp30.000 < Rp50.000, tolak\nB> ROLLBACK;",
+      "jelas": "Tidak ada yang ditulis oleh B. Saldo tetap Rp30.000."
+    },
+    {
+      "dari": "api",
+      "ke": "hp",
+      "judul": "HP: penarikan berhasil",
+      "kirim": "201 {\"saldo\": 30000}",
+      "jelas": "Request A sukses.",
+      "nada": "good",
+      "layar": {
+        "hp": {
+          "waktu": "12.30",
+          "saldo": 30000,
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Rp70.000 ditarik",
+              "nada": "good"
+            }
+          ],
+          "nada": "good"
+        }
+      }
+    },
+    {
+      "dari": "api",
+      "ke": "tablet",
+      "judul": "Tablet: saldo tidak cukup",
+      "kirim": "422 {\"error\": \"saldo_kurang\", \"saldo\": 30000}",
+      "jelas": "Saldo akhir Rp30.000, sama dengan rekaman. Tidak ada uang yang tercipta.",
+      "nada": "good",
+      "layar": {
+        "tablet": {
+          "waktu": "12.30",
+          "saldo": 30000,
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Saldo tidak cukup",
+              "nada": "warn"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "varian": {
+    "label": "SELECT tanpa FOR UPDATE (hanya transaction)",
+    "mulai": 2,
+    "langkah": [
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "akses data",
+        "judul": "A membaca saldo, tanpa lock",
+        "kirim": "A> BEGIN;\nA> SELECT saldo FROM akun WHERE id = 1;\n   100000",
+        "jelas": "Tidak ada lock. Baris ini bebas dibaca siapa pun."
+      },
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "akses data",
+        "judul": "B juga membaca Rp100.000",
+        "kirim": "B> BEGIN;\nB> SELECT saldo FROM akun WHERE id = 1;\n   100000",
+        "jelas": "Dua request kini memegang angka yang sama, dan keduanya akan lolos cek saldo.",
+        "nada": "warn"
+      },
+      {
+        "dari": "api",
+        "lapisan": "logika bisnis",
+        "judul": "Keduanya menghitung saldo baru di aplikasi",
+        "kirim": "A: Rp100.000 ≥ Rp70.000 → saldo baru Rp30.000\nB: Rp100.000 ≥ Rp50.000 → saldo baru Rp50.000",
+        "jelas": "Keputusan sudah diambil dari bacaan yang sama, sebelum ada yang menulis."
+      },
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "akses data",
+        "judul": "A menulis dan COMMIT",
+        "kirim": "A> UPDATE akun SET saldo = 30000 WHERE id = 1;\nA> COMMIT;",
+        "jelas": "UPDATE milik A memasang lock, tapi hanya sampai COMMIT.",
+        "layar": {
+          "hp": {
+            "waktu": "12.30",
+            "saldo": 30000,
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Rp70.000 ditarik",
+                "nada": "good"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "akses data",
+        "judul": "B menimpa dengan angka dari bacaan lama",
+        "kirim": "B> UPDATE akun SET saldo = 50000 WHERE id = 1;\n   (menunggu lock A, lalu) UPDATE 1\nB> COMMIT;     -- saldo tercatat: 50000",
+        "jelas": "B memang menunggu lock di UPDATE. Tapi angka Rp50.000 sudah dihitung dari bacaan lama. Tulisan A hilang: lost update.",
+        "nada": "warn"
+      },
+      {
+        "dari": "api",
+        "ke": "tablet",
+        "judul": "Dua penarikan sukses, Rp120.000 keluar",
+        "kirim": "201 {\"saldo\": 50000}",
+        "jelas": "Budi menerima Rp70.000 + Rp50.000, dan saldonya masih Rp50.000. Rekeningo rugi Rp70.000.",
+        "nada": "warn",
+        "layar": {
+          "tablet": {
+            "waktu": "12.30",
+            "saldo": 50000,
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Rp50.000 ditarik",
+                "nada": "good"
+              }
+            ],
+            "nada": "warn"
+          }
+        }
+      }
+    ]
+  }
+}

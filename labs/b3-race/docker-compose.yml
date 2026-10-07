@@ -1,0 +1,19 @@
+# Lab B3: dua koneksi, satu saldo. Postgres sungguhan, bukan simulasi.
+# Jalankan: make -C labs/b3-race run
+services:
+  db:
+    image: postgres:17
+    # Catat setiap statement beserta application_name dan pid, supaya lab B3
+    # bisa menunjukkan apa yang benar-benar diterima PostgreSQL dari tiap stack.
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_line_prefix=%a|%p|"]
+    environment:
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD: lab   # kredensial lab lokal, bukan rahasia
+      POSTGRES_DB: lab
+    ports:
+      - "127.0.0.1:54333:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab -d lab"]
+      interval: 1s
+      timeout: 2s
+      retries: 30

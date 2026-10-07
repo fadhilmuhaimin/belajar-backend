@@ -1,0 +1,14 @@
+== C. Webhook evt_901 dua kali, handler naif (tanpa catatan event, jumlah dari isi webhook)
+api      evt_901 → 200, saldo ditambah 200000 dari isi webhook (mode naif)
+gateway  kirim evt_901 {"order_id":"tp_5521","status":"paid","amount":200000} → 200
+api      evt_901 → 200, saldo ditambah 200000 dari isi webhook (mode naif)
+gateway  kirim evt_901 {"order_id":"tp_5521","status":"paid","amount":200000} → 200
+worker   outbox #1 → push ke HP Budi: "Top-up Rp200.000 berhasil"
+worker   outbox #2 → push ke HP Budi: "Top-up Rp200.000 berhasil"
+
+-- PostgreSQL 17 sesudahnya (saldo awal Budi 50000)
+ saldo_budi | status_topup | event_tercatat | baris_outbox 
+------------+--------------+----------------+--------------
+     450000 | menunggu     |              0 |            2
+(1 row)
+

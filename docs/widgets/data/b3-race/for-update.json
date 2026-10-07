@@ -1,0 +1,174 @@
+{
+ "id": "for-update",
+ "title": "SELECT ... FOR UPDATE",
+ "summary": "Hanya A yang sukses. B tertahan sejak SELECT, lalu membaca saldo terbaru (Rp30.000) dan menolak.",
+ "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+ "isolation": "read committed",
+ "start": 100000,
+ "withdraw": {
+  "A": 70000,
+  "B": 50000
+ },
+ "final": 30000,
+ "recorded": "2026-10-06",
+ "steps": [
+  {
+   "actor": "A",
+   "sql": "BEGIN",
+   "result": "BEGIN",
+   "note": "",
+   "committed": 100000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {},
+    "B": {}
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "BEGIN",
+   "result": "BEGIN",
+   "note": "",
+   "committed": 100000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {},
+    "B": {}
+   }
+  },
+  {
+   "actor": "A",
+   "sql": "SELECT saldo FROM akun WHERE id = 1 FOR UPDATE",
+   "result": "100000",
+   "note": "",
+   "committed": 100000,
+   "lock": "A",
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000
+    },
+    "B": {}
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "SELECT saldo FROM akun WHERE id = 1 FOR UPDATE",
+   "result": "MENUNGGU lock",
+   "note": "",
+   "committed": 100000,
+   "lock": "A",
+   "waiting": [
+    "B"
+   ],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000
+    },
+    "B": {}
+   }
+  },
+  {
+   "actor": "A",
+   "sql": null,
+   "result": "saldo Rp100.000 >= Rp70.000, lanjut. Saldo baru: Rp30.000",
+   "note": "kode aplikasi",
+   "committed": 100000,
+   "lock": "A",
+   "waiting": [
+    "B"
+   ],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000
+    },
+    "B": {}
+   }
+  },
+  {
+   "actor": "A",
+   "sql": "UPDATE akun SET saldo = 30000 WHERE id = 1",
+   "result": "UPDATE 1",
+   "note": "",
+   "committed": 100000,
+   "lock": "A",
+   "waiting": [
+    "B"
+   ],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000
+    },
+    "B": {}
+   }
+  },
+  {
+   "actor": "A",
+   "sql": "COMMIT",
+   "result": "COMMIT",
+   "note": "lock A dilepas, B yang sedang menunggu langsung mendapat lock",
+   "committed": 30000,
+   "lock": "B",
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000
+    },
+    "B": {}
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "SELECT saldo FROM akun WHERE id = 1 FOR UPDATE",
+   "result": "30000",
+   "note": "lanjut setelah lock dilepas",
+   "committed": 30000,
+   "lock": "B",
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000
+    },
+    "B": {
+     "saldo_dibaca": 30000
+    }
+   }
+  },
+  {
+   "actor": "B",
+   "sql": null,
+   "result": "saldo Rp30.000 < Rp50.000, tolak penarikan",
+   "note": "kode aplikasi",
+   "committed": 30000,
+   "lock": "B",
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000
+    },
+    "B": {
+     "saldo_dibaca": 30000
+    }
+   }
+  },
+  {
+   "actor": "B",
+   "sql": "ROLLBACK",
+   "result": "ROLLBACK",
+   "note": "",
+   "committed": 30000,
+   "lock": null,
+   "waiting": [],
+   "vars": {
+    "A": {
+     "saldo_dibaca": 100000
+    },
+    "B": {
+     "saldo_dibaca": 30000
+    }
+   }
+  }
+ ]
+}

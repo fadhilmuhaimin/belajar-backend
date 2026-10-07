@@ -1,0 +1,13 @@
+$ go run . tarik
+tarik 50000: sukses
+tarik 70000: saldo tidak cukup
+saldo budi=50000 ani=980000 total=1030000
+
+-- diterima PostgreSQL 17.11 (log_statement=all), urut saat diterima:
+[A] BEGIN
+[A] SELECT saldo FROM akun WHERE nama = 'budi' FOR UPDATE
+[A] UPDATE akun SET saldo = 50000 WHERE nama = 'budi'
+[A] COMMIT
+[B] BEGIN
+[B] SELECT saldo FROM akun WHERE nama = 'budi' FOR UPDATE
+[B] ROLLBACK

@@ -1,0 +1,104 @@
+---
+title: "5.3 Feed dan notifikasi"
+---
+
+<div data-bb="kamu-di-sini" data-tahap="5"></div>
+
+# 5.3 Feed dan notifikasi
+
+Baca 7 menit · studi desain · Prasyarat: [[D2]], [[E4]]
+{: .meta }
+
+<div data-bb="selesai"></div>
+
+??? question "Sudah tahu? Cek 3 pertanyaan"
+
+    1. Apa beda fan-out saat tulis dan fan-out saat baca?
+    2. Kenapa promo dari toko dengan 50.000 pengikut diperlakukan berbeda dari promo warung kecil?
+    3. Apa yang terjadi kalau server mengirim push ke sejuta device dalam satu menit?
+
+    Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+## Inti
+
+Feed disusun saat ditulis untuk kebanyakan toko, saat dibaca untuk toko besar. Push massal lewat queue, dengan laju yang dibatasi.
+
+<div data-bb="arsitektur" data-tahap="5"></div>
+
+## Lihat sendiri
+
+Setiap jenis pesan disebar dengan cara berbeda. Pilah dulu, lalu cek.
+
+<div data-bb="pilah" data-src="data/d4b-pilah.json"></div>
+
+## Kenapa ini ada
+
+Rekeningo menambah fitur "Promo dari toko yang kamu ikuti". Versi pertama menulis satu baris feed untuk setiap pengikut, langsung di request saat merchant memasang promo.
+
+Lalu jaringan toko besar bergabung. Satu promo mereka menulis puluhan ribu baris, request merchant timeout, dan push dikirim serentak ke semua pengikut. Sebagian push ditolak layanan push karena melewati kuota.
+
+## Cara kerjanya
+
+Studi ini memakai kerangka [[D1]]. Semua angka di bawah adalah asumsi untuk melatih cara berpikir, bukan angka kapasitas.
+
+| Besaran | Nilai | Cara hitung |
+|---|---|---|
+| User aktif harian (DAU) | 200.000 | angka Tahap 5 |
+| Feed dibuka per hari | 600.000 | 200.000 × 3 kali (asumsi) |
+| Promo baru per hari | 2.000 | asumsi |
+| Baris feed per hari, fan-out saat tulis | 80.000 | 2.000 promo × 40 pengikut rata-rata (asumsi) |
+| Satu promo toko besar | 50.000 baris | 50.000 pengikut (asumsi) |
+
+**Fan-out saat tulis.** Saat promo dipasang, worker menulis satu baris ke feed setiap pengikut. Membaca feed jadi satu query sederhana per user, dengan index ([[B2.3]]). Biayanya ada di tulis, dan membengkak untuk toko dengan banyak pengikut.
+
+**Fan-out saat baca.** Feed dirakit saat dibuka: ambil promo terbaru dari toko yang diikuti. Tulis jadi ringan, tapi setiap pembukaan feed menjalankan query yang lebih berat.
+
+**Gabungan.** Toko biasa memakai fan-out saat tulis. Toko di atas batas pengikut tertentu (mis. 10.000, angka ini juga asumsi) memakai fan-out saat baca, lalu hasilnya digabung saat feed dibuka. Batas itu diputuskan dari metric, bukan ditebak di awal.
+
+**Push massal.** Penulisan feed dan pengiriman push dikerjakan worker dari queue ([[B10.1]]), bukan di request merchant. Layanan push punya kuota. Dokumentasi FCM menyebut kuota bawaan 600.000 pesan per menit per project, menjawab `429` kalau terlampaui, dan mencatat bahwa batas ini bisa berubah ([FCM: throttling and quotas](https://firebase.google.com/docs/cloud-messaging/throttling-and-quotas)). Pengumuman ke 1.000.000 device dengan kuota itu butuh paling cepat ±1,7 menit, dan bersaing dengan push lain seperti "pesanan siap" ([[E4]]).
+
+Karena itu worker membatasi lajunya sendiri (mirip token bucket di [[C4]]), dan push transaksi diberi queue terpisah dengan prioritas lebih tinggi dari promo. Untuk informasi yang sama bagi semua orang, FCM topic menyebar pesan dari sisi FCM, dioptimalkan untuk throughput, bukan latency ([FCM: topic messaging](https://firebase.google.com/docs/cloud-messaging/topic-messaging)).
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Fan-out saat tulis | Baca feed ringan dan cepat | Tulis membengkak untuk toko besar; data feed berlipat ganda |
+| Fan-out saat baca | Tulis ringan, tidak ada data ganda | Setiap pembukaan feed lebih berat; sulit di-cache per user |
+| Gabungan | Ringan di kedua sisi untuk kebanyakan kasus | Dua jalur kode; batasnya harus dipantau |
+| Push lewat topik | Server mengirim sekali | Tidak bisa personal; tidak cocok untuk pesan yang mendesak |
+
+## Cek diri
+
+**1.** Promo baru dari toko dengan 50.000 pengikut. Dengan fan-out saat tulis, berapa baris yang ditulis, dan di mana pekerjaan itu sebaiknya dijalankan?
+
+??? success "Jawaban"
+
+    50.000 baris (asumsi pengikut di atas). Pekerjaan itu dijalankan worker dari queue, bertahap, bukan di request merchant. Atau, untuk toko sebesar ini, pakai fan-out saat baca sehingga tidak ada 50.000 baris yang ditulis.
+
+**2.** Jelaskan kenapa push "pesanan siap" dan push promo tidak dimasukkan ke queue yang sama.
+
+??? success "Jawaban"
+
+    Push promo massal bisa memenuhi queue dan kuota layanan push selama beberapa menit. Kalau satu queue, "pesanan siap" untuk Budi menunggu di belakang ratusan ribu promo. Queue terpisah dengan prioritas membuat push transaksi tetap cepat.
+
+**3.** Merchant menghapus promo yang salah harga lima menit setelah dipasang. Apa bedanya untuk fan-out saat tulis dan saat baca?
+
+??? success "Jawaban"
+
+    Dengan fan-out saat baca, promo hilang dari semua feed begitu dihapus dari tabel promo. Dengan fan-out saat tulis, baris di setiap feed pengikut juga harus dihapus, dan push yang sudah terkirim tidak bisa ditarik. Ini alasan lain untuk menunda push promo beberapa menit.
+
+## Saat me-review desain atau kode AI, cek ini
+
+- [ ] Penulisan feed dan pengiriman push tidak terjadi di request merchant.
+- [ ] Ada batas pengikut yang membedakan fan-out saat tulis dan saat baca, dan batas itu dipantau.
+- [ ] Worker push membatasi laju dan menangani `429` dengan retry dan backoff.
+- [ ] Push transaksi tidak berbagi queue dengan push promo.
+- [ ] Preferensi user (berhenti menerima promo, jam tenang) diperiksa sebelum mengirim.
+
+## Bacaan lanjut
+
+- [FCM: Throttling and quotas](https://firebase.google.com/docs/cloud-messaging/throttling-and-quotas)
+- [FCM: Topic messaging](https://firebase.google.com/docs/cloud-messaging/topic-messaging)
+
+<div data-bb="umpan-balik"></div>

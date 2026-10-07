@@ -1,0 +1,60 @@
+{
+  "versi": 2,
+  "judul": "Raka menambah kolom telp lewat migration",
+  "sumber": { "jenis": "rekaman", "file": "labs/b4-migration/output/migrate.txt", "fileVarian": "labs/b4-migration/output/migrate.txt",
+    "catatan": "golang-migrate v4.20.1 ke PostgreSQL 17.11, direkam 2026-10-06 (labs/b4-migration/run.sh)." },
+  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': migration ketiga punya salah ketik.",
+  "komponen": [
+    { "id": "git", "label": "Repo (Git)" },
+    { "id": "ci", "label": "Deploy (CI)" },
+    { "id": "db", "label": "PostgreSQL" }
+  ],
+  "layarAwal": {},
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: statement kedua di migration 3 salah ketik nama tabel. Statement pertama (ADD COLUMN telp) benar. Setelah error, apakah kolom telp ada di database?",
+    "options": ["Ada, karena statement pertama sudah jalan", "Tidak ada", "Ada, tapi kosong"],
+    "answer": 1,
+    "varian": true,
+    "explain": "PostgreSQL menjalankan beberapa statement dalam satu kiriman sebagai satu transaction implisit. Error di statement kedua membatalkan ADD COLUMN. Yang tertinggal hanya tanda dirty di tabel schema_migrations. Rekaman lab menunjukkan kolom akun tetap id, nama, saldo."
+  },
+  "langkah": [
+    { "dari": "git", "judul": "Skema ditulis sebagai file berurutan",
+      "kirim": "migrations/\n  000001_buat_akun.up.sql      + .down.sql\n  000002_buat_transfer.up.sql  + .down.sql",
+      "jelas": "Setiap perubahan skema adalah file bernomor, direview di pull request seperti kode biasa." },
+    { "dari": "ci", "ke": "db", "judul": "Deploy menjalankan migrate up",
+      "kirim": "$ migrate up\n1/u buat_akun (6.5ms)\n2/u buat_transfer (12.9ms)",
+      "jelas": "Alat migration menjalankan file yang belum pernah dijalankan, berurutan." },
+    { "dari": "db", "judul": "Versi tercatat di database",
+      "kirim": "SELECT * FROM schema_migrations;\n version | dirty\n       2 | f",
+      "jelas": "Database sendiri yang tahu skemanya sudah sampai versi berapa. Laptop Raka, server staging, dan production bisa dicek dengan cara yang sama.",
+      "nada": "good" },
+    { "dari": "git", "judul": "Raka menambah migration 3",
+      "kirim": "000003_tambah_telp.up.sql\n  ALTER TABLE akun ADD COLUMN telp text;\n  CREATE INDEX akun_telp_idx ON akun (telp);",
+      "jelas": "File baru, bukan mengedit file lama. File yang sudah jalan di production tidak boleh diubah." },
+    { "dari": "ci", "ke": "db", "judul": "Deploy berikutnya",
+      "kirim": "$ migrate up\n3/u tambah_telp (6.3ms)\n$ migrate version\n3",
+      "jelas": "Hanya migration 3 yang dijalankan. Skema di semua environment kini sama.",
+      "nada": "good" }
+  ],
+  "varian": {
+    "label": "migration 3 punya salah ketik nama tabel",
+    "mulai": 3,
+    "langkah": [
+      { "dari": "git", "judul": "Migration 3 dengan salah ketik",
+        "kirim": "ALTER TABLE akun ADD COLUMN telp text;\nCREATE INDEX akun_telp_idx ON akuns (telp);",
+        "jelas": "Statement pertama benar, statement kedua merujuk tabel akuns yang tidak ada.", "nada": "warn" },
+      { "dari": "ci", "ke": "db", "judul": "migrate up gagal",
+        "kirim": "error: migration failed: relation \"akuns\" does not exist\nexit status 1",
+        "jelas": "Pipeline deploy berhenti di sini. Kode aplikasi versi baru tidak ikut naik.", "nada": "warn" },
+      { "dari": "db", "judul": "Versi 3 ditandai dirty, kolom telp tidak ada",
+        "kirim": "version | dirty\n      3 | t\nkolom akun: id, nama, saldo",
+        "jelas": "ADD COLUMN ikut dibatalkan oleh transaction implisit PostgreSQL. Yang tertinggal hanya tanda dirty: alat migration tidak tahu apakah perubahan setengah jalan." },
+      { "dari": "ci", "ke": "db", "judul": "Deploy berikutnya ditolak",
+        "kirim": "$ migrate up\nerror: Dirty database version 3. Fix and force version.",
+        "jelas": "Bagus: alat migration menolak menebak. Manusia harus memeriksa keadaan database dulu.", "nada": "warn" },
+      { "dari": "ci", "ke": "db", "judul": "Periksa, force, perbaiki, ulang",
+        "kirim": "$ migrate force 2\n(file 3 diperbaiki: ON akun)\n$ migrate up\n3/u tambah_telp (6.3ms)",
+        "jelas": "force hanya mengubah catatan versi, bukan skema. Jalankan setelah memastikan isi database cocok dengan versi itu. Di MySQL, DDL tidak dibatalkan seperti ini, jadi pemeriksaan manual lebih penting [perlu verifikasi]." }
+    ]
+  }
+}

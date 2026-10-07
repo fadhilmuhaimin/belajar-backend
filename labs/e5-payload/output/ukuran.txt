@@ -1,0 +1,5 @@
+-- data: PostgreSQL 17.11 skema b2q; JSON dari json.dumps (tanpa spasi), gzip level 9 (bawaan gzip.compress di Python)
+ 20 pesanan · lengkap (toko + pembeli + item di setiap pesanan)  10.620 B mentah ·    836 B gzip
+ 20 pesanan · ringkas (field layar daftar saja)                  1.630 B mentah ·    262 B gzip
+100 pesanan · lengkap (toko + pembeli + item di setiap pesanan)  52.931 B mentah ·  2.486 B gzip
+100 pesanan · ringkas (field layar daftar saja)                  8.110 B mentah ·    766 B gzip

@@ -1,0 +1,36 @@
+# Bagian signature token disensor sebagai <signature>.
+# server: ./api-t1
+
+$ curl -i -X POST /login -d '{"id": "budi", "pin": "123456"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 182
+
+{"kedaluwarsa_detik":900,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJidWRpIiwiaWF0IjoxNzkxMjg3NDQ3LCJleHAiOjE3OTEyODgzNDd9.<signature>"}
+
+$ curl -i -X GET /akun/budi -H 'Authorization: Bearer <token Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 43
+
+{"id":"budi","nama":"Budi","saldo":100000}
+
+$ curl -i -X GET /akun/ani -H 'Authorization: Bearer <token Budi>'
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+Content-Length: 81
+
+{"type":"/problems/tidak-ditemukan","title":"Akun tidak ditemukan","status":404}
+
+server log: api-t1 dev mendengarkan di 127.0.0.1:18081
+
+# server: ./api-t1 -tanpa-cek-pemilik
+
+$ curl -i -X GET /akun/ani -H 'Authorization: Bearer <token Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 48
+
+{"id":"ani","nama":"Warung Ani","saldo":250000}
+
+server log: api-t1 dev mendengarkan di 127.0.0.1:18081

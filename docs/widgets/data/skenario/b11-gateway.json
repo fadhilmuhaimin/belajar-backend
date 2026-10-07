@@ -1,0 +1,225 @@
+{
+ "versi": 2,
+ "judul": "Budi top-up Rp200.000 saat payment gateway lambat",
+ "sumber": {
+  "jenis": "rekaman",
+  "file": "labs/b11-integrasi/output/c-breaker.txt",
+  "fileVarian": "labs/b11-integrasi/output/a-tanpa-timeout.txt",
+  "catatan": "API Go (timeout 2 detik + circuit breaker) dan payment gateway tiruan yang lambat 10 detik, direkam 2026-10-07 (labs/b11-integrasi)."
+ },
+ "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': API memanggil gateway tanpa timeout.",
+ "komponen": [
+  {
+   "id": "budi",
+   "label": "App Budi"
+  },
+  {
+   "id": "api",
+   "label": "Monolith API"
+  },
+  {
+   "id": "gw",
+   "label": "Payment gateway"
+  }
+ ],
+ "perangkat": [
+  {
+   "id": "budi",
+   "label": "HP Budi"
+  }
+ ],
+ "layarAwal": {
+  "budi": {
+   "judul": "Top-up",
+   "waktu": "12.00",
+   "isi": [
+    {
+     "jenis": "baris",
+     "kiri": "Saldo Budi",
+     "kanan": "Rp50.000"
+    },
+    {
+     "jenis": "input",
+     "label": "Jumlah top-up",
+     "nilai": "Rp200.000"
+    },
+    {
+     "jenis": "tombol",
+     "teks": "Top-up"
+    }
+   ]
+  }
+ },
+ "predict": {
+  "q": "Nanti kamu akan mengubah satu hal: API memanggil gateway tanpa timeout. Gateway sedang lambat 10 detik. Berapa lama Budi menunggu?",
+  "options": [
+   "2 detik",
+   "10 detik",
+   "Sampai app ditutup"
+  ],
+  "answer": 1,
+  "varian": true,
+  "explain": "Client HTTP bawaan Go tidak punya timeout, jadi API menunggu selama gateway menunggu. Rekaman lab: setiap top-up selesai setelah 10,0 detik, dan 6 top-up yang masuk dalam 2,5 detik semuanya menunggu bersamaan."
+ },
+ "langkah": [
+  {
+   "dari": "budi",
+   "ke": "api",
+   "judul": "Budi menekan Top-up",
+   "kirim": "POST /topup\nX-Topup-Id: tp_5521",
+   "jelas": "Id top-up dibuat app, supaya retry tidak membuat tagihan baru ([[E3]]).",
+   "layar": {
+    "budi": {
+     "judul": "Top-up",
+     "waktu": "12.00",
+     "isi": [
+      {
+       "jenis": "baris",
+       "kiri": "Saldo Budi",
+       "kanan": "Rp50.000"
+      },
+      {
+       "jenis": "proses",
+       "teks": "Memproses top-up..."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "dari": "api",
+   "ke": "gw",
+   "judul": "API membuat tagihan di gateway",
+   "kirim": "POST /charges\nIdempotency-Key: tp_5521",
+   "jelas": "Client HTTP API dipasang timeout 2 detik."
+  },
+  {
+   "dari": "api",
+   "judul": "2 detik tanpa jawaban: timeout",
+   "kirim": "timeout 2 detik → 503 setelah 2.0 detik\n(gateway tetap membuat tagihan ch_1)",
+   "jelas": "Timeout berarti API berhenti menunggu, bukan berarti gateway gagal. Tagihan bisa saja sudah dibuat. Karena itu status top-up di app adalah 'belum pasti', bukan 'gagal'.",
+   "nada": "warn"
+  },
+  {
+   "dari": "api",
+   "ke": "budi",
+   "judul": "App menampilkan gangguan",
+   "kirim": "503 {\"title\":\"Pembayaran sedang gangguan, coba lagi nanti\"}",
+   "jelas": "Budi menunggu 2 detik, bukan 10. Saldo tidak berubah.",
+   "layar": {
+    "budi": {
+     "judul": "Top-up",
+     "waktu": "12.00",
+     "isi": [
+      {
+       "jenis": "baris",
+       "kiri": "Saldo Budi",
+       "kanan": "Rp50.000"
+      },
+      {
+       "jenis": "toast",
+       "teks": "Pembayaran sedang gangguan, coba lagi nanti",
+       "nada": "warn"
+      },
+      {
+       "jenis": "tombol",
+       "teks": "Top-up"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "dari": "budi",
+   "ke": "api",
+   "judul": "Dua top-up berikutnya juga timeout",
+   "kirim": "tp_5522 → 503 setelah 2.0 detik\ntp_5523 → 503 setelah 2.0 detik",
+   "jelas": "Tiga kegagalan berturut-turut."
+  },
+  {
+   "dari": "api",
+   "judul": "Circuit breaker terbuka",
+   "kirim": "3 gagal berturut-turut → terbuka selama 5 detik",
+   "jelas": "Selama terbuka, API tidak memanggil gateway sama sekali.",
+   "nada": "warn"
+  },
+  {
+   "dari": "budi",
+   "ke": "api",
+   "judul": "Top-up berikutnya ditolak seketika",
+   "kirim": "tp_5524 → 503 setelah 0.0 detik\n(breaker terbuka, gateway tidak dipanggil)",
+   "jelas": "Gagal cepat lebih baik dari menunggu 2 detik untuk hasil yang sama. Gateway yang sedang kewalahan juga tidak ditambah bebannya.",
+   "layar": {
+    "budi": {
+     "judul": "Top-up",
+     "waktu": "12.01",
+     "isi": [
+      {
+       "jenis": "baris",
+       "kiri": "Saldo Budi",
+       "kanan": "Rp50.000"
+      },
+      {
+       "jenis": "toast",
+       "teks": "Pembayaran sedang gangguan, coba lagi nanti",
+       "nada": "warn"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "dari": "api",
+   "ke": "gw",
+   "judul": "Jeda habis: satu request mencoba",
+   "kirim": "tp_5526 → gateway dipanggil lagi\n→ timeout 2 detik → breaker terbuka lagi",
+   "jelas": "Setelah 5 detik, satu request boleh lewat untuk menguji gateway (half-open). Kalau berhasil, breaker tertutup dan semua request jalan lagi."
+  }
+ ],
+ "varian": {
+  "label": "API memanggil gateway tanpa timeout",
+  "mulai": 2,
+  "langkah": [
+   {
+    "dari": "api",
+    "judul": "API terus menunggu",
+    "kirim": "http.Client{}   // bawaan Go: tanpa timeout",
+    "jelas": "Tidak ada yang menghentikan penantian selain gateway itu sendiri.",
+    "nada": "warn"
+   },
+   {
+    "dari": "budi",
+    "ke": "api",
+    "judul": "Top-up lain ikut menunggu",
+    "kirim": "6 top-up dalam 2,5 detik\n→ 6 request menunggu gateway bersamaan",
+    "jelas": "Setiap request yang menunggu memegang goroutine dan koneksi. Di Tahap 3, menunggu sambil memegang koneksi database menghabiskan pool ([[B2.5]]).",
+    "nada": "warn"
+   },
+   {
+    "dari": "gw",
+    "ke": "api",
+    "judul": "Gateway menjawab setelah 10 detik",
+    "kirim": "tp_5521 → 202 tagihan ch_1 setelah 10.0 detik",
+    "jelas": "Hasilnya benar, tapi terlambat. Budi sudah menatap spinner 10 detik.",
+    "layar": {
+     "budi": {
+      "judul": "Top-up",
+      "waktu": "12.00",
+      "isi": [
+       {
+        "jenis": "baris",
+        "kiri": "Saldo Budi",
+        "kanan": "Rp50.000"
+       },
+       {
+        "jenis": "proses",
+        "teks": "Memproses top-up... (10 detik)"
+       }
+      ],
+      "nada": "warn"
+     }
+    }
+   }
+  ]
+ }
+}

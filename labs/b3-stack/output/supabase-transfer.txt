@@ -1,0 +1,8 @@
+$ psql -f supabase/uji-transfer.sql
+ERROR: new row for relation "akun" violates check constraint "akun_check"
+budi=100000
+ani=980000
+
+-- diterima PostgreSQL 17.11 (log_statement=all), urut saat diterima:
+select transfer('budi', 'ani', 70000)
+ERROR: new row for relation "akun" violates check constraint "akun_check"

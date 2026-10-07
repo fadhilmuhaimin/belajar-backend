@@ -1,0 +1,18 @@
+# Lingkungan & hasil build
+.venv/
+site/
+__pycache__/
+*.pyc
+.DS_Store
+
+# QA gambar (seharusnya di /tmp/fig-check, jaga-jaga)
+fig-check/
+tmp/
+
+# Font: Satoshi (ITF FFL) tidak boleh diredistribusi. Unduh: bash tools/get_fonts.sh
+docs/assets/fonts/*
+
+# Rahasia: jangan pernah masuk repo
+.env*
+*.pdf
+.claude/

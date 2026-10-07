@@ -1,0 +1,33 @@
+{
+  "id": "b2-1-relasi",
+  "title": "Raka menghapus Warung Ani yang masih punya pesanan",
+  "setup": "CREATE TABLE toko (id INTEGER PRIMARY KEY, nama TEXT NOT NULL);\nCREATE TABLE pesanan (id INTEGER PRIMARY KEY, akun TEXT NOT NULL, toko_id INTEGER NOT NULL REFERENCES toko(id), total INTEGER NOT NULL);\nINSERT INTO toko VALUES (1, 'Warung Ani'), (2, 'Apotek Sehat');\nINSERT INTO pesanan VALUES (1, 'budi', 1, 35000), (2, 'budi', 2, 18000);",
+  "check": "SELECT p.id AS pesanan, p.akun, p.total, COALESCE(t.nama, '(toko hilang)') AS toko FROM pesanan p LEFT JOIN toko t ON t.id = p.toko_id ORDER BY p.id",
+  "predict": {
+    "q": "Di panel Before, foreign key sudah ditulis di skema, tapi SQLite belum diminta menegakkannya. Raka menghapus Warung Ani. Apa yang terjadi pada pesanan Budi di Warung Ani?",
+    "options": ["Pesanan ikut terhapus", "Pesanan tetap ada, tapi tokonya hilang", "Penghapusan ditolak"],
+    "answer": 1,
+    "explain": "Before: SQLite mematikan foreign key secara bawaan, jadi DELETE berhasil dan pesanan 1 menunjuk toko yang tidak ada. After: setelah PRAGMA foreign_keys = ON, DELETE ditolak. Centang 'Ubah satu hal' untuk melihat ON DELETE CASCADE: pesanan ikut terhapus, padahal itu riwayat pembayaran."
+  },
+  "panels": {
+    "before": {
+      "label": "Before: foreign key tidak ditegakkan",
+      "onError": "stop",
+      "steps": [
+        { "sql": "DELETE FROM toko WHERE id = 1", "note": "Raka membersihkan toko uji coba" }
+      ]
+    },
+    "after": {
+      "label": "After: foreign key ditegakkan",
+      "onError": "stop",
+      "steps": [
+        { "sql": "PRAGMA foreign_keys = ON", "note": "wajib per koneksi di SQLite" },
+        { "sql": "DELETE FROM toko WHERE id = 1", "note": "Raka membersihkan toko uji coba" }
+      ]
+    }
+  },
+  "toggles": [
+    { "label": "pakai ON DELETE CASCADE di pesanan.toko_id",
+      "pairs": [["REFERENCES toko(id), total", "REFERENCES toko(id) ON DELETE CASCADE, total"]] }
+  ]
+}

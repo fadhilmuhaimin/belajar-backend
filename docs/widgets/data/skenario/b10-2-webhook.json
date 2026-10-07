@@ -1,0 +1,236 @@
+{
+ "versi": 2,
+ "judul": "Budi top-up Rp200.000 lewat payment gateway",
+ "sumber": {
+  "jenis": "rekaman",
+  "file": "labs/b10-2-webhook/output/b-duplikat.txt",
+  "fileVarian": "labs/b10-2-webhook/output/c-naif.txt",
+  "catatan": "Gateway tiruan mengirim webhook format Standard Webhooks ke API Go → PostgreSQL 17, direkam 2026-10-07 (labs/b10-2-webhook). Langkah 1–3 (membuat tagihan dan membayar) tidak direkam."
+ },
+ "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal' dan perhatikan saldo Budi.",
+ "komponen": [
+  {
+   "id": "app",
+   "label": "App Budi"
+  },
+  {
+   "id": "api",
+   "label": "Monolith API",
+   "lapisan": [
+    "handler",
+    "logika bisnis",
+    "akses data"
+   ]
+  },
+  {
+   "id": "gw",
+   "label": "Payment gateway"
+  },
+  {
+   "id": "db",
+   "label": "PostgreSQL"
+  },
+  {
+   "id": "worker",
+   "label": "Worker"
+  }
+ ],
+ "perangkat": [
+  {
+   "id": "hp",
+   "label": "HP Budi"
+  }
+ ],
+ "layarAwal": {
+  "hp": {
+   "waktu": "19.10",
+   "saldo": 50000,
+   "isi": [
+    {
+     "jenis": "input",
+     "label": "Top-up",
+     "nilai": "Rp200.000"
+    },
+    {
+     "jenis": "tombol",
+     "teks": "Bayar"
+    }
+   ]
+  }
+ },
+ "predict": {
+  "q": "Nanti kamu akan mengubah satu hal: gateway mengirim webhook yang sama dua kali, dan tabel event tidak punya constraint unik. Berapa saldo Budi di akhir?",
+  "options": [
+   "Rp250.000",
+   "Rp450.000",
+   "Rp50.000"
+  ],
+  "answer": 1,
+  "varian": true,
+  "explain": "Webhook kedua diproses seperti pembayaran baru, jadi saldo bertambah dua kali: Rp50.000 + Rp200.000 + Rp200.000 = Rp450.000. Gateway berhak mengirim ulang. Yang salah adalah backend yang tidak mencatat event yang sudah diproses."
+ },
+ "langkah": [
+  {
+   "dari": "app",
+   "ke": "api",
+   "lapisan": "handler",
+   "judul": "Budi menekan Bayar",
+   "kirim": "POST /topups\n{\"jumlah\": 200000}",
+   "jelas": "App meminta tagihan top-up. Saldo belum berubah, karena uangnya belum dibayar.",
+   "layar": {
+    "hp": {
+     "waktu": "19.10",
+     "saldo": 50000,
+     "isi": [
+      {
+       "jenis": "proses",
+       "teks": "Membuat tagihan..."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "dari": "api",
+   "ke": "gw",
+   "lapisan": "logika bisnis",
+   "judul": "API membuat tagihan di gateway",
+   "kirim": "POST /charges\n{\"order_id\": \"tp_5521\", \"amount\": 200000}",
+   "jelas": "API mencatat top-up tp_5521 berstatus menunggu, lalu meminta gateway membuat tagihan."
+  },
+  {
+   "dari": "app",
+   "ke": "gw",
+   "judul": "Budi membayar di halaman gateway",
+   "kirim": "status tagihan tp_5521: dibayar",
+   "jelas": "Pembayaran terjadi di sistem gateway, bukan di Rekeningo. Rekeningo baru tahu lewat webhook.",
+   "layar": {
+    "hp": {
+     "waktu": "19.11",
+     "saldo": 50000,
+     "isi": [
+      {
+       "jenis": "proses",
+       "teks": "Menunggu konfirmasi..."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "dari": "gw",
+   "ke": "api",
+   "lapisan": "handler",
+   "judul": "Gateway mengirim webhook",
+   "kirim": "POST /webhooks/pembayaran\nwebhook-id: evt_901\nwebhook-timestamp: <detik Unix saat dikirim>\nwebhook-signature: v1,…\n{\"order_id\":\"tp_5521\",\"status\":\"paid\",\"amount\":200000}",
+   "jelas": "Webhook adalah HTTP request dari sistem lain ke API kita. Siapa pun bisa mengirim request ke URL ini, jadi signature-nya harus dicek."
+  },
+  {
+   "dari": "api",
+   "lapisan": "handler",
+   "judul": "Handler memverifikasi signature",
+   "kirim": "base64(HMAC-SHA256(secret, \"evt_901.<timestamp>.\" + body)) == signature  ✓\ntimestamp dalam 5 menit terakhir  ✓",
+   "jelas": "Signature dihitung dari id, timestamp, dan body memakai secret yang hanya diketahui gateway dan Rekeningo. Body yang diubah atau kiriman lama yang diputar ulang ditolak 401 (rekaman D)."
+  },
+  {
+   "dari": "api",
+   "ke": "db",
+   "lapisan": "akses data",
+   "judul": "Satu transaction: catat event, tambah saldo, tulis outbox",
+   "kirim": "BEGIN;\nINSERT INTO webhook_event (event_id) VALUES ('evt_901') ON CONFLICT DO NOTHING;  -- 1 baris\nUPDATE topup SET status = 'dibayar' WHERE id = 'tp_5521' AND status = 'menunggu' RETURNING akun, jumlah;\nUPDATE akun SET saldo = saldo + 200000 WHERE id = 'budi';\nINSERT INTO outbox (jenis, data) VALUES ('topup_masuk', ...);\nCOMMIT;",
+   "jelas": "event_id adalah PRIMARY KEY. Kalau event yang sama datang lagi, INSERT tidak menulis apa-apa dan saldo tidak disentuh (rekaman B: \"duplikat, sudah pernah diproses\"). Jumlah diambil dari tabel topup milik kita, bukan dari isi webhook.",
+   "nada": "good"
+  },
+  {
+   "dari": "api",
+   "ke": "gw",
+   "lapisan": "handler",
+   "judul": "API menjawab 200 dengan cepat",
+   "kirim": "200 OK\n(kiriman ke-2 evt_901 → 200 duplikat, sudah pernah diproses)",
+   "jelas": "Gateway hanya butuh tahu bahwa webhook diterima. Pekerjaan lambat, mis. kirim notifikasi, tidak dikerjakan di sini."
+  },
+  {
+   "dari": "db",
+   "ke": "worker",
+   "judul": "Worker mengambil event dari outbox",
+   "kirim": "SELECT id, data FROM outbox WHERE terkirim = false ORDER BY id FOR UPDATE SKIP LOCKED LIMIT 10;\n→ outbox #1 topup_masuk",
+   "jelas": "Event outbox ditulis di transaction yang sama dengan saldo. Jadi notifikasi tidak mungkin terkirim untuk saldo yang batal."
+  },
+  {
+   "dari": "worker",
+   "ke": "app",
+   "judul": "Notifikasi sampai di HP Budi",
+   "kirim": "push: \"Top-up Rp200.000 berhasil\" (1×)\nPostgreSQL: saldo 250000",
+   "jelas": "Saldo bertambah tepat satu kali.",
+   "nada": "good",
+   "layar": {
+    "hp": {
+     "waktu": "19.11",
+     "saldo": 250000,
+     "nada": "good",
+     "isi": [
+      {
+       "jenis": "toast",
+       "teks": "Top-up Rp200.000 berhasil",
+       "nada": "good"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "varian": {
+  "label": "gateway mengirim webhook yang sama dua kali, tanpa constraint unik",
+  "mulai": 5,
+  "langkah": [
+   {
+    "dari": "api",
+    "ke": "db",
+    "lapisan": "akses data",
+    "judul": "API menambah saldo tanpa mencatat event",
+    "kirim": "UPDATE akun SET saldo = saldo + 200000 WHERE id = 'budi';   -- jumlah dari isi webhook\n-- saldo: 250000",
+    "jelas": "Handler naif: tidak mencatat event, dan percaya jumlah di isi webhook."
+   },
+   {
+    "dari": "gw",
+    "ke": "api",
+    "lapisan": "handler",
+    "judul": "Gateway tidak menerima jawaban, lalu mengirim ulang",
+    "kirim": "POST /webhooks/pembayaran\nwebhook-id: evt_901   (kiriman ke-2)",
+    "jelas": "Bagi gateway, tidak ada jawaban berarti belum diterima. Mengirim ulang adalah perilaku normal.",
+    "nada": "warn"
+   },
+   {
+    "dari": "api",
+    "ke": "db",
+    "lapisan": "akses data",
+    "judul": "Event yang sama diproses lagi",
+    "kirim": "UPDATE akun SET saldo = saldo + 200000 WHERE id = 'budi';\n-- saldo: 450000",
+    "jelas": "Tidak ada yang mencatat bahwa evt_901 sudah diproses, jadi saldo bertambah dua kali.",
+    "nada": "warn"
+   },
+   {
+    "dari": "worker",
+    "ke": "app",
+    "judul": "Saldo Budi Rp450.000",
+    "kirim": "push: \"Top-up Rp200.000 berhasil\" (2×)\nPostgreSQL: saldo 450000",
+    "jelas": "Rekeningo rugi Rp200.000. Perbaikannya: simpan event_id dengan constraint unik di transaction yang sama.",
+    "nada": "warn",
+    "layar": {
+     "hp": {
+      "waktu": "19.12",
+      "saldo": 450000,
+      "nada": "warn",
+      "isi": [
+       {
+        "jenis": "toast",
+        "teks": "Top-up Rp200.000 berhasil (2×)",
+        "nada": "warn"
+       }
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

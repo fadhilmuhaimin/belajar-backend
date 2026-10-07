@@ -1,0 +1,22 @@
+-- PostgreSQL 17.11, skema dari skema.sql
+INSERT INTO pesanan (id, akun_id, toko_id) VALUES (2, 'budi', 99);
+ERROR:  insert or update on table "pesanan" violates foreign key constraint "pesanan_toko_id_fkey"
+DETAIL:  Key (toko_id)=(99) is not present in table "toko".
+DELETE FROM toko WHERE id = 1;
+ERROR:  update or delete on table "toko" violates foreign key constraint "produk_toko_id_fkey" on table "produk"
+DETAIL:  Key (id)=(1) is still referenced from table "produk".
+UPDATE produk SET harga = 28000 WHERE id = 1;
+SELECT p.nama, p.harga AS harga_sekarang, i.harga AS harga_di_pesanan_1, i.jumlah
+  FROM item_pesanan i JOIN produk p ON p.id = i.produk_id WHERE i.pesanan_id = 1 ORDER BY p.id;
+    nama     | harga_sekarang | harga_di_pesanan_1 | jumlah 
+-------------+----------------+--------------------+--------
+ Nasi goreng |          28000 |              25000 |      1
+ Es teh      |           5000 |               5000 |      2
+(2 rows)
+
+SELECT sum(i.harga * i.jumlah) AS total_pesanan_1 FROM item_pesanan i WHERE i.pesanan_id = 1;
+ total_pesanan_1 
+-----------------
+           35000
+(1 row)
+

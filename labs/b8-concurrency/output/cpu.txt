@@ -1,0 +1,2 @@
+Go go1.27.1: /ping dijawab setelah 0.000351 detik
+Node.js v22.17.1: /ping dijawab setelah 0.956768 detik

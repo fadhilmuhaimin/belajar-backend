@@ -1,0 +1,59 @@
+{
+ "id": "b1-3-pagination",
+ "title": "Riwayat Ani, 3 pesanan per halaman, pesanan baru masuk di tengah",
+ "setup": "CREATE TABLE pesanan (id INTEGER PRIMARY KEY, toko_id INTEGER NOT NULL, total INTEGER NOT NULL);\nWITH RECURSIVE g(x) AS (SELECT 101 UNION ALL SELECT x + 1 FROM g WHERE x < 110) INSERT INTO pesanan SELECT x, 1, 25000 FROM g;",
+ "check": "SELECT id, total FROM pesanan ORDER BY id DESC LIMIT 7",
+ "predict": {
+  "q": "Ani membuka halaman 1 (3 pesanan terbaru). Satu pesanan baru masuk. Lalu Ani menggulir ke halaman 2. Di panel Before (OFFSET), apa yang terjadi?",
+  "options": [
+   "Halaman 2 benar, tidak ada yang ganda",
+   "Satu pesanan muncul dua kali",
+   "Satu pesanan terlewat"
+  ],
+  "answer": 1,
+  "explain": "OFFSET 3 menghitung posisi dari data terbaru. Pesanan baru menggeser semua baris satu posisi, jadi baris terakhir halaman 1 (108) muncul lagi di awal halaman 2. Cursor (After) meminta baris yang id-nya lebih kecil dari 108, jadi tidak terpengaruh pesanan baru. Rekaman PostgreSQL di halaman ini menunjukkan hal yang sama."
+ },
+ "panels": {
+  "before": {
+   "label": "Before: OFFSET",
+   "onError": "stop",
+   "steps": [
+    {
+     "sql": "SELECT id FROM pesanan WHERE toko_id = 1 ORDER BY id DESC LIMIT 3 OFFSET 0",
+     "note": "halaman 1"
+    },
+    {
+     "sql": "INSERT INTO pesanan VALUES (111, 1, 30000)",
+     "note": "pesanan baru masuk"
+    },
+    {
+     "sql": "SELECT id FROM pesanan WHERE toko_id = 1 ORDER BY id DESC LIMIT 3 OFFSET 3",
+     "note": "halaman 2"
+    }
+   ]
+  },
+  "after": {
+   "label": "After: cursor",
+   "onError": "stop",
+   "steps": [
+    {
+     "sql": "SELECT id FROM pesanan WHERE toko_id = 1 ORDER BY id DESC LIMIT 3",
+     "note": "halaman 1"
+    },
+    {
+     "sql": "SELECT MIN(id) FROM (SELECT id FROM pesanan WHERE toko_id = 1 ORDER BY id DESC LIMIT 3)",
+     "store": "kursor",
+     "note": "cursor = id terakhir yang dilihat, dikirim app"
+    },
+    {
+     "sql": "INSERT INTO pesanan VALUES (111, 1, 30000)",
+     "note": "pesanan baru masuk"
+    },
+    {
+     "sql": "SELECT id FROM pesanan WHERE toko_id = 1 AND id < ${kursor} ORDER BY id DESC LIMIT 3",
+     "note": "halaman 2"
+    }
+   ]
+  }
+ }
+}

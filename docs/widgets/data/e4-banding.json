@@ -1,0 +1,25 @@
+{
+  "judul": "Ani menunggu pesanan Budi siap: tiga cara memberi tahu",
+  "opsi": [
+    { "id": "poll", "nama": "Polling setiap 5 detik",
+      "baris": [ [ { "id": "app", "label": "App", "sub": "timer 5 detik" }, { "id": "api", "label": "API", "sub": "GET /pesanan/812" }, { "id": "db", "label": "PostgreSQL" } ] ] },
+    { "id": "sse", "nama": "SSE (koneksi terbuka)",
+      "baris": [ [ { "id": "app", "label": "App", "sub": "koneksi tetap terbuka" }, { "id": "api", "label": "API", "sub": "kirim saat berubah" }, { "id": "db", "label": "PostgreSQL" } ] ] },
+    { "id": "fcm", "nama": "Push notification (FCM)",
+      "baris": [ [ { "id": "api", "label": "API" }, { "id": "fcm", "label": "FCM", "sub": "layanan push" }, { "id": "hp", "label": "HP", "sub": "app boleh tertutup" } ] ] }
+  ],
+  "fitur": [
+    { "label": "Seberapa cepat app tahu?",
+      "sorot": { "poll": ["app", "api"], "sse": ["api", "app"], "fcm": ["fcm", "hp"] },
+      "catatan": { "poll": "Sampai satu interval terlambat. Rekaman lab: berubah detik ke-7, app tahu detik ke-10.", "sse": "Rekaman lab: event sampai di detik ke-7, saat status berubah.", "fcm": "Biasanya cepat, tapi waktu sampai tidak dijamin. Prioritas pesan memengaruhi kapan HP dibangunkan." },
+      "nada": { "poll": "warn" } },
+    { "label": "Berapa request ke server?",
+      "sorot": { "poll": ["app", "api", "db"], "sse": ["app", "api"], "fcm": ["api", "fcm"] },
+      "catatan": { "poll": "3 request dalam 10 detik untuk satu pesanan. Dikali ribuan user di Tahap 3, polling jadi sumber beban.", "sse": "1 request, tapi koneksinya terbuka terus selama layar dibuka.", "fcm": "Satu panggilan dari server ke FCM per notifikasi." },
+      "nada": { "poll": "warn" } },
+    { "label": "App sedang tertutup",
+      "sorot": { "poll": ["app"], "sse": ["app"], "fcm": ["hp"] },
+      "catatan": { "poll": "Tidak bekerja: timer tidak jalan.", "sse": "Tidak bekerja: koneksi tertutup bersama app.", "fcm": "Bekerja: sistem operasi menampilkan notifikasi." },
+      "nada": { "poll": "warn", "sse": "warn" } }
+  ]
+}

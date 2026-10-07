@@ -1,0 +1,1055 @@
+{
+  "app": "Rekeningo",
+  "catatan": "Aplikasi fiktif. Sumber: plan/STORY.md. Satu-satunya sumber data untuk blok 'Kamu di sini', diagram arsitektur tahap, dan Peta cerita.",
+  "tahap": [
+    {
+      "no": 1,
+      "nama": "MVP",
+      "user": "1–100 user",
+      "rekap": "Rekeningo diuji di satu kompleks perkantoran oleh 100 orang. Raka membangun satu backend monolith dengan satu database, dan transfer pertama mulai berjalan.",
+      "sebelumnya": "Belum ada. Ini awal cerita.",
+      "arsitektur": {
+        "baris": [
+          [
+            {
+              "label": "App Flutter",
+              "baru": true
+            },
+            {
+              "label": "Monolith API",
+              "baru": true
+            },
+            {
+              "label": "PostgreSQL",
+              "baru": true
+            }
+          ]
+        ],
+        "caption": "Tahap 1 punya tiga komponen. Biru = baru di tahap ini."
+      },
+      "asumsi": {
+        "user": 100,
+        "aktif": 30,
+        "req": 40,
+        "puncak": 10,
+        "trx": 2,
+        "baris": 300,
+        "tim": "1 developer"
+      },
+      "jalur_inti": {
+        "menit": 152,
+        "halaman": 18
+      }
+    },
+    {
+      "no": 2,
+      "nama": "Saldo salah dan dobel bayar",
+      "user": "100–1.000 user",
+      "rekap": "Rekeningo dibuka untuk tiga kompleks. Budi menarik saldo dari HP dan tablet bersamaan, dan keduanya sukses.",
+      "sebelumnya": "Tahap 1: transfer sudah aman dari kegagalan di tengah jalan berkat transaction.",
+      "arsitektur": {
+        "baris": [
+          [
+            {
+              "label": "App Flutter",
+              "catatan": "+ idempotency key",
+              "berubah": true
+            },
+            {
+              "label": "Monolith API",
+              "catatan": "+ cek baris berubah",
+              "berubah": true
+            },
+            {
+              "label": "PostgreSQL",
+              "catatan": "+ index, lock",
+              "berubah": true
+            }
+          ]
+        ],
+        "caption": "Tahap 2: komponennya sama, isinya berubah (biru): idempotency key, cek baris, index + lock."
+      },
+      "asumsi": {
+        "user": 1000,
+        "aktif": 30,
+        "req": 40,
+        "puncak": 10,
+        "trx": 2,
+        "baris": 300,
+        "tim": "2 developer"
+      },
+      "jalur_inti": {
+        "menit": 61,
+        "halaman": 7
+      }
+    },
+    {
+      "no": 3,
+      "nama": "Lambat di jam sibuk",
+      "user": "1.000–10.000 user",
+      "rekap": "Rekeningo dipakai di satu kota, dan app lambat di jam makan siang.",
+      "sebelumnya": "Tahap 2: saldo dan pembayaran sudah aman dari race condition dan request ganda.",
+      "arsitektur": {
+        "baris": [
+          [
+            {
+              "label": "App Flutter"
+            },
+            {
+              "label": "Monolith API ×2",
+              "baru": true
+            },
+            {
+              "label": "PostgreSQL"
+            }
+          ],
+          [
+            {
+              "label": "Redis",
+              "baru": true
+            },
+            {
+              "label": "Worker",
+              "baru": true
+            },
+            {
+              "label": "FCM / email",
+              "baru": true
+            }
+          ]
+        ],
+        "caption": "Tahap 3: pekerjaan lambat pindah ke worker lewat queue."
+      },
+      "asumsi": {
+        "user": 10000,
+        "aktif": 25,
+        "req": 60,
+        "puncak": 10,
+        "trx": 2,
+        "baris": 300,
+        "tim": "3–4 developer"
+      },
+      "jalur_inti": {
+        "menit": 54,
+        "halaman": 6
+      }
+    },
+    {
+      "no": 4,
+      "nama": "Integrasi pihak ketiga",
+      "user": "10.000–100.000 user",
+      "rekap": "Rekeningo bekerja sama dengan payment gateway dan layanan verifikasi identitas, dan tim jadi delapan orang.",
+      "sebelumnya": "Tahap 3: jam sibuk sudah lancar setelah pekerjaan lambat dipindah ke worker.",
+      "arsitektur": {
+        "baris": [
+          [
+            {
+              "label": "App Flutter"
+            },
+            {
+              "label": "Monolith modular",
+              "baru": true
+            },
+            {
+              "label": "PostgreSQL"
+            }
+          ],
+          [
+            {
+              "label": "Object storage",
+              "baru": true,
+              "lepas": true
+            },
+            {
+              "label": "Layanan pembayaran",
+              "baru": true
+            },
+            {
+              "label": "Payment gateway",
+              "baru": true
+            }
+          ]
+        ],
+        "caption": "Tahap 4: pembayaran jadi service sendiri."
+      },
+      "asumsi": {
+        "user": 100000,
+        "aktif": 20,
+        "req": 60,
+        "puncak": 10,
+        "trx": 2,
+        "baris": 300,
+        "upload": 2000,
+        "fileKB": 500,
+        "tim": "6–10 developer, 2 tim"
+      },
+      "jalur_inti": {
+        "menit": 15,
+        "halaman": 2
+      }
+    },
+    {
+      "no": 5,
+      "nama": "Satu database tidak cukup",
+      "user": "100.000–1.000.000+ user",
+      "rekap": "Rekeningo dipakai di banyak kota, dan database utama penuh oleh query baca.",
+      "sebelumnya": "Tahap 4: integrasi pihak ketiga dan pemecahan layanan pembayaran sudah berjalan.",
+      "arsitektur": {
+        "baris": [
+          [
+            {
+              "label": "App Flutter"
+            },
+            {
+              "label": "Load balancer",
+              "baru": true
+            },
+            {
+              "label": "API + service"
+            }
+          ],
+          [
+            {
+              "label": "DB primary"
+            },
+            {
+              "label": "Read replica",
+              "baru": true,
+              "lepas": true
+            },
+            {
+              "label": "Queue"
+            }
+          ]
+        ],
+        "caption": "Tahap 5: query baca dipindah ke replica."
+      },
+      "asumsi": {
+        "user": 1000000,
+        "aktif": 20,
+        "req": 60,
+        "puncak": 10,
+        "trx": 2,
+        "baris": 300,
+        "upload": 20000,
+        "fileKB": 500,
+        "tim": "20+ developer"
+      },
+      "jalur_inti": {
+        "menit": 0,
+        "halaman": 0
+      }
+    }
+  ],
+  "halaman": [
+    {
+      "id": "A0",
+      "judul": "Cara pakai panduan ini",
+      "tahap": "pembuka",
+      "path": "index.md",
+      "inti": true,
+      "ada": true,
+      "menit": 3
+    },
+    {
+      "id": "Cerita",
+      "judul": "Cerita Rekeningo",
+      "tahap": "pembuka",
+      "path": "cerita/index.md",
+      "inti": true,
+      "ada": true,
+      "menit": 4
+    },
+    {
+      "id": "Peta",
+      "judul": "Peta cerita",
+      "tahap": "pembuka",
+      "path": "cerita/peta.md",
+      "inti": true,
+      "ada": true
+    },
+    {
+      "id": "T1",
+      "judul": "Tahap 1 · Ceritanya",
+      "tahap": 1,
+      "path": "cerita/tahap-1.md",
+      "inti": true,
+      "ada": true,
+      "menit": 4
+    },
+    {
+      "id": "A1",
+      "judul": "Apa yang dikerjakan backend",
+      "tahap": 1,
+      "kelompok": "Gambaran besar",
+      "topik": "Gambaran besar",
+      "path": "a-gambaran/a1-apa-yang-dikerjakan-backend.md",
+      "inti": true,
+      "masalah": "Bingung apa saja yang harus ditulis di backend",
+      "ada": true,
+      "nomor": "1.1",
+      "menit": 7
+    },
+    {
+      "id": "A4",
+      "judul": "BaaS atau backend sendiri",
+      "tahap": 1,
+      "kelompok": "Gambaran besar",
+      "topik": "Gambaran besar",
+      "path": "a-gambaran/a4-baas-vs-backend-sendiri.md",
+      "prasyarat": [
+        "A1"
+      ],
+      "inti": true,
+      "masalah": "Ragu: cukup Supabase/Firebase atau perlu backend sendiri?",
+      "ada": true,
+      "nomor": "1.2",
+      "menit": 8
+    },
+    {
+      "id": "A2",
+      "judul": "Perjalanan satu request",
+      "tahap": 1,
+      "kelompok": "Gambaran besar",
+      "topik": "Gambaran besar",
+      "path": "a-gambaran/a2-perjalanan-request.md",
+      "prasyarat": [
+        "A1"
+      ],
+      "inti": true,
+      "masalah": "Tidak tahu apa yang terjadi setelah app mengirim request",
+      "ada": true,
+      "nomor": "1.3",
+      "menit": 9
+    },
+    {
+      "id": "B1.1",
+      "judul": "HTTP: method, status, header",
+      "tahap": 1,
+      "kelompok": "Dasar API",
+      "topik": "API",
+      "path": "b-fondasi/b1-1-http.md",
+      "prasyarat": [
+        "A2"
+      ],
+      "inti": true,
+      "masalah": "Bingung memilih method dan status code",
+      "ada": true,
+      "nomor": "1.4",
+      "menit": 10
+    },
+    {
+      "id": "B1.2",
+      "judul": "Resource dan format error",
+      "tahap": 1,
+      "kelompok": "Dasar API",
+      "topik": "API",
+      "path": "b-fondasi/b1-2-resource-error.md",
+      "prasyarat": [
+        "B1.1"
+      ],
+      "inti": true,
+      "masalah": "App menampilkan pesan error yang tidak jelas",
+      "ada": true,
+      "nomor": "1.5",
+      "menit": 8
+    },
+    {
+      "id": "B6",
+      "judul": "Validation dan error handling",
+      "tahap": 1,
+      "kelompok": "Dasar API",
+      "topik": "API",
+      "path": "b-fondasi/b6-validation-error.md",
+      "prasyarat": [
+        "B1.2"
+      ],
+      "inti": true,
+      "masalah": "Nominal transfer negatif lolos ke database",
+      "ada": true,
+      "nomor": "1.6",
+      "menit": 10
+    },
+    {
+      "id": "B1.4",
+      "judul": "Kontrak API dengan OpenAPI",
+      "tahap": 1,
+      "kelompok": "Dasar API",
+      "topik": "API",
+      "path": "b-fondasi/b1-4-openapi.md",
+      "prasyarat": [
+        "B1.2"
+      ],
+      "masalah": "App dan backend beda paham soal bentuk JSON",
+      "ada": true,
+      "nomor": "1.7",
+      "menit": 8
+    },
+    {
+      "id": "B2.1",
+      "judul": "Data modeling dan relasi",
+      "tahap": 1,
+      "kelompok": "Data",
+      "topik": "Data",
+      "path": "b-fondasi/b2-1-data-modeling.md",
+      "prasyarat": [
+        "A1"
+      ],
+      "inti": true,
+      "masalah": "Bingung merancang tabel akun, transaksi, pesanan",
+      "ada": true,
+      "nomor": "1.8",
+      "menit": 9
+    },
+    {
+      "id": "B2.2",
+      "judul": "SQL atau NoSQL",
+      "tahap": 1,
+      "kelompok": "Data",
+      "topik": "Data",
+      "path": "b-fondasi/b2-2-sql-vs-nosql.md",
+      "prasyarat": [
+        "B2.1"
+      ],
+      "inti": true,
+      "masalah": "Tergoda pindah ke NoSQL \"karena lebih cepat\"",
+      "ada": true,
+      "nomor": "1.9",
+      "menit": 7
+    },
+    {
+      "id": "B4.1",
+      "judul": "Migration: skema sebagai kode",
+      "tahap": 1,
+      "kelompok": "Data",
+      "topik": "Data",
+      "path": "b-fondasi/b4-1-migration.md",
+      "prasyarat": [
+        "B2.1"
+      ],
+      "inti": true,
+      "masalah": "Skema database di laptop dan di server berbeda",
+      "ada": true,
+      "nomor": "1.10",
+      "menit": 8
+    },
+    {
+      "id": "B3.1",
+      "judul": "Transaction",
+      "tahap": 1,
+      "kelompok": "Data",
+      "topik": "Data",
+      "path": "b-fondasi/b3-1-transaction.md",
+      "prasyarat": [
+        "A2"
+      ],
+      "prasyarat_lain": "`SELECT`, `UPDATE`",
+      "inti": true,
+      "masalah": "Transfer gagal di tengah, saldo hilang",
+      "ada": true,
+      "nomor": "1.11",
+      "menit": 8
+    },
+    {
+      "id": "B5.1",
+      "judul": "Authentication: session atau token",
+      "tahap": 1,
+      "kelompok": "Keamanan",
+      "topik": "Keamanan",
+      "path": "b-fondasi/b5-1-authentication.md",
+      "prasyarat": [
+        "B1.1"
+      ],
+      "inti": true,
+      "masalah": "Bingung memilih session atau JWT untuk login",
+      "ada": true,
+      "nomor": "1.12",
+      "menit": 10
+    },
+    {
+      "id": "B5.3",
+      "judul": "Authorization: siapa boleh apa",
+      "tahap": 1,
+      "kelompok": "Keamanan",
+      "topik": "Keamanan",
+      "path": "b-fondasi/b5-3-authorization.md",
+      "prasyarat": [
+        "B5.1"
+      ],
+      "inti": true,
+      "masalah": "Budi bisa melihat saldo Ani lewat ID di URL",
+      "ada": true,
+      "nomor": "1.13",
+      "menit": 9
+    },
+    {
+      "id": "B7.1",
+      "judul": "Lapisan dasar",
+      "tahap": 1,
+      "kelompok": "Kualitas dan rilis",
+      "topik": "Struktur kode",
+      "path": "b-fondasi/b7-1-lapisan-dasar.md",
+      "prasyarat": [
+        "A2"
+      ],
+      "inti": true,
+      "masalah": "Logika transfer tercampur parsing HTTP",
+      "ada": true,
+      "nomor": "1.14",
+      "menit": 9
+    },
+    {
+      "id": "C1",
+      "judul": "Testing: apa dites di level mana",
+      "tahap": 1,
+      "kelompok": "Kualitas dan rilis",
+      "topik": "Operasional",
+      "path": "c-operasional/c1-testing.md",
+      "prasyarat": [
+        "B7.1"
+      ],
+      "inti": true,
+      "masalah": "Bug lama muncul lagi setelah perubahan",
+      "ada": true,
+      "nomor": "1.15",
+      "menit": 10
+    },
+    {
+      "id": "C3",
+      "judul": "Deployment dan rollback",
+      "tahap": 1,
+      "kelompok": "Kualitas dan rilis",
+      "topik": "Operasional",
+      "path": "c-operasional/c3-deployment.md",
+      "prasyarat": [
+        "C1"
+      ],
+      "masalah": "Deploy membuat app mati, atau harus mundur cepat",
+      "ada": true,
+      "nomor": "1.16",
+      "menit": 10
+    },
+    {
+      "id": "D1",
+      "judul": "Kerangka berpikir dan estimasi",
+      "tahap": 1,
+      "kelompok": "Merancang dan bekerja dengan AI",
+      "topik": "Desain sistem",
+      "path": "d-system-design/d1-kerangka-berpikir.md",
+      "prasyarat": [
+        "T1"
+      ],
+      "inti": true,
+      "masalah": "Tidak tahu harus mulai dari mana saat mendesain",
+      "ada": true,
+      "nomor": "1.17",
+      "menit": 9
+    },
+    {
+      "id": "F1",
+      "judul": "Menulis spesifikasi untuk AI",
+      "tahap": 1,
+      "kelompok": "Merancang dan bekerja dengan AI",
+      "topik": "Bekerja dengan AI",
+      "path": "f-ai-belajar/f1-spesifikasi-untuk-ai.md",
+      "prasyarat": [
+        "B1.4"
+      ],
+      "inti": true,
+      "masalah": "Kode AI tidak sesuai maksud",
+      "ada": true,
+      "nomor": "1.18",
+      "menit": 6
+    },
+    {
+      "id": "F2",
+      "judul": "Review kode backend buatan AI",
+      "tahap": 1,
+      "kelompok": "Merancang dan bekerja dengan AI",
+      "topik": "Bekerja dengan AI",
+      "path": "f-ai-belajar/f2-review-kode-ai.md",
+      "prasyarat": [
+        "F1"
+      ],
+      "inti": true,
+      "masalah": "Ragu menyetujui kode atau desain buatan AI",
+      "ada": true,
+      "nomor": "1.19",
+      "menit": 11
+    },
+    {
+      "id": "T2",
+      "judul": "Tahap 2 · Ceritanya",
+      "tahap": 2,
+      "path": "cerita/tahap-2.md",
+      "inti": true,
+      "ada": true,
+      "menit": 4
+    },
+    {
+      "id": "B3.2",
+      "judul": "Race condition dan lock",
+      "tahap": 2,
+      "topik": "Data",
+      "path": "b-fondasi/b3-2-race-condition-lock.md",
+      "prasyarat": [
+        "B3.1"
+      ],
+      "inti": true,
+      "masalah": "Saldo salah: dua penarikan bersamaan sama-sama lolos",
+      "ada": true,
+      "pendek": "Race condition",
+      "nomor": "2.1",
+      "menit": 10
+    },
+    {
+      "id": "B3.3",
+      "judul": "Isolation level secara praktis",
+      "tahap": 2,
+      "topik": "Data",
+      "path": "b-fondasi/b3-3-isolation-level.md",
+      "prasyarat": [
+        "B3.2"
+      ],
+      "masalah": "Transaction melihat data yang \"berubah sendiri\"",
+      "ada": true,
+      "pendek": "Isolation level",
+      "nomor": "2.2",
+      "menit": 10
+    },
+    {
+      "id": "E3",
+      "judul": "Retry dan idempotency key dari app",
+      "tahap": 2,
+      "topik": "Khusus app mobile",
+      "path": "e-mobile/e3-retry-idempotency.md",
+      "prasyarat": [
+        "A2"
+      ],
+      "inti": true,
+      "masalah": "Dobel bayar setelah app retry",
+      "ada": true,
+      "pendek": "Retry dan idempotency key",
+      "nomor": "2.3",
+      "menit": 10
+    },
+    {
+      "id": "B1.3",
+      "judul": "Pagination dan idempotent method",
+      "tahap": 2,
+      "topik": "API",
+      "path": "b-fondasi/b1-3-pagination-idempotent.md",
+      "prasyarat": [
+        "B1.1"
+      ],
+      "inti": true,
+      "masalah": "Riwayat panjang, halaman berikutnya berisi data ganda",
+      "ada": true,
+      "nomor": "2.4",
+      "menit": 8
+    },
+    {
+      "id": "B2.4",
+      "judul": "N+1 query",
+      "tahap": 2,
+      "topik": "Data",
+      "path": "b-fondasi/b2-4-n-plus-1.md",
+      "prasyarat": [
+        "B2.1"
+      ],
+      "masalah": "Riwayat penjualan lambat walau datanya sedikit",
+      "ada": true,
+      "nomor": "2.5",
+      "menit": 8
+    },
+    {
+      "id": "B2.3",
+      "judul": "Index dan query plan",
+      "tahap": 2,
+      "topik": "Data",
+      "path": "b-fondasi/b2-3-index.md",
+      "prasyarat": [
+        "B2.4"
+      ],
+      "inti": true,
+      "masalah": "Query lambat setelah data bertambah",
+      "ada": true,
+      "nomor": "2.6",
+      "menit": 10
+    },
+    {
+      "id": "E5",
+      "judul": "Ukuran payload dan kuota",
+      "tahap": 2,
+      "topik": "Khusus app mobile",
+      "path": "e-mobile/e5-ukuran-payload.md",
+      "prasyarat": [
+        "B1.3"
+      ],
+      "masalah": "Response besar membebani HP dan kuota",
+      "ada": true,
+      "nomor": "2.7",
+      "menit": 8
+    },
+    {
+      "id": "B4.2",
+      "judul": "Ubah skema tanpa downtime",
+      "tahap": 2,
+      "topik": "Data",
+      "path": "b-fondasi/b4-2-ubah-skema-tanpa-downtime.md",
+      "prasyarat": [
+        "B3.1"
+      ],
+      "inti": true,
+      "masalah": "Rename kolom membuat app lama crash",
+      "ada": true,
+      "nomor": "2.8",
+      "menit": 10
+    },
+    {
+      "id": "E1",
+      "judul": "App versi lama yang tidak bisa dipaksa update",
+      "tahap": 2,
+      "topik": "Khusus app mobile",
+      "path": "e-mobile/e1-app-versi-lama.md",
+      "prasyarat": [
+        "B4.2"
+      ],
+      "inti": true,
+      "masalah": "Perubahan API membuat app versi lama crash",
+      "ada": true,
+      "nomor": "2.9",
+      "menit": 9
+    },
+    {
+      "id": "T3",
+      "judul": "Tahap 3 · Ceritanya",
+      "tahap": 3,
+      "path": "cerita/tahap-3.md",
+      "inti": true,
+      "ada": true,
+      "menit": 5
+    },
+    {
+      "id": "C2",
+      "judul": "Observability: log, metric, trace",
+      "tahap": 3,
+      "topik": "Operasional",
+      "path": "c-operasional/c2-observability.md",
+      "prasyarat": [
+        "C1"
+      ],
+      "inti": true,
+      "masalah": "Tidak tahu bagian mana yang lambat",
+      "ada": true,
+      "nomor": "3.1",
+      "menit": 9
+    },
+    {
+      "id": "B2.5",
+      "judul": "Connection pool",
+      "tahap": 3,
+      "topik": "Skala dan kinerja",
+      "path": "b-fondasi/b2-5-connection-pool.md",
+      "prasyarat": [
+        "B3.1"
+      ],
+      "inti": true,
+      "masalah": "Request menunggu koneksi database di jam sibuk",
+      "ada": true,
+      "nomor": "3.2",
+      "menit": 10
+    },
+    {
+      "id": "B10.1",
+      "judul": "Background job, queue, retry",
+      "tahap": 3,
+      "topik": "Skala dan kinerja",
+      "path": "b-fondasi/b10-1-background-job.md",
+      "prasyarat": [
+        "B2.5"
+      ],
+      "inti": true,
+      "masalah": "Notifikasi dan email memperlambat request bayar",
+      "ada": true,
+      "nomor": "3.3",
+      "menit": 10
+    },
+    {
+      "id": "B8",
+      "judul": "Concurrency dan async",
+      "tahap": 3,
+      "topik": "Skala dan kinerja",
+      "path": "b-fondasi/b8-concurrency.md",
+      "prasyarat": [
+        "B10.1"
+      ],
+      "masalah": "Bingung: thread, event loop, goroutine, worker",
+      "ada": true,
+      "nomor": "3.4",
+      "menit": 9
+    },
+    {
+      "id": "E4",
+      "judul": "Push dan real-time",
+      "tahap": 3,
+      "topik": "Khusus app mobile",
+      "path": "e-mobile/e4-push-real-time.md",
+      "prasyarat": [
+        "B10.1"
+      ],
+      "masalah": "App polling status pesanan tiap 5 detik",
+      "ada": true,
+      "nomor": "3.5",
+      "menit": 8
+    },
+    {
+      "id": "B9",
+      "judul": "Caching dan invalidation",
+      "tahap": 3,
+      "topik": "Skala dan kinerja",
+      "path": "b-fondasi/b9-caching.md",
+      "prasyarat": [
+        "B2.3"
+      ],
+      "inti": true,
+      "masalah": "Katalog dibaca ribuan kali dengan isi sama; harga lama muncul",
+      "ada": true,
+      "nomor": "3.6",
+      "menit": 10
+    },
+    {
+      "id": "C4",
+      "judul": "Security dasar dan rate limit",
+      "tahap": 3,
+      "topik": "Keamanan",
+      "path": "c-operasional/c4-security-dasar.md",
+      "prasyarat": [
+        "B5.1"
+      ],
+      "inti": true,
+      "masalah": "Login dicoba ribuan kali dari satu IP",
+      "ada": true,
+      "nomor": "3.7",
+      "menit": 10
+    },
+    {
+      "id": "E2",
+      "judul": "Offline-first dan sync",
+      "tahap": 3,
+      "topik": "Khusus app mobile",
+      "path": "e-mobile/e2-offline-first.md",
+      "prasyarat": [
+        "E3",
+        "B3.2"
+      ],
+      "masalah": "Perubahan stok saat offline hilang",
+      "ada": true,
+      "nomor": "3.8",
+      "menit": 10
+    },
+    {
+      "id": "T4",
+      "judul": "Tahap 4 · Ceritanya",
+      "tahap": 4,
+      "path": "cerita/tahap-4.md",
+      "inti": true,
+      "ada": true,
+      "menit": 5
+    },
+    {
+      "id": "B11",
+      "judul": "Integrasi pihak ketiga",
+      "tahap": 4,
+      "topik": "Integrasi pihak ketiga",
+      "path": "b-fondasi/b11-integrasi-pihak-ketiga.md",
+      "prasyarat": [
+        "B10.1"
+      ],
+      "inti": true,
+      "masalah": "Payment gateway lambat, request ikut menggantung",
+      "ada": true,
+      "nomor": "4.1",
+      "menit": 10
+    },
+    {
+      "id": "B11.2",
+      "judul": "Proxy dan BFF",
+      "tahap": 4,
+      "topik": "Integrasi pihak ketiga",
+      "path": "b-fondasi/b11-2-proxy-bff.md",
+      "prasyarat": [
+        "B11"
+      ],
+      "masalah": "Layanan luar hanya menerima IP terdaftar; layar beranda butuh 5 request",
+      "ada": true,
+      "nomor": "4.2",
+      "menit": 11
+    },
+    {
+      "id": "B10.2",
+      "judul": "Webhook dan outbox",
+      "tahap": 4,
+      "topik": "Integrasi pihak ketiga",
+      "path": "b-fondasi/b10-2-webhook-outbox.md",
+      "prasyarat": [
+        "B10.1",
+        "E3"
+      ],
+      "masalah": "Webhook dikirim dua kali; saldo bertambah dua kali",
+      "ada": true,
+      "nomor": "4.3",
+      "menit": 10
+    },
+    {
+      "id": "B5.2",
+      "judul": "OAuth dan login sosial",
+      "tahap": 4,
+      "topik": "Keamanan",
+      "path": "b-fondasi/b5-2-oauth-oidc.md",
+      "prasyarat": [
+        "B5.1"
+      ],
+      "masalah": "Ingin login dengan akun yang sudah dimiliki user (login sosial)",
+      "ada": true,
+      "nomor": "4.4",
+      "menit": 10
+    },
+    {
+      "id": "B7.2",
+      "judul": "Modular monolith",
+      "tahap": 4,
+      "topik": "Struktur kode",
+      "path": "b-fondasi/b7-2-batas-modul.md",
+      "prasyarat": [
+        "B7.1"
+      ],
+      "masalah": "Dua tim bentrok di satu codebase",
+      "ada": true,
+      "nomor": "4.5",
+      "menit": 10
+    },
+    {
+      "id": "D5",
+      "judul": "Template ADR",
+      "tahap": 4,
+      "topik": "Desain sistem",
+      "path": "d-system-design/d5-adr.md",
+      "prasyarat": [
+        "D1"
+      ],
+      "masalah": "Keputusan desain lupa alasannya",
+      "ada": true,
+      "nomor": "4.6",
+      "menit": 6
+    },
+    {
+      "id": "T5",
+      "judul": "Tahap 5 · Ceritanya",
+      "tahap": 5,
+      "path": "cerita/tahap-5.md",
+      "ada": true,
+      "menit": 4
+    },
+    {
+      "id": "D2",
+      "judul": "Scaling",
+      "tahap": 5,
+      "topik": "Skala dan kinerja",
+      "path": "d-system-design/d2-scaling.md",
+      "prasyarat": [
+        "B2.5",
+        "B9"
+      ],
+      "masalah": "Database utama penuh oleh query baca",
+      "ada": true,
+      "nomor": "5.1",
+      "menit": 10
+    },
+    {
+      "id": "D3",
+      "judul": "Replica dan consistency",
+      "tahap": 5,
+      "topik": "Skala dan kinerja",
+      "path": "d-system-design/d3-consistency.md",
+      "prasyarat": [
+        "B3.3",
+        "B10.2"
+      ],
+      "masalah": "User tidak melihat transaksinya sendiri sesaat",
+      "ada": true,
+      "nomor": "5.2",
+      "menit": 10
+    },
+    {
+      "id": "D4b",
+      "judul": "Feed dan notifikasi",
+      "tahap": 5,
+      "topik": "Desain sistem",
+      "path": "d-system-design/d4b-feed-notifikasi.md",
+      "prasyarat": [
+        "D2",
+        "E4"
+      ],
+      "masalah": "Notifikasi ke ratusan ribu user sekaligus",
+      "ada": true,
+      "nomor": "5.3",
+      "menit": 7
+    },
+    {
+      "id": "D4c",
+      "judul": "Studi desain: laporan lapangan offline",
+      "tahap": "sampingan",
+      "topik": "Desain sistem",
+      "path": "d-system-design/d4c-laporan-lapangan-offline.md",
+      "prasyarat": [
+        "E2"
+      ],
+      "masalah": "Aplikasi lapangan harus jalan tanpa sinyal",
+      "ada": true,
+      "menit": 7
+    },
+    {
+      "id": "Glosarium",
+      "judul": "Glosarium",
+      "tahap": "alat",
+      "path": "alat/glosarium.md",
+      "ada": true
+    },
+    {
+      "id": "Kamus",
+      "judul": "Kamus lintas stack",
+      "tahap": "alat",
+      "path": "alat/kamus-lintas-stack.md",
+      "ada": true
+    },
+    {
+      "id": "Indeks",
+      "judul": "Indeks per topik",
+      "tahap": "alat",
+      "path": "alat/indeks-topik.md",
+      "ada": true
+    },
+    {
+      "id": "Kartu",
+      "judul": "Kartu ulang",
+      "tahap": "alat",
+      "path": "alat/kartu-ulang.md",
+      "ada": true
+    },
+    {
+      "id": "Belajar",
+      "judul": "Belajar mandiri",
+      "tahap": "alat",
+      "path": "alat/belajar-mandiri.md",
+      "ada": true
+    },
+    {
+      "id": "Umpan",
+      "judul": "Umpan balik",
+      "tahap": "alat",
+      "path": "alat/umpan-balik.md",
+      "ada": true
+    }
+  ]
+}

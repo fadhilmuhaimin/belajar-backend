@@ -1,0 +1,49 @@
+-- 10-expand.sql
+Timing is on.
+ALTER TABLE akun ADD COLUMN no_hp text;
+ALTER TABLE
+Time: 0.548 ms
+Timing is off.
+
+-- 20-tulis-dua.sql
+UPDATE akun SET telp = '081299990001', no_hp = '081299990001' WHERE id = 1;
+UPDATE 1
+
+-- 30-backfill.sql
+UPDATE akun SET no_hp = telp WHERE id IN (SELECT id FROM akun WHERE no_hp IS NULL ORDER BY id LIMIT 1000);
+UPDATE 1000
+UPDATE akun SET no_hp = telp WHERE id IN (SELECT id FROM akun WHERE no_hp IS NULL ORDER BY id LIMIT 1000);
+UPDATE 1000
+UPDATE akun SET no_hp = telp WHERE id IN (SELECT id FROM akun WHERE no_hp IS NULL ORDER BY id LIMIT 1000);
+UPDATE 499
+UPDATE akun SET no_hp = telp WHERE id IN (SELECT id FROM akun WHERE no_hp IS NULL ORDER BY id LIMIT 1000);
+UPDATE 0
+SELECT count(*) AS belum_terisi FROM akun WHERE no_hp IS NULL;
+ belum_terisi 
+--------------
+            0
+(1 row)
+
+
+-- 40-baca-baru.sql
+SELECT json_build_object('nama', nama, 'telp', no_hp, 'no_hp', no_hp) AS response FROM akun WHERE id = 1;
+                               response                               
+----------------------------------------------------------------------
+ {"nama" : "Budi", "telp" : "081299990001", "no_hp" : "081299990001"}
+(1 row)
+
+
+$ dart run app/profil_v14.dart '{"nama" : "Budi", "telp" : "081299990001", "no_hp" : "081299990001"}'
+app v1.4  layar profil: Budi · 081299990001
+(exit code 0)
+
+-- 50-contract.sql
+ALTER TABLE akun DROP COLUMN telp;
+ALTER TABLE
+SELECT json_build_object('nama', nama, 'no_hp', no_hp) AS response FROM akun WHERE id = 1;
+                  response                   
+---------------------------------------------
+ {"nama" : "Budi", "no_hp" : "081299990001"}
+(1 row)
+
+

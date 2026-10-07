@@ -1,0 +1,4 @@
+== C. Layanan lambat 8 detik · proxy tanpa timeout
+  8.0 s  layanan  diterima dengan kredensial → 200 (setelah 8 detik)
+  8.0 s  proxy    audit: user=budi nik=3201… hasil=true lama=8s
+  8.0 s  app      ke proxy dengan token Budi → 200 {"status":"terverifikasi"} (menunggu 8.0 detik)
