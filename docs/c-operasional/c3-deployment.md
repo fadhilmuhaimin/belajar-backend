@@ -61,7 +61,7 @@ Masalahnya bukan di kode, tapi di cara mengirim kode. Raka butuh deploy yang sam
 
 **Rollback = jalankan image lama.** Rollback cepat karena tidak ada yang dibangun ulang. Syaratnya dua: image lama masih disimpan, dan skema database masih cocok dengan kode lama.
 
-Syarat kedua yang sering terlupa. Migration yang menghapus kolom membuat kode lama gagal walau image-nya benar ([[B4.2]]).
+Syarat kedua inilah yang sering terlupa. Migration yang menghapus kolom membuat kode lama gagal walau image-nya benar ([[B4.2]]).
 
 Rekaman lengkap:
 

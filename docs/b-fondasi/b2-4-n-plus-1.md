@@ -35,7 +35,7 @@ Jalankan SQL sungguhan di browser. Hitung langkah di kedua panel.
 
 Di Tahap 2, Ani mengeluh layar riwayat penjualannya lambat. Raka heran, karena tabel pesanan Warung Ani baru beberapa ribu baris.
 
-Ternyata kodenya mengambil 100 pesanan terbaru, lalu untuk setiap pesanan mengambil itemnya. Satu layar, 101 query. Di laptop Raka, dengan 10 pesanan uji dan database di mesin yang sama, layar itu terasa instan.
+Ternyata kodenya mengambil 100 pesanan terbaru, lalu untuk setiap pesanan mengambil itemnya. Satu layar menjalankan 101 query. Di laptop Raka, dengan 10 pesanan uji dan database di mesin yang sama, layar itu terasa instan.
 
 Di Flutter, pola yang sama muncul saat `ListView.builder` memanggil API detail untuk setiap baris. Bedanya, di backend setiap query juga memegang koneksi database yang jumlahnya terbatas ([[B2.5]]).
 

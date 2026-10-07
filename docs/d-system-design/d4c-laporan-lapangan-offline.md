@@ -55,7 +55,7 @@ Angka ini memberi besaran, bukan kapasitas. Data teks hampir tidak berarti diban
 
 ## 3. Bottleneck
 
-Foto, di tiga tempat sekaligus: penyimpanan di server, bandwidth saat 300 HP kembali ke sinyal di sore hari, dan upload yang terputus di sinyal lemah. Database tidak masuk daftar: 6.000 baris per hari kecil untuk PostgreSQL.
+Bottleneck-nya foto. Foto membebani tiga tempat sekaligus: penyimpanan di server, bandwidth saat 300 HP kembali ke sinyal di sore hari, dan upload yang terputus di sinyal lemah. Database tidak masuk daftar: 6.000 baris per hari kecil untuk PostgreSQL.
 
 ## 4. Desain paling sederhana
 

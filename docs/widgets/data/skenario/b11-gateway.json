@@ -134,7 +134,7 @@
    "ke": "api",
    "judul": "Dua top-up berikutnya juga timeout",
    "kirim": "tp_5522 → 503 setelah 2.0 detik\ntp_5523 → 503 setelah 2.0 detik",
-   "jelas": "Tiga kegagalan berturut-turut."
+   "jelas": "Sekarang sudah tiga kegagalan berturut-turut, batas yang membuka breaker."
   },
   {
    "dari": "api",

@@ -35,7 +35,7 @@ Ini rekaman sungguhan: client Dart mengirim pembayaran ke server Go, dan server 
 
 Jam makan siang di kantin kompleks. Sinyal di sana sering hilang di dekat lift.
 
-Budi memesan nasi goreng di Warung Ani seharga Rp25.000 dan menekan Bayar. Loading berputar, lalu muncul "Koneksi lambat, mencoba lagi". Satu detik kemudian: "Pembayaran berhasil". Malamnya Budi melihat riwayat: dua pembayaran Rp25.000 ke Warung Ani.
+Budi memesan nasi goreng di Warung Ani seharga Rp25.000 dan menekan Bayar. Loading berputar, lalu muncul "Koneksi lambat, mencoba lagi". Satu detik kemudian muncul "Pembayaran berhasil". Malamnya Budi melihat riwayat: dua pembayaran Rp25.000 ke Warung Ani.
 
 Raka memeriksa log. Request pertama sampai di server dan sudah COMMIT. Response-nya yang hilang.
 

@@ -140,7 +140,7 @@ Yang sama di semua stack: relasinya jadi foreign key di database. Yang berbeda: 
 | `SET NULL` | Anak tetap ada | Kolom harus boleh kosong, dan kode harus siap dengan `NULL` |
 | Soft delete (kolom `dihapus_pada`) | Tidak ada yang benar-benar hilang | Setiap query harus ingat menyaring baris yang dihapus |
 
-Untuk data uang dan riwayat transaksi, Rekeningo memakai tolak atau soft delete. Tidak pernah `CASCADE`.
+Untuk data uang dan riwayat transaksi, Rekeningo memakai tolak atau soft delete, dan tidak pernah `CASCADE`.
 
 ## Cek diri
 

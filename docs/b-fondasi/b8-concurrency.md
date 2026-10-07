@@ -49,7 +49,7 @@ Raka ingat `Future.wait` di Dart dan `async`/`await` di Kotlin coroutine. Konsep
 --8<-- "labs/b8-concurrency/output/node.txt"
 ```
 
-Berurutan 5 detik, paralel 0,5 detik, di kedua stack. Selama menunggu jaringan, tidak ada kerja yang menghalangi kerja lain.
+Di kedua stack, cara berurutan butuh 5 detik dan cara paralel 0,5 detik. Selama menunggu jaringan, tidak ada kerja yang menghalangi kerja lain.
 
 **Membatasi paralelisme.** "Dibatasi 3 bersamaan" butuh 2 detik. Ini yang biasanya dipakai di production: layanan luar punya kuota, dan pool koneksi punya batas ([[B2.5]]). Semaphore sederhana di Go:
 

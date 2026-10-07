@@ -53,7 +53,7 @@
       "jelas": "Langkah ini bisa makan minggu. Contract hanya aman setelah tidak ada lagi yang membaca field atau kolom lama. Langkah ini tidak direkam di lab." },
     { "dari": "api", "ke": "db", "judul": "Contract: hapus kolom lama",
       "kirim": "ALTER TABLE akun DROP COLUMN telp;\nALTER TABLE\n→ {\"nama\": \"Budi\", \"no_hp\": \"081299990001\"}",
-      "jelas": "Migration selesai tanpa satu pun app yang crash. Biayanya: empat deploy, bukan satu.",
+      "jelas": "Migration selesai tanpa satu pun app yang crash. Biayanya, perlu empat deploy, bukan satu.",
       "nada": "good" }
   ],
   "varian": {

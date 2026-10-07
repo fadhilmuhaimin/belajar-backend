@@ -108,7 +108,7 @@
       "ke": "api",
       "judul": "Tablet mengirim penarikan Rp50.000 (request B)",
       "kirim": "POST /penarikan\n{\"jumlah\": 50000}",
-      "jelas": "Beberapa milidetik kemudian. Bagi server, ini dua request yang berjalan bersamaan di dua koneksi database.",
+      "jelas": "Request B tiba beberapa milidetik kemudian. Bagi server, ini dua request yang berjalan bersamaan di dua koneksi database.",
       "layar": {
         "tablet": {
           "waktu": "12.30",

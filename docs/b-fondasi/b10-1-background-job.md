@@ -21,7 +21,7 @@ Baca 7 menit · coba 3 menit · Prasyarat: [[B2.5]] · Jalur inti
 
 ## Inti
 
-Pekerjaan yang tidak perlu ditunggu user pindah ke worker. Gantinya: retry, dead-letter, dan penerima yang tahan pesan ganda.
+Pekerjaan yang tidak perlu ditunggu user pindah ke worker. Sebagai gantinya, kamu butuh retry, dead-letter, dan penerima yang tahan pesan ganda.
 
 <div data-bb="arsitektur" data-tahap="3"></div>
 
@@ -35,7 +35,7 @@ Satu pembayaran, dari tap Bayar sampai notifikasi terkirim. Semua log dan isi ta
 
 Rekaman [[B2.5]] menunjukkan masalahnya: notifikasi 2 detik di dalam transaction membuat 116 dari 170 pembayaran timeout. Raka perlu memindahkan notifikasi keluar dari jalur request.
 
-Versi pertama yang terpikir: kirim notifikasi di goroutine terpisah setelah `COMMIT`. Cepat ditulis. Tapi Raka bertanya ke dirinya sendiri: bagaimana kalau server di-restart tepat setelah `COMMIT`? Goroutine itu hilang, dan Budi tidak pernah tahu pembayarannya berhasil. Ia butuh pekerjaan yang tersimpan, bukan hanya berjalan di memori.
+Versi pertama yang terpikir: kirim notifikasi di goroutine terpisah setelah `COMMIT`, yang cepat ditulis. Tapi Raka bertanya ke dirinya sendiri: bagaimana kalau server di-restart tepat setelah `COMMIT`? Goroutine itu hilang, dan Budi tidak pernah tahu pembayarannya berhasil. Ia butuh pekerjaan yang tersimpan, bukan hanya berjalan di memori.
 
 ## Cara kerjanya
 

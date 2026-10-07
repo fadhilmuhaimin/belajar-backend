@@ -89,7 +89,7 @@
       "ke": "api",
       "judul": "HP menarik Rp70.000 (A)",
       "kirim": "POST /penarikan {\"jumlah\": 70000}",
-      "jelas": "Request A.",
+      "jelas": "Request A tiba lebih dulu.",
       "layar": {
         "hp": {
           "waktu": "12.30",
@@ -108,7 +108,7 @@
       "ke": "api",
       "judul": "Tablet menarik Rp50.000 (B)",
       "kirim": "POST /penarikan {\"jumlah\": 50000}",
-      "jelas": "Request B, beberapa milidetik kemudian.",
+      "jelas": "Request B tiba beberapa milidetik kemudian.",
       "layar": {
         "tablet": {
           "waktu": "12.30",

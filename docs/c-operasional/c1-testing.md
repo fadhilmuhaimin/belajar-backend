@@ -33,7 +33,7 @@ Pilih level test yang paling tepat untuk tiap hal, lalu cek. Semua contoh punya 
 
 ## Kenapa ini ada
 
-Tahap 1 berjalan, dan Raka mulai takut mengubah kode. Setiap perubahan kecil ia uji dengan membuka app, login, lalu transfer. Sepuluh menit per perubahan.
+Tahap 1 berjalan, dan Raka mulai takut mengubah kode. Setiap perubahan kecil ia uji dengan membuka app, login, lalu transfer. Satu perubahan makan waktu sepuluh menit.
 
 Lalu satu perbaikan kecil di validasi diam-diam merusak format error. App menampilkan "Terjadi kesalahan" untuk saldo kurang selama dua hari, sampai ada penguji yang mengeluh.
 
