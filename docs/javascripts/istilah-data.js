@@ -112,6 +112,14 @@ window.ISTILAH = {
   "t": "Backoff",
   "u": "e-mobile/e3-retry-idempotency/"
  },
+ "CI": {
+  "b": "B1.4",
+  "d": "Pemeriksaan otomatis (build, test, lint) yang berjalan di server setiap kali kode dikirim, sebelum perubahan boleh digabung.",
+  "n": "1.7 Kontrak API dengan OpenAPI",
+  "s": "istilah-ci",
+  "t": "CI (Continuous Integration)",
+  "u": "b-fondasi/b1-4-openapi/"
+ },
  "COMMIT": {
   "b": "B3.1",
   "d": "Perintah yang membuat semua perubahan dalam transaction menjadi permanen dan terlihat oleh koneksi lain.",
@@ -159,6 +167,14 @@ window.ISTILAH = {
   "s": "istilah-container",
   "t": "Container",
   "u": "c-operasional/c3-deployment/"
+ },
+ "Continuous Integration": {
+  "b": "B1.4",
+  "d": "Pemeriksaan otomatis (build, test, lint) yang berjalan di server setiap kali kode dikirim, sebelum perubahan boleh digabung.",
+  "n": "1.7 Kontrak API dengan OpenAPI",
+  "s": "istilah-ci",
+  "t": "CI (Continuous Integration)",
+  "u": "b-fondasi/b1-4-openapi/"
  },
  "Cursor pagination": {
   "b": "B1.3",
@@ -256,6 +272,14 @@ window.ISTILAH = {
   "t": "Header",
   "u": "b-fondasi/b1-1-http/"
  },
+ "Idempotency key": {
+  "b": "E3",
+  "d": "Nilai unik yang dibuat app untuk satu aksi, mis. satu kali tekan Bayar, dan dikirim ulang di setiap retry, supaya server mengenali kiriman ulang dan tidak menjalankannya dua kali.",
+  "n": "2.3 Retry dan idempotency key",
+  "s": "istilah-idempotency-key",
+  "t": "Idempotency key",
+  "u": "e-mobile/e3-retry-idempotency/"
+ },
  "Idempotent": {
   "b": "B1.3",
   "d": "Sifat operasi yang hasil akhirnya sama walau dijalankan sekali atau berkali-kali.",
@@ -344,6 +368,14 @@ window.ISTILAH = {
   "t": "Metric",
   "u": "c-operasional/c2-observability/"
  },
+ "Microservice": {
+  "b": "B7.2",
+  "d": "Gaya arsitektur yang memecah backend jadi beberapa service kecil yang di-deploy terpisah dan saling memanggil lewat jaringan.",
+  "n": "4.5 Modular monolith",
+  "s": "istilah-microservice",
+  "t": "Microservice",
+  "u": "b-fondasi/b7-2-batas-modul/"
+ },
  "Middleware": {
   "b": "B7.1",
   "d": "Fungsi yang dijalankan sebelum atau sesudah semua handler, mis. pemeriksa token atau pencatat log.",
@@ -407,6 +439,14 @@ window.ISTILAH = {
   "s": "istilah-oidc",
   "t": "OIDC (OpenID Connect)",
   "u": "b-fondasi/b5-2-oauth-oidc/"
+ },
+ "ORM": {
+  "b": "B2.1",
+  "d": "Library yang memetakan tabel database ke objek di kode, sehingga query ditulis sebagai pemanggilan method, mis. Eloquent di Laravel atau ORM bawaan Django.",
+  "n": "1.8 Data modeling dan relasi",
+  "s": "istilah-orm",
+  "t": "ORM (Object-Relational Mapping)",
+  "u": "b-fondasi/b2-1-data-modeling/"
  },
  "Object storage": {
   "b": "B11.2",
@@ -511,6 +551,14 @@ window.ISTILAH = {
   "s": "istilah-polling",
   "t": "Polling",
   "u": "e-mobile/e4-push-real-time/"
+ },
+ "Primary": {
+  "b": "D3",
+  "d": "Database utama yang menerima semua perintah tulis; replica menyalin perubahan dari primary.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-primary",
+  "t": "Primary",
+  "u": "d-system-design/d3-consistency/"
  },
  "Primary key": {
   "b": "B2.1",
@@ -719,6 +767,22 @@ window.ISTILAH = {
   "s": "istilah-timeout",
   "t": "Timeout",
   "u": "b-fondasi/b11-integrasi-pihak-ketiga/"
+ },
+ "Token": {
+  "b": "B5.1",
+  "d": "String yang dibawa request sebagai bukti siapa pengirimnya, mis. token login di header Authorization; siapa pun yang memegangnya bisa memakainya. Di token bucket, token berarti satu jatah request.",
+  "n": "1.12 Authentication",
+  "s": "istilah-token",
+  "t": "Token",
+  "u": "b-fondasi/b5-1-authentication/"
+ },
+ "Token bucket": {
+  "b": "C4",
+  "d": "Algoritma rate limit: setiap key (IP atau akun) punya bucket berisi token yang terisi ulang dengan laju tetap, dan setiap request memakai satu token.",
+  "n": "3.7 Security dasar dan rate limit",
+  "s": "istilah-token-bucket",
+  "t": "Token bucket",
+  "u": "c-operasional/c4-security-dasar/"
  },
  "Trace": {
   "b": "C2",
@@ -936,6 +1000,14 @@ window.ISTILAH = {
   "t": "Header",
   "u": "b-fondasi/b1-1-http/"
  },
+ "idempotency key": {
+  "b": "E3",
+  "d": "Nilai unik yang dibuat app untuk satu aksi, mis. satu kali tekan Bayar, dan dikirim ulang di setiap retry, supaya server mengenali kiriman ulang dan tidak menjalankannya dua kali.",
+  "n": "2.3 Retry dan idempotency key",
+  "s": "istilah-idempotency-key",
+  "t": "Idempotency key",
+  "u": "e-mobile/e3-retry-idempotency/"
+ },
  "idempotent": {
   "b": "B1.3",
   "d": "Sifat operasi yang hasil akhirnya sama walau dijalankan sekali atau berkali-kali.",
@@ -999,6 +1071,14 @@ window.ISTILAH = {
   "s": "istilah-metric",
   "t": "Metric",
   "u": "c-operasional/c2-observability/"
+ },
+ "microservice": {
+  "b": "B7.2",
+  "d": "Gaya arsitektur yang memecah backend jadi beberapa service kecil yang di-deploy terpisah dan saling memanggil lewat jaringan.",
+  "n": "4.5 Modular monolith",
+  "s": "istilah-microservice",
+  "t": "Microservice",
+  "u": "b-fondasi/b7-2-batas-modul/"
  },
  "middleware": {
   "b": "B7.1",
@@ -1072,6 +1152,22 @@ window.ISTILAH = {
   "t": "Outbox",
   "u": "b-fondasi/b10-2-webhook-outbox/"
  },
+ "p50": {
+  "b": "C2",
+  "d": "Persentil latency: 95% request selesai lebih cepat dari angka p95, dan separuh request lebih cepat dari p50 (median).",
+  "n": "3.1 Observability",
+  "s": "istilah-p95-p50",
+  "t": "p95 / p50",
+  "u": "c-operasional/c2-observability/"
+ },
+ "p95": {
+  "b": "C2",
+  "d": "Persentil latency: 95% request selesai lebih cepat dari angka p95, dan separuh request lebih cepat dari p50 (median).",
+  "n": "3.1 Observability",
+  "s": "istilah-p95-p50",
+  "t": "p95 / p50",
+  "u": "c-operasional/c2-observability/"
+ },
  "pagination": {
   "b": "B1.3",
   "d": "Membagi daftar panjang menjadi potongan kecil yang diminta satu per satu.",
@@ -1095,6 +1191,14 @@ window.ISTILAH = {
   "s": "istilah-polling",
   "t": "Polling",
   "u": "e-mobile/e4-push-real-time/"
+ },
+ "primary": {
+  "b": "D3",
+  "d": "Database utama yang menerima semua perintah tulis; replica menyalin perubahan dari primary.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-primary",
+  "t": "Primary",
+  "u": "d-system-design/d3-consistency/"
  },
  "primary key": {
   "b": "B2.1",
@@ -1231,6 +1335,22 @@ window.ISTILAH = {
   "s": "istilah-timeout",
   "t": "Timeout",
   "u": "b-fondasi/b11-integrasi-pihak-ketiga/"
+ },
+ "token": {
+  "b": "B5.1",
+  "d": "String yang dibawa request sebagai bukti siapa pengirimnya, mis. token login di header Authorization; siapa pun yang memegangnya bisa memakainya. Di token bucket, token berarti satu jatah request.",
+  "n": "1.12 Authentication",
+  "s": "istilah-token",
+  "t": "Token",
+  "u": "b-fondasi/b5-1-authentication/"
+ },
+ "token bucket": {
+  "b": "C4",
+  "d": "Algoritma rate limit: setiap key (IP atau akun) punya bucket berisi token yang terisi ulang dengan laju tetap, dan setiap request memakai satu token.",
+  "n": "3.7 Security dasar dan rate limit",
+  "s": "istilah-token-bucket",
+  "t": "Token bucket",
+  "u": "c-operasional/c4-security-dasar/"
  },
  "trace": {
   "b": "C2",

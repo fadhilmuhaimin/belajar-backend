@@ -38,11 +38,12 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **ACID** | Empat jaminan transaction di database relasional: atomicity, consistency, isolation, durability. | [[B3.1]] |
 | **ADR** (Architecture Decision Record) | Catatan pendek tentang satu keputusan desain: konteks, pilihan, alasan, dan akibatnya. | [[D5]] |
 | **Atomicity** | Jaminan bahwa semua perubahan dalam satu transaction terjadi seluruhnya atau tidak sama sekali. | [[B3.1]] |
+| **BaaS** (Backend-as-a-Service) | Layanan yang menyediakan database, auth, dan API siap pakai, mis. Supabase dan Firebase. | [[A4]] |
 | **Backfill** | Script sekali jalan yang mengisi kolom baru untuk baris lama, biasanya bertahap per batch. | [[B4.2]] |
 | **Backoff** | Jeda yang makin panjang di antara percobaan ulang, supaya server yang sedang kesulitan tidak dibanjiri. | [[E3]] |
-| **BaaS** (Backend-as-a-Service) | Layanan yang menyediakan database, auth, dan API siap pakai, mis. Supabase dan Firebase. | [[A4]] |
 | **BFF** (Backend for Frontend) | Endpoint atau service yang dibentuk khusus untuk satu jenis client, mis. satu endpoint beranda untuk app mobile. | [[B11.2]] |
 | **Cache** | Salinan data di tempat yang lebih cepat dibaca, dengan risiko isinya tertinggal dari data asli. | [[B9]] |
+| **CI** (Continuous Integration) | Pemeriksaan otomatis (build, test, lint) yang berjalan di server setiap kali kode dikirim, sebelum perubahan boleh digabung. | [[B1.4]] |
 | **Circuit breaker** | Mekanisme yang berhenti memanggil layanan yang sedang gagal untuk sementara, lalu mencoba lagi setelah jeda. | [[B11]] |
 | **COMMIT** | Perintah yang membuat semua perubahan dalam transaction menjadi permanen dan terlihat oleh koneksi lain. | [[B3.1]] |
 | **Connection pool** | Sekumpulan koneksi database yang dibuka sekali lalu dipinjamkan bergantian ke request. | [[B2.5]] |
@@ -53,6 +54,7 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **Eventual consistency** | Data di beberapa tempat boleh berbeda sesaat, tapi akan sama setelah perubahan selesai menyebar. | [[D3]] |
 | **Expand-migrate-contract** | Urutan mengubah skema tanpa downtime: tambah yang baru, pindahkan data dan kode, baru hapus yang lama. | [[B4.2]] |
 | **Foreign key** | Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada. | [[B2.1]] |
+| **Idempotency key** | Nilai unik yang dibuat app untuk satu aksi, mis. satu kali tekan Bayar, dan dikirim ulang di setiap retry, supaya server mengenali kiriman ulang dan tidak menjalankannya dua kali. | [[E3]] |
 | **Index** | Struktur data tambahan yang mempercepat pencarian baris, dengan biaya tulis dan ruang disk. | [[B2.3]] |
 | **Isolation level** | Seberapa banyak perubahan dari transaction lain yang boleh terlihat oleh satu transaction yang sedang berjalan. | [[B3.3]] |
 | **JWT** (JSON Web Token) | Token berisi data JSON plus signature, sehingga server bisa memeriksa keasliannya tanpa query ke database. | [[B5.1]] |
@@ -63,21 +65,25 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **Log** | Catatan kejadian per request atau per peristiwa, ditulis aplikasi untuk dibaca saat menyelidiki masalah. | [[C2]] |
 | **Lost update** | Perubahan yang hilang karena dua transaction membaca nilai lama yang sama lalu saling menimpa. | [[B3.2]] |
 | **Metric** | Angka yang dihitung terus-menerus, mis. jumlah request per detik atau persentase error. | [[C2]] |
+| **Microservice** | Gaya arsitektur yang memecah backend jadi beberapa service kecil yang di-deploy terpisah dan saling memanggil lewat jaringan. | [[B7.2]] |
 | **Middleware** | Fungsi yang dijalankan sebelum atau sesudah semua handler, mis. pemeriksa token atau pencatat log. | [[B7.1]] |
 | **Modular monolith** | Satu aplikasi yang di-deploy sebagai satu unit, tapi kodenya dibagi ke modul dengan batas yang tegas. | [[B7.2]] |
 | **Monolith** | Satu aplikasi backend yang memuat semua fitur dan di-deploy sebagai satu unit. | [[A1]] |
 | **MVCC** (Multi-Version Concurrency Control) | Cara database menyimpan beberapa versi baris, supaya pembaca tidak perlu menunggu penulis. | [[B3.3]] |
 | **N+1 query** | Pola satu query untuk daftar lalu satu query lagi untuk setiap item di daftar itu. | [[B2.4]] |
 | **OAuth 2.0** | Standar untuk memberi aplikasi akses terbatas ke akun user di layanan lain tanpa memberikan password. | [[B5.2]] |
-| **OIDC** (OpenID Connect) | Lapisan di atas OAuth 2.0 untuk login, yang memberi tahu aplikasi siapa user-nya. | [[B5.2]] |
 | **Object storage** | Layanan penyimpanan file besar per objek, diakses lewat HTTP, mis. layanan kompatibel S3. | [[B11.2]] |
 | **Offline-first** | Desain app yang menyimpan perubahan di HP dulu, lalu menyinkronkannya ke server saat sinyal ada. | [[E2]] |
+| **OIDC** (OpenID Connect) | Lapisan di atas OAuth 2.0 untuk login, yang memberi tahu aplikasi siapa user-nya. | [[B5.2]] |
 | **OpenAPI** | Format standar untuk menulis kontrak API (endpoint, request, response) yang bisa dibaca manusia dan mesin. | [[B1.4]] |
 | **Optimistic lock** | Cara mencegah lost update dengan mengecek nomor versi saat menulis, tanpa mengunci baris saat membaca. | [[B3.2]] |
+| **ORM** (Object-Relational Mapping) | Library yang memetakan tabel database ke objek di kode, sehingga query ditulis sebagai pemanggilan method, mis. Eloquent di Laravel atau ORM bawaan Django. | [[B2.1]] |
 | **Outbox** | Tabel tempat event ditulis dalam transaction yang sama dengan perubahan data, lalu dikirim oleh worker. | [[B10.2]] |
+| **p95 / p50** | Persentil latency: 95% request selesai lebih cepat dari angka p95, dan separuh request lebih cepat dari p50 (median). | [[C2]] |
 | **Pagination** | Membagi daftar panjang menjadi potongan kecil yang diminta satu per satu. | [[B1.3]] |
 | **PKCE** | Tambahan pada alur OAuth untuk app mobile yang mencegah authorization code dipakai oleh aplikasi lain. | [[B5.2]] |
 | **Polling** | App menanyakan status ke server berulang kali dengan jeda tetap. | [[E4]] |
+| **Primary** | Database utama yang menerima semua perintah tulis; replica menyalin perubahan dari primary. | [[D3]] |
 | **Primary key** | Kolom yang nilainya unik dan dipakai untuk mengenali satu baris. | [[B2.1]] |
 | **Problem Details** | Format error JSON standar dari RFC 9457, dengan field seperti `type`, `title`, `status`, dan `detail`. | [[B1.2]] |
 | **Proxy** | Server perantara yang meneruskan request ke sistem lain sambil menambahkan hal yang tidak boleh dipegang client. | [[B11.2]] |
@@ -100,6 +106,8 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **Stateless** | Server tidak menyimpan keadaan antar-request di memorinya, jadi request mana pun bisa dilayani instance mana pun. | [[D2]] |
 | **Throughput** | Jumlah pekerjaan yang selesai per satuan waktu, mis. request per detik. | [[C2]] |
 | **Timeout** | Batas waktu menunggu sebelum sebuah panggilan dianggap gagal. | [[B11]] |
+| **Token** | String yang dibawa request sebagai bukti siapa pengirimnya, mis. token login di header `Authorization`; siapa pun yang memegangnya bisa memakainya. Di token bucket, token berarti satu jatah request. | [[B5.1]] |
+| **Token bucket** | Algoritma rate limit: setiap key (IP atau akun) punya bucket berisi token yang terisi ulang dengan laju tetap, dan setiap request memakai satu token. | [[C4]] |
 | **Trace** | Rekaman perjalanan satu request melewati beberapa komponen, lengkap dengan durasi tiap bagian. | [[C2]] |
 | **TTL** (Time To Live) | Masa berlaku sebuah data di cache sebelum dianggap kedaluwarsa. | [[B9]] |
 | **Webhook** | HTTP request yang dikirim sistem lain ke API kita saat ada kejadian, mis. pembayaran berhasil. | [[B10.2]] |
