@@ -10,7 +10,21 @@ import psycopg
 
 HERE = pathlib.Path(__file__).parent
 P = psycopg.connect("postgresql://lab:lab@127.0.0.1:54340/lab", autocommit=True)
-R = psycopg.connect("postgresql://lab:lab@127.0.0.1:54341/lab", autocommit=True)
+
+
+def sambung_replica(batas=60):
+    """Replica baru menerima koneksi setelah pg_basebackup selesai; dari kondisi bersih ini butuh beberapa detik."""
+    akhir = time.monotonic() + batas
+    while True:
+        try:
+            return psycopg.connect("postgresql://lab:lab@127.0.0.1:54341/lab", autocommit=True)
+        except psycopg.OperationalError:
+            if time.monotonic() > akhir:
+                raise SystemExit(f"GAGAL: replica tidak siap dalam {batas} detik")
+            time.sleep(1)
+
+
+R = sambung_replica()
 out, t0 = [], [0.0]
 
 
@@ -27,7 +41,8 @@ out.append("== A. Tulis ke primary, baca dari replica")
 t0[0] = time.monotonic()
 P.execute("UPDATE akun SET saldo = saldo + 200000 WHERE id = 'budi'")
 log(f"primary  UPDATE saldo +200000 → COMMIT. Saldo di primary: {P.execute('SELECT saldo FROM akun').fetchone()[0]}")
-for jeda in (0, 0.5, 1.0, 1.5, 2.0, 2.5):
+# Tanpa titik 2,0 detik: tepat di batas recovery_min_apply_delay=2s, hasilnya kadang lama, kadang baru.
+for jeda in (0, 0.5, 1.0, 1.5, 2.5):
     time.sleep(max(0, jeda - (time.monotonic() - t0[0])))
     log(f"replica  SELECT saldo → {saldo_r()}")
 

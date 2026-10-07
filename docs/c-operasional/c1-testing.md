@@ -195,7 +195,7 @@ Rekeningo: unit test untuk semua aturan, integration test untuk setiap endpoint 
 
 ??? success "Jawaban"
 
-    Urutan dua request paralel tidak bisa ditebak, jadi saldo akhir Budi bisa Rp30.000 atau Rp50.000, dan keduanya sah. Yang selalu benar adalah invarian: total uang Budi + Ani tidak berubah. Rekaman naif: total Rp400.000, artinya Rp50.000 tercipta.
+    Urutan dua request paralel tidak bisa ditebak, jadi saldo akhir Budi bisa Rp30.000 atau Rp50.000, dan keduanya sah. Yang selalu benar adalah invarian: total uang Budi + Ani tetap Rp350.000. Di mode naif, total juga bergantung urutan: rekaman ini Rp400.000 (Rp50.000 tercipta), dan run lain bisa Rp420.000 (Rp70.000 tercipta).
 
 **3.** `go test -race ./...` lolos tanpa peringatan. Apakah endpoint transfer aman dari race condition?
 

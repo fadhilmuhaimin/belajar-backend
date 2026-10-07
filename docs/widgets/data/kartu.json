@@ -350,7 +350,7 @@
   "judul": "1.15 Testing: apa dites di level mana",
   "url": "c-operasional/c1-testing/",
   "tanya": "Jelaskan kenapa regression test race di rekaman memeriksa total saldo, bukan saldo Budi saja.",
-  "jawab": "Urutan dua request paralel tidak bisa ditebak, jadi saldo akhir Budi bisa Rp30.000 atau Rp50.000, dan keduanya sah. Yang selalu benar adalah invarian: total uang Budi + Ani tidak berubah. Rekaman naif: total Rp400.000, artinya Rp50.000 tercipta."
+  "jawab": "Urutan dua request paralel tidak bisa ditebak, jadi saldo akhir Budi bisa Rp30.000 atau Rp50.000, dan keduanya sah. Yang selalu benar adalah invarian: total uang Budi + Ani tetap Rp350.000. Di mode naif, total juga bergantung urutan: rekaman ini Rp400.000 (Rp50.000 tercipta), dan run lain bisa Rp420.000 (Rp70.000 tercipta)."
  },
  {
   "id": "C1-3",

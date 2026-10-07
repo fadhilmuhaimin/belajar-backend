@@ -4,11 +4,10 @@
  0.5 s  replica  SELECT saldo → 50000
  1.0 s  replica  SELECT saldo → 50000
  1.5 s  replica  SELECT saldo → 50000
- 2.0 s  replica  SELECT saldo → 250000
  2.5 s  replica  SELECT saldo → 250000
 
 == B. Read-your-writes dengan LSN
- 0.0 s  primary  UPDATE saldo -25000 → COMMIT, LSN sesudah tulis: 0/307DC08
+ 0.0 s  primary  UPDATE saldo -25000 → COMMIT, LSN sesudah tulis: 0/3032C60
  0.0 s  replica  belum sampai LSN itu → baca dari primary: saldo 225000 (replica masih 250000)
  2.5 s  replica  sudah sampai LSN itu → baca dari replica: saldo 225000
 
