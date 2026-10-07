@@ -44,7 +44,7 @@ func gateway() {
 		}
 		jumlah := len(tagihan)
 		mu.Unlock()
-		log.Printf("gateway  kunci %s → %s (%s), total tagihan dibuat: %d", key, id, map[bool]string{true: "tagihan lama", false: "tagihan baru"}[ada], jumlah)
+		log.Printf("gateway  key %s → %s (%s), total tagihan dibuat: %d", key, id, map[bool]string{true: "tagihan lama", false: "tagihan baru"}[ada], jumlah)
 		if mode == "lambat" {
 			time.Sleep(10 * time.Second)
 		}
@@ -131,11 +131,11 @@ func api() {
 		// --8<-- [start:retry]
 		case "retry", "retry-key-baru":
 			for coba := 1; coba <= 3; coba++ {
-				kunci := key
+				keyKirim := key
 				if k == "retry-key-baru" {
-					kunci = fmt.Sprintf("%s-%d", key, coba) // salah: key baru setiap retry
+					keyKirim = fmt.Sprintf("%s-%d", key, coba) // salah: key baru setiap retry
 				}
-				if id, err = buatTagihan(kunci); err == nil || coba == 3 {
+				if id, err = buatTagihan(keyKirim); err == nil || coba == 3 {
 					break
 				}
 				tunggu := 200 * time.Millisecond << (coba - 1)          // 200, 400, 800 ms

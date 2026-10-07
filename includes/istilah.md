@@ -146,8 +146,8 @@
 *[ROLLBACK]: Perintah yang membatalkan semua perubahan sejak BEGIN.
 *[Rolling deploy]: Mengganti instance satu per satu, supaya selalu ada instance yang melayani request.
 *[rolling deploy]: Mengganti instance satu per satu, supaya selalu ada instance yang melayani request.
-*[Sharding]: Membagi data ke beberapa database berdasarkan kunci, mis. per wilayah.
-*[sharding]: Membagi data ke beberapa database berdasarkan kunci, mis. per wilayah.
+*[Sharding]: Membagi data ke beberapa database berdasarkan shard key, mis. per wilayah.
+*[sharding]: Membagi data ke beberapa database berdasarkan shard key, mis. per wilayah.
 *[Signature]: Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah.
 *[signature]: Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah.
 *[Signed URL]: URL berbatas waktu yang memberi akses langsung ke satu file di object storage.

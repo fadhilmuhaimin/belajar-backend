@@ -1,7 +1,7 @@
 // Lab C4 · rate limit login dengan token bucket. Tanpa database: fokusnya pembatas, bukan login.
 //
-// BATAS=ip       satu ember per IP: 5 percobaan, isi ulang 1 token per 12 detik (5 per menit)
-// BATAS=akun+ip  satu ember per akun (5, 1 per 12 detik) + satu ember per IP yang longgar (60, 1 per detik)
+// BATAS=ip       satu bucket per IP: 5 percobaan, isi ulang 1 token per 12 detik (5 per menit)
+// BATAS=akun+ip  satu bucket per akun (5, 1 per 12 detik) + satu bucket per IP yang longgar (60, 1 per detik)
 //
 // IP ditiru lewat header X-Lab-IP, hanya di lab. Di production IP diambil dari koneksi,
 // atau dari header proxy yang tepercaya (lihat halaman).
@@ -19,8 +19,8 @@ import (
 	"time"
 )
 
-// --8<-- [start:ember]
-type ember struct {
+// --8<-- [start:bucket]
+type bucket struct {
 	token    float64
 	terakhir time.Time
 }
@@ -29,17 +29,17 @@ type pembatas struct {
 	mu        sync.Mutex
 	kapasitas float64 // token maksimum = burst
 	perDetik  float64 // laju isi ulang
-	ember     map[string]*ember
+	bucket    map[string]*bucket
 }
 
-// izinkan mengambil satu token dari ember milik kunci. Kalau kosong, kembalikan lama menunggu token berikutnya.
-func (p *pembatas) izinkan(kunci string, now time.Time) (bool, time.Duration) {
+// izinkan mengambil satu token dari bucket milik key. Kalau kosong, kembalikan lama menunggu token berikutnya.
+func (p *pembatas) izinkan(key string, now time.Time) (bool, time.Duration) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	e, ada := p.ember[kunci]
+	e, ada := p.bucket[key]
 	if !ada {
-		e = &ember{token: p.kapasitas, terakhir: now}
-		p.ember[kunci] = e
+		e = &bucket{token: p.kapasitas, terakhir: now}
+		p.bucket[key] = e
 	}
 	e.token = math.Min(p.kapasitas, e.token+now.Sub(e.terakhir).Seconds()*p.perDetik)
 	e.terakhir = now
@@ -50,10 +50,10 @@ func (p *pembatas) izinkan(kunci string, now time.Time) (bool, time.Duration) {
 	return false, time.Duration((1 - e.token) / p.perDetik * float64(time.Second))
 }
 
-// --8<-- [end:ember]
+// --8<-- [end:bucket]
 
 func baru(kapasitas, perDetik float64) *pembatas {
-	return &pembatas{kapasitas: kapasitas, perDetik: perDetik, ember: map[string]*ember{}}
+	return &pembatas{kapasitas: kapasitas, perDetik: perDetik, bucket: map[string]*bucket{}}
 }
 
 func tulis(w http.ResponseWriter, status int, v any) {

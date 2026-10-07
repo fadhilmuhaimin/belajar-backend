@@ -2,8 +2,8 @@
 
 A. Satu IP, 8 tebakan PIN berturut-turut, lalu menunggu 12 detik.      BATAS=ip
 B. Jam makan siang: 30 karyawan satu kantor login lewat satu Wi-Fi.     BATAS=ip
-C. Sama seperti A dan B, tapi ember per akun + ember per IP yang longgar, dan penyerang berganti IP.  BATAS=akun+ip
-D. Dua instance API, ember disimpan di memori masing-masing; penyerang kena instance bergantian.      BATAS=akun+ip
+C. Sama seperti A dan B, tapi bucket per akun + bucket per IP yang longgar, dan penyerang berganti IP.  BATAS=akun+ip
+D. Dua instance API, bucket disimpan di memori masing-masing; penyerang kena instance bergantian.      BATAS=akun+ip
 """
 import json, os, pathlib, socket, subprocess, time, urllib.error, urllib.request
 
@@ -71,7 +71,7 @@ hasil = [login(18094, t, "246810", "10.0.0.20")[0] for t in KARYAWAN]
 tulis(f"{time.monotonic() - t0:5.1f} s  30 login benar dari 10.0.0.20 → {ringkas(hasil)}")
 srv.terminate(); srv.wait()
 
-tulis("\n== C. BATAS=akun+ip · ember per akun (5, 1 per 12 detik) + ember per IP longgar (60, 1 per detik)")
+tulis("\n== C. BATAS=akun+ip · bucket per akun (5, 1 per 12 detik) + bucket per IP longgar (60, 1 per detik)")
 srv = server("akun+ip", 18094); t0 = time.monotonic()
 for i in range(8):
     st, ra, _ = login(18094, AKUN_BUDI, f"00000{i}", f"10.0.1.{i + 1}")
@@ -80,7 +80,7 @@ hasil = [login(18094, t, "246810", "10.0.0.20")[0] for t in KARYAWAN]
 tulis(f"{time.monotonic() - t0:5.1f} s  30 login benar dari 10.0.0.20 → {ringkas(hasil)}")
 srv.terminate(); srv.wait()
 
-tulis("\n== D. BATAS=akun+ip · dua instance API, ember di memori masing-masing; tebakan bergantian ke instance 1 dan 2")
+tulis("\n== D. BATAS=akun+ip · dua instance API, bucket di memori masing-masing; tebakan bergantian ke instance 1 dan 2")
 s1, s2 = server("akun+ip", 18094), server("akun+ip", 18095); t0 = time.monotonic()
 lolos = 0
 for i in range(12):

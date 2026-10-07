@@ -21,7 +21,7 @@
   "judul": "1.1 Apa yang dikerjakan backend",
   "url": "a-gambaran/a1-apa-yang-dikerjakan-backend/",
   "tanya": "Siapa yang memanggil layanan push untuk memberi tahu Ani?",
-  "jawab": "Backend. Hanya backend yang tahu penerima transfer dan menyimpan kunci akses layanan push."
+  "jawab": "Backend. Hanya backend yang tahu penerima transfer dan menyimpan API key layanan push."
  },
  {
   "id": "A4-1",
@@ -534,8 +534,8 @@
   "halaman": "B1.3",
   "judul": "2.4 Pagination dan idempotent method",
   "url": "b-fondasi/b1-3-pagination-idempotent/",
-  "tanya": "Kenapa kunci cursor memakai `(dibuat, id)`, bukan `dibuat` saja?",
-  "jawab": "Dua pesanan bisa punya `dibuat` yang sama persis. Dengan `dibuat` saja, baris dengan waktu sama di batas halaman bisa terlewat atau terulang. `id` membuat kunci urutnya unik."
+  "tanya": "Kenapa sort key cursor memakai `(dibuat, id)`, bukan `dibuat` saja?",
+  "jawab": "Dua pesanan bisa punya `dibuat` yang sama persis. Dengan `dibuat` saja, baris dengan waktu sama di batas halaman bisa terlewat atau terulang. `id` membuat sort key-nya unik."
  },
  {
   "id": "B1.3-2",
@@ -822,8 +822,8 @@
   "halaman": "C4",
   "judul": "3.7 Security dasar dan rate limit",
   "url": "c-operasional/c4-security-dasar/",
-  "tanya": "Ember 5 token, terisi 1 token per 12 detik. Penyerang mengirim 8 tebakan, lalu menunggu 30 detik dan mengirim 3 lagi. Berapa dari 3 tebakan terakhir yang sampai ke pemeriksaan PIN?",
-  "jawab": "Dua. Setelah 8 tebakan, ember kosong. Dalam 30 detik terisi 30 ÷ 12 = 2,5 token. Dua tebakan mengambil dua token penuh, yang ketiga ditolak `429`."
+  "tanya": "Bucket 5 token, terisi 1 token per 12 detik. Penyerang mengirim 8 tebakan, lalu menunggu 30 detik dan mengirim 3 lagi. Berapa dari 3 tebakan terakhir yang sampai ke pemeriksaan PIN?",
+  "jawab": "Dua. Setelah 8 tebakan, bucket kosong. Dalam 30 detik terisi 30 ÷ 12 = 2,5 token. Dua tebakan mengambil dua token penuh, yang ketiga ditolak `429`."
  },
  {
   "id": "C4-2",
@@ -831,7 +831,7 @@
   "judul": "3.7 Security dasar dan rate limit",
   "url": "c-operasional/c4-security-dasar/",
   "tanya": "Jelaskan kenapa rate limit di memori proses tidak cukup untuk Rekeningo Tahap 3.",
-  "jawab": "Tahap 3 menjalankan dua instance API. Setiap instance menyimpan embernya sendiri, jadi batas 5 per akun menjadi 10 (rekaman bagian D). Hitungan harus disimpan di tempat bersama, mis. Redis, atau dikerjakan gateway di depan kedua instance."
+  "jawab": "Tahap 3 menjalankan dua instance API. Setiap instance menyimpan bucket-nya sendiri, jadi batas 5 per akun menjadi 10 (rekaman bagian D). Hitungan harus disimpan di tempat bersama, mis. Redis, atau dikerjakan gateway di depan kedua instance."
  },
  {
   "id": "C4-3",

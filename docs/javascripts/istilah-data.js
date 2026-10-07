@@ -690,7 +690,7 @@ window.ISTILAH = {
  },
  "Sharding": {
   "b": "D2",
-  "d": "Membagi data ke beberapa database berdasarkan kunci, mis. per wilayah.",
+  "d": "Membagi data ke beberapa database berdasarkan shard key, mis. per wilayah.",
   "n": "5.1 Scaling",
   "s": "istilah-sharding",
   "t": "Sharding",
@@ -1282,7 +1282,7 @@ window.ISTILAH = {
  },
  "sharding": {
   "b": "D2",
-  "d": "Membagi data ke beberapa database berdasarkan kunci, mis. per wilayah.",
+  "d": "Membagi data ke beberapa database berdasarkan shard key, mis. per wilayah.",
   "n": "5.1 Scaling",
   "s": "istilah-sharding",
   "t": "Sharding",

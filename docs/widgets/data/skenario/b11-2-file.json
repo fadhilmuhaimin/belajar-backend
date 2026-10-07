@@ -5,7 +5,7 @@
   "jenis": "rekaman",
   "file": "labs/b11-2-proxy/output/d-file.txt",
   "fileVarian": "labs/b11-2-proxy/output/d-file.txt",
-  "catatan": "Monolith API Go dan object storage tiruan dengan URL bertanda tangan (HMAC), direkam 2026-10-07 (labs/b11-2-proxy). Bukan S3; perilaku signed URL S3 dirujuk ke dokumentasi AWS di halaman."
+  "catatan": "Monolith API Go dan object storage tiruan dengan signed URL (HMAC), direkam 2026-10-07 (labs/b11-2-proxy). Bukan S3; perilaku signed URL S3 dirujuk ke dokumentasi AWS di halaman."
  },
  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': app memakai signed URL.",
  "komponen": [
@@ -68,11 +68,11 @@
   "options": [
    "404, sama seperti lewat API",
    "File bukti milik Budi",
-   "403 tanda tangan salah"
+   "403 signature salah"
   ],
   "answer": 1,
   "varian": true,
-  "explain": "Storage hanya memeriksa tanda tangan dan waktu kedaluwarsa, bukan siapa yang memakai URL. Rekaman lab: Ani mendapat 245760 byte milik Budi. Dokumentasi AWS menyebut presigned URL sebagai bearer token. Setelah kedaluwarsa, URL yang sama dijawab 403."
+  "explain": "Storage hanya memeriksa signature dan waktu kedaluwarsa, bukan siapa yang memakai URL. Rekaman lab: Ani mendapat 245760 byte milik Budi. Dokumentasi AWS menyebut presigned URL sebagai bearer token. Setelah kedaluwarsa, URL yang sama dijawab 403."
  },
  "langkah": [
   {

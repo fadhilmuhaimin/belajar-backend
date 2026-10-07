@@ -61,7 +61,7 @@ Foto, di tiga tempat sekaligus: penyimpanan di server, bandwidth saat 300 HP kem
 
 **Id dibuat di HP.** Setiap laporan dan foto mendapat UUID saat dibuat, bukan saat sampai di server. UUIDv7 berurut menurut waktu, jadi tetap ramah index ([RFC 9562 §5.7](https://www.rfc-editor.org/rfc/rfc9562.html#section-5.7)). Laporan dikirim dengan `PUT /laporan/{id}`, yang idempotent menurut [RFC 9110 §9.2.2](https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2): kirim ulang tidak membuat laporan ganda.
 
-**Dua jalur.** Data teks lewat Sync API, dengan aturan dari widget di atas. Foto diunggah langsung ke object storage dengan URL bertanda tangan berumur pendek. Upload yang putus dilanjutkan dari byte terakhir, bukan diulang dari nol: protokol tus menanyakan `Upload-Offset` lalu melanjutkan dengan `PATCH` ([tus](https://tus.io/protocols/resumable-upload)). S3 menyediakan multipart upload dengan ide serupa ([AWS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html)).
+**Dua jalur.** Data teks lewat Sync API, dengan aturan dari widget di atas. Foto diunggah langsung ke object storage dengan signed URL berumur pendek. Upload yang putus dilanjutkan dari byte terakhir, bukan diulang dari nol: protokol tus menanyakan `Upload-Offset` lalu melanjutkan dengan `PATCH` ([tus](https://tus.io/protocols/resumable-upload)). S3 menyediakan multipart upload dengan ide serupa ([AWS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html)).
 
 **Urutan sync.** Laporan dikirim dulu, foto menyusul. Server menerima laporan dengan foto yang belum lengkap, dan menandainya. Supervisor hanya bisa menyetujui laporan yang fotonya lengkap.
 

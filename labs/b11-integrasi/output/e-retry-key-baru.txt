@@ -1,8 +1,8 @@
 == E. Sama seperti D · retry dengan key baru setiap percobaan
-  0.0 s  gateway  kunci tp_5521-1 → ch_1 (tagihan baru), total tagihan dibuat: 1
-  2.0 s  api      tp_5521 percobaan 1 gagal (timeout 2 detik), tunggu 210ms
-  2.2 s  gateway  kunci tp_5521-2 → ch_2 (tagihan baru), total tagihan dibuat: 2
-  4.2 s  api      tp_5521 percobaan 2 gagal (timeout 2 detik), tunggu 459ms
-  4.7 s  gateway  kunci tp_5521-3 → ch_3 (tagihan baru), total tagihan dibuat: 3
-  6.7 s  api      tp_5521 → 503 setelah 6.67s (timeout 2 detik), menunggu gateway saat masuk: 1
+  0.0 s  gateway  key tp_5521-1 → ch_1 (tagihan baru), total tagihan dibuat: 1
+  2.0 s  api      tp_5521 percobaan 1 gagal (timeout 2 detik), tunggu 201ms
+  2.2 s  gateway  key tp_5521-2 → ch_2 (tagihan baru), total tagihan dibuat: 2
+  4.2 s  api      tp_5521 percobaan 2 gagal (timeout 2 detik), tunggu 512ms
+  4.7 s  gateway  key tp_5521-3 → ch_3 (tagihan baru), total tagihan dibuat: 3
+  6.7 s  api      tp_5521 → 503 setelah 6.72s (timeout 2 detik), menunggu gateway saat masuk: 1
   6.7 s  app      tp_5521 selesai: 503 setelah 6.7 detik

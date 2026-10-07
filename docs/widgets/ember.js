@@ -64,7 +64,7 @@
     BB.fetchJSON(host.dataset.src).then(function (d) {
       var modeIdx = 0, state = baru(), sudahTebak = false;
       var kepala = BB.el("div", { class: "bb-ember__head" }, [BB.el("strong", { text: d.judul }), " ", BB.sumberChip(d.sumber)]);
-      var modeRow = BB.el("div", { class: "bb-ember__mode", role: "group", "aria-label": "Kunci ember" });
+      var modeRow = BB.el("div", { class: "bb-ember__mode", role: "group", "aria-label": "Key bucket" });
       var jam = BB.el("span", { class: "bb-ember__jam" });
       var ember = BB.el("div", { class: "bb-ember__ember", "aria-live": "polite" });
       var log = BB.el("ul", { class: "bb-ember__log", role: "status" });
@@ -76,7 +76,7 @@
         jam.textContent = "Jam simulasi: " + state.now + " detik";
         ember.textContent = "";
         var kunci = Object.keys(state.ember);
-        if (!kunci.length) { ember.appendChild(BB.el("p", { class: "bb-muted", text: "Belum ada request. Setiap kunci punya ember sendiri, penuh di awal." })); return; }
+        if (!kunci.length) { ember.appendChild(BB.el("p", { class: "bb-muted", text: "Belum ada request. Setiap key punya bucket sendiri, penuh di awal." })); return; }
         kunci.slice(-3).forEach(function (k) {
           var jenis = k.split(":")[0], cfg = mode.ember[jenis];
           var e = state.ember[k];

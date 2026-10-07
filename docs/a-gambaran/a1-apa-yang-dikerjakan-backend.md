@@ -82,7 +82,7 @@ Backend Rekeningo punya empat tugas:
 1. **Sumber kebenaran data bersama.** Saldo, riwayat, dan pesanan disimpan di satu database. Semua perangkat membaca dari sana.
 2. **Aturan bisnis yang tidak bisa dilewati.** "Saldo harus cukup" dicek di server. App boleh mengecek lebih dulu, tapi hanya untuk memberi kabar cepat.
 3. **Identitas dan izin.** Backend tahu siapa yang mengirim request (authentication) dan apa yang boleh ia lakukan (authorization). Dibahas di [[B5.1]] dan [[B5.3]].
-4. **Penghubung ke sistem lain.** Notifikasi ke HP Ani, bank untuk top-up, email struk. HP tidak memegang kunci rahasia untuk sistem-sistem itu.
+4. **Penghubung ke sistem lain.** Notifikasi ke HP Ani, bank untuk top-up, email struk. HP tidak memegang secret untuk sistem-sistem itu.
 
 Di dalam API ada tiga lapisan. **Handler** mengurus HTTP. **Logika bisnis** memegang aturan Rekeningo. **Akses data** berbicara dengan database.
 
@@ -126,13 +126,13 @@ Supabase dan Firebase tetap punya "backend". Bedanya, sebagian besar sudah jadi,
 
 ??? success "Jawaban"
 
-    Backend. Hanya backend yang tahu penerima transfer dan menyimpan kunci akses layanan push.
+    Backend. Hanya backend yang tahu penerima transfer dan menyimpan API key layanan push.
 
 ## Saat me-review kode AI, cek ini
 
 - [ ] Setiap aturan bisnis yang dicek di app juga dicek di backend.
 - [ ] Endpoint tidak percaya nilai dari client untuk hal yang bisa dihitung server, mis. saldo atau harga.
-- [ ] Kunci rahasia (API key bank, layanan push) hanya ada di server, tidak di kode app.
+- [ ] Secret (API key bank, layanan push) hanya ada di server, tidak di kode app.
 - [ ] Aturan uang tidak ditulis di handler, tapi di lapisan logika bisnis.
 
 ## Bacaan lanjut

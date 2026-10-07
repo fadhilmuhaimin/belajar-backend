@@ -101,7 +101,7 @@ Rekaman di [[B3.1]] menunjukkan satu konsekuensinya: satu panggilan `rpc` Supaba
 
 - [ ] Di proyek BaaS: setiap tabel baru punya RLS aktif dan policy yang jelas.
 - [ ] Logika uang tidak dijalankan di app lalu hasilnya ditulis langsung ke tabel.
-- [ ] Kunci `service_role` Supabase atau kredensial admin Firebase tidak ada di kode app.
+- [ ] Key `service_role` Supabase atau kredensial admin Firebase tidak ada di kode app.
 - [ ] Fungsi SQL yang mengubah banyak baris berjalan dalam satu transaction.
 
 ## Bacaan lanjut

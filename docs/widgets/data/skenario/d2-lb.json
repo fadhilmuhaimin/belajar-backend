@@ -73,7 +73,7 @@
    "ke": "api2",
    "judul": "Diteruskan ke API #2",
    "kirim": "lb  POST /login → 127.0.0.1:18142\n→ 200, token budi.…(disensor)",
-   "jelas": "Token ditandatangani dengan secret yang sama di kedua instance ([[B5.1]])."
+   "jelas": "Signature token dibuat dengan secret yang sama di kedua instance ([[B5.1]])."
   },
   {
    "dari": "budi",

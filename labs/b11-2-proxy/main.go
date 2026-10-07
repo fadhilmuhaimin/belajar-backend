@@ -3,7 +3,7 @@
 //
 //	b112 layanan  layanan verifikasi identitas tiruan :18111 (hanya menerima X-Kredensial yang benar). LAMBAT=detik
 //	b112 proxy    proxy verifikasi Go :18112. TIMEOUT=detik (0 = tanpa timeout)
-//	b112 storage  object storage tiruan :18113 (hanya melayani URL bertanda tangan)
+//	b112 storage  object storage tiruan :18113 (hanya melayani signed URL)
 //	b112 api      Monolith API :18114: /bukti (proxy file dan signed URL), /beranda (BFF) dan 5 endpoint bagiannya
 package main
 
@@ -106,7 +106,7 @@ func storage() {
 		k := r.PathValue("kunci")
 		exp, _ := strconv.ParseInt(r.URL.Query().Get("exp"), 10, 64)
 		if !hmac.Equal([]byte(tandaTangan(k, exp)), []byte(r.URL.Query().Get("sig"))) {
-			log.Printf("storage  GET %s → 403 tanda tangan salah", k)
+			log.Printf("storage  GET %s → 403 signature salah", k)
 			tulis(w, 403, map[string]string{"error": "signature_mismatch"})
 			return
 		}

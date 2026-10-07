@@ -2,15 +2,15 @@
   "judul": "Token bucket untuk login",
   "sumber": { "jenis": "ilustrasi", "catatan": "Simulasi di browser dengan aturan yang sama dengan lab labs/c4-ratelimit: 5 token, 1 token per 12 detik. Rekaman lab ada di Cara kerjanya." },
   "tebak": {
-    "q": "Ember berisi 5 token dan terisi 1 token per 12 detik. Penyerang mengirim 8 tebakan PIN dalam satu detik. Berapa yang sampai ke pemeriksaan PIN?",
+    "q": "Bucket berisi 5 token dan terisi 1 token per 12 detik. Penyerang mengirim 8 tebakan PIN dalam satu detik. Berapa yang sampai ke pemeriksaan PIN?",
     "options": ["3", "5", "8"],
     "benar": 1,
     "jelas": "Lima token habis dipakai lima tebakan pertama. Tiga sisanya ditolak 429 sebelum PIN dicek. Token berikutnya baru ada 12 detik kemudian.",
     "setelah": 0
   },
   "mode": [
-    { "id": "ip", "label": "Ember per IP", "ember": { "ip": { "kapasitas": 5, "perDetik": 0.08333333333333333 } } },
-    { "id": "akun+ip", "label": "Ember per akun + per IP longgar", "ember": { "ip": { "kapasitas": 60, "perDetik": 1 }, "akun": { "kapasitas": 5, "perDetik": 0.08333333333333333 } } }
+    { "id": "ip", "label": "Bucket per IP", "ember": { "ip": { "kapasitas": 5, "perDetik": 0.08333333333333333 } } },
+    { "id": "akun+ip", "label": "Bucket per akun + per IP longgar", "ember": { "ip": { "kapasitas": 60, "perDetik": 1 }, "akun": { "kapasitas": 5, "perDetik": 0.08333333333333333 } } }
   ],
   "aksi": [
     { "label": "8 tebakan PIN akun Budi", "kirim": { "jumlah": 8, "akun": "Budi", "ip": "10.0.0.66" } },

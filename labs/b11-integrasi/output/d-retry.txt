@@ -1,6 +1,6 @@
 == D. Response pertama gateway terlambat 3 detik · timeout 2 detik · retry dengan key yang sama
-  0.0 s  gateway  kunci tp_5521 → ch_1 (tagihan baru), total tagihan dibuat: 1
-  2.0 s  api      tp_5521 percobaan 1 gagal (timeout 2 detik), tunggu 214ms
-  2.2 s  gateway  kunci tp_5521 → ch_1 (tagihan lama), total tagihan dibuat: 1
+  0.0 s  gateway  key tp_5521 → ch_1 (tagihan baru), total tagihan dibuat: 1
+  2.0 s  api      tp_5521 percobaan 1 gagal (timeout 2 detik), tunggu 219ms
+  2.2 s  gateway  key tp_5521 → ch_1 (tagihan lama), total tagihan dibuat: 1
   2.2 s  api      tp_5521 → 202 tagihan ch_1 setelah 2.22s, menunggu gateway saat masuk: 1
   2.2 s  app      tp_5521 selesai: 202 setelah 2.2 detik

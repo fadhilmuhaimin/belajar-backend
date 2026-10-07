@@ -47,7 +47,7 @@ Raka menambah `?halaman=2&per_halaman=20`, yang di SQL menjadi `OFFSET 20`. Lalu
 
 Bagian A: pesanan 199900 muncul di halaman 1 dan halaman 2. Bagian C: `OFFSET` tetap membaca semua baris sebelum posisi yang diminta, jadi halaman yang jauh makin lambat.
 
-**Cursor pagination** (keyset) meminta "baris sesudah yang terakhir kulihat". Kunci urutnya harus unik dan stabil, mis. `(dibuat, id)`, dengan index yang cocok ([[B2.3]]). Bentuk response yang umum:
+**Cursor pagination** (keyset) meminta "baris sesudah yang terakhir kulihat". Sort key-nya harus unik dan stabil, mis. `(dibuat, id)`, dengan index yang cocok ([[B2.3]]). Bentuk response yang umum:
 
 ```json
 {
@@ -66,7 +66,7 @@ Cursor sebaiknya dianggap teks buram oleh app: app hanya mengirimnya kembali, ti
 
 **Skenario:** riwayat penjualan dengan cursor pagination. Tidak ada tab yang dijalankan; semua dicek ke dokumentasi. Perilaku SQL-nya ada di rekaman di atas.
 
-Yang sama di semua stack: cursor adalah nilai kunci urut dari baris terakhir. Yang berbeda: apakah framework menyediakannya.
+Yang sama di semua stack: cursor adalah nilai sort key dari baris terakhir. Yang berbeda: apakah framework menyediakannya.
 
 | Stack | Cursor pagination | Sumber |
 |---|---|---|
@@ -82,18 +82,18 @@ Yang sama di semua stack: cursor adalah nilai kunci urut dari baris terakhir. Ya
 | Pilihan | Kelebihan | Kekurangan |
 |---|---|---|
 | Offset | Bisa lompat ke halaman ke-N, mudah ditulis | Item ganda atau terlewat saat data berubah; halaman jauh makin lambat |
-| Cursor | Stabil saat data berubah, cepat di halaman mana pun | Tidak bisa lompat ke halaman ke-N; butuh kunci urut unik + index |
+| Cursor | Stabil saat data berubah, cepat di halaman mana pun | Tidak bisa lompat ke halaman ke-N; butuh sort key unik + index |
 | Tanpa pagination | Paling sederhana | Response membesar tanpa batas ([[E5]]) |
 
 Rule of thumb: infinite scroll di app mobile memakai cursor. Tabel admin yang butuh "halaman 7 dari 40" boleh memakai offset.
 
 ## Cek diri
 
-**1.** Kenapa kunci cursor memakai `(dibuat, id)`, bukan `dibuat` saja?
+**1.** Kenapa sort key cursor memakai `(dibuat, id)`, bukan `dibuat` saja?
 
 ??? success "Jawaban"
 
-    Dua pesanan bisa punya `dibuat` yang sama persis. Dengan `dibuat` saja, baris dengan waktu sama di batas halaman bisa terlewat atau terulang. `id` membuat kunci urutnya unik.
+    Dua pesanan bisa punya `dibuat` yang sama persis. Dengan `dibuat` saja, baris dengan waktu sama di batas halaman bisa terlewat atau terulang. `id` membuat sort key-nya unik.
 
 **2.** Jelaskan kenapa offset pagination bisa menampilkan item yang sama dua kali.
 
@@ -110,7 +110,7 @@ Rule of thumb: infinite scroll di app mobile memakai cursor. Tabel admin yang bu
 ## Saat me-review kode AI, cek ini
 
 - [ ] Endpoint daftar punya batas maksimum per halaman di server.
-- [ ] Infinite scroll memakai cursor dengan kunci urut unik, didukung index.
+- [ ] Infinite scroll memakai cursor dengan sort key unik, didukung index.
 - [ ] Cursor divalidasi di server, tidak dipercaya mentah-mentah.
 - [ ] `GET`, `PUT`, `DELETE` tidak punya efek tambahan saat diulang. `POST` yang memindahkan uang memakai idempotency key.
 

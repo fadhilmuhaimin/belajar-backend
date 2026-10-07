@@ -21,7 +21,7 @@ Baca 7 menit · coba 3 menit · Prasyarat: [[B1.1]] · Jalur inti
 
 ## Inti
 
-Authentication menjawab siapa pengirim request. Setelah login, server memberi bukti berumur pendek: session id yang dicek ke database, atau token bertanda tangan.
+Authentication menjawab siapa pengirim request. Setelah login, server memberi bukti berumur pendek: session id yang dicek ke database, atau token dengan signature.
 
 <div data-bb="arsitektur" data-tahap="1"></div>
 
@@ -47,7 +47,7 @@ OWASP mencantumkan Argon2id, scrypt, bcrypt, dan PBKDF2 sebagai pilihan ([Passwo
 
 **Dua cara membawa bukti setelah login:**
 
-| | Session | Token bertanda tangan (JWT) |
+| | Session | Token dengan signature (JWT) |
 |---|---|---|
 | Yang dipegang app | Session id acak | Token berisi data (`sub`, `exp`) + signature |
 | Cara server memeriksa | Cari session id di database atau cache | Hitung ulang signature dengan secret |

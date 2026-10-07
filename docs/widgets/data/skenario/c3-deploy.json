@@ -44,7 +44,7 @@
         "jelas": "Kesalahan konfigurasi, bukan kesalahan kode. Test di CI tidak akan menangkapnya.", "nada": "warn" },
       { "dari": "server", "judul": "Aplikasi menolak start (fail-fast)",
         "kirim": "$ docker logs rekeningo-api\nkonfigurasi salah: TOKEN_SECRET kosong atau kurang dari 16 karakter",
-        "jelas": "Lebih baik mati saat start daripada jalan lalu menerbitkan token yang ditandatangani secret kosong." },
+        "jelas": "Lebih baik mati saat start daripada jalan lalu menerbitkan token dengan signature dari secret kosong." },
       { "dari": "ci", "ke": "server", "judul": "Health check gagal selama 5 detik",
         "kirim": "$ curl /sehat\ntidak ada jawaban selama 5 detik",
         "jelas": "Batas waktu health check menentukan berapa lama user menunggu sebelum rollback.", "nada": "warn",

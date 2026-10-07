@@ -125,9 +125,9 @@
   {
    "dari": "api",
    "ke": "idp",
-   "judul": "Ambil kunci publik",
+   "judul": "Ambil public key",
    "kirim": "GET /jwks → {\"keys\":[{\"kty\":\"RSA\",\"kid\":\"lab-1\",…}]}",
-   "jelas": "Di production, kunci ini di-cache dan diperbarui berkala."
+   "jelas": "Di production, public key ini di-cache dan diperbarui berkala."
   },
   {
    "dari": "api",

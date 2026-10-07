@@ -68,7 +68,7 @@ Lama kerja lebih menentukan dari jumlah user.
 --8<-- "labs/t5-skala/output/partisi.txt:23:24"
 ```
 
-Query tanpa filter tanggal tetap memindai ketiga partisi (rekaman lengkap di file yang sama). Partisi membantu kalau query dan arsip mengikuti kunci partisinya.
+Query tanpa filter tanggal tetap memindai ketiga partisi (rekaman lengkap di file yang sama). Partisi membantu kalau query dan arsip mengikuti partition key-nya.
 
 ## Di stack lain
 
@@ -80,7 +80,7 @@ Syarat stateless sering dilanggar lewat penyimpanan sesi bawaan. Hanya Go yang d
 | Laravel | Database | Driver bisa diganti ke Redis | [Laravel: session](https://laravel.com/docs/12.x/session) |
 | Django | Database | Bisa diganti ke cache atau file | [Django: sessions](https://docs.djangoproject.com/en/stable/topics/http/sessions/) |
 | Spring | Sesi milik servlet container (tanpa Spring Session) | Spring Session menyimpan sesi di Redis atau JDBC supaya bisa dipakai bersama di cluster | [Spring Session](https://docs.spring.io/spring-session/reference/) |
-| Go (lab) | Tidak ada bawaan | Lab membandingkan map di memori dengan token bertanda tangan | Rekaman di atas |
+| Go (lab) | Tidak ada bawaan | Lab membandingkan map di memori dengan token yang punya signature | Rekaman di atas |
 
 ## Trade-off: kapan pakai apa
 
@@ -89,7 +89,7 @@ Syarat stateless sering dilanggar lewat penyimpanan sesi bawaan. Hanya Go yang d
 | Scale up | Tanpa ubah kode atau arsitektur | Ada batas atas; satu server tetap satu titik gagal |
 | Scale out API | Tambah atau kurangi instance sesuai beban | Syarat stateless; butuh load balancer |
 | Read replica | Beban baca pindah dari primary | Replication lag; read-your-writes harus ditangani ([[D3]]) |
-| Partisi | Query per periode dan arsip jadi ringan | Query tanpa kunci partisi tidak terbantu; desain kunci sulit diubah |
+| Partisi | Query per periode dan arsip jadi ringan | Query tanpa partition key tidak terbantu; partition key sulit diubah |
 
 ## Cek diri
 
@@ -116,7 +116,7 @@ Syarat stateless sering dilanggar lewat penyimpanan sesi bawaan. Hanya Go yang d
 - [ ] Usulan scaling menyebut metric yang menunjukkan bottleneck, bukan hanya "supaya scalable".
 - [ ] API tidak menyimpan sesi, file, atau state lain di memori atau disk lokal instance.
 - [ ] Query baca yang diarahkan ke replica boleh menerima data yang tertinggal.
-- [ ] Partisi memakai kunci yang memang dipakai di filter query dan arsip.
+- [ ] Partisi memakai partition key yang memang dipakai di filter query dan arsip.
 - [ ] Sharding tidak diusulkan sebelum query, cache, replica, dan partisi dicoba.
 
 ## Bacaan lanjut

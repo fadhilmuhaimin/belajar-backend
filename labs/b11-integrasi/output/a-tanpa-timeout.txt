@@ -1,10 +1,10 @@
 == A. Gateway lambat 10 detik · API tanpa timeout · 6 top-up tiap 0,5 detik
-  0.0 s  gateway  kunci tp_5521 → ch_1 (tagihan baru), total tagihan dibuat: 1
-  0.5 s  gateway  kunci tp_5522 → ch_2 (tagihan baru), total tagihan dibuat: 2
-  1.0 s  gateway  kunci tp_5523 → ch_3 (tagihan baru), total tagihan dibuat: 3
-  1.5 s  gateway  kunci tp_5524 → ch_4 (tagihan baru), total tagihan dibuat: 4
-  2.0 s  gateway  kunci tp_5525 → ch_5 (tagihan baru), total tagihan dibuat: 5
-  2.5 s  gateway  kunci tp_5526 → ch_6 (tagihan baru), total tagihan dibuat: 6
+  0.0 s  gateway  key tp_5521 → ch_1 (tagihan baru), total tagihan dibuat: 1
+  0.5 s  gateway  key tp_5522 → ch_2 (tagihan baru), total tagihan dibuat: 2
+  1.0 s  gateway  key tp_5523 → ch_3 (tagihan baru), total tagihan dibuat: 3
+  1.5 s  gateway  key tp_5524 → ch_4 (tagihan baru), total tagihan dibuat: 4
+  2.0 s  gateway  key tp_5525 → ch_5 (tagihan baru), total tagihan dibuat: 5
+  2.5 s  gateway  key tp_5526 → ch_6 (tagihan baru), total tagihan dibuat: 6
  10.0 s  api      tp_5521 → 202 tagihan ch_1 setelah 10s, menunggu gateway saat masuk: 1
  10.0 s  app      tp_5521 selesai: 202 setelah 10.0 detik
  10.5 s  api      tp_5522 → 202 tagihan ch_2 setelah 10s, menunggu gateway saat masuk: 2

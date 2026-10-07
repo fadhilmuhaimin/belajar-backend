@@ -98,7 +98,7 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **RLS** (Row Level Security) | Fitur PostgreSQL yang menyaring baris berdasarkan aturan per user, dijalankan di dalam database. | [[B5.3]] |
 | **ROLLBACK** | Perintah yang membatalkan semua perubahan sejak `BEGIN`. | [[B3.1]] |
 | **Rolling deploy** | Mengganti instance satu per satu, supaya selalu ada instance yang melayani request. | [[C3]] |
-| **Sharding** | Membagi data ke beberapa database berdasarkan kunci, mis. per wilayah. | [[D2]] |
+| **Sharding** | Membagi data ke beberapa database berdasarkan shard key, mis. per wilayah. | [[D2]] |
 | **Signature** | Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah. | [[B5.1]] |
 | **Signed URL** | URL berbatas waktu yang memberi akses langsung ke satu file di object storage. | [[B11.2]] |
 | **SSE** (Server-Sent Events) | Koneksi HTTP yang dibiarkan terbuka sehingga server bisa mengirim pesan satu arah ke client. | [[E4]] |

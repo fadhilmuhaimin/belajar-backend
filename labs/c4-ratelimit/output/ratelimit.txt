@@ -12,7 +12,7 @@
 == B. BATAS=ip · 30 karyawan satu tempat kerja login benar lewat satu Wi-Fi (10.0.0.20)
   0.0 s  30 login benar dari 10.0.0.20 → 200: 5 · 429: 25
 
-== C. BATAS=akun+ip · ember per akun (5, 1 per 12 detik) + ember per IP longgar (60, 1 per detik)
+== C. BATAS=akun+ip · bucket per akun (5, 1 per 12 detik) + bucket per IP longgar (60, 1 per detik)
   0.0 s  tebakan #1 dari 10.0.1.1           401
   0.0 s  tebakan #2 dari 10.0.1.2           401
   0.0 s  tebakan #3 dari 10.0.1.3           401
@@ -23,7 +23,7 @@
   0.0 s  tebakan #8 dari 10.0.1.8           429  Retry-After: 12
   0.0 s  30 login benar dari 10.0.0.20 → 200: 30
 
-== D. BATAS=akun+ip · dua instance API, ember di memori masing-masing; tebakan bergantian ke instance 1 dan 2
+== D. BATAS=akun+ip · dua instance API, bucket di memori masing-masing; tebakan bergantian ke instance 1 dan 2
   0.0 s  tebakan #1 → instance 1            401
   0.0 s  tebakan #2 → instance 2            401
   0.0 s  tebakan #3 → instance 1            401
