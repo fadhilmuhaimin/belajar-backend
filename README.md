@@ -19,7 +19,7 @@ Yang membedakan panduan ini:
 | `labs/` | Lab yang menghasilkan rekaman di halaman (Go, Python, Dart, Node, PostgreSQL, Redis) |
 | `tools/` | Skrip sinkronisasi, pemeriksaan, dan hook MkDocs |
 | `tests/` | Tes widget (Node) |
-| `plan/` | Rancangan cerita (`STORY.md`) dan catatan keputusan desain (`KEPUTUSAN.md`) |
+| `plan/` | Rancangan cerita (`STORY.md`), catatan keputusan desain (`KEPUTUSAN.md`), dan status pekerjaan terbuka (`STATUS.md`) |
 
 ## Menjalankan situs
 
