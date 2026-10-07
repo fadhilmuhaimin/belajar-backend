@@ -3,7 +3,7 @@
 Dokumen perencanaan cerita.
 Tanggal: 2026-10-05
 
-> **GATE A disetujui (2026-10-05) dengan revisi:** nama dicek terhadap produk nyata dan ditandai fiktif; Tahap 3–4 dikerjakan setelah Tahap 1–2 dinilai; navigasi per tahap + indeks per topik sebagai nav kedua; di layar < 44em blok "Kamu di sini" jadi satu baris yang bisa dibuka; revisi a–e diterapkan di dokumen ini.
+> **Rancangan awal disepakati (2026-10-05) dengan revisi:** nama dicek terhadap produk nyata dan ditandai fiktif; Tahap 3–4 dikerjakan setelah Tahap 1–2 dinilai; navigasi per tahap + indeks per topik sebagai nav kedua; di layar < 44em blok "Kamu di sini" jadi satu baris yang bisa dibuka; revisi a–e diterapkan di dokumen ini.
 
 **Masalah yang dijawab:** B3.1 berdiri sendiri. Kamu tidak tahu sedang berada di mana dalam keseluruhan sistem.
 **Jawaban:** satu aplikasi fiktif yang tumbuh dari 100 user sampai jutaan. Setiap konsep muncul karena cerita membutuhkannya, bukan karena ada di daftar materi.
@@ -18,7 +18,7 @@ Isi:
 5. [Perubahan template: blok "Kamu di sini"](#5-perubahan-template-blok-kamu-di-sini)
 6. [Halaman "Peta cerita"](#6-halaman-peta-cerita)
 7. [Contoh integrasi Tahap 4: proxy dan BFF](#7-contoh-integrasi-tahap-4-proxy-dan-bff)
-8. [Keputusan GATE A](#8-keputusan-gate-a-2026-10-05)
+8. [Keputusan rancangan awal](#8-keputusan-rancangan-awal-2026-10-05)
 
 ---
 
@@ -28,19 +28,19 @@ Isi:
 
 **Penafian untuk A0** (wajib satu kalimat): *Rekeningo dan seluruh ceritanya fiktif; cerita ini tidak mengklaim kepatuhan terhadap regulasi pembayaran, perlindungan data, atau aturan lain yang berlaku di dunia nyata.*
 
-**Domain: dompet digital + pemesanan.** Saya setuju dengan usulanmu, karena alasan berikut.
+**Domain: dompet digital + pemesanan.** Domain ini dipilih karena alasan berikut.
 
 - Transaction, race condition, idempotency, payment gateway, notifikasi, dan upload muncul alami. Semuanya inti backend.
 - Contoh Budi dan Ani di B3.1 dan rekaman lab B3 langsung masuk ke cerita. Pilot tidak perlu dibuang.
 - Alternatifnya, pelaporan lapangan offline-first, kuat di sync dan conflict resolution. Tapi lemah di transaction uang, idempotency pembayaran, dan integrasi payment gateway. Topik offline-first tetap masuk lewat aplikasi merchant (Tahap 3) dan studi desain sampingan D4c.
 
-**Tahap 5: masuk cerita, tapi hanya sebagai kerangka.** Rekomendasi saya:
+**Tahap 5: masuk cerita, tapi hanya sebagai kerangka.** Keputusannya:
 
 - STORY.md menulis Tahap 5 lengkap di tingkat cerita, asumsi, dan arsitektur. Tanpa itu, "ke mana arahnya" tidak terlihat dari tahap mana pun.
 - Halaman konsep yang hanya milik Tahap 5 (D2 bagian sharding, D3, D4b) dibuat **paling akhir** dan boleh ditunda. Cerita Tahap 1–4 tidak bergantung padanya.
 - Tahap 5 paling spekulatif. Semua angkanya asumsi, dan beberapa keputusannya bergantung pada vendor cloud. Itu ditandai jelas di bawah.
 
-Catatan: diagram proxy yang kamu sebut (Go di depan object storage dan di depan layanan web eksternal) tidak terlampir di sesi ini. Bagian 7 saya susun dari deskripsimu, dengan nama netral.
+Catatan: bagian 7 (proxy Go di depan object storage dan di depan layanan web eksternal) disusun dengan nama netral.
 
 ---
 
@@ -461,9 +461,9 @@ Aturan:
 
 - Tiga baris teks maksimal: posisi tahap, rekap cerita 2 kalimat, satu kalimat tahap sebelumnya.
 - Data blok diambil dari satu file (`docs/widgets/data/cerita.json`). Isi yang sama dipakai juga oleh Peta cerita, jadi tidak ada dua sumber yang bisa saling beda.
-- Diagram statis di bawah Inti sekarang adalah **arsitektur tahap itu** (≤ 6 elemen), sesuai permintaanmu. Diagram alur langkah (BEGIN → ROLLBACK) pindah ke "Cara kerjanya".
+- Diagram statis di bawah Inti sekarang adalah **arsitektur tahap itu** (≤ 6 elemen). Diagram alur langkah (BEGIN → ROLLBACK) pindah ke "Cara kerjanya".
 
-**Layar pertama (keputusan GATE A, opsi 2).**
+**Layar pertama (keputusan rancangan awal, opsi 2).**
 
 - Di layar ≥ 44em blok tampil penuh (tiga baris).
 - Di layar < 44em blok menjadi **satu baris yang bisa dibuka** ("Kamu di sini · Tahap 2/5 ▸"). Rekap dan tahap sebelumnya muncul saat dibuka.
@@ -542,11 +542,11 @@ Yang dikerjakan proxy, dan kenapa di sana:
 
 Trade-off: proxy adalah satu komponen tambahan yang harus selalu hidup. Kalau proxy mati, verifikasi berhenti total. Butuh dua instance dan monitoring sendiri.
 
-Kedua skenario menjadi isi halaman baru **B11.2 Proxy & BFF**, dengan lab yang bisa dijalankan. Lab memakai object storage lokal (mis. MinIO di docker) dan layanan eksternal tiruan [perlu verifikasi pilihan image saat membangun].
+Kedua skenario menjadi isi halaman baru **B11.2 Proxy & BFF**, dengan lab yang bisa dijalankan. Lab memakai object storage tiruan dan layanan eksternal tiruan, keduanya program Go kecil di folder lab (rencana awal memakai MinIO diganti, lihat keputusan 60).
 
 ---
 
-## 8. Keputusan GATE A (2026-10-05)
+## 8. Keputusan rancangan awal (2026-10-05)
 
 1. Domain dompet digital + pemesanan, tokoh Budi/Ani/Raka/Sinta: **setuju**. Nama diganti menjadi **Rekeningo** karena "Kantong" bentrok dengan aplikasi nyata (bagian 0).
 2. Tahap 5 ditulis lengkap, halamannya paling akhir. Tahap 3–4 dikerjakan setelah Tahap 1–2 dinilai.
