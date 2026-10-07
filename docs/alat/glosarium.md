@@ -37,6 +37,8 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 |---|---|---|
 | **ACID** | Empat jaminan transaction di database relasional: atomicity, consistency, isolation, durability. | [[B3.1]] |
 | **ADR** (Architecture Decision Record) | Catatan pendek tentang satu keputusan desain: konteks, pilihan, alasan, dan akibatnya. | [[D5]] |
+| **API gateway** | Server di depan beberapa instance atau service yang mengurus hal bersama sebelum request diteruskan, mis. rate limit, authentication, dan routing. | [[C4]] |
+| **At-least-once** | Jaminan pengiriman: setiap pesan sampai minimal sekali, jadi bisa sampai dua kali dan penerimanya harus tahan pesan ganda. | [[B10.1]] |
 | **Atomicity** | Jaminan bahwa semua perubahan dalam satu transaction terjadi seluruhnya atau tidak sama sekali. | [[B3.1]] |
 | **BaaS** (Backend-as-a-Service) | Layanan yang menyediakan database, auth, dan API siap pakai, mis. Supabase dan Firebase. | [[A4]] |
 | **Backfill** | Script sekali jalan yang mengisi kolom baru untuk baris lama, biasanya bertahap per batch. | [[B4.2]] |
@@ -53,17 +55,22 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **Deadlock** | Dua transaction saling menunggu lock milik yang lain, sehingga database harus membatalkan salah satunya. | [[B3.2]] |
 | **Eventual consistency** | Data di beberapa tempat boleh berbeda sesaat, tapi akan sama setelah perubahan selesai menyebar. | [[D3]] |
 | **Expand-migrate-contract** | Urutan mengubah skema tanpa downtime: tambah yang baru, pindahkan data dan kode, baru hapus yang lama. | [[B4.2]] |
+| **Fan-out** | Menyebarkan satu kejadian ke banyak penerima, mis. satu promo ditulis ke feed setiap pengikut. | [[D4b]] |
+| **FCM** (Firebase Cloud Messaging) | Layanan push notification milik Firebase. Server mengirim pesan ke token perangkat atau ke topic, lalu sistem operasi HP menampilkannya. | [[E4]] |
 | **Foreign key** | Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada. | [[B2.1]] |
 | **Idempotency key** | Nilai unik yang dibuat app untuk satu aksi, mis. satu kali tekan Bayar, dan dikirim ulang di setiap retry, supaya server mengenali kiriman ulang dan tidak menjalankannya dua kali. | [[E3]] |
 | **Index** | Struktur data tambahan yang mempercepat pencarian baris, dengan biaya tulis dan ruang disk. | [[B2.3]] |
+| **Invarian** | Aturan yang harus selalu benar apa pun yang terjadi, mis. transfer tidak mengubah total saldo semua akun. | [[C1]] |
 | **Isolation level** | Seberapa banyak perubahan dari transaction lain yang boleh terlihat oleh satu transaction yang sedang berjalan. | [[B3.3]] |
 | **JWT** (JSON Web Token) | Token berisi data JSON plus signature, sehingga server bisa memeriksa keasliannya tanpa query ke database. | [[B5.1]] |
 | **Latency** | Lama waktu satu request dari dikirim sampai response diterima. | [[C2]] |
+| **Lease** | Batas waktu satu pekerjaan di queue dipegang satu worker. Kalau worker mati sebelum selesai, pekerjaan diberikan ke worker lain setelah lease habis. | [[B10.1]] |
 | **Little's Law** | Rumus L = λ × W: jumlah yang sedang diproses sama dengan laju kedatangan dikali lama tiap item tinggal. | [[B2.5]] |
 | **Load balancer** | Komponen yang membagi request ke beberapa instance server yang sama. | [[D2]] |
 | **Lock** | Tanda di database bahwa satu transaction sedang memakai baris atau tabel, sehingga transaction lain harus menunggu. | [[B3.2]] |
 | **Log** | Catatan kejadian per request atau per peristiwa, ditulis aplikasi untuk dibaca saat menyelidiki masalah. | [[C2]] |
 | **Lost update** | Perubahan yang hilang karena dua transaction membaca nilai lama yang sama lalu saling menimpa. | [[B3.2]] |
+| **LSN** (Log Sequence Number) | Posisi di WAL. Membandingkan LSN primary dan replica menunjukkan apakah replica sudah menerapkan perubahan tertentu. | [[D3]] |
 | **Metric** | Angka yang dihitung terus-menerus, mis. jumlah request per detik atau persentase error. | [[C2]] |
 | **Microservice** | Gaya arsitektur yang memecah backend jadi beberapa service kecil yang di-deploy terpisah dan saling memanggil lewat jaringan. | [[B7.2]] |
 | **Middleware** | Fungsi yang dijalankan sebelum atau sesudah semua handler, mis. pemeriksa token atau pencatat log. | [[B7.1]] |
@@ -71,6 +78,7 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **Monolith** | Satu aplikasi backend yang memuat semua fitur dan di-deploy sebagai satu unit. | [[A1]] |
 | **MVCC** (Multi-Version Concurrency Control) | Cara database menyimpan beberapa versi baris, supaya pembaca tidak perlu menunggu penulis. | [[B3.3]] |
 | **N+1 query** | Pola satu query untuk daftar lalu satu query lagi untuk setiap item di daftar itu. | [[B2.4]] |
+| **Nonrepeatable read** | Anomali: baris yang sama dibaca dua kali dalam satu transaction dan nilainya berbeda, karena transaction lain sudah commit perubahan. | [[B3.3]] |
 | **OAuth 2.0** | Standar untuk memberi aplikasi akses terbatas ke akun user di layanan lain tanpa memberikan password. | [[B5.2]] |
 | **Object storage** | Layanan penyimpanan file besar per objek, diakses lewat HTTP, mis. layanan kompatibel S3. | [[B11.2]] |
 | **Offline-first** | Desain app yang menyimpan perubahan di HP dulu, lalu menyinkronkannya ke server saat sinyal ada. | [[E2]] |
@@ -81,6 +89,8 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **Outbox** | Tabel tempat event ditulis dalam transaction yang sama dengan perubahan data, lalu dikirim oleh worker. | [[B10.2]] |
 | **p95 / p50** | Persentil latency: 95% request selesai lebih cepat dari angka p95, dan separuh request lebih cepat dari p50 (median). | [[C2]] |
 | **Pagination** | Membagi daftar panjang menjadi potongan kecil yang diminta satu per satu. | [[B1.3]] |
+| **Partitioning** | Membagi satu tabel besar jadi beberapa partisi di database yang sama, mis. per bulan, supaya query dan arsip hanya menyentuh sebagian data. | [[D2]] |
+| **Phantom read** | Anomali: query yang sama dalam satu transaction mengembalikan kumpulan baris berbeda, karena transaction lain menambah atau menghapus baris. | [[B3.3]] |
 | **PKCE** | Tambahan pada alur OAuth untuk app mobile yang mencegah authorization code dipakai oleh aplikasi lain. | [[B5.2]] |
 | **Polling** | App menanyakan status ke server berulang kali dengan jeda tetap. | [[E4]] |
 | **Primary** | Database utama yang menerima semua perintah tulis; replica menyalin perubahan dari primary. | [[D3]] |
@@ -93,14 +103,22 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **Rate limit** | Batas jumlah request per waktu dari satu sumber, mis. lima percobaan login per menit. | [[C4]] |
 | **RBAC** (Role-Based Access Control) | Authorization berdasarkan peran, mis. hanya peran admin yang boleh membekukan akun. | [[B5.3]] |
 | **Read replica** | Salinan database yang hanya melayani baca dan selalu sedikit tertinggal dari database utama. | [[D2]] |
+| **Read-your-writes** | Jaminan bahwa user langsung melihat perubahan yang baru ditulisnya, walau bacaan biasa dilayani replica yang tertinggal. | [[D3]] |
 | **Replication lag** | Jeda antara perubahan di database utama dan munculnya perubahan itu di replica. | [[D3]] |
 | **Retry** | Mengirim ulang request yang gagal atau tidak dijawab. | [[E3]] |
+| **Reverse proxy** | Server di depan aplikasi yang menerima request dari internet lalu meneruskannya, sambil mengurus hal bersama seperti TLS dan kompresi. | [[B11.2]] |
 | **RLS** (Row Level Security) | Fitur PostgreSQL yang menyaring baris berdasarkan aturan per user, dijalankan di dalam database. | [[B5.3]] |
 | **ROLLBACK** | Perintah yang membatalkan semua perubahan sejak `BEGIN`. | [[B3.1]] |
 | **Rolling deploy** | Mengganti instance satu per satu, supaya selalu ada instance yang melayani request. | [[C3]] |
+| **Round trip** | Satu kali bolak-balik request dan response antara app dan server. Di jaringan seluler, setiap round trip menambah latency. | [[B11.2]] |
+| **Router** | Bagian framework yang mencocokkan method dan path request dengan handler yang tepat. | [[B1.1]] |
+| **Saga** | Pola untuk proses yang melewati beberapa service: setiap langkah punya transaction sendiri, dan kegagalan dibatalkan dengan langkah kompensasi. | [[D3]] |
+| **Semaphore** | Penghitung yang membatasi berapa pekerjaan boleh berjalan bersamaan; pekerjaan berikutnya menunggu sampai ada yang selesai. | [[B8]] |
+| **Serialization anomaly** | Anomali: hasil beberapa transaction yang berjalan bersamaan tidak sama dengan hasil menjalankannya satu per satu dalam urutan mana pun. | [[B3.3]] |
 | **Sharding** | Membagi data ke beberapa database berdasarkan shard key, mis. per wilayah. | [[D2]] |
 | **Signature** | Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah. | [[B5.1]] |
 | **Signed URL** | URL berbatas waktu yang memberi akses langsung ke satu file di object storage. | [[B11.2]] |
+| **Snapshot** | Gambaran isi database pada satu saat, yang dilihat oleh satu query atau satu transaction. | [[B3.3]] |
 | **Source of truth** | Satu tempat yang isinya dianggap benar ketika salinan lain berbeda, mis. database backend untuk saldo; cache dan data di HP hanya salinan. | [[A1]] |
 | **SSE** (Server-Sent Events) | Koneksi HTTP yang dibiarkan terbuka sehingga server bisa mengirim pesan satu arah ke client. | [[E4]] |
 | **Stale** | Data yang sudah tidak terbaru, mis. harga lama yang masih tersimpan di cache. | [[B9]] |
@@ -111,6 +129,7 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **Token bucket** | Algoritma rate limit: setiap key (IP atau akun) punya bucket berisi token yang terisi ulang dengan laju tetap, dan setiap request memakai satu token. | [[C4]] |
 | **Trace** | Rekaman perjalanan satu request melewati beberapa komponen, lengkap dengan durasi tiap bagian. | [[C2]] |
 | **TTL** (Time To Live) | Masa berlaku sebuah data di cache sebelum dianggap kedaluwarsa. | [[B9]] |
+| **WAL** (Write-Ahead Log) | Log perubahan yang ditulis PostgreSQL sebelum data diubah. Replica menyalin perubahan dengan membaca WAL dari primary. | [[D3]] |
 | **Webhook** | HTTP request yang dikirim sistem lain ke API kita saat ada kejadian, mis. pembayaran berhasil. | [[B10.2]] |
 | **WebSocket** | Koneksi dua arah yang tetap terbuka antara app dan server. | [[E4]] |
 | **Worker** | Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request. Di server web seperti WSGI, worker juga berarti satu proses yang melayani request. | [[B10.1]] |

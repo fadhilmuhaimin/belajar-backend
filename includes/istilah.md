@@ -37,6 +37,9 @@
 *[ACID]: Empat jaminan transaction di database relasional: atomicity, consistency, isolation, durability.
 *[ADR]: Catatan pendek tentang satu keputusan desain: konteks, pilihan, alasan, dan akibatnya.
 *[Architecture Decision Record]: Catatan pendek tentang satu keputusan desain: konteks, pilihan, alasan, dan akibatnya.
+*[API gateway]: Server di depan beberapa instance atau service yang mengurus hal bersama sebelum request diteruskan, mis. rate limit, authentication, dan routing.
+*[At-least-once]: Jaminan pengiriman: setiap pesan sampai minimal sekali, jadi bisa sampai dua kali dan penerimanya harus tahan pesan ganda.
+*[at-least-once]: Jaminan pengiriman: setiap pesan sampai minimal sekali, jadi bisa sampai dua kali dan penerimanya harus tahan pesan ganda.
 *[Atomicity]: Jaminan bahwa semua perubahan dalam satu transaction terjadi seluruhnya atau tidak sama sekali.
 *[atomicity]: Jaminan bahwa semua perubahan dalam satu transaction terjadi seluruhnya atau tidak sama sekali.
 *[BaaS]: Layanan yang menyediakan database, auth, dan API siap pakai, mis. Supabase dan Firebase.
@@ -67,16 +70,24 @@
 *[eventual consistency]: Data di beberapa tempat boleh berbeda sesaat, tapi akan sama setelah perubahan selesai menyebar.
 *[Expand-migrate-contract]: Urutan mengubah skema tanpa downtime: tambah yang baru, pindahkan data dan kode, baru hapus yang lama.
 *[expand-migrate-contract]: Urutan mengubah skema tanpa downtime: tambah yang baru, pindahkan data dan kode, baru hapus yang lama.
+*[Fan-out]: Menyebarkan satu kejadian ke banyak penerima, mis. satu promo ditulis ke feed setiap pengikut.
+*[fan-out]: Menyebarkan satu kejadian ke banyak penerima, mis. satu promo ditulis ke feed setiap pengikut.
+*[FCM]: Layanan push notification milik Firebase. Server mengirim pesan ke token perangkat atau ke topic, lalu sistem operasi HP menampilkannya.
+*[Firebase Cloud Messaging]: Layanan push notification milik Firebase. Server mengirim pesan ke token perangkat atau ke topic, lalu sistem operasi HP menampilkannya.
 *[Foreign key]: Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada.
 *[foreign key]: Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada.
 *[Idempotency key]: Nilai unik yang dibuat app untuk satu aksi, mis. satu kali tekan Bayar, dan dikirim ulang di setiap retry, supaya server mengenali kiriman ulang dan tidak menjalankannya dua kali.
 *[idempotency key]: Nilai unik yang dibuat app untuk satu aksi, mis. satu kali tekan Bayar, dan dikirim ulang di setiap retry, supaya server mengenali kiriman ulang dan tidak menjalankannya dua kali.
+*[Invarian]: Aturan yang harus selalu benar apa pun yang terjadi, mis. transfer tidak mengubah total saldo semua akun.
+*[invarian]: Aturan yang harus selalu benar apa pun yang terjadi, mis. transfer tidak mengubah total saldo semua akun.
 *[Isolation level]: Seberapa banyak perubahan dari transaction lain yang boleh terlihat oleh satu transaction yang sedang berjalan.
 *[isolation level]: Seberapa banyak perubahan dari transaction lain yang boleh terlihat oleh satu transaction yang sedang berjalan.
 *[JWT]: Token berisi data JSON plus signature, sehingga server bisa memeriksa keasliannya tanpa query ke database.
 *[JSON Web Token]: Token berisi data JSON plus signature, sehingga server bisa memeriksa keasliannya tanpa query ke database.
 *[Latency]: Lama waktu satu request dari dikirim sampai response diterima.
 *[latency]: Lama waktu satu request dari dikirim sampai response diterima.
+*[Lease]: Batas waktu satu pekerjaan di queue dipegang satu worker. Kalau worker mati sebelum selesai, pekerjaan diberikan ke worker lain setelah lease habis.
+*[lease]: Batas waktu satu pekerjaan di queue dipegang satu worker. Kalau worker mati sebelum selesai, pekerjaan diberikan ke worker lain setelah lease habis.
 *[Load balancer]: Komponen yang membagi request ke beberapa instance server yang sama.
 *[load balancer]: Komponen yang membagi request ke beberapa instance server yang sama.
 *[Lock]: Tanda di database bahwa satu transaction sedang memakai baris atau tabel, sehingga transaction lain harus menunggu.
@@ -85,6 +96,8 @@
 *[log]: Catatan kejadian per request atau per peristiwa, ditulis aplikasi untuk dibaca saat menyelidiki masalah.
 *[Lost update]: Perubahan yang hilang karena dua transaction membaca nilai lama yang sama lalu saling menimpa.
 *[lost update]: Perubahan yang hilang karena dua transaction membaca nilai lama yang sama lalu saling menimpa.
+*[LSN]: Posisi di WAL. Membandingkan LSN primary dan replica menunjukkan apakah replica sudah menerapkan perubahan tertentu.
+*[Log Sequence Number]: Posisi di WAL. Membandingkan LSN primary dan replica menunjukkan apakah replica sudah menerapkan perubahan tertentu.
 *[Metric]: Angka yang dihitung terus-menerus, mis. jumlah request per detik atau persentase error.
 *[metric]: Angka yang dihitung terus-menerus, mis. jumlah request per detik atau persentase error.
 *[Microservice]: Gaya arsitektur yang memecah backend jadi beberapa service kecil yang di-deploy terpisah dan saling memanggil lewat jaringan.
@@ -99,6 +112,8 @@
 *[N+1 query]: Pola satu query untuk daftar lalu satu query lagi untuk setiap item di daftar itu.
 *[n+1 query]: Pola satu query untuk daftar lalu satu query lagi untuk setiap item di daftar itu.
 *[N+1]: Pola satu query untuk daftar lalu satu query lagi untuk setiap item di daftar itu.
+*[Nonrepeatable read]: Anomali: baris yang sama dibaca dua kali dalam satu transaction dan nilainya berbeda, karena transaction lain sudah commit perubahan.
+*[nonrepeatable read]: Anomali: baris yang sama dibaca dua kali dalam satu transaction dan nilainya berbeda, karena transaction lain sudah commit perubahan.
 *[OAuth 2.0]: Standar untuk memberi aplikasi akses terbatas ke akun user di layanan lain tanpa memberikan password.
 *[Object storage]: Layanan penyimpanan file besar per objek, diakses lewat HTTP, mis. layanan kompatibel S3.
 *[object storage]: Layanan penyimpanan file besar per objek, diakses lewat HTTP, mis. layanan kompatibel S3.
@@ -116,6 +131,12 @@
 *[p50]: Persentil latency: 95% request selesai lebih cepat dari angka p95, dan separuh request lebih cepat dari p50 (median).
 *[Pagination]: Membagi daftar panjang menjadi potongan kecil yang diminta satu per satu.
 *[pagination]: Membagi daftar panjang menjadi potongan kecil yang diminta satu per satu.
+*[Partitioning]: Membagi satu tabel besar jadi beberapa partisi di database yang sama, mis. per bulan, supaya query dan arsip hanya menyentuh sebagian data.
+*[partitioning]: Membagi satu tabel besar jadi beberapa partisi di database yang sama, mis. per bulan, supaya query dan arsip hanya menyentuh sebagian data.
+*[partisi]: Membagi satu tabel besar jadi beberapa partisi di database yang sama, mis. per bulan, supaya query dan arsip hanya menyentuh sebagian data.
+*[Partisi]: Membagi satu tabel besar jadi beberapa partisi di database yang sama, mis. per bulan, supaya query dan arsip hanya menyentuh sebagian data.
+*[Phantom read]: Anomali: query yang sama dalam satu transaction mengembalikan kumpulan baris berbeda, karena transaction lain menambah atau menghapus baris.
+*[phantom read]: Anomali: query yang sama dalam satu transaction mengembalikan kumpulan baris berbeda, karena transaction lain menambah atau menghapus baris.
 *[PKCE]: Tambahan pada alur OAuth untuk app mobile yang mencegah authorization code dipakai oleh aplikasi lain.
 *[Polling]: App menanyakan status ke server berulang kali dengan jeda tetap.
 *[polling]: App menanyakan status ke server berulang kali dengan jeda tetap.
@@ -137,20 +158,36 @@
 *[RBAC]: Authorization berdasarkan peran, mis. hanya peran admin yang boleh membekukan akun.
 *[Read replica]: Salinan database yang hanya melayani baca dan selalu sedikit tertinggal dari database utama.
 *[read replica]: Salinan database yang hanya melayani baca dan selalu sedikit tertinggal dari database utama.
+*[Read-your-writes]: Jaminan bahwa user langsung melihat perubahan yang baru ditulisnya, walau bacaan biasa dilayani replica yang tertinggal.
+*[read-your-writes]: Jaminan bahwa user langsung melihat perubahan yang baru ditulisnya, walau bacaan biasa dilayani replica yang tertinggal.
 *[Replication lag]: Jeda antara perubahan di database utama dan munculnya perubahan itu di replica.
 *[replication lag]: Jeda antara perubahan di database utama dan munculnya perubahan itu di replica.
 *[Retry]: Mengirim ulang request yang gagal atau tidak dijawab.
 *[retry]: Mengirim ulang request yang gagal atau tidak dijawab.
+*[Reverse proxy]: Server di depan aplikasi yang menerima request dari internet lalu meneruskannya, sambil mengurus hal bersama seperti TLS dan kompresi.
+*[reverse proxy]: Server di depan aplikasi yang menerima request dari internet lalu meneruskannya, sambil mengurus hal bersama seperti TLS dan kompresi.
 *[RLS]: Fitur PostgreSQL yang menyaring baris berdasarkan aturan per user, dijalankan di dalam database.
 *[Row Level Security]: Fitur PostgreSQL yang menyaring baris berdasarkan aturan per user, dijalankan di dalam database.
 *[ROLLBACK]: Perintah yang membatalkan semua perubahan sejak BEGIN.
 *[Rolling deploy]: Mengganti instance satu per satu, supaya selalu ada instance yang melayani request.
 *[rolling deploy]: Mengganti instance satu per satu, supaya selalu ada instance yang melayani request.
+*[Round trip]: Satu kali bolak-balik request dan response antara app dan server. Di jaringan seluler, setiap round trip menambah latency.
+*[round trip]: Satu kali bolak-balik request dan response antara app dan server. Di jaringan seluler, setiap round trip menambah latency.
+*[Router]: Bagian framework yang mencocokkan method dan path request dengan handler yang tepat.
+*[router]: Bagian framework yang mencocokkan method dan path request dengan handler yang tepat.
+*[Saga]: Pola untuk proses yang melewati beberapa service: setiap langkah punya transaction sendiri, dan kegagalan dibatalkan dengan langkah kompensasi.
+*[saga]: Pola untuk proses yang melewati beberapa service: setiap langkah punya transaction sendiri, dan kegagalan dibatalkan dengan langkah kompensasi.
+*[Semaphore]: Penghitung yang membatasi berapa pekerjaan boleh berjalan bersamaan; pekerjaan berikutnya menunggu sampai ada yang selesai.
+*[semaphore]: Penghitung yang membatasi berapa pekerjaan boleh berjalan bersamaan; pekerjaan berikutnya menunggu sampai ada yang selesai.
+*[Serialization anomaly]: Anomali: hasil beberapa transaction yang berjalan bersamaan tidak sama dengan hasil menjalankannya satu per satu dalam urutan mana pun.
+*[serialization anomaly]: Anomali: hasil beberapa transaction yang berjalan bersamaan tidak sama dengan hasil menjalankannya satu per satu dalam urutan mana pun.
 *[Sharding]: Membagi data ke beberapa database berdasarkan shard key, mis. per wilayah.
 *[sharding]: Membagi data ke beberapa database berdasarkan shard key, mis. per wilayah.
 *[Signature]: Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah.
 *[signature]: Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah.
 *[Signed URL]: URL berbatas waktu yang memberi akses langsung ke satu file di object storage.
+*[Snapshot]: Gambaran isi database pada satu saat, yang dilihat oleh satu query atau satu transaction.
+*[snapshot]: Gambaran isi database pada satu saat, yang dilihat oleh satu query atau satu transaction.
 *[Source of truth]: Satu tempat yang isinya dianggap benar ketika salinan lain berbeda, mis. database backend untuk saldo; cache dan data di HP hanya salinan.
 *[source of truth]: Satu tempat yang isinya dianggap benar ketika salinan lain berbeda, mis. database backend untuk saldo; cache dan data di HP hanya salinan.
 *[SSE]: Koneksi HTTP yang dibiarkan terbuka sehingga server bisa mengirim pesan satu arah ke client.
@@ -170,6 +207,7 @@
 *[trace]: Rekaman perjalanan satu request melewati beberapa komponen, lengkap dengan durasi tiap bagian.
 *[TTL]: Masa berlaku sebuah data di cache sebelum dianggap kedaluwarsa.
 *[Time To Live]: Masa berlaku sebuah data di cache sebelum dianggap kedaluwarsa.
+*[WAL]: Log perubahan yang ditulis PostgreSQL sebelum data diubah. Replica menyalin perubahan dengan membaca WAL dari primary.
 *[Webhook]: HTTP request yang dikirim sistem lain ke API kita saat ada kejadian, mis. pembayaran berhasil.
 *[webhook]: HTTP request yang dikirim sistem lain ke API kita saat ada kejadian, mis. pembayaran berhasil.
 *[WebSocket]: Koneksi dua arah yang tetap terbuka antara app dan server.

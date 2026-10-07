@@ -47,7 +47,7 @@ Besoknya, keluhan baru datang dari satu gedung perkantoran. Jam makan siang, 30 
 --8<-- "labs/c4-ratelimit/main.go:bucket"
 ```
 
-Kapasitas bucket menentukan burst: berapa request boleh datang sekaligus. Laju isi menentukan rata-rata jangka panjang. Ini definisi yang sama dengan `golang.org/x/time/rate` ([dokumentasi](https://pkg.go.dev/golang.org/x/time/rate)). Di production, pakai library itu atau fitur gateway, bukan kode sendiri.
+Kapasitas bucket menentukan burst: berapa request boleh datang sekaligus. Laju isi menentukan rata-rata jangka panjang. Ini definisi yang sama dengan `golang.org/x/time/rate` ([dokumentasi](https://pkg.go.dev/golang.org/x/time/rate)). Di production, pakai library itu atau fitur API gateway, bukan kode sendiri.
 
 Penolakan memakai `429 Too Many Requests`. Header `Retry-After` memberi tahu berapa detik harus menunggu ([RFC 6585 §4](https://www.rfc-editor.org/rfc/rfc6585.html#section-4)). App membaca header ini, menampilkan "coba lagi dalam 12 detik", dan tidak langsung retry ([[E3]]).
 
@@ -79,7 +79,7 @@ Batas 5 jadi 10. Perbaikannya: simpan bucket di tempat bersama, mis. Redis yang 
 
 ## Di stack lain
 
-Yang sama di semua stack: hitung request per key, tolak dengan `429`. Yang berbeda: tempat hitungan disimpan, dan siapa yang mengerjakannya (aplikasi atau gateway). Hanya Go yang dijalankan di lab. Baris lain dicek ke dokumentasi.
+Yang sama di semua stack: hitung request per key, tolak dengan `429`. Yang berbeda: tempat hitungan disimpan, dan siapa yang mengerjakannya (aplikasi atau API gateway). Hanya Go yang dijalankan di lab. Baris lain dicek ke dokumentasi.
 
 | Stack | Cara umum | Hitungan disimpan di | Sumber |
 |---|---|---|---|
@@ -112,7 +112,7 @@ Dokumentasi DRF mencatat bahwa throttle bawaannya bisa meloloskan beberapa reque
 
 ??? success "Jawaban"
 
-    Tahap 3 menjalankan dua instance API. Setiap instance menyimpan bucket-nya sendiri, jadi batas 5 per akun menjadi 10 (rekaman bagian D). Hitungan harus disimpan di tempat bersama, mis. Redis, atau dikerjakan gateway di depan kedua instance.
+    Tahap 3 menjalankan dua instance API. Setiap instance menyimpan bucket-nya sendiri, jadi batas 5 per akun menjadi 10 (rekaman bagian D). Hitungan harus disimpan di tempat bersama, mis. Redis, atau dikerjakan API gateway di depan kedua instance.
 
 **3.** App menerima `429` dengan `Retry-After: 12`. Apa yang sebaiknya dilakukan app?
 

@@ -24,6 +24,14 @@ window.ISTILAH = {
   "t": "API (Application Programming Interface)",
   "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
  },
+ "API gateway": {
+  "b": "C4",
+  "d": "Server di depan beberapa instance atau service yang mengurus hal bersama sebelum request diteruskan, mis. rate limit, authentication, dan routing.",
+  "n": "3.7 Security dasar dan rate limit",
+  "s": "istilah-api-gateway",
+  "t": "API gateway",
+  "u": "c-operasional/c4-security-dasar/"
+ },
  "Application Programming Interface": {
   "b": "A1",
   "d": "Sekumpulan endpoint yang disediakan server supaya program lain, mis. app Flutter, bisa membaca dan mengubah data.",
@@ -39,6 +47,14 @@ window.ISTILAH = {
   "s": "istilah-adr",
   "t": "ADR (Architecture Decision Record)",
   "u": "d-system-design/d5-adr/"
+ },
+ "At-least-once": {
+  "b": "B10.1",
+  "d": "Jaminan pengiriman: setiap pesan sampai minimal sekali, jadi bisa sampai dua kali dan penerimanya harus tahan pesan ganda.",
+  "n": "3.3 Background job, queue, retry",
+  "s": "istilah-at-least-once",
+  "t": "At-least-once",
+  "u": "b-fondasi/b10-1-background-job/"
  },
  "Atomicity": {
   "b": "B3.1",
@@ -232,6 +248,30 @@ window.ISTILAH = {
   "t": "Expand-migrate-contract",
   "u": "b-fondasi/b4-2-ubah-skema-tanpa-downtime/"
  },
+ "FCM": {
+  "b": "E4",
+  "d": "Layanan push notification milik Firebase. Server mengirim pesan ke token perangkat atau ke topic, lalu sistem operasi HP menampilkannya.",
+  "n": "3.5 Push dan real-time",
+  "s": "istilah-fcm",
+  "t": "FCM (Firebase Cloud Messaging)",
+  "u": "e-mobile/e4-push-real-time/"
+ },
+ "Fan-out": {
+  "b": "D4b",
+  "d": "Menyebarkan satu kejadian ke banyak penerima, mis. satu promo ditulis ke feed setiap pengikut.",
+  "n": "5.3 Feed dan notifikasi",
+  "s": "istilah-fan-out",
+  "t": "Fan-out",
+  "u": "d-system-design/d4b-feed-notifikasi/"
+ },
+ "Firebase Cloud Messaging": {
+  "b": "E4",
+  "d": "Layanan push notification milik Firebase. Server mengirim pesan ke token perangkat atau ke topic, lalu sistem operasi HP menampilkannya.",
+  "n": "3.5 Push dan real-time",
+  "s": "istilah-fcm",
+  "t": "FCM (Firebase Cloud Messaging)",
+  "u": "e-mobile/e4-push-real-time/"
+ },
  "Foreign key": {
   "b": "B2.1",
   "d": "Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada.",
@@ -288,6 +328,14 @@ window.ISTILAH = {
   "t": "Idempotent",
   "u": "b-fondasi/b1-3-pagination-idempotent/"
  },
+ "Invarian": {
+  "b": "C1",
+  "d": "Aturan yang harus selalu benar apa pun yang terjadi, mis. transfer tidak mengubah total saldo semua akun.",
+  "n": "1.15 Testing",
+  "s": "istilah-invarian",
+  "t": "Invarian",
+  "u": "c-operasional/c1-testing/"
+ },
  "Isolation level": {
   "b": "B3.3",
   "d": "Seberapa banyak perubahan dari transaction lain yang boleh terlihat oleh satu transaction yang sedang berjalan.",
@@ -312,6 +360,14 @@ window.ISTILAH = {
   "t": "JWT (JSON Web Token)",
   "u": "b-fondasi/b5-1-authentication/"
  },
+ "LSN": {
+  "b": "D3",
+  "d": "Posisi di WAL. Membandingkan LSN primary dan replica menunjukkan apakah replica sudah menerapkan perubahan tertentu.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-lsn",
+  "t": "LSN (Log Sequence Number)",
+  "u": "d-system-design/d3-consistency/"
+ },
  "Latency": {
   "b": "C2",
   "d": "Lama waktu satu request dari dikirim sampai response diterima.",
@@ -319,6 +375,14 @@ window.ISTILAH = {
   "s": "istilah-latency",
   "t": "Latency",
   "u": "c-operasional/c2-observability/"
+ },
+ "Lease": {
+  "b": "B10.1",
+  "d": "Batas waktu satu pekerjaan di queue dipegang satu worker. Kalau worker mati sebelum selesai, pekerjaan diberikan ke worker lain setelah lease habis.",
+  "n": "3.3 Background job, queue, retry",
+  "s": "istilah-lease",
+  "t": "Lease",
+  "u": "b-fondasi/b10-1-background-job/"
  },
  "Load balancer": {
   "b": "D2",
@@ -343,6 +407,14 @@ window.ISTILAH = {
   "s": "istilah-log",
   "t": "Log",
   "u": "c-operasional/c2-observability/"
+ },
+ "Log Sequence Number": {
+  "b": "D3",
+  "d": "Posisi di WAL. Membandingkan LSN primary dan replica menunjukkan apakah replica sudah menerapkan perubahan tertentu.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-lsn",
+  "t": "LSN (Log Sequence Number)",
+  "u": "d-system-design/d3-consistency/"
  },
  "Lost update": {
   "b": "B3.2",
@@ -423,6 +495,14 @@ window.ISTILAH = {
   "s": "istilah-n-1-query",
   "t": "N+1 query",
   "u": "b-fondasi/b2-4-n-plus-1/"
+ },
+ "Nonrepeatable read": {
+  "b": "B3.3",
+  "d": "Anomali: baris yang sama dibaca dua kali dalam satu transaction dan nilainya berbeda, karena transaction lain sudah commit perubahan.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-nonrepeatable-read",
+  "t": "Nonrepeatable read",
+  "u": "b-fondasi/b3-3-isolation-level/"
  },
  "OAuth 2.0": {
   "b": "B5.2",
@@ -536,6 +616,22 @@ window.ISTILAH = {
   "t": "Pagination",
   "u": "b-fondasi/b1-3-pagination-idempotent/"
  },
+ "Partisi": {
+  "b": "D2",
+  "d": "Membagi satu tabel besar jadi beberapa partisi di database yang sama, mis. per bulan, supaya query dan arsip hanya menyentuh sebagian data.",
+  "n": "5.1 Scaling",
+  "s": "istilah-partitioning",
+  "t": "Partitioning",
+  "u": "d-system-design/d2-scaling/"
+ },
+ "Partitioning": {
+  "b": "D2",
+  "d": "Membagi satu tabel besar jadi beberapa partisi di database yang sama, mis. per bulan, supaya query dan arsip hanya menyentuh sebagian data.",
+  "n": "5.1 Scaling",
+  "s": "istilah-partitioning",
+  "t": "Partitioning",
+  "u": "d-system-design/d2-scaling/"
+ },
  "Payload": {
   "b": "E5",
   "d": "Isi data yang dikirim di body request atau response, biasanya JSON.",
@@ -543,6 +639,14 @@ window.ISTILAH = {
   "s": "istilah-payload",
   "t": "Payload",
   "u": "e-mobile/e5-ukuran-payload/"
+ },
+ "Phantom read": {
+  "b": "B3.3",
+  "d": "Anomali: query yang sama dalam satu transaction mengembalikan kumpulan baris berbeda, karena transaction lain menambah atau menghapus baris.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-phantom-read",
+  "t": "Phantom read",
+  "u": "b-fondasi/b3-3-isolation-level/"
  },
  "Polling": {
   "b": "E4",
@@ -648,6 +752,14 @@ window.ISTILAH = {
   "t": "Read replica",
   "u": "d-system-design/d2-scaling/"
  },
+ "Read-your-writes": {
+  "b": "D3",
+  "d": "Jaminan bahwa user langsung melihat perubahan yang baru ditulisnya, walau bacaan biasa dilayani replica yang tertinggal.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-read-your-writes",
+  "t": "Read-your-writes",
+  "u": "d-system-design/d3-consistency/"
+ },
  "Replication lag": {
   "b": "D3",
   "d": "Jeda antara perubahan di database utama dan munculnya perubahan itu di replica.",
@@ -664,6 +776,14 @@ window.ISTILAH = {
   "t": "Retry",
   "u": "e-mobile/e3-retry-idempotency/"
  },
+ "Reverse proxy": {
+  "b": "B11.2",
+  "d": "Server di depan aplikasi yang menerima request dari internet lalu meneruskannya, sambil mengurus hal bersama seperti TLS dan kompresi.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-reverse-proxy",
+  "t": "Reverse proxy",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
  "Rolling deploy": {
   "b": "C3",
   "d": "Mengganti instance satu per satu, supaya selalu ada instance yang melayani request.",
@@ -671,6 +791,22 @@ window.ISTILAH = {
   "s": "istilah-rolling-deploy",
   "t": "Rolling deploy",
   "u": "c-operasional/c3-deployment/"
+ },
+ "Round trip": {
+  "b": "B11.2",
+  "d": "Satu kali bolak-balik request dan response antara app dan server. Di jaringan seluler, setiap round trip menambah latency.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-round-trip",
+  "t": "Round trip",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
+ "Router": {
+  "b": "B1.1",
+  "d": "Bagian framework yang mencocokkan method dan path request dengan handler yang tepat.",
+  "n": "1.4 HTTP",
+  "s": "istilah-router",
+  "t": "Router",
+  "u": "b-fondasi/b1-1-http/"
  },
  "Row Level Security": {
   "b": "B5.3",
@@ -687,6 +823,30 @@ window.ISTILAH = {
   "s": "istilah-sse",
   "t": "SSE (Server-Sent Events)",
   "u": "e-mobile/e4-push-real-time/"
+ },
+ "Saga": {
+  "b": "D3",
+  "d": "Pola untuk proses yang melewati beberapa service: setiap langkah punya transaction sendiri, dan kegagalan dibatalkan dengan langkah kompensasi.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-saga",
+  "t": "Saga",
+  "u": "d-system-design/d3-consistency/"
+ },
+ "Semaphore": {
+  "b": "B8",
+  "d": "Penghitung yang membatasi berapa pekerjaan boleh berjalan bersamaan; pekerjaan berikutnya menunggu sampai ada yang selesai.",
+  "n": "3.4 Concurrency dan async",
+  "s": "istilah-semaphore",
+  "t": "Semaphore",
+  "u": "b-fondasi/b8-concurrency/"
+ },
+ "Serialization anomaly": {
+  "b": "B3.3",
+  "d": "Anomali: hasil beberapa transaction yang berjalan bersamaan tidak sama dengan hasil menjalankannya satu per satu dalam urutan mana pun.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-serialization-anomaly",
+  "t": "Serialization anomaly",
+  "u": "b-fondasi/b3-3-isolation-level/"
  },
  "Sharding": {
   "b": "D2",
@@ -711,6 +871,14 @@ window.ISTILAH = {
   "s": "istilah-signed-url",
   "t": "Signed URL",
   "u": "b-fondasi/b11-2-proxy-bff/"
+ },
+ "Snapshot": {
+  "b": "B3.3",
+  "d": "Gambaran isi database pada satu saat, yang dilihat oleh satu query atau satu transaction.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-snapshot",
+  "t": "Snapshot",
+  "u": "b-fondasi/b3-3-isolation-level/"
  },
  "Source of truth": {
   "b": "A1",
@@ -816,6 +984,14 @@ window.ISTILAH = {
   "t": "Transaction",
   "u": "b-fondasi/b3-1-transaction/"
  },
+ "WAL": {
+  "b": "D3",
+  "d": "Log perubahan yang ditulis PostgreSQL sebelum data diubah. Replica menyalin perubahan dengan membaca WAL dari primary.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-wal",
+  "t": "WAL (Write-Ahead Log)",
+  "u": "d-system-design/d3-consistency/"
+ },
  "WebSocket": {
   "b": "E4",
   "d": "Koneksi dua arah yang tetap terbuka antara app dan server.",
@@ -838,6 +1014,14 @@ window.ISTILAH = {
   "n": "3.3 Background job, queue, retry",
   "s": "istilah-worker",
   "t": "Worker",
+  "u": "b-fondasi/b10-1-background-job/"
+ },
+ "at-least-once": {
+  "b": "B10.1",
+  "d": "Jaminan pengiriman: setiap pesan sampai minimal sekali, jadi bisa sampai dua kali dan penerimanya harus tahan pesan ganda.",
+  "n": "3.3 Background job, queue, retry",
+  "s": "istilah-at-least-once",
+  "t": "At-least-once",
   "u": "b-fondasi/b10-1-background-job/"
  },
  "atomicity": {
@@ -984,6 +1168,14 @@ window.ISTILAH = {
   "t": "Expand-migrate-contract",
   "u": "b-fondasi/b4-2-ubah-skema-tanpa-downtime/"
  },
+ "fan-out": {
+  "b": "D4b",
+  "d": "Menyebarkan satu kejadian ke banyak penerima, mis. satu promo ditulis ke feed setiap pengikut.",
+  "n": "5.3 Feed dan notifikasi",
+  "s": "istilah-fan-out",
+  "t": "Fan-out",
+  "u": "d-system-design/d4b-feed-notifikasi/"
+ },
  "foreign key": {
   "b": "B2.1",
   "d": "Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada.",
@@ -1024,6 +1216,14 @@ window.ISTILAH = {
   "t": "Idempotent",
   "u": "b-fondasi/b1-3-pagination-idempotent/"
  },
+ "invarian": {
+  "b": "C1",
+  "d": "Aturan yang harus selalu benar apa pun yang terjadi, mis. transfer tidak mengubah total saldo semua akun.",
+  "n": "1.15 Testing",
+  "s": "istilah-invarian",
+  "t": "Invarian",
+  "u": "c-operasional/c1-testing/"
+ },
  "isolation level": {
   "b": "B3.3",
   "d": "Seberapa banyak perubahan dari transaction lain yang boleh terlihat oleh satu transaction yang sedang berjalan.",
@@ -1039,6 +1239,14 @@ window.ISTILAH = {
   "s": "istilah-latency",
   "t": "Latency",
   "u": "c-operasional/c2-observability/"
+ },
+ "lease": {
+  "b": "B10.1",
+  "d": "Batas waktu satu pekerjaan di queue dipegang satu worker. Kalau worker mati sebelum selesai, pekerjaan diberikan ke worker lain setelah lease habis.",
+  "n": "3.3 Background job, queue, retry",
+  "s": "istilah-lease",
+  "t": "Lease",
+  "u": "b-fondasi/b10-1-background-job/"
  },
  "load balancer": {
   "b": "D2",
@@ -1128,6 +1336,14 @@ window.ISTILAH = {
   "t": "N+1 query",
   "u": "b-fondasi/b2-4-n-plus-1/"
  },
+ "nonrepeatable read": {
+  "b": "B3.3",
+  "d": "Anomali: baris yang sama dibaca dua kali dalam satu transaction dan nilainya berbeda, karena transaction lain sudah commit perubahan.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-nonrepeatable-read",
+  "t": "Nonrepeatable read",
+  "u": "b-fondasi/b3-3-isolation-level/"
+ },
  "object storage": {
   "b": "B11.2",
   "d": "Layanan penyimpanan file besar per objek, diakses lewat HTTP, mis. layanan kompatibel S3.",
@@ -1184,6 +1400,22 @@ window.ISTILAH = {
   "t": "Pagination",
   "u": "b-fondasi/b1-3-pagination-idempotent/"
  },
+ "partisi": {
+  "b": "D2",
+  "d": "Membagi satu tabel besar jadi beberapa partisi di database yang sama, mis. per bulan, supaya query dan arsip hanya menyentuh sebagian data.",
+  "n": "5.1 Scaling",
+  "s": "istilah-partitioning",
+  "t": "Partitioning",
+  "u": "d-system-design/d2-scaling/"
+ },
+ "partitioning": {
+  "b": "D2",
+  "d": "Membagi satu tabel besar jadi beberapa partisi di database yang sama, mis. per bulan, supaya query dan arsip hanya menyentuh sebagian data.",
+  "n": "5.1 Scaling",
+  "s": "istilah-partitioning",
+  "t": "Partitioning",
+  "u": "d-system-design/d2-scaling/"
+ },
  "payload": {
   "b": "E5",
   "d": "Isi data yang dikirim di body request atau response, biasanya JSON.",
@@ -1191,6 +1423,14 @@ window.ISTILAH = {
   "s": "istilah-payload",
   "t": "Payload",
   "u": "e-mobile/e5-ukuran-payload/"
+ },
+ "phantom read": {
+  "b": "B3.3",
+  "d": "Anomali: query yang sama dalam satu transaction mengembalikan kumpulan baris berbeda, karena transaction lain menambah atau menghapus baris.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-phantom-read",
+  "t": "Phantom read",
+  "u": "b-fondasi/b3-3-isolation-level/"
  },
  "polling": {
   "b": "E4",
@@ -1264,6 +1504,14 @@ window.ISTILAH = {
   "t": "Read replica",
   "u": "d-system-design/d2-scaling/"
  },
+ "read-your-writes": {
+  "b": "D3",
+  "d": "Jaminan bahwa user langsung melihat perubahan yang baru ditulisnya, walau bacaan biasa dilayani replica yang tertinggal.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-read-your-writes",
+  "t": "Read-your-writes",
+  "u": "d-system-design/d3-consistency/"
+ },
  "replication lag": {
   "b": "D3",
   "d": "Jeda antara perubahan di database utama dan munculnya perubahan itu di replica.",
@@ -1280,6 +1528,14 @@ window.ISTILAH = {
   "t": "Retry",
   "u": "e-mobile/e3-retry-idempotency/"
  },
+ "reverse proxy": {
+  "b": "B11.2",
+  "d": "Server di depan aplikasi yang menerima request dari internet lalu meneruskannya, sambil mengurus hal bersama seperti TLS dan kompresi.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-reverse-proxy",
+  "t": "Reverse proxy",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
  "rolling deploy": {
   "b": "C3",
   "d": "Mengganti instance satu per satu, supaya selalu ada instance yang melayani request.",
@@ -1287,6 +1543,46 @@ window.ISTILAH = {
   "s": "istilah-rolling-deploy",
   "t": "Rolling deploy",
   "u": "c-operasional/c3-deployment/"
+ },
+ "round trip": {
+  "b": "B11.2",
+  "d": "Satu kali bolak-balik request dan response antara app dan server. Di jaringan seluler, setiap round trip menambah latency.",
+  "n": "4.2 Proxy dan BFF",
+  "s": "istilah-round-trip",
+  "t": "Round trip",
+  "u": "b-fondasi/b11-2-proxy-bff/"
+ },
+ "router": {
+  "b": "B1.1",
+  "d": "Bagian framework yang mencocokkan method dan path request dengan handler yang tepat.",
+  "n": "1.4 HTTP",
+  "s": "istilah-router",
+  "t": "Router",
+  "u": "b-fondasi/b1-1-http/"
+ },
+ "saga": {
+  "b": "D3",
+  "d": "Pola untuk proses yang melewati beberapa service: setiap langkah punya transaction sendiri, dan kegagalan dibatalkan dengan langkah kompensasi.",
+  "n": "5.2 Replica dan consistency",
+  "s": "istilah-saga",
+  "t": "Saga",
+  "u": "d-system-design/d3-consistency/"
+ },
+ "semaphore": {
+  "b": "B8",
+  "d": "Penghitung yang membatasi berapa pekerjaan boleh berjalan bersamaan; pekerjaan berikutnya menunggu sampai ada yang selesai.",
+  "n": "3.4 Concurrency dan async",
+  "s": "istilah-semaphore",
+  "t": "Semaphore",
+  "u": "b-fondasi/b8-concurrency/"
+ },
+ "serialization anomaly": {
+  "b": "B3.3",
+  "d": "Anomali: hasil beberapa transaction yang berjalan bersamaan tidak sama dengan hasil menjalankannya satu per satu dalam urutan mana pun.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-serialization-anomaly",
+  "t": "Serialization anomaly",
+  "u": "b-fondasi/b3-3-isolation-level/"
  },
  "sharding": {
   "b": "D2",
@@ -1303,6 +1599,14 @@ window.ISTILAH = {
   "s": "istilah-signature",
   "t": "Signature",
   "u": "b-fondasi/b5-1-authentication/"
+ },
+ "snapshot": {
+  "b": "B3.3",
+  "d": "Gambaran isi database pada satu saat, yang dilihat oleh satu query atau satu transaction.",
+  "n": "2.2 Isolation level",
+  "s": "istilah-snapshot",
+  "t": "Snapshot",
+  "u": "b-fondasi/b3-3-isolation-level/"
  },
  "source of truth": {
   "b": "A1",

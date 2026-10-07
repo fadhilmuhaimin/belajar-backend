@@ -831,7 +831,7 @@
   "judul": "3.7 Security dasar dan rate limit",
   "url": "c-operasional/c4-security-dasar/",
   "tanya": "Jelaskan kenapa rate limit di memori proses tidak cukup untuk Rekeningo Tahap 3.",
-  "jawab": "Tahap 3 menjalankan dua instance API. Setiap instance menyimpan bucket-nya sendiri, jadi batas 5 per akun menjadi 10 (rekaman bagian D). Hitungan harus disimpan di tempat bersama, mis. Redis, atau dikerjakan gateway di depan kedua instance."
+  "jawab": "Tahap 3 menjalankan dua instance API. Setiap instance menyimpan bucket-nya sendiri, jadi batas 5 per akun menjadi 10 (rekaman bagian D). Hitungan harus disimpan di tempat bersama, mis. Redis, atau dikerjakan API gateway di depan kedua instance."
  },
  {
   "id": "C4-3",

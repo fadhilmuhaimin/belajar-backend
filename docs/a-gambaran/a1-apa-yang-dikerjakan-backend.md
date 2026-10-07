@@ -77,6 +77,8 @@ Di Android, kamu terbiasa dengan Room atau sqflite sebagai sumber data. Itu bena
 <figcaption>Abu-abu = di HP user. Biru = di server milik tim, tempat keputusan diambil.</figcaption>
 </figure>
 
+Di Tahap 1, backend Rekeningo adalah satu monolith: satu aplikasi yang memuat semua fitur dan di-deploy sebagai satu unit.
+
 Backend Rekeningo punya empat tugas:
 
 1. **Source of truth untuk data bersama.** Saldo, riwayat, dan pesanan disimpan di satu database. Semua perangkat membaca dari sana.

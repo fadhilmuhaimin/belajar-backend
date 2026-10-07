@@ -50,6 +50,8 @@ Jawabannya: isolation punya beberapa tingkat, dan bawaan PostgreSQL bukan yang p
 
 Di PostgreSQL, dirty read (membaca data yang belum commit) tidak mungkin di level mana pun.
 
+Isolation level bekerja lewat snapshot: gambaran isi database pada satu saat. PostgreSQL bisa memberi snapshot tanpa membuat pembaca menunggu penulis karena memakai MVCC. Setiap perubahan membuat versi baris baru, dan setiap query membaca versi yang cocok dengan snapshot-nya.
+
 **Read committed: setiap query melihat snapshot baru.** Laporan Ani di bawah membaca saldo dua kali dalam satu transaction, dan hasilnya berbeda:
 
 ```text title="Output rekaman: labs/b3-isolasi/output/laporan-read-committed.txt"
