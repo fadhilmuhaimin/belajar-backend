@@ -89,7 +89,7 @@ Hampir semua lab memakai satu PostgreSQL bersama di port `54333`. Setiap lab pun
 | `e2`, `e3` | `e2-sync`, `e3-idempotency` |
 | `t3`, `t4w`, `t5p` | `t3-bayar`, `b10-2-webhook`, `t5-skala` |
 
-Lab yang gagal membuat schema-nya berhenti dengan error, bukan merekam hasil dari schema lama. Untuk mengosongkan seluruh database lab bersama, jalankan `make -C labs/b3-race down` lalu `make -C labs/b3-race up`. `t5-replika` dan Redis `b9-cache` memakai kontainer sendiri.
+Lab yang gagal membuat schema-nya berhenti dengan error, bukan merekam hasil dari schema lama.
 
 ```bash
 make -C labs/b3-race setup
@@ -100,6 +100,28 @@ make -C labs/b3-race up
 ```
 
 `setup` membuat `labs/.venv` dan memasang `labs/requirements.txt`. `up` menjalankan PostgreSQL 17 di Docker. Kredensialnya (`lab`/`lab`) khusus lab lokal dan hanya mendengarkan `127.0.0.1`.
+
+### Kontainer lab dan reset
+
+| Kontainer | Port | Dibuat oleh | Dipakai |
+|---|---|---|---|
+| PostgreSQL 17 bersama | `54333` | `make -C labs/b3-race up` | Semua lab di tabel schema di atas |
+| Redis 8 | `56379` | `make -C labs/b9-cache run` | `b9-cache` |
+| PostgreSQL primary + replica | `54340`–`54341` | `make -C labs/t5-replika run` | `t5-replika` |
+
+Nama project Docker Compose diambil dari nama folder lab (`b3-race`, `b9-cache`, `t5-replika`). Kalau kamu punya lebih dari satu clone repo ini, semua clone memakai kontainer yang sama, dan `down` di satu clone mematikan kontainer untuk clone lain.
+
+Urutan reset sebelum merekam ulang untuk dikirim:
+
+```bash
+make -C labs/b3-race down
+```
+
+```bash
+make -C labs/b3-race up
+```
+
+Lalu jalankan lab yang kamu ubah. `down` memakai `-v`, jadi semua schema lab di database bersama ikut terhapus. Setelah reset, lab bisa dijalankan dalam urutan apa pun, kecuali `e5-payload` yang butuh data `b2-query`. Untuk `t5-replika`, jalankan `make -C labs/t5-replika down` sebelum `run` supaya primary dan replica dibuat dari awal.
 
 ### Daftar lab
 
@@ -146,7 +168,7 @@ Data di lab dan halaman juga karangan: nama user, NIK, nomor HP, email (`@contoh
 
 ## Kontribusi
 
-Lihat [CONTRIBUTING.md](CONTRIBUTING.md).
+Repo ini adalah tempat kerja utama panduan. Lihat [CONTRIBUTING.md](CONTRIBUTING.md) untuk aturan konten, pemeriksaan, dan cara merekam ulang lab.
 
 ## Lisensi
 

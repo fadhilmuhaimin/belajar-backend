@@ -15,7 +15,6 @@ if grep -E "^(WARNING|ERROR)|Aborted" "$LOG_BUILD"; then :; fi   # banner Materi
 rm -f "$LOG_BUILD"
 if [ "$BUILD_OK" != 1 ]; then echo "GAGAL: build strict"; exit 1; fi
 echo "build strict lolos"
-for f in tools/lokal/cek-*.sh; do [ -f "$f" ] && { echo "== lokal: $f"; bash "$f"; }; done   # opsional, tidak ikut repo
 echo "== ID internal tidak tampil";           $PY tools/cek_id_tampil.py
 echo "== audit bahasa";                         $PY tools/audit_bahasa.py --check | tail -3
 echo "== tes widget";                           node --test tests/widgets/*.cjs 2>&1 | grep -E "^# (pass|fail)"

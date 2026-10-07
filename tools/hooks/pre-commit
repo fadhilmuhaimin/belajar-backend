@@ -16,8 +16,3 @@ gitleaks git --pre-commit --staged --redact --no-banner --config .gitleaks.toml 
   echo "DITOLAK: gitleaks menemukan kemungkinan secret." >&2
   exit 1
 }
-# Pemeriksaan tambahan milik clone ini (opsional, tidak ikut repo).
-for f in tools/lokal/pre-commit-*.sh; do
-  [ -f "$f" ] || continue
-  bash "$f" || { echo "DITOLAK: $f gagal." >&2; exit 1; }
-done

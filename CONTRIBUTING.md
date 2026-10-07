@@ -2,6 +2,8 @@
 
 Terima kasih sudah mau membantu. Koreksi kecil (salah ketik, tautan mati, klaim yang keliru) paling berguna. Untuk halaman atau lab baru, buka issue dulu supaya kita sepakat di mana tempatnya di cerita.
 
+Repo ini adalah tempat kerja utama panduan. Semua perubahan, termasuk dari pemelihara, dibuat langsung di sini lewat branch dan pull request.
+
 ## Sebelum mengirim perubahan
 
 1. Pasang pre-commit hook (hook tidak ikut ter-clone):
@@ -18,7 +20,13 @@ Terima kasih sudah mau membantu. Koreksi kecil (salah ketik, tautan mati, klaim 
    bash tools/cek_batch.sh
    ```
 
-3. Kalau kamu mengubah lab, jalankan ulang lab itu dan commit output-nya bersama perubahan kode. Angka di halaman harus sama dengan file di `labs/*/output/`.
+3. Kalau kamu mengubah lab, rekam ulang di database lab yang bersih, lalu commit output-nya bersama perubahan kode. Angka di halaman harus sama dengan file di `labs/*/output/`.
+
+   ```bash
+   make -C labs/b3-race down && make -C labs/b3-race up
+   ```
+
+   Setelah itu jalankan lab yang kamu ubah (lihat README, bagian "Kontainer lab dan reset"). Rekaman dari database yang sudah dipakai lab lain tidak diterima: lab yang rusak bisa tetap terlihat lolos. Kalau output baru hanya berbeda di angka waktu, token, atau id acak, jangan ikut commit file itu kecuali halamannya juga kamu perbarui.
 
 ## Aturan konten
 
@@ -28,13 +36,14 @@ Terima kasih sudah mau membantu. Koreksi kecil (salah ketik, tautan mati, klaim 
 - **Label kejujuran.** Output dari lab ditandai **Rekaman lab** dan menyebut file-nya. Selain itu pakai **Ilustrasi**, **tidak dijalankan**, **asumsi**, atau **[perlu verifikasi]**. Klaim tentang perilaku library atau standar ditautkan ke sumber primer.
 - **Pihak ketiga di lab selalu tiruan** dengan nama netral. Jangan menambah lab yang butuh akun vendor atau menghubungi layanan luar.
 - **Data karangan saja.** Jangan memasukkan data, kode, atau nama dari sistem nyata milik siapa pun.
+- **Jangan menyalin dari repo atau dokumen lain tanpa memeriksa nama nyata.** Ini berlaku untuk teks, kode, output, dan catatan dari project kerja, catatan pribadi, atau repo lain milikmu sendiri. Sebelum commit, periksa nama orang, instansi, perusahaan, sistem, domain, path, nama tabel, dan nama fungsi. `tools/audit_bahasa.py` hanya menangkap merek umum. Nama lain tetap tanggung jawabmu saat review.
 
 ## Menambah halaman
 
 1. Daftarkan halaman di `docs/widgets/data/cerita.json` (`id`, `judul`, `tahap`, `path`, `prasyarat`, `masalah`). Urutan di registry adalah urutan baca.
 2. Tulis file-nya tanpa nomor di H1. Rujuk halaman lain dengan `[[ID]]` atau `[[ID|teks]]`, bukan link biasa. Pembaca hanya melihat nomor tampilan seperti 2.1, tidak pernah ID internal.
 3. Jalankan `.venv/bin/python tools/sinkron_cerita.py`. Skrip ini membuat nav, indeks per topik, baris prasyarat, dan kartu ulang.
-4. Catat keputusan desain yang tidak jelas dari kodenya di `plan/KEPUTUSAN.md`: apa, kenapa, dan alternatif yang ditolak.
+4. Catat keputusan desain yang tidak jelas dari kodenya di `plan/KEPUTUSAN.md`: apa, kenapa, dan alternatif yang ditolak. Nomornya melanjutkan baris terakhir di tabel. Nomor lama tidak pernah dipakai ulang atau digeser.
 
 ## Lisensi kontribusi
 
