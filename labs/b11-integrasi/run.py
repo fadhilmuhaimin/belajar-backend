@@ -20,11 +20,21 @@ def bebas(port):
         pass
 
 
+def baca_log(p, log, t0):
+    """Baris log proses Go diawali waktu tulis (nanodetik, lihat stempel di main.go)."""
+    for l in p.stderr:
+        n, _, isi = l.rstrip().partition(" ")
+        if n.isdigit():
+            ts = int(n) / 1e9
+        else:  # baris tanpa stempel (mis. panic): pakai waktu baca
+            ts, isi = time.time(), l.rstrip()
+        log.append((ts, f"{ts - t0[0]:5.1f} s  {isi}"))
+
+
 def jalan(peran, port, env, log, t0):
     bebas(port)
     p = subprocess.Popen([str(HERE / "b11"), peran], env={**os.environ, **env}, stderr=subprocess.PIPE, text=True)
-    threading.Thread(target=lambda: [log.append((time.monotonic(), f"{time.monotonic() - t0[0]:5.1f} s  " + l.rstrip())) for l in p.stderr],
-                     daemon=True).start()
+    threading.Thread(target=baca_log, args=(p, log, t0), daemon=True).start()
     for _ in range(100):
         try:
             socket.create_connection(("127.0.0.1", port), 0.1).close(); return p
@@ -42,10 +52,10 @@ def topup(key):
 
 
 def bagian(nama, judul, gw_mode, kebijakan, aksi):
-    log, t0 = [], [time.monotonic()]
+    log, t0 = [], [time.time()]  # waktu dinding, sama dengan stempel log proses Go
     gw = jalan("gateway", 18101, {"GW_MODE": gw_mode}, log, t0)
     api = jalan("api", 18102, {"KEBIJAKAN": kebijakan}, log, t0)
-    t0[0] = time.monotonic()
+    t0[0] = time.time()
     aksi(log, t0)
     time.sleep(0.3)
     for p in (gw, api):
@@ -58,7 +68,8 @@ def bagian(nama, judul, gw_mode, kebijakan, aksi):
 def app(log, t0, key):
     mulai = time.monotonic()
     st = topup(key)
-    log.append((time.monotonic(), f"{time.monotonic() - t0[0]:5.1f} s  app      {key} selesai: {st} setelah {time.monotonic() - mulai:.1f} detik"))
+    now = time.time()
+    log.append((now, f"{now - t0[0]:5.1f} s  app      {key} selesai: {st} setelah {time.monotonic() - mulai:.1f} detik"))
 
 
 def bersamaan(log, t0):
@@ -72,7 +83,8 @@ def bersamaan(log, t0):
 def satu_per_satu(log, t0):
     for i in range(5):
         app(log, t0, f"tp_{5521 + i}")
-    log.append((time.monotonic(), f"{time.monotonic() - t0[0]:5.1f} s  app      (menunggu 5 detik)"))
+    now = time.time()
+    log.append((now, f"{now - t0[0]:5.1f} s  app      (menunggu 5 detik)"))
     time.sleep(5)
     for i in range(5, 7):
         app(log, t0, f"tp_{5521 + i}")

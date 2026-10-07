@@ -742,7 +742,7 @@
   "halaman": "B10.1",
   "judul": "3.3 Background job, queue, retry",
   "url": "b-fondasi/b10-1-background-job/",
-  "tanya": "Rekaman menunjukkan outbox id 1 berstatus `gagal`. Apa yang harus terjadi selanjutnya?",
+  "tanya": "Rekaman menunjukkan satu pesan outbox (di rekaman ini id 2) berstatus `gagal`. Apa yang harus terjadi selanjutnya?",
   "jawab": "Alert ke tim, karena dead-letter berarti ada pesan yang tidak sampai. Setelah penyebabnya diperbaiki (mis. layanan notifikasi pulih), pesan dikirim ulang secara manual, mis. dengan mengembalikan status ke `menunggu`. Tanpa alert, dead-letter hanya jadi tempat pesan hilang secara diam-diam."
  },
  {

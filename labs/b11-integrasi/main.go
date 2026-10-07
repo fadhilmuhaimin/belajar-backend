@@ -18,8 +18,18 @@ import (
 	"time"
 )
 
+// stempel menulis waktu tulis (nanodetik) di depan setiap baris log. run.py mengurutkan log beberapa
+// proses menurut waktu kejadian ini, bukan menurut kapan baris itu sempat dibaca.
+type stempel struct{}
+
+func (stempel) Write(p []byte) (int, error) {
+	fmt.Fprintf(os.Stderr, "%d %s", time.Now().UnixNano(), p)
+	return len(p), nil
+}
+
 func main() {
 	log.SetFlags(0)
+	log.SetOutput(stempel{})
 	switch os.Args[1] {
 	case "gateway":
 		gateway()

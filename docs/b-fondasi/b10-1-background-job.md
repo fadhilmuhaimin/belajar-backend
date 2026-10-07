@@ -101,7 +101,7 @@ Perhatikan baris Spring: `@Async` hanya menjalankan method di thread lain. Peker
 
     Itu mengulang masalah [[B2.5]] di worker: koneksi tertahan 2 detik per pesan. Worker memakai lease. Ia mengambil pesan dengan satu `UPDATE` singkat yang menggeser `coba_lagi` 30 detik, lalu mengirim tanpa transaction. Kalau worker mati, lease habis dan pesan diambil lagi.
 
-**3.** Rekaman menunjukkan outbox id 1 berstatus `gagal`. Apa yang harus terjadi selanjutnya?
+**3.** Rekaman menunjukkan satu pesan outbox (di rekaman ini id 2) berstatus `gagal`. Apa yang harus terjadi selanjutnya?
 
 ??? success "Jawaban"
 

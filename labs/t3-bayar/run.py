@@ -107,10 +107,14 @@ for _ in range(80):
     time.sleep(0.5)
 keluaran = henti(wk); henti(nt)
 log = ["# layanan notifikasi menjawab 503 untuk 7 kiriman pertama · 3 pesan di outbox · maks 3 percobaan",
-       "# log worker (JSON, waktu dihapus):"]
+       "# log worker (JSON, waktu dihapus, diurutkan per percobaan lalu id; tiga pesan dikirim paralel):"]
+baris = []
 for l in keluaran.splitlines():
     if l.startswith("{"):
-        d = json.loads(l); d.pop("time", None); log.append(json.dumps(d, ensure_ascii=False))
+        d = json.loads(l); d.pop("time", None); baris.append(d)
+# Goroutine per pesan menulis log dalam urutan yang berubah-ubah; urutan tetap supaya rekaman bisa dibandingkan.
+baris.sort(key=lambda d: (d.get("percobaan", 0), d.get("outbox_id", 0)))
+log += [json.dumps(d, ensure_ascii=False) for d in baris]
 log += ["", "$ psql -c \"SELECT id, status, percobaan, error_akhir FROM outbox ORDER BY id\"",
         sql("SELECT id, status, percobaan, error_akhir FROM outbox ORDER BY id").rstrip()]
 teks = "\n".join(log) + "\n"

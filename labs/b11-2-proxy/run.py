@@ -13,6 +13,17 @@ subprocess.run(["go", "build", "-o", str(HERE / "b112"), "."], cwd=HERE, check=T
 PORT = {"layanan": 18111, "proxy": 18112, "storage": 18113, "api": 18114}
 
 
+def baca_log(p, log, t0):
+    """Baris log proses Go diawali waktu tulis (nanodetik, lihat stempel di main.go)."""
+    for l in p.stderr:
+        n, _, isi = l.rstrip().partition(" ")
+        if n.isdigit():
+            ts = int(n) / 1e9
+        else:  # baris tanpa stempel (mis. panic): pakai waktu baca
+            ts, isi = time.time(), l.rstrip()
+        log.append((ts, f"{ts - t0[0]:5.1f} s  {isi}"))
+
+
 def mulai(log, t0, **env):
     ps = []
     for peran, port in PORT.items():
@@ -22,7 +33,7 @@ def mulai(log, t0, **env):
         except OSError:
             pass
         p = subprocess.Popen([str(HERE / "b112"), peran], env={**os.environ, **env}, stderr=subprocess.PIPE, text=True)
-        threading.Thread(target=lambda p=p: [log.append((time.monotonic(), f"{time.monotonic() - t0[0]:5.1f} s  " + l.rstrip())) for l in p.stderr], daemon=True).start()
+        threading.Thread(target=baca_log, args=(p, log, t0), daemon=True).start()
         ps.append(p)
     for port in PORT.values():
         for _ in range(100):
@@ -46,13 +57,14 @@ def http(method, url, body=None, token=None, headers=None):
 
 
 def catat(log, t0, s):
-    log.append((time.monotonic(), f"{time.monotonic() - t0[0]:5.1f} s  {s}"))
+    now = time.time()
+    log.append((now, f"{now - t0[0]:5.1f} s  {s}"))
 
 
 def bagian(nama, judul, aksi, **env):
-    log, t0 = [], [time.monotonic()]
+    log, t0 = [], [time.time()]  # waktu dinding, sama dengan stempel log proses Go
     ps = mulai(log, t0, **env)
-    t0[0] = time.monotonic()
+    t0[0] = time.time()
     aksi(log, t0)
     time.sleep(0.3)
     for p in ps:

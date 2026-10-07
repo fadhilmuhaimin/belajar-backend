@@ -1,17 +1,17 @@
 # layanan notifikasi menjawab 503 untuk 7 kiriman pertama · 3 pesan di outbox · maks 3 percobaan
-# log worker (JSON, waktu dihapus):
-{"level": "WARN", "msg": "retry", "outbox_id": 2, "percobaan": 1, "coba_lagi_dalam": "2s", "error": "notifikasi: status 503"}
+# log worker (JSON, waktu dihapus, diurutkan per percobaan lalu id; tiga pesan dikirim paralel):
 {"level": "WARN", "msg": "retry", "outbox_id": 1, "percobaan": 1, "coba_lagi_dalam": "2s", "error": "notifikasi: status 503"}
+{"level": "WARN", "msg": "retry", "outbox_id": 2, "percobaan": 1, "coba_lagi_dalam": "2s", "error": "notifikasi: status 503"}
 {"level": "WARN", "msg": "retry", "outbox_id": 3, "percobaan": 1, "coba_lagi_dalam": "2s", "error": "notifikasi: status 503"}
 {"level": "WARN", "msg": "retry", "outbox_id": 1, "percobaan": 2, "coba_lagi_dalam": "4s", "error": "notifikasi: status 503"}
-{"level": "WARN", "msg": "retry", "outbox_id": 3, "percobaan": 2, "coba_lagi_dalam": "4s", "error": "notifikasi: status 503"}
 {"level": "WARN", "msg": "retry", "outbox_id": 2, "percobaan": 2, "coba_lagi_dalam": "4s", "error": "notifikasi: status 503"}
-{"level": "WARN", "msg": "dead-letter", "outbox_id": 1, "percobaan": 3, "error": "notifikasi: status 503"}
+{"level": "WARN", "msg": "retry", "outbox_id": 3, "percobaan": 2, "coba_lagi_dalam": "4s", "error": "notifikasi: status 503"}
+{"level": "WARN", "msg": "dead-letter", "outbox_id": 2, "percobaan": 3, "error": "notifikasi: status 503"}
 
 $ psql -c "SELECT id, status, percobaan, error_akhir FROM outbox ORDER BY id"
  id |  status  | percobaan |      error_akhir       
 ----+----------+-----------+------------------------
-  1 | gagal    |         3 | notifikasi: status 503
-  2 | terkirim |         3 | 
+  1 | terkirim |         3 | 
+  2 | gagal    |         3 | notifikasi: status 503
   3 | terkirim |         3 | 
 (3 rows)
