@@ -7,7 +7,7 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eo pipefail -c
 PSQL := docker compose -f ../b3-race/docker-compose.yml exec -T -e PGOPTIONS=-csearch_path=b3s db psql -U lab -d lab -q -v ON_ERROR_STOP=1
 
-.PHONY: all run rekam go node django laravel supabase
+.PHONY: all run rekam ulang go node django laravel supabase
 
 # Rekaman yang dipakai halaman: output/<stack>-<skenario>.txt (lihat rekam.py).
 all run: rekam
@@ -18,6 +18,12 @@ rekam:
 	cd laravel && composer install -q
 	cd node && npm install --silent --no-audit --no-fund
 	../.venv/bin/python rekam.py
+
+# Skenario tarik 10 kali per stack (klaim "tepat satu sukses di setiap run" di halaman 2.1).
+ulang:
+	cd laravel && composer install -q
+	cd node && npm install --silent --no-audit --no-fund
+	../.venv/bin/python ulang.py
 
 # Menjalankan satu stack di terminal tanpa merekam (untuk mencoba sendiri).
 go:

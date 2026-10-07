@@ -1,0 +1,6 @@
+# Skenario tarik (Rp70.000 dan Rp50.000 bersamaan, saldo Rp100.000), 10 run per stack
+# Setiap run: skema dibuat ulang, lalu hasil divalidasi (tepat satu sukses, saldo akhir Rp30.000 atau Rp50.000).
+go       10/10 run tepat satu sukses · 70000 menang 1×, 50000 menang 9×
+node     10/10 run tepat satu sukses · 70000 menang 10×, 50000 menang 0×
+laravel  10/10 run tepat satu sukses · 70000 menang 6×, 50000 menang 4×
+django   10/10 run tepat satu sukses · 70000 menang 6×, 50000 menang 4×

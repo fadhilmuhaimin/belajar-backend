@@ -211,7 +211,7 @@ Yang sama di semua stack: keputusan "saldo cukup?" diambil dari nilai terbaru, b
     **Yang berbeda di stack ini:** tidak ada lock. SDK mobile dan web memakai optimistic concurrency. Kalau dokumen yang dibaca diubah client lain, seluruh fungsi diulang otomatis sampai batas tertentu. Transaction gagal saat client offline ([Firestore](https://firebase.google.com/docs/firestore/manage-data/transactions)). Tidak ada output rekaman.
     {: .bb-beda }
 
-Skenario ini diulang 10 kali di Go, Node, Laravel, dan Django: di setiap run, tepat satu dari dua penarikan yang sukses. Mana yang menang bisa berbeda antar run, tergantung siapa yang lebih dulu mendapat lock.
+Rekaman lab (`labs/b3-stack/output/ulang-10.txt`): skenario ini diulang 10 kali di Go, Node, Laravel, dan Django, dan di setiap run tepat satu dari dua penarikan yang sukses. Pemenangnya ditentukan oleh siapa yang lebih dulu mendapat lock. Di Go, Laravel, dan Django pemenangnya berganti-ganti antar run. Di Node, Rp70.000 menang di kesepuluh run.
 
 ## Trade-off: kapan pakai apa
 
