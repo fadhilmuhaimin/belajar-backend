@@ -35,7 +35,7 @@ Budi mengganti ID di URL. Request dan response di widget ini direkam dari server
 
 Minggu keempat uji coba. Seorang penguji melaporkan hal aneh: ia bisa melihat saldo Warung Ani.
 
-Caranya sederhana. Ia memasang proxy di laptop, melihat request `GET /akun/budi` dari app, lalu mengganti `budi` dengan `ani`. Token-nya asli, jadi server menjawab.
+Caranya sederhana. Ia memasang proxy di laptop, yaitu alat yang menampilkan request dari app dan bisa mengubahnya sebelum dikirim. Ia melihat request `GET /akun/budi`, lalu mengganti `budi` dengan `ani`. Token-nya asli, jadi server menjawab.
 
 Raka sudah memasang pemeriksaan token di semua endpoint ([[B5.1]]). Yang lupa: membandingkan pemilik token dengan pemilik data. Di app, tombol "lihat akun orang lain" memang tidak ada. Tapi request tidak harus lewat tombol.
 

@@ -124,8 +124,8 @@
 *[Primary key]: Kolom yang nilainya unik dan dipakai untuk mengenali satu baris.
 *[primary key]: Kolom yang nilainya unik dan dipakai untuk mengenali satu baris.
 *[Problem Details]: Format error JSON standar dari RFC 9457, dengan field seperti type, title, status, dan detail.
-*[Proxy]: Server perantara yang meneruskan request ke sistem lain sambil menambahkan hal yang tidak boleh dipegang client.
-*[proxy]: Server perantara yang meneruskan request ke sistem lain sambil menambahkan hal yang tidak boleh dipegang client.
+*[Proxy]: Program perantara yang meneruskan request antara client dan server. Proxy milik backend menambahkan hal yang tidak boleh dipegang client, mis. credential; proxy di laptop penguji dipakai untuk melihat dan mengubah request.
+*[proxy]: Program perantara yang meneruskan request antara client dan server. Proxy milik backend menambahkan hal yang tidak boleh dipegang client, mis. credential; proxy di laptop penguji dipakai untuk melihat dan mengubah request.
 *[Query plan]: Rencana langkah yang dipilih database untuk menjalankan satu query, dilihat dengan EXPLAIN.
 *[query plan]: Rencana langkah yang dipilih database untuk menjalankan satu query, dilihat dengan EXPLAIN.
 *[Queue]: Daftar pekerjaan yang menunggu diproses oleh worker, satu per satu atau paralel.
@@ -171,5 +171,5 @@
 *[Webhook]: HTTP request yang dikirim sistem lain ke API kita saat ada kejadian, mis. pembayaran berhasil.
 *[webhook]: HTTP request yang dikirim sistem lain ke API kita saat ada kejadian, mis. pembayaran berhasil.
 *[WebSocket]: Koneksi dua arah yang tetap terbuka antara app dan server.
-*[Worker]: Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request.
-*[worker]: Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request.
+*[Worker]: Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request. Di server web seperti WSGI, worker juga berarti satu proses yang melayani request.
+*[worker]: Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request. Di server web seperti WSGI, worker juga berarti satu proses yang melayani request.

@@ -578,7 +578,7 @@ window.ISTILAH = {
  },
  "Proxy": {
   "b": "B11.2",
-  "d": "Server perantara yang meneruskan request ke sistem lain sambil menambahkan hal yang tidak boleh dipegang client.",
+  "d": "Program perantara yang meneruskan request antara client dan server. Proxy milik backend menambahkan hal yang tidak boleh dipegang client, mis. credential; proxy di laptop penguji dipakai untuk melihat dan mengubah request.",
   "n": "4.2 Proxy dan BFF",
   "s": "istilah-proxy",
   "t": "Proxy",
@@ -826,7 +826,7 @@ window.ISTILAH = {
  },
  "Worker": {
   "b": "B10.1",
-  "d": "Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request.",
+  "d": "Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request. Di server web seperti WSGI, worker juga berarti satu proses yang melayani request.",
   "n": "3.3 Background job, queue, retry",
   "s": "istilah-worker",
   "t": "Worker",
@@ -1210,7 +1210,7 @@ window.ISTILAH = {
  },
  "proxy": {
   "b": "B11.2",
-  "d": "Server perantara yang meneruskan request ke sistem lain sambil menambahkan hal yang tidak boleh dipegang client.",
+  "d": "Program perantara yang meneruskan request antara client dan server. Proxy milik backend menambahkan hal yang tidak boleh dipegang client, mis. credential; proxy di laptop penguji dipakai untuk melihat dan mengubah request.",
   "n": "4.2 Proxy dan BFF",
   "s": "istilah-proxy",
   "t": "Proxy",
@@ -1386,7 +1386,7 @@ window.ISTILAH = {
  },
  "worker": {
   "b": "B10.1",
-  "d": "Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request.",
+  "d": "Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request. Di server web seperti WSGI, worker juga berarti satu proses yang melayani request.",
   "n": "3.3 Background job, queue, retry",
   "s": "istilah-worker",
   "t": "Worker",

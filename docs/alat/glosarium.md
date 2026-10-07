@@ -86,7 +86,7 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **Primary** | Database utama yang menerima semua perintah tulis; replica menyalin perubahan dari primary. | [[D3]] |
 | **Primary key** | Kolom yang nilainya unik dan dipakai untuk mengenali satu baris. | [[B2.1]] |
 | **Problem Details** | Format error JSON standar dari RFC 9457, dengan field seperti `type`, `title`, `status`, dan `detail`. | [[B1.2]] |
-| **Proxy** | Server perantara yang meneruskan request ke sistem lain sambil menambahkan hal yang tidak boleh dipegang client. | [[B11.2]] |
+| **Proxy** | Program perantara yang meneruskan request antara client dan server. Proxy milik backend menambahkan hal yang tidak boleh dipegang client, mis. credential; proxy di laptop penguji dipakai untuk melihat dan mengubah request. | [[B11.2]] |
 | **Query plan** | Rencana langkah yang dipilih database untuk menjalankan satu query, dilihat dengan `EXPLAIN`. | [[B2.3]] |
 | **Queue** | Daftar pekerjaan yang menunggu diproses oleh worker, satu per satu atau paralel. | [[B10.1]] |
 | **Race condition** | Hasil yang bergantung pada urutan dua proses yang berjalan bersamaan. | [[B3.2]] |
@@ -112,6 +112,6 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **TTL** (Time To Live) | Masa berlaku sebuah data di cache sebelum dianggap kedaluwarsa. | [[B9]] |
 | **Webhook** | HTTP request yang dikirim sistem lain ke API kita saat ada kejadian, mis. pembayaran berhasil. | [[B10.2]] |
 | **WebSocket** | Koneksi dua arah yang tetap terbuka antara app dan server. | [[E4]] |
-| **Worker** | Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request. | [[B10.1]] |
+| **Worker** | Proses terpisah yang mengambil pekerjaan dari queue dan mengerjakannya di luar jalur request. Di server web seperti WSGI, worker juga berarti satu proses yang melayani request. | [[B10.1]] |
 
 <div data-bb="umpan-balik"></div>

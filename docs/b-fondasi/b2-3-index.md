@@ -51,7 +51,7 @@ Yang terbaca dari rekaman:
 
 | Query | Tanpa index | Dengan index |
 |---|---|---|
-| 20 pesanan terbaru toko 1 | Parallel Seq Scan, 98.000 baris dibuang per worker, ±4,3 ms | Index Scan, ±0,04 ms |
+| 20 pesanan terbaru toko 1 | Parallel Seq Scan, 98.000 baris dibuang per proses paralel, ±4,3 ms | Index Scan, ±0,04 ms |
 | Item satu pesanan | Parallel Seq Scan atas 600.000 item, ±6,7 ms | Index Scan, ±0,02 ms |
 
 Angka ini dari satu mesin lab. Besaran relatifnya yang penting: ratusan kali lipat. Waktu absolut di sistemmu akan berbeda.
