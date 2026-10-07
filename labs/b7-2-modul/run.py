@@ -40,7 +40,7 @@ p = tulis_sementara("modul/pembayaran/status.go", 'package pembayaran\n\nimport 
 jalankan("C. pembayaran mengimpor pesanan (pesanan sudah mengimpor pembayaran)", ["go", "build", "./..."])
 p.unlink()
 
-subprocess.run(PSQL + ["-U", "lab", "-d", "lab"], input=(HERE / "schema.sql").read_text(), text=True, check=True, capture_output=True)
+subprocess.run(PSQL + ["-U", "lab", "-d", "lab", "-v", "ON_ERROR_STOP=1"], input=(HERE / "schema.sql").read_text(), text=True, check=True, capture_output=True)
 q = "SELECT p.id, t.id AS transaksi FROM pesanan.pesanan p JOIN pembayaran.transaksi t ON t.pesanan_id = p.id;"
 jalankan("D. modul pesanan (role modul_pesanan) membaca tabel pembayaran.transaksi", PSQL + ["-U", "modul_pesanan", "-d", "lab", "-c", q])
 jalankan("E. modul pesanan membaca tabel miliknya sendiri", PSQL + ["-U", "modul_pesanan", "-d", "lab", "-c", "SELECT id, total FROM pesanan.pesanan;"])

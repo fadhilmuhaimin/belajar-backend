@@ -13,13 +13,13 @@ import os, pathlib, re, subprocess, time
 HERE = pathlib.Path(__file__).parent
 OUT = HERE / "output"
 COMPOSE = ["docker", "compose", "-f", str(HERE / "../b3-race/docker-compose.yml")]
-BASE = "postgres://lab:lab@127.0.0.1:54333/lab"
-PSQL = COMPOSE + ["exec", "-T"]
+BASE = "postgres://lab:lab@127.0.0.1:54333/lab?options=-c%20search_path%3Db3s"  # schema b3s
+PSQL = COMPOSE + ["exec", "-T", "-e", "PGOPTIONS=-csearch_path=b3s"]
 
 
 # stack -> skenario -> (tampilan perintah, daftar perintah)
 def commands(stack, scen):
-    env = dict(os.environ, DATABASE_URL=f"{BASE}?application_name={stack}", APP_NAME=stack)
+    env = dict(os.environ, DATABASE_URL=f"{BASE}&application_name={stack}", APP_NAME=stack)
     if stack == "go":
         return f"go run . {scen}", [(["go", "run", ".", scen], HERE / "go", env)]
     if stack == "node":

@@ -33,7 +33,7 @@ def kirim(log, event_id, body, ts=None, rahasia=RAHASIA, sig_body=None):
 
 
 def bagian(nama, judul, aksi, mode=""):
-    subprocess.run(PSQL, input=(HERE / "schema.sql").read_text(), text=True, check=True, capture_output=True)
+    subprocess.run(PSQL + ["-v", "ON_ERROR_STOP=1"], input=(HERE / "schema.sql").read_text(), text=True, check=True, capture_output=True)
     try:
         socket.create_connection(("127.0.0.1", 18120), 0.1).close()
         raise SystemExit("port 18120 sudah dipakai proses lain; hentikan dulu")

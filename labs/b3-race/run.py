@@ -17,7 +17,10 @@ Jalankan lewat `make run` (lihat Makefile).
 import json, pathlib, threading, time
 import psycopg
 
-DSN = "host=127.0.0.1 port=54333 user=lab password=lab dbname=lab"
+# Schema b3r, terpisah dari lab lain di database bersama. search_path lewat parameter koneksi,
+# jadi SQL yang direkam tetap tanpa nama schema. public dibutuhkan untuk fungsi pgrowlocks.
+SCHEMA = "b3r"
+DSN = f"host=127.0.0.1 port=54333 user=lab password=lab dbname=lab options=-csearch_path={SCHEMA},public"
 OUT = pathlib.Path(__file__).parent / "output"
 SALDO_AWAL, TARIK_A, TARIK_B = 100000, 70000, 50000  # rupiah
 
@@ -146,8 +149,11 @@ def _inline(query, params):
 
 def reset():
     with psycopg.connect(DSN, autocommit=True) as c:
-        c.execute("CREATE EXTENSION IF NOT EXISTS pgrowlocks")
-        c.execute("DROP TABLE IF EXISTS akun")
+        c.execute("CREATE EXTENSION IF NOT EXISTS pgrowlocks WITH SCHEMA public")
+        # Schema dibuat ulang, bukan DROP TABLE: dengan search_path b3r,public, DROP TABLE akun
+        # bisa mengenai public.akun milik lab lain bila b3r.akun belum ada.
+        c.execute(f"DROP SCHEMA IF EXISTS {SCHEMA} CASCADE")
+        c.execute(f"CREATE SCHEMA {SCHEMA}")
         c.execute("CREATE TABLE akun (id int PRIMARY KEY, saldo int NOT NULL, version int NOT NULL DEFAULT 1)")
         c.execute("INSERT INTO akun (id, saldo) VALUES (1, %s)", (SALDO_AWAL,))
 

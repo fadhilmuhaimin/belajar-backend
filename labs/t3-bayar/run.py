@@ -41,7 +41,7 @@ def sql(q):
 
 
 def reset():
-    subprocess.run(PSQL, input=(HERE / "skema.sql").read_text(), capture_output=True, text=True, check=True)
+    subprocess.run(PSQL + ["-v", "ON_ERROR_STOP=1"], input=(HERE / "skema.sql").read_text(), capture_output=True, text=True, check=True)
 
 
 def pool():

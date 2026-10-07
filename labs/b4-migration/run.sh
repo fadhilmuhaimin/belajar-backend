@@ -5,7 +5,8 @@ cd "$(dirname "$0")"
 DC="docker compose -f ../b3-race/docker-compose.yml exec -T db"
 DB="postgres://lab:lab@127.0.0.1:54333/lab?sslmode=disable&search_path=b4m&x-migrations-table=schema_migrations"
 M="go run -tags postgres github.com/golang-migrate/migrate/v4/cmd/migrate@v4.20.1"
-$DC psql -U lab -d lab -q -c "DROP SCHEMA IF EXISTS b4m CASCADE; CREATE SCHEMA b4m;" >/dev/null 2>&1
+$DC psql -U lab -d lab -q -v ON_ERROR_STOP=1 -c "DROP SCHEMA IF EXISTS b4m CASCADE; CREATE SCHEMA b4m;" >/dev/null \
+  || { echo "GAGAL: schema b4m tidak bisa dibuat ulang" >&2; exit 1; }
 rm -f migrations/000003_*
 jalan() { echo "\$ migrate $*"; $M -path migrations -database "$DB" "$@" 2>&1 | sed -E 's/^[0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9:]{8} //'; echo; }
 sql() { echo "\$ psql -c \"$1\""; $DC psql -U lab -d lab -c "SET search_path = b4m; $1" 2>&1 | grep -v "^SET$"; echo; }

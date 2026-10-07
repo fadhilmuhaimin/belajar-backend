@@ -1,5 +1,8 @@
 -- Lab E3 · idempotency key. Rekeningo (fiktif): Budi membayar pesanan di Warung Ani.
-DROP TABLE IF EXISTS idempotency_key, pembayaran, akun;
+-- Schema e3, terpisah dari lab lain di database bersama (server dan psql memakai search_path=e3).
+DROP SCHEMA IF EXISTS e3 CASCADE;
+CREATE SCHEMA e3;
+SET search_path = e3;
 CREATE TABLE akun (
   id    text PRIMARY KEY,
   saldo bigint NOT NULL CHECK (saldo >= 0)

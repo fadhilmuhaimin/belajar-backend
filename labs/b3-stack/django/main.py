@@ -9,7 +9,8 @@ u = urlparse(os.environ["DATABASE_URL"])
 settings.configure(DATABASES={"default": {
     "ENGINE": "django.db.backends.postgresql", "NAME": u.path[1:], "USER": u.username,
     "PASSWORD": u.password, "HOST": u.hostname, "PORT": u.port,
-    "OPTIONS": {"application_name": os.environ.get("APP_NAME", "django")}}})
+    "OPTIONS": {"application_name": os.environ.get("APP_NAME", "django"),
+                "options": "-c search_path=b3s"}}})  # schema lab ini
 django.setup()
 
 from django.db import connection, models, transaction  # noqa: E402

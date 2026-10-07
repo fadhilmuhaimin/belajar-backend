@@ -1,13 +1,13 @@
 $ python django/main.py tarik
-tarik 70000: sukses
-tarik 50000: saldo tidak cukup
-budi=30000 ani=980000 total=1010000
+tarik 50000: sukses
+tarik 70000: saldo tidak cukup
+budi=50000 ani=980000 total=1030000
 
 -- diterima PostgreSQL 17.11 (log_statement=all), urut saat diterima:
 [A] BEGIN
 [B] BEGIN
 [A] SELECT "akun"."nama", "akun"."saldo" FROM "akun" WHERE "akun"."nama" = 'budi' LIMIT 21 FOR UPDATE
 [B] SELECT "akun"."nama", "akun"."saldo" FROM "akun" WHERE "akun"."nama" = 'budi' LIMIT 21 FOR UPDATE
-[A] UPDATE "akun" SET "saldo" = 30000 WHERE "akun"."nama" = 'budi'
-[A] COMMIT
-[B] ROLLBACK
+[B] UPDATE "akun" SET "saldo" = 50000 WHERE "akun"."nama" = 'budi'
+[B] COMMIT
+[A] ROLLBACK

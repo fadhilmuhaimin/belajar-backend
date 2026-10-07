@@ -33,7 +33,7 @@ for mode, judul in JUDUL.items():
         raise SystemExit("port 18096 sudah dipakai proses lain; hentikan dulu")
     except OSError:
         pass
-    subprocess.run(PSQL, input=(HERE / "schema.sql").read_text(), text=True, check=True, capture_output=True)
+    subprocess.run(PSQL + ["-v", "ON_ERROR_STOP=1"], input=(HERE / "schema.sql").read_text(), text=True, check=True, capture_output=True)
     (HERE / "queue.json").unlink(missing_ok=True)
     log = []
     srv = subprocess.Popen([str(HERE / "server/e2-server")], env=ENV, stderr=subprocess.PIPE, text=True)

@@ -9,7 +9,7 @@ $u = parse_url(getenv('DATABASE_URL'));
 $capsule = new Capsule;
 $capsule->addConnection(['driver' => 'pgsql', 'host' => $u['host'], 'port' => $u['port'],
     'database' => ltrim($u['path'], '/'), 'username' => $u['user'], 'password' => $u['pass'],
-    'application_name' => getenv('APP_NAME') ?: 'laravel']);
+    'application_name' => getenv('APP_NAME') ?: 'laravel', 'search_path' => 'b3s']);  // schema lab ini
 $capsule->setAsGlobal();
 $db = Capsule::connection();
 

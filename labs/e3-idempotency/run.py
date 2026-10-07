@@ -7,9 +7,11 @@ import pathlib, socket, subprocess, time, os
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE / "output"
-PSQL = ["docker", "compose", "-f", str(HERE / "../b3-race/docker-compose.yml"), "exec", "-T", "db",
-        "psql", "-U", "lab", "-d", "lab", "-q"]
-ENV = dict(os.environ, DATABASE_URL="postgres://lab:lab@127.0.0.1:54333/lab?application_name=e3")
+# Schema e3 lewat parameter koneksi; ON_ERROR_STOP supaya skema yang gagal dibuat tidak lolos diam-diam.
+PSQL = ["docker", "compose", "-f", str(HERE / "../b3-race/docker-compose.yml"), "exec", "-T",
+        "-e", "PGOPTIONS=-csearch_path=e3", "db", "psql", "-U", "lab", "-d", "lab", "-q", "-v", "ON_ERROR_STOP=1"]
+ENV = dict(os.environ, DATABASE_URL="postgres://lab:lab@127.0.0.1:54333/lab?options=-c%20search_path%3De3"
+                                    "&application_name=e3")
 
 
 def psql(sql):

@@ -76,7 +76,20 @@ Setiap halaman yang menampilkan **Rekaman lab** menyebut file output-nya, misaln
 
 ### Langkah pertama
 
-Hampir semua lab memakai satu PostgreSQL bersama di port `54333`, dengan schema terpisah per lab.
+Hampir semua lab memakai satu PostgreSQL bersama di port `54333`. Setiap lab punya schema sendiri dan membuatnya ulang setiap kali dijalankan, jadi lab bisa dijalankan dalam urutan apa pun. Tidak ada lab yang menulis ke schema `public`.
+
+| Schema | Lab |
+|---|---|
+| `t1` | `api-t1` |
+| `b2`, `b2q` | `b2-model`, `b2-query` (`e5-payload` membaca `b2q`, jadi jalankan `b2-query` dulu) |
+| `b3r`, `b3s`, `b33` | `b3-race`, `b3-stack`, `b3-isolasi` |
+| `b4m`, `b4` | `b4-migration`, `b4-skema` |
+| `b5`, `b9` | `b5-rls`, `b9-cache` |
+| `pembayaran`, `pesanan` | `b7-2-modul` (dua modul, dua schema) |
+| `e2`, `e3` | `e2-sync`, `e3-idempotency` |
+| `t3`, `t4w`, `t5p` | `t3-bayar`, `b10-2-webhook`, `t5-skala` |
+
+Lab yang gagal membuat schema-nya berhenti dengan error, bukan merekam hasil dari schema lama. Untuk mengosongkan seluruh database lab bersama, jalankan `make -C labs/b3-race down` lalu `make -C labs/b3-race up`. `t5-replika` dan Redis `b9-cache` memakai kontainer sendiri.
 
 ```bash
 make -C labs/b3-race setup
@@ -98,7 +111,7 @@ Lab yang punya `Makefile` dijalankan dengan `make -C labs/<nama> run`. Sisanya d
 | `b1-openapi` | 1.7 | `make -C labs/b1-openapi run` |
 | `b2-model` | 1.8 | `make -C labs/b2-model run` |
 | `b4-migration` | 1.10 | `make -C labs/b4-migration run` |
-| `b3-stack` | 1.11, 2.1 | `make -C labs/b3-stack all` (butuh Go, Node, PHP + Composer) |
+| `b3-stack` | 1.11, 2.1 | `make -C labs/b3-stack run` (butuh Go, Node, PHP + Composer; gagal bila hasil satu stack tidak sesuai skenario) |
 | `b5-rls` | 1.13 | `make -C labs/b5-rls run` |
 | `f2-review` | 1.19 | `make -C labs/f2-review run` |
 | `b3-race` | 2.1 | `make -C labs/b3-race run` |

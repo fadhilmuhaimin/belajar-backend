@@ -1,10 +1,11 @@
 # Lab B3 · contoh transaction & lock di beberapa stack, ke Postgres yang sama.
 # Butuh: lab db jalan (make -C ../b3-race up), Go, Node, PHP + Composer, Python venv labs/.venv.
-export DATABASE_URL := postgres://lab:lab@127.0.0.1:54333/lab
+# Schema b3s lewat parameter koneksi (Go pgx, node-postgres); Django dan Laravel memasangnya di konfigurasi.
+export DATABASE_URL := postgres://lab:lab@127.0.0.1:54333/lab?options=-c%20search_path%3Db3s
 # Gagal keras: error di tengah pipeline atau di psql tidak boleh tertelan.
 SHELL := /bin/bash
 .SHELLFLAGS := -eo pipefail -c
-PSQL := docker compose -f ../b3-race/docker-compose.yml exec -T db psql -U lab -d lab -q -v ON_ERROR_STOP=1
+PSQL := docker compose -f ../b3-race/docker-compose.yml exec -T -e PGOPTIONS=-csearch_path=b3s db psql -U lab -d lab -q -v ON_ERROR_STOP=1
 
 .PHONY: all run rekam go node django laravel supabase
 

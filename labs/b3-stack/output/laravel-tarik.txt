@@ -1,13 +1,13 @@
 $ php main.php tarik 70000 & php main.php tarik 50000
-tarik 70000: sukses
-tarik 50000: saldo tidak cukup
-budi=30000 ani=980000 total=1010000
+tarik 70000: saldo tidak cukup
+tarik 50000: sukses
+budi=50000 ani=980000 total=1030000
 
 -- diterima PostgreSQL 17.11 (log_statement=all), urut saat diterima:
 [A] BEGIN
 [B] BEGIN
 [B] select * from "akun" where "nama" = 'budi' limit 1 for update
 [A] select * from "akun" where "nama" = 'budi' limit 1 for update
-[B] update "akun" set "saldo" = 30000 where "nama" = 'budi'
+[B] update "akun" set "saldo" = 50000 where "nama" = 'budi'
 [B] COMMIT
 [A] ROLLBACK

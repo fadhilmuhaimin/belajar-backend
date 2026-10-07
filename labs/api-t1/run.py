@@ -27,7 +27,7 @@ def sql(q, tampil=True):
 
 
 def reset():
-    subprocess.run(PSQL, input=(HERE / "schema.sql").read_text(), capture_output=True, text=True, check=True)
+    subprocess.run(PSQL + ["-v", "ON_ERROR_STOP=1"], input=(HERE / "schema.sql").read_text(), capture_output=True, text=True, check=True)
     subprocess.run([str(BIN), "-seed"], env=ENV, check=True)
 
 
