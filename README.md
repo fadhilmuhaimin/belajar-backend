@@ -33,6 +33,8 @@ python3 -m venv .venv
 
 Buka `http://127.0.0.1:8000`. Versi yang dikunci di `requirements.txt` antara lain `mkdocs==1.6.1` dan `mkdocs-material==9.7.7`. Versi lain belum dites, dan build strict bisa gagal karena perubahan perilaku plugin.
 
+Setiap build dan `serve` mencetak banner peringatan dari Material for MkDocs tentang MkDocs 2.0. Banner itu informasi dari pembuat theme, bukan error di repo ini. Untuk mematikannya, jalankan dengan `NO_MKDOCS_2_WARNING=1` (dipakai otomatis oleh `tools/cek_batch.sh`).
+
 Build statis, wajib lolos sebelum perubahan dikirim:
 
 ```bash

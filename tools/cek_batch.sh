@@ -4,6 +4,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 PY=.venv/bin/python
+# Banner informasi Material soal MkDocs 2.0 dimatikan dengan saklar resminya; dependency tetap di-pin (README).
+export NO_MKDOCS_2_WARNING=1
 echo "== sinkron cerita, kartu, angka asumsi";  $PY tools/sinkron_cerita.py --check
 echo "== istilah";                              $PY tools/build_istilah.py --check
 echo "== build strict"
@@ -11,7 +13,7 @@ echo "== build strict"
 # tertulis walau strict membatalkan build (test -f site/index.html tidak cukup).
 LOG_BUILD=$(mktemp)
 if .venv/bin/mkdocs build --strict >"$LOG_BUILD" 2>&1; then BUILD_OK=1; else BUILD_OK=0; fi
-if grep -E "^(WARNING|ERROR)|Aborted" "$LOG_BUILD"; then :; fi   # banner Material dan baris INFO tidak dicetak
+if grep -E "^(WARNING|ERROR)|Aborted" "$LOG_BUILD"; then :; fi   # baris INFO tidak dicetak
 rm -f "$LOG_BUILD"
 if [ "$BUILD_OK" != 1 ]; then echo "GAGAL: build strict"; exit 1; fi
 echo "build strict lolos"
