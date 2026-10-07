@@ -18,6 +18,15 @@ def psql(sql):
     return subprocess.run(PSQL + ["-c", sql], capture_output=True, text=True, check=True).stdout
 
 
+def pastikan_bebas(port):
+    """Gagal keras bila port sudah dipakai: rekaman tidak boleh diam-diam diambil dari server lama."""
+    try:
+        socket.create_connection(("127.0.0.1", port), 0.2).close()
+    except OSError:
+        return
+    raise SystemExit(f"GAGAL: port {port} sudah dipakai proses lain; hentikan dulu")
+
+
 def tunggu_port():
     for _ in range(100):
         try:
@@ -32,6 +41,7 @@ subprocess.run(["go", "build", "-o", str(HERE / "server/e3-server"), "."], cwd=H
 OUT.mkdir(exist_ok=True)
 for mode in ("kunci-sama", "kunci-baru"):
     subprocess.run(PSQL, input=(HERE / "schema.sql").read_text(), text=True, check=True, capture_output=True)
+    pastikan_bebas(18080)
     srv = subprocess.Popen([str(HERE / "server/e3-server"), "-lambat-pertama"], env=ENV,
                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     tunggu_port()

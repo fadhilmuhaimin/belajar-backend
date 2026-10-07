@@ -4,6 +4,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -51,5 +52,5 @@ func main() {
 		}
 	})
 	// --8<-- [end:sse]
-	http.ListenAndServe("127.0.0.1:18093", nil)
+	log.Fatal(http.ListenAndServe("127.0.0.1:18093", nil))
 }

@@ -31,9 +31,19 @@ def reset():
     subprocess.run([str(BIN), "-seed"], env=ENV, check=True)
 
 
+def pastikan_bebas(port):
+    """Gagal keras bila port sudah dipakai: rekaman tidak boleh diam-diam diambil dari server lama."""
+    try:
+        socket.create_connection(("127.0.0.1", port), 0.2).close()
+    except OSError:
+        return
+    raise SystemExit(f"GAGAL: port {port} sudah dipakai proses lain; hentikan dulu")
+
+
 def mulai(*flag, env=None):
     global srv
     stop()
+    pastikan_bebas(18081)
     srv = subprocess.Popen([str(BIN), *flag], env=env or ENV, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     for _ in range(100):
         try:

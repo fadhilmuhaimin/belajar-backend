@@ -24,6 +24,15 @@ def jalan(nama, *args):
     return p
 
 
+def pastikan_bebas(port):
+    """Gagal keras bila port sudah dipakai: rekaman tidak boleh diam-diam diambil dari server lama."""
+    try:
+        socket.create_connection(("127.0.0.1", port), 0.2).close()
+    except OSError:
+        return
+    raise SystemExit(f"GAGAL: port {port} sudah dipakai proses lain; hentikan dulu")
+
+
 def tunggu(port):
     for _ in range(100):
         try:
@@ -57,6 +66,7 @@ build(); OUT.mkdir(exist_ok=True)
 
 for mode in ("dalam-tx", "outbox"):
     reset()
+    pastikan_bebas(18090); pastikan_bebas(18083)
     nt = jalan("notif", "-jeda", "2s"); tunggu(18090)
     api = jalan("api", "-mode", mode); tunggu(18083)
     wk = jalan("api", "-worker") if mode == "outbox" else None
@@ -87,6 +97,7 @@ for mode in ("dalam-tx", "outbox"):
 
 # Worker: retry, backoff, dead-letter
 reset()
+pastikan_bebas(18090)
 nt = jalan("notif", "-jeda", "200ms", "-gagal-dulu", "7"); tunggu(18090)
 sql("""INSERT INTO outbox (jenis, data) SELECT 'pembayaran_berhasil', jsonb_build_object('pembayaran_id', g) FROM generate_series(1, 3) g""")
 wk = jalan("api", "-worker")

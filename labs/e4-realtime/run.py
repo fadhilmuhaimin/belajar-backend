@@ -4,6 +4,11 @@ import pathlib, socket, subprocess, threading, time, urllib.request
 
 HERE = pathlib.Path(__file__).parent
 subprocess.run(["go", "build", "-o", str(HERE / "e4"), "."], cwd=HERE, check=True)
+try:
+    socket.create_connection(("127.0.0.1", 18093), 0.2).close()
+    raise SystemExit("GAGAL: port 18093 sudah dipakai proses lain; hentikan dulu")
+except OSError:
+    pass
 srv = subprocess.Popen([str(HERE / "e4")])
 t0 = time.monotonic()
 for _ in range(100):

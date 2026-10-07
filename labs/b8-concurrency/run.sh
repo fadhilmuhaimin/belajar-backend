@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Lab B8 · Go vs Node.js. Butuh binary notif dari lab t3-bayar (dibangun otomatis di bawah).
 cd "$(dirname "$0")"
+for p in 18090 18091 18092; do   # gagal keras bila port sudah dipakai: rekaman tidak boleh dari server lama
+  if (exec 3<>/dev/tcp/127.0.0.1/$p) 2>/dev/null; then echo "GAGAL: port $p sudah dipakai proses lain; hentikan dulu" >&2; exit 1; fi
+done
 ( cd ../t3-bayar && go build -o bin/notif ./notif )
 ../t3-bayar/bin/notif -jeda 500ms & NOTIF=$!
 sleep 0.5

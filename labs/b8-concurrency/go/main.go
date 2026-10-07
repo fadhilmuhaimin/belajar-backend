@@ -96,7 +96,9 @@ func init() {
 			}
 		})
 		http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {})
-		http.ListenAndServe("127.0.0.1:18091", nil)
-		os.Exit(0)
+		if err := http.ListenAndServe("127.0.0.1:18091", nil); err != nil {
+			fmt.Fprintln(os.Stderr, "GAGAL:", err)
+			os.Exit(1)
+		}
 	}
 }
