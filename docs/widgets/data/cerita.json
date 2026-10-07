@@ -910,7 +910,7 @@
       "prasyarat": [
         "B5.1"
       ],
-      "masalah": "Ingin login dengan akun yang sudah dimiliki user (login sosial)",
+      "masalah": "Ingin login dengan akun lain milik user (login sosial)",
       "ada": true,
       "nomor": "4.4",
       "menit": 10

@@ -31,7 +31,7 @@
       "layar": { "budi": { "judul": "Warung Ani", "waktu": "11.55", "isi": [ { "jenis": "baris", "kiri": "Nasi goreng", "kanan": "Rp25.000" }, { "jenis": "tombol", "teks": "Pesan" } ] } } },
     { "dari": "ani", "ke": "api", "judul": "Ani menaikkan harga", "kirim": "PATCH /produk/1 {\"harga\": 28000}", "jelas": "Harga bahan naik, Ani menyesuaikan harga dari HP-nya.",
       "layar": { "ani": { "judul": "Toko saya", "waktu": "11.56", "isi": [ { "jenis": "baris", "kiri": "Nasi goreng", "kanan": "Rp28.000" }, { "jenis": "toast", "teks": "Harga disimpan", "nada": "good" } ] } } },
-    { "dari": "api", "ke": "db", "judul": "Database diperbarui", "kirim": "UPDATE produk SET harga = 28000 WHERE id = 1;", "jelas": "Database adalah sumber kebenaran. Cache hanya salinan." },
+    { "dari": "api", "ke": "db", "judul": "Database diperbarui", "kirim": "UPDATE produk SET harga = 28000 WHERE id = 1;", "jelas": "Database adalah source of truth. Cache hanya salinan." },
     { "dari": "api", "ke": "redis", "judul": "Cache dihapus", "kirim": "DEL produk:1:harga", "jelas": "Invalidation: salinan lama dibuang saat data aslinya berubah.", "nada": "good" },
     { "dari": "api", "ke": "db", "judul": "Budi membuka katalog lagi: MISS, isi ulang", "kirim": "GET produk:1:harga → (nil)  MISS\nSELECT harga ... → 28000;  SET ... EX 300", "jelas": "Satu query ke database, lalu cache terisi dengan harga baru." },
     { "dari": "api", "ke": "budi", "judul": "Budi melihat harga baru", "kirim": "Budi baca harga → Rp28.000 (MISS, sisa TTL 300 detik)", "jelas": "Rekaman lab bagian B.", "nada": "good",

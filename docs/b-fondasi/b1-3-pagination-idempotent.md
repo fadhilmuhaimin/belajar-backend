@@ -56,7 +56,7 @@ Bagian A: pesanan 199900 muncul di halaman 1 dan halaman 2. Bagian C: `OFFSET` t
 }
 ```
 
-Cursor sebaiknya dianggap teks buram oleh app: app hanya mengirimnya kembali, tidak membuat sendiri. Contoh di atas adalah JSON `{"dibuat": ..., "id": ...}` yang di-encode base64url, bukan enkripsi. Server tetap harus memvalidasinya.
+Cursor sebaiknya dianggap opaque oleh app, yaitu isinya tidak perlu dipahami: app hanya mengirimnya kembali, tidak membuat sendiri. Contoh di atas adalah JSON `{"dibuat": ..., "id": ...}` yang di-encode base64url, bukan enkripsi. Server tetap harus memvalidasinya.
 
 **Batas ukuran.** Server menentukan maksimal per halaman, mis. 50, apa pun yang diminta app. Tanpa batas, satu request `?per_halaman=100000` bisa menghabiskan memori server.
 

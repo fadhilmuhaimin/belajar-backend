@@ -7,7 +7,7 @@
   "fileVarian": "labs/t5-skala/output/lb.txt",
   "catatan": "Load balancer round robin dan dua instance API Go, direkam 2026-10-07 (labs/t5-skala). Token di rekaman disensor."
  },
- "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': sesi disimpan di memori instance.",
+ "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': session disimpan di memori instance.",
  "komponen": [
   {
    "id": "budi",
@@ -50,7 +50,7 @@
   }
  },
  "predict": {
-  "q": "Nanti kamu akan mengubah satu hal: sesi login disimpan di memori instance yang menerima login. Request berikutnya diarahkan ke instance lain. Apa yang Budi lihat?",
+  "q": "Nanti kamu akan mengubah satu hal: session login disimpan di memori instance yang menerima login. Request berikutnya diarahkan ke instance lain. Apa yang Budi lihat?",
   "options": [
    "Riwayatnya",
    "401, kembali ke layar login",
@@ -58,7 +58,7 @@
   ],
   "answer": 1,
   "varian": true,
-  "explain": "Instance lain tidak pernah melihat sesi itu. Rekaman lab: request pertama ke API #1 dijawab 401, request kedua ke API #2 (tempat login) dijawab 200. Bagi Budi, app tiba-tiba keluar sendiri, lalu kadang masuk lagi."
+  "explain": "Instance lain tidak pernah melihat session itu. Rekaman lab: request pertama ke API #1 dijawab 401, request kedua ke API #2 (tempat login) dijawab 200. Bagi Budi, app tiba-tiba keluar sendiri, lalu kadang masuk lagi."
  },
  "langkah": [
   {
@@ -111,15 +111,15 @@
   }
  ],
  "varian": {
-  "label": "sesi disimpan di memori instance yang menerima login",
+  "label": "session disimpan di memori instance yang menerima login",
   "mulai": 1,
   "langkah": [
    {
     "dari": "lb",
     "ke": "api2",
-    "judul": "Login di API #2, sesi disimpan di memorinya",
+    "judul": "Login di API #2, session disimpan di memorinya",
     "kirim": "lb  POST /login → 127.0.0.1:18142\nsesi[a1c1b8…] = budi   (hanya di API #2)",
-    "jelas": "Sesi hanya ada di memori proses API #2.",
+    "jelas": "Session hanya ada di memori proses API #2.",
     "nada": "warn"
    },
    {
@@ -127,7 +127,7 @@
     "ke": "api1",
     "judul": "Riwayat diarahkan ke API #1",
     "kirim": "lb  GET /riwayat → 127.0.0.1:18141\napi:18141 → 401 (sesi tidak dikenal di instance ini)",
-    "jelas": "API #1 tidak pernah melihat sesi itu.",
+    "jelas": "API #1 tidak pernah melihat session itu.",
     "nada": "warn"
    },
    {
@@ -135,7 +135,7 @@
     "ke": "budi",
     "judul": "Budi kembali ke layar login",
     "kirim": "401",
-    "jelas": "Request berikutnya ke API #2 dijawab 200 (rekaman). Gejalanya acak: kadang masuk, kadang keluar. Restart atau deploy API #2 juga menghapus semua sesi di sana.",
+    "jelas": "Request berikutnya ke API #2 dijawab 200 (rekaman). Gejalanya acak: kadang masuk, kadang keluar. Restart atau deploy API #2 juga menghapus semua session di sana.",
     "nada": "warn",
     "layar": {
      "budi": {

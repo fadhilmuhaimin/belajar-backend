@@ -53,7 +53,7 @@ Ani ingin laporan penjualan per bulan, yang belum pernah ia minta sebelumnya. Ke
 | Banyak perubahan sekaligus | Transaction, bagian inti sejak awal | Tersedia ([MongoDB](https://www.mongodb.com/docs/manual/core/transactions/), [Firestore](https://firebase.google.com/docs/firestore/manage-data/transactions)), dengan batasan masing-masing |
 | Query baru yang tidak direncanakan | `JOIN`, `GROUP BY` bebas | Biasanya butuh index baru atau bentuk dokumen baru |
 
-**"Lebih cepat" tergantung pola akses.** Membaca satu pesanan beserta itemnya memang satu baca di dokumen. Di SQL, itu dua tabel.
+**"Lebih cepat" tergantung pola akses.** Membaca satu pesanan beserta itemnya memang cukup sekali baca di dokumen. Di SQL, itu dua tabel.
 
 Tapi laporan per bulan, yang menyatukan banyak pesanan, adalah kekuatan SQL. Untuk volume Rekeningo Tahap 1 (±0,14 request per detik di jam puncak, lihat halaman Tahap 1), kecepatan mesin bukan faktor penentu.
 

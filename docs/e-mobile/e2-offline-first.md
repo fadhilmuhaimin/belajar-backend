@@ -60,7 +60,7 @@ Setiap operasi di queue membawa `op_id` yang dibuat saat Ani mengubah data. Fung
 --8<-- "labs/e2-sync/output/harga.txt:1:11"
 ```
 
-Server tidak memilih pemenang. Ia menolak dengan status `konflik` dan mengirim nilai terbarunya. App menyimpan perubahan Ani di queue dan menampilkan dua harga untuk dipilih. Untuk stok dan uang, server tetap sumber kebenarannya: `CHECK (stok >= 0)` di database menolak penjualan yang melebihi stok.
+Server tidak memilih pemenang. Ia menolak dengan status `konflik` dan mengirim nilai terbarunya. App menyimpan perubahan Ani di queue dan menampilkan dua harga untuk dipilih. Untuk stok dan uang, server tetap menjadi source of truth: `CHECK (stok >= 0)` di database menolak penjualan yang melebihi stok.
 
 ## Di stack lain
 

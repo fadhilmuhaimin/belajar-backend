@@ -70,7 +70,7 @@ Di Android, kamu terbiasa dengan Room atau sqflite sebagai sumber data. Itu bena
 <ul>
 <li>Tabel akun, transaksi</li>
 <li>Constraint: saldo ≥ 0</li>
-<li>Satu sumber kebenaran</li>
+<li>Satu source of truth</li>
 </ul>
 </div>
 </div>
@@ -79,7 +79,7 @@ Di Android, kamu terbiasa dengan Room atau sqflite sebagai sumber data. Itu bena
 
 Backend Rekeningo punya empat tugas:
 
-1. **Sumber kebenaran data bersama.** Saldo, riwayat, dan pesanan disimpan di satu database. Semua perangkat membaca dari sana.
+1. **Source of truth untuk data bersama.** Saldo, riwayat, dan pesanan disimpan di satu database. Semua perangkat membaca dari sana.
 2. **Aturan bisnis yang tidak bisa dilewati.** "Saldo harus cukup" dicek di server. App boleh mengecek lebih dulu, tapi hanya untuk memberi kabar cepat.
 3. **Identitas dan izin.** Backend tahu siapa yang mengirim request (authentication) dan apa yang boleh ia lakukan (authorization). Dibahas di [[B5.1]] dan [[B5.3]].
 4. **Penghubung ke sistem lain.** Notifikasi ke HP Ani, bank untuk top-up, email struk. HP tidak memegang secret untuk sistem-sistem itu.
@@ -120,7 +120,7 @@ Supabase dan Firebase tetap punya "backend". Bedanya, sebagian besar sudah jadi,
 
 ??? success "Jawaban"
 
-    Pertama, Budi punya dua perangkat, dan sqflite tidak berbagi data antar-perangkat. Kedua, Ani harus melihat uang masuk di HP-nya. Ketiga, data di HP bisa diubah pemiliknya. Semua itu butuh satu sumber kebenaran yang dipegang tim: database di backend.
+    Pertama, Budi punya dua perangkat, dan sqflite tidak berbagi data antar-perangkat. Kedua, Ani harus melihat uang masuk di HP-nya. Ketiga, data di HP bisa diubah pemiliknya. Semua itu butuh satu source of truth yang dipegang tim: database di backend.
 
 **3.** Siapa yang memanggil layanan push untuk memberi tahu Ani?
 

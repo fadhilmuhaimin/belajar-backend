@@ -99,7 +99,7 @@ Diff per file, lalu ringkasan: aturan dan sifat mana dipenuhi di baris mana.
 
 Tiga kebiasaan yang membantu:
 
-1. **Tulis kasus gagal**, bukan hanya jalur bahagia. AI paling sering melewatkan jalur gagal.
+1. **Tulis kasus gagal**, bukan hanya happy path (jalur ketika semuanya berhasil). AI paling sering melewatkan jalur gagal.
 2. **Minta pemetaan** "aturan nomor N ada di baris mana". Review jadi jauh lebih cepat ([[F2]]).
 3. **Sertakan potongan kode yang sudah ada**, bukan deskripsinya. Pola di kode lebih jelas dari penjelasan.
 

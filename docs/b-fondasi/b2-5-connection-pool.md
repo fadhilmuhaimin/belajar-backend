@@ -89,7 +89,7 @@ Perhatikan baris pertama. Go `database/sql` tanpa batas berarti masalahnya tidak
 | Pool kecil + W kecil | Beban PostgreSQL rendah, request jarang menunggu | Butuh disiplin: tidak ada pekerjaan lambat di dalam transaction |
 | Pool besar | Menunda gejala | Koneksi menumpuk di PostgreSQL; masalah pindah ke database |
 | Pool tanpa batas | Tidak pernah menunggu di aplikasi | Satu lonjakan bisa menghabiskan `max_connections` untuk semua instance |
-| Pooler terpisah (mis. PgBouncer, Supavisor) | Banyak instance berbagi sedikit koneksi | Satu komponen lagi; mode tertentu membatasi fitur sesi |
+| Pooler terpisah (mis. PgBouncer, Supavisor) | Banyak instance berbagi sedikit koneksi | Satu komponen lagi; mode tertentu membatasi fitur session |
 
 ## Cek diri
 

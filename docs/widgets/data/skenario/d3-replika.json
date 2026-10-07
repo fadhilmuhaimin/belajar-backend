@@ -66,7 +66,7 @@
    "ke": "api",
    "judul": "Budi top-up",
    "kirim": "POST /topup {\"jumlah\":200000}",
-   "jelas": "Semua tulis ke primary."
+   "jelas": "Semua perintah tulis masuk ke primary."
   },
   {
    "dari": "api",
@@ -123,7 +123,7 @@
   }
  ],
  "varian": {
-  "label": "semua baca selalu dari replica",
+  "label": "semua query baca selalu ke replica",
   "mulai": 3,
   "langkah": [
    {

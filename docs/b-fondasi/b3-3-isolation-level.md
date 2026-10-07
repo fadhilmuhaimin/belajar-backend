@@ -21,7 +21,7 @@ Baca 7 menit · coba 3 menit · Prasyarat: [[B3.2]]
 
 ## Inti
 
-Isolation level menentukan seberapa banyak perubahan transaction lain yang terlihat oleh transaction-mu. Level yang lebih ketat mencegah lebih banyak anomali, dengan imbalan error yang harus di-retry.
+Isolation level menentukan seberapa banyak perubahan transaction lain yang terlihat oleh transaction-mu. Level yang lebih ketat mencegah lebih banyak anomali, tapi harganya error yang harus di-retry.
 
 <div data-bb="arsitektur" data-tahap="2"></div>
 

@@ -66,7 +66,7 @@ Karena itu worker membatasi lajunya sendiri (mirip token bucket di [[C4]]), dan 
 | Fan-out saat tulis | Baca feed ringan dan cepat | Tulis membengkak untuk toko besar; data feed berlipat ganda |
 | Fan-out saat baca | Tulis ringan, tidak ada data ganda | Setiap pembukaan feed lebih berat; sulit di-cache per user |
 | Gabungan | Ringan di kedua sisi untuk kebanyakan kasus | Dua jalur kode; batasnya harus dipantau |
-| Push lewat topik | Server mengirim sekali | Tidak bisa personal; tidak cocok untuk pesan yang mendesak |
+| Push lewat topic | Server mengirim sekali | Tidak bisa personal; tidak cocok untuk pesan yang mendesak |
 
 ## Cek diri
 

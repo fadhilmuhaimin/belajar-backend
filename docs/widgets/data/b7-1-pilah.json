@@ -7,7 +7,7 @@
     { "teks": "UPDATE akun SET saldo = saldo - $1 WHERE id = $2 AND saldo >= $1", "jawab": 2, "kenapa": "SQL hanya ada di lapisan akses data. Logika bisnis tidak tahu tabel dan kolomnya." },
     { "teks": "w.Header().Set(\"Location\", \"/transfers/1\")", "jawab": 0, "kenapa": "Header dan status code adalah urusan HTTP." },
     { "teks": "if ke == dari { return ErrValidasi{\"ke\", ...} }", "jawab": 1, "kenapa": "Aturan bisnis: tidak boleh transfer ke diri sendiri." },
-    { "teks": "case errors.Is(err, ErrSaldoKurang): tulisProblem(w, Problem{Status: 422, ...})", "jawab": 0, "kenapa": "Memetakan error bisnis ke status code dilakukan sekali, di tepi HTTP." },
+    { "teks": "case errors.Is(err, ErrSaldoKurang): tulisProblem(w, Problem{Status: 422, ...})", "jawab": 0, "kenapa": "Memetakan error bisnis ke status code dilakukan sekali, di handler (lapisan HTTP)." },
     { "teks": "tx, err := r.db.BeginTx(ctx, nil)", "jawab": 2, "kenapa": "Transaction database dibuka di lapisan akses data, di fungsi yang menjalankan beberapa query sekaligus." }
   ],
   "penutup": "Uji cepatnya: kalau besok endpoint ini juga dipanggil dari worker (Tahap 3), bagian mana yang tetap dipakai? Logika bisnis dan akses data. Handler tidak."

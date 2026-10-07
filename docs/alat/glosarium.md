@@ -101,6 +101,7 @@ Lima belas istilah yang muncul di hampir semua halaman Tahap 1. Baca sekali sebe
 | **Sharding** | Membagi data ke beberapa database berdasarkan shard key, mis. per wilayah. | [[D2]] |
 | **Signature** | Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah. | [[B5.1]] |
 | **Signed URL** | URL berbatas waktu yang memberi akses langsung ke satu file di object storage. | [[B11.2]] |
+| **Source of truth** | Satu tempat yang isinya dianggap benar ketika salinan lain berbeda, mis. database backend untuk saldo; cache dan data di HP hanya salinan. | [[A1]] |
 | **SSE** (Server-Sent Events) | Koneksi HTTP yang dibiarkan terbuka sehingga server bisa mengirim pesan satu arah ke client. | [[E4]] |
 | **Stale** | Data yang sudah tidak terbaru, mis. harga lama yang masih tersimpan di cache. | [[B9]] |
 | **Stateless** | Server tidak menyimpan keadaan antar-request di memorinya, jadi request mana pun bisa dilayani instance mana pun. | [[D2]] |

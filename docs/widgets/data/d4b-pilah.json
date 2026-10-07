@@ -1,10 +1,10 @@
 {
   "judul": "Cara menyebarkan setiap jenis pesan",
-  "kelompok": ["Fan-out saat tulis", "Fan-out saat baca", "Push lewat topik"],
+  "kelompok": ["Fan-out saat tulis", "Fan-out saat baca", "Push lewat topic"],
   "item": [
     { "teks": "Warung Ani (±40 pengikut, asumsi) memasang promo baru di feed.", "jawab": 0, "kenapa": "Menulis 40 baris ke feed pengikut ringan, dan feed tiap pengikut jadi satu query sederhana saat dibuka." },
     { "teks": "Jaringan toko besar (±50.000 pengikut, asumsi) memasang promo.", "jawab": 1, "kenapa": "Menulis 50.000 baris untuk satu promo berat dan lambat. Promo dari toko besar lebih ringan diambil saat feed dibuka, lalu digabung dengan feed hasil tulis." },
     { "teks": "Pengumuman perawatan sistem untuk semua user.", "jawab": 2, "kenapa": "Isinya sama untuk semua orang dan bukan pribadi. Dokumentasi FCM menyebut topic cocok untuk informasi publik, dioptimalkan untuk throughput, bukan latency." },
-    { "teks": "Cashback khusus untuk Budi berdasarkan riwayat belanjanya.", "jawab": 0, "kenapa": "Pesan untuk satu user ditulis langsung ke feed Budi, dan dikirim ke token device Budi, bukan ke topik." }
+    { "teks": "Cashback khusus untuk Budi berdasarkan riwayat belanjanya.", "jawab": 0, "kenapa": "Pesan untuk satu user ditulis langsung ke feed Budi, dan dikirim ke token device Budi, bukan ke topic." }
   ]
 }

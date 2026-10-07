@@ -47,7 +47,7 @@ Navigasi utama mengikuti tahap cerita. Halaman ini menyusun halaman yang sama pe
 | [1.12 Authentication: session atau token](../b-fondasi/b5-1-authentication.md) | Tahap 1 | Bingung memilih session atau JWT untuk login |
 | [1.13 Authorization: siapa boleh apa](../b-fondasi/b5-3-authorization.md) | Tahap 1 | Budi bisa melihat saldo Ani lewat ID di URL |
 | [3.7 Security dasar dan rate limit](../c-operasional/c4-security-dasar.md) | Tahap 3 | Login dicoba ribuan kali dari satu IP |
-| [4.4 OAuth dan login sosial](../b-fondasi/b5-2-oauth-oidc.md) | Tahap 4 | Ingin login dengan akun yang sudah dimiliki user (login sosial) |
+| [4.4 OAuth dan login sosial](../b-fondasi/b5-2-oauth-oidc.md) | Tahap 4 | Ingin login dengan akun lain milik user (login sosial) |
 
 ## Struktur kode
 

@@ -61,7 +61,7 @@ Versi pertama yang terpikir: kirim notifikasi di goroutine terpisah setelah `COM
 --8<-- "labs/t3-bayar/output/worker-retry.txt"
 ```
 
-**Redis di Tahap 3.** Arsitektur Tahap 3 juga punya Redis. Rekeningo memakainya untuk cache ([[B9]]) dan job yang tidak perlu atomik dengan data, mis. email promo. Notifikasi pembayaran tetap lewat outbox karena harus konsisten dengan pembayarannya.
+**Redis di Tahap 3.** Arsitektur Tahap 3 juga punya Redis. Rekeningo memakainya untuk cache ([[B9]]) dan job yang tidak perlu satu transaction dengan data, mis. email promo. Notifikasi pembayaran tetap lewat outbox karena harus konsisten dengan pembayarannya.
 
 ## Di stack lain
 
@@ -84,8 +84,8 @@ Perhatikan baris Spring: `@Async` hanya menjalankan method di thread lain. Peker
 |---|---|---|
 | Kerjakan di dalam request | Paling sederhana, hasil langsung pasti | Request lambat, menahan koneksi ([[B2.5]]) |
 | Goroutine / thread setelah COMMIT | Cepat ditulis | Hilang saat restart; tanpa retry |
-| Tabel outbox sebagai queue | Atomik dengan data, tanpa komponen baru | Polling tabel; volume besar butuh perawatan index dan arsip |
-| Queue terpisah (Redis, broker) | Throughput tinggi, fitur lengkap | Komponen tambahan; tidak atomik dengan transaction database |
+| Tabel outbox sebagai queue | Ditulis dalam transaction yang sama dengan data, tanpa komponen baru | Polling tabel; volume besar butuh perawatan index dan arsip |
+| Queue terpisah (Redis, broker) | Throughput tinggi, fitur lengkap | Komponen tambahan; tidak bisa ikut transaction database |
 
 ## Cek diri
 

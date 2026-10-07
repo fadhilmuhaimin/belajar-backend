@@ -63,7 +63,7 @@ Tiga hal dari rekaman:
 
 ## Di stack lain
 
-Yang sama di semua stack: baca cache, isi kalau kosong, hapus saat data berubah. Yang berbeda: API-nya. Hanya Python (redis-py) yang dijalankan di lab, sebagai pengganti netral. Baris lain dicek ke dokumentasi.
+Yang sama di semua stack: baca cache, isi kalau kosong, hapus saat data berubah. Yang berbeda: API-nya. Hanya Python (redis-py) yang dijalankan di lab, karena Python tidak termasuk stack yang dibandingkan di sini. Baris lain dicek ke dokumentasi.
 
 | Stack | Baca atau isi | Hapus saat berubah | Sumber |
 |---|---|---|---|

@@ -45,7 +45,7 @@ Tiga aturan untuk app mobile:
 
 1. **Browser sistem, bukan WebView.** App native tidak boleh memakai embedded user-agent, karena app bisa membaca password yang diketik di dalamnya ([RFC 8252 §8.12](https://www.rfc-editor.org/rfc/rfc8252.html#section-8.12)).
 2. **Tanpa client secret.** Secret yang ikut di dalam app bisa dibaca siapa pun yang membongkarnya ([RFC 8252 §8.5](https://www.rfc-editor.org/rfc/rfc8252.html#section-8.5)). App adalah public client.
-3. **Selalu PKCE.** Karena tidak ada secret, code yang dicegat bisa ditukar oleh siapa pun. PKCE mengikat code ke `code_verifier` yang hanya dimiliki app ([RFC 7636](https://www.rfc-editor.org/rfc/rfc7636.html)). RFC 9700 mewajibkan PKCE untuk public client, dan menyatakan client sebaiknya tidak memakai implicit grant, yaitu token langsung di URL ([RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html)).
+3. **Selalu PKCE.** Karena tidak ada secret, code yang dicegat bisa ditukar oleh siapa pun. PKCE mengikat code ke `code_verifier` yang hanya dipegang app ([RFC 7636](https://www.rfc-editor.org/rfc/rfc7636.html)). RFC 9700 mewajibkan PKCE untuk public client, dan menyatakan client sebaiknya tidak memakai implicit grant, yaitu token langsung di URL ([RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html)).
 
 ```go title="labs/b5-2-oidc/main.go"
 --8<-- "labs/b5-2-oidc/main.go:pkce"

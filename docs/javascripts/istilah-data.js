@@ -712,6 +712,14 @@ window.ISTILAH = {
   "t": "Signed URL",
   "u": "b-fondasi/b11-2-proxy-bff/"
  },
+ "Source of truth": {
+  "b": "A1",
+  "d": "Satu tempat yang isinya dianggap benar ketika salinan lain berbeda, mis. database backend untuk saldo; cache dan data di HP hanya salinan.",
+  "n": "1.1 Apa yang dikerjakan backend",
+  "s": "istilah-source-of-truth",
+  "t": "Source of truth",
+  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+ },
  "Stale": {
   "b": "B9",
   "d": "Data yang sudah tidak terbaru, mis. harga lama yang masih tersimpan di cache.",
@@ -1295,6 +1303,14 @@ window.ISTILAH = {
   "s": "istilah-signature",
   "t": "Signature",
   "u": "b-fondasi/b5-1-authentication/"
+ },
+ "source of truth": {
+  "b": "A1",
+  "d": "Satu tempat yang isinya dianggap benar ketika salinan lain berbeda, mis. database backend untuk saldo; cache dan data di HP hanya salinan.",
+  "n": "1.1 Apa yang dikerjakan backend",
+  "s": "istilah-source-of-truth",
+  "t": "Source of truth",
+  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
  },
  "stale": {
   "b": "B9",

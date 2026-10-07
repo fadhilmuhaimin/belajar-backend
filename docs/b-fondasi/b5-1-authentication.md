@@ -35,7 +35,7 @@ Login, lalu membuka saldo. Request, response, dan isi token di widget ini direka
 
 Versi pertama endpoint saldo Rekeningo menerima `GET /akun/budi?pin=123456`. Setiap request membawa PIN.
 
-Raka segera melihat tiga masalah. PIN ikut tercatat di log server, karena URL selalu dicatat. App harus menyimpan PIN di HP untuk dikirim terus. Dan untuk mengganti PIN, semua sesi di semua perangkat harus ikut berubah.
+Raka segera melihat tiga masalah. PIN ikut tercatat di log server, karena URL selalu dicatat. App harus menyimpan PIN di HP untuk dikirim terus. Dan kalau PIN diganti, app di semua perangkat harus ikut menyimpan PIN baru.
 
 Raka butuh pola yang dipakai semua app yang ia kenal: login sekali, lalu bawa bukti yang berumur pendek.
 

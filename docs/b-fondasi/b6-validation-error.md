@@ -70,7 +70,7 @@ Perhatikan tiga hal di rekaman:
 
 **Error handling.** Tiga kebiasaan yang membuat error bisa dilacak:
 
-- **Petakan sekali, di tepi.** Logika bisnis mengembalikan error bertipe (`ErrValidasi`, `ErrSaldoKurang`). Hanya handler yang mengubahnya jadi status code.
+- **Petakan sekali, di handler.** Logika bisnis mengembalikan error bertipe (`ErrValidasi`, `ErrSaldoKurang`). Hanya handler yang mengubahnya jadi status code.
 - **Jangan buang error.** Error yang ditangkap lalu diabaikan (di-swallow) membuat bug tidak terlihat. Kalau sengaja diabaikan, tulis alasannya.
 - **Detail ke log, pesan umum ke client.** Pesan database bisa membocorkan nama tabel dan kolom.
 

@@ -5,7 +5,7 @@
     "jenis": "rekaman",
     "file": "labs/b3-isolasi/output/tarik-repeatable-read.txt",
     "fileVarian": "labs/b3-race/output/tx-tanpa-lock.txt",
-    "catatan": "PostgreSQL 17.11, dua sesi psycopg, direkam 2026-10-06 (labs/b3-isolasi). Varian memakai rekaman [[B3.2]] di READ COMMITTED."
+    "catatan": "PostgreSQL 17.11, dua koneksi psycopg, direkam 2026-10-06 (labs/b3-isolasi). Varian memakai rekaman [[B3.2]] di READ COMMITTED."
   },
   "pengantar": "Kode aplikasinya sama dengan [[B3.2]] versi salah: baca saldo, hitung di aplikasi, tulis. Yang berbeda hanya isolation level.",
   "komponen": [

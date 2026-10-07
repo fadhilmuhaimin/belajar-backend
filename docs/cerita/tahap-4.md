@@ -54,7 +54,7 @@ Memecah service menambah deploy, monitoring, dan panggilan jaringan yang bisa ga
 | Payment gateway lambat, request ikut menggantung | [4.1 Integrasi pihak ketiga](../b-fondasi/b11-integrasi-pihak-ketiga.md) |
 | Layanan luar hanya menerima IP terdaftar; layar beranda butuh 5 request | [4.2 Proxy dan BFF](../b-fondasi/b11-2-proxy-bff.md) |
 | Webhook dikirim dua kali; saldo bertambah dua kali | [4.3 Webhook dan outbox](../b-fondasi/b10-2-webhook-outbox.md) |
-| Ingin login dengan akun yang sudah dimiliki user (login sosial) | [4.4 OAuth dan login sosial](../b-fondasi/b5-2-oauth-oidc.md) |
+| Ingin login dengan akun lain milik user (login sosial) | [4.4 OAuth dan login sosial](../b-fondasi/b5-2-oauth-oidc.md) |
 | Dua tim bentrok di satu codebase | [4.5 Modular monolith](../b-fondasi/b7-2-batas-modul.md) |
 | Keputusan desain lupa alasannya | [4.6 Template ADR](../d-system-design/d5-adr.md) |
 <!-- /daftar-tahap -->

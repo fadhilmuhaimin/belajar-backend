@@ -13,7 +13,7 @@
   "judul": "1.1 Apa yang dikerjakan backend",
   "url": "a-gambaran/a1-apa-yang-dikerjakan-backend/",
   "tanya": "Jelaskan kenapa saldo tidak cukup disimpan di sqflite HP Budi.",
-  "jawab": "Pertama, Budi punya dua perangkat, dan sqflite tidak berbagi data antar-perangkat. Kedua, Ani harus melihat uang masuk di HP-nya. Ketiga, data di HP bisa diubah pemiliknya. Semua itu butuh satu sumber kebenaran yang dipegang tim: database di backend."
+  "jawab": "Pertama, Budi punya dua perangkat, dan sqflite tidak berbagi data antar-perangkat. Kedua, Ani harus melihat uang masuk di HP-nya. Ketiga, data di HP bisa diubah pemiliknya. Semua itu butuh satu source of truth yang dipegang tim: database di backend."
  },
  {
   "id": "A1-3",
@@ -61,7 +61,7 @@
   "judul": "1.3 Perjalanan satu request",
   "url": "a-gambaran/a2-perjalanan-request/",
   "tanya": "Response transfer membawa `saldo` terbaru. Apa untungnya bagi app?",
-  "jawab": "App bisa langsung memperbarui layar tanpa request `GET` kedua. Satu perjalanan lebih sedikit berarti lebih cepat dan lebih sedikit titik gagal."
+  "jawab": "App bisa langsung memperbarui layar tanpa request `GET` kedua. Satu perjalanan lebih sedikit berarti lebih cepat dan lebih sedikit tempat yang bisa gagal."
  },
  {
   "id": "A2-3",
@@ -1015,7 +1015,7 @@
   "judul": "5.1 Scaling",
   "url": "d-system-design/d2-scaling/",
   "tanya": "API Rekeningo menyimpan file upload sementara di disk lokal instance, lalu memprosesnya di request berikutnya. Apa yang terjadi setelah scale out ke tiga instance?",
-  "jawab": "Request berikutnya bisa mendarat di instance lain yang tidak punya file itu, sama seperti sesi di memori di widget. File harus disimpan di tempat bersama (object storage), atau diproses dalam request yang sama."
+  "jawab": "Request berikutnya bisa diarahkan ke instance lain yang tidak punya file itu, sama seperti session di memori di widget. File harus disimpan di tempat bersama (object storage), atau diproses dalam request yang sama."
  },
  {
   "id": "D2-2",

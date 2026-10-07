@@ -19,7 +19,7 @@
       "nada": { "doc": "warn" } },
     { "label": "Buka satu pesanan beserta itemnya",
       "sorot": { "sql": ["pesanan", "join"], "doc": ["dpes"] },
-      "catatan": { "sql": "Dua tabel digabung dengan JOIN, atau dua query.", "doc": "Satu dokumen, satu baca. Item tertanam di dokumen pesanan. Ini kekuatan model dokumen." } },
+      "catatan": { "sql": "Dua tabel digabung dengan JOIN, atau dua query.", "doc": "Satu dokumen, sekali baca. Item tertanam di dokumen pesanan. Ini kekuatan model dokumen." } },
     { "label": "Laporan penjualan Ani per bulan",
       "sorot": { "sql": ["pesanan", "join"], "doc": ["dpes", "idx"] },
       "catatan": { "sql": "GROUP BY bulan, SUM total. Query baru tidak butuh perubahan skema.", "doc": "Bisa dengan query agregasi, tapi setiap pola query baru biasanya butuh index baru, dan bentuk dokumen dirancang mengikuti query yang sudah diketahui." },

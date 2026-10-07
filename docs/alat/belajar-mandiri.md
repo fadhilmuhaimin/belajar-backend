@@ -23,7 +23,7 @@ Contoh di panduan ini: ukuran pool bawaan node-postgres dan HikariCP diambil dar
 
 ## Membaca dokumentasi resmi dengan cepat
 
-1. **Cari halaman konsep, bukan tutorial.** Tutorial menunjukkan jalur bahagia. Halaman konsep atau referensi menjelaskan perilaku saat gagal.
+1. **Cari halaman konsep, bukan tutorial.** Tutorial menunjukkan happy path, yaitu jalur ketika semuanya berjalan lancar. Halaman konsep atau referensi menjelaskan perilaku saat gagal.
 2. **Cari kata "default", "must", "should", "note", "warning".** Nilai bawaan dan peringatan biasanya ada di sana.
 3. **Catat versi.** Tulis versi di catatan atau di komentar kode, mis. "Django 6.1, `CONN_MAX_AGE` bawaan 0".
 4. **Coba di lab kecil.** Kalau perilakunya penting, jalankan sekali. Panduan ini melakukannya di `labs/`.

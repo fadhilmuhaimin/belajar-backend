@@ -73,7 +73,7 @@ Dokumentasi AWS menyebut presigned URL sebagai bearer token: siapa pun yang meme
 --8<-- "labs/b11-2-proxy/output/e-bff.txt"
 ```
 
-Di localhost bedanya 211 ms lawan 42 ms. Di jaringan seluler, setiap request menambah satu round trip. Misalkan satu round trip 150 ms (asumsi, bukan rekaman). Lima request berurutan butuh 5 × 150 = 750 ms, satu request 150 ms, sebelum kerja server dihitung.
+Di localhost bedanya 211 ms dibanding 42 ms. Di jaringan seluler, setiap request menambah satu round trip. Misalkan satu round trip 150 ms (asumsi, bukan rekaman). Lima request berurutan butuh 5 × 150 = 750 ms, satu request 150 ms, sebelum kerja server dihitung.
 
 ## Di stack lain
 

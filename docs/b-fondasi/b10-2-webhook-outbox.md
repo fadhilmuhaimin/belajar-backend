@@ -111,7 +111,7 @@ Kesalahan yang sering muncul: framework mem-parse JSON lalu kode menghitung sign
 
 ## Saat me-review kode AI, cek ini
 
-- [ ] Signature diverifikasi dari body mentah, dengan perbandingan waktu-konstan (`hmac.Equal`, bukan `==`).
+- [ ] Signature diverifikasi dari body mentah, dengan constant-time comparison (`hmac.Equal`, bukan `==`), supaya lama perbandingan tidak membocorkan berapa karakter yang sudah cocok.
 - [ ] Timestamp diperiksa, kiriman lama ditolak.
 - [ ] Id event disimpan dengan constraint unik, di transaction yang sama dengan perubahan saldo.
 - [ ] Jumlah uang diambil dari data sendiri, bukan dari isi webhook.

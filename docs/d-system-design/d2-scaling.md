@@ -56,7 +56,7 @@ Lama kerja lebih menentukan dari jumlah user.
 1. **Perbaiki query.** Index, N+1, pagination ([[B2.3]], [[B2.4]]). Sering cukup.
 2. **Cache** untuk baca yang berat dan berulang ([[B9]]).
 3. **Server lebih besar** (scale up). Tanpa ubah kode, tapi ada batas atasnya.
-4. **Tambah instance API** (scale out). Syaratnya stateless: proses tidak menyimpan apa pun yang harus bertahan antar-request ([twelve-factor](https://12factor.net/processes)). Widget di atas menunjukkan akibatnya kalau sesi disimpan di memori.
+4. **Tambah instance API** (scale out). Syaratnya stateless: proses tidak menyimpan apa pun yang harus bertahan antar-request ([twelve-factor](https://12factor.net/processes)). Widget di atas menunjukkan akibatnya kalau session disimpan di memori.
 5. **Read replica** untuk query baca. Akibatnya: replica bisa tertinggal ([[D3]]).
 6. **Partisi** tabel yang sangat besar, mis. per bulan.
 7. **Sharding**: data dipecah ke beberapa database. Hampir semua query berubah, dan sulit dibatalkan. Rekeningo sengaja belum melakukannya.
@@ -72,21 +72,21 @@ Query tanpa filter tanggal tetap memindai ketiga partisi (rekaman lengkap di fil
 
 ## Di stack lain
 
-Syarat stateless sering dilanggar lewat penyimpanan sesi bawaan. Hanya Go yang dijalankan di lab. Baris lain dicek ke dokumentasi.
+Syarat stateless sering dilanggar lewat penyimpanan session bawaan. Hanya Go yang dijalankan di lab. Baris lain dicek ke dokumentasi.
 
-| Stack | Sesi bawaan disimpan di | Catatan | Sumber |
+| Stack | Session bawaan disimpan di | Catatan | Sumber |
 |---|---|---|---|
 | Express (`express-session`) | `MemoryStore`, memori proses | Dokumentasinya menulis MemoryStore sengaja tidak dirancang untuk production | [express-session](https://github.com/expressjs/session) |
 | Laravel | Database | Driver bisa diganti ke Redis | [Laravel: session](https://laravel.com/docs/12.x/session) |
 | Django | Database | Bisa diganti ke cache atau file | [Django: sessions](https://docs.djangoproject.com/en/stable/topics/http/sessions/) |
-| Spring | Sesi milik servlet container (tanpa Spring Session) | Spring Session menyimpan sesi di Redis atau JDBC supaya bisa dipakai bersama di cluster | [Spring Session](https://docs.spring.io/spring-session/reference/) |
+| Spring | Session milik servlet container (tanpa Spring Session) | Spring Session menyimpan session di Redis atau JDBC supaya bisa dipakai bersama di cluster | [Spring Session](https://docs.spring.io/spring-session/reference/) |
 | Go (lab) | Tidak ada bawaan | Lab membandingkan map di memori dengan token yang punya signature | Rekaman di atas |
 
 ## Trade-off: kapan pakai apa
 
 | Pilihan | Kelebihan | Kekurangan |
 |---|---|---|
-| Scale up | Tanpa ubah kode atau arsitektur | Ada batas atas; satu server tetap satu titik gagal |
+| Scale up | Tanpa ubah kode atau arsitektur | Ada batas atas; satu server tetap jadi single point of failure: kalau mati, semua berhenti |
 | Scale out API | Tambah atau kurangi instance sesuai beban | Syarat stateless; butuh load balancer |
 | Read replica | Beban baca pindah dari primary | Replication lag; read-your-writes harus ditangani ([[D3]]) |
 | Partisi | Query per periode dan arsip jadi ringan | Query tanpa partition key tidak terbantu; partition key sulit diubah |
@@ -97,7 +97,7 @@ Syarat stateless sering dilanggar lewat penyimpanan sesi bawaan. Hanya Go yang d
 
 ??? success "Jawaban"
 
-    Request berikutnya bisa mendarat di instance lain yang tidak punya file itu, sama seperti sesi di memori di widget. File harus disimpan di tempat bersama (object storage), atau diproses dalam request yang sama.
+    Request berikutnya bisa diarahkan ke instance lain yang tidak punya file itu, sama seperti session di memori di widget. File harus disimpan di tempat bersama (object storage), atau diproses dalam request yang sama.
 
 **2.** Jelaskan kenapa angka "±1.400 request per detik" saja tidak cukup untuk memutuskan jumlah server.
 
@@ -114,7 +114,7 @@ Syarat stateless sering dilanggar lewat penyimpanan sesi bawaan. Hanya Go yang d
 ## Saat me-review kode AI, cek ini
 
 - [ ] Usulan scaling menyebut metric yang menunjukkan bottleneck, bukan hanya "supaya scalable".
-- [ ] API tidak menyimpan sesi, file, atau state lain di memori atau disk lokal instance.
+- [ ] API tidak menyimpan session, file, atau state lain di memori atau disk lokal instance.
 - [ ] Query baca yang diarahkan ke replica boleh menerima data yang tertinggal.
 - [ ] Partisi memakai partition key yang memang dipakai di filter query dan arsip.
 - [ ] Sharding tidak diusulkan sebelum query, cache, replica, dan partisi dicoba.

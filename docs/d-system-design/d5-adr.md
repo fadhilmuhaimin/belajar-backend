@@ -35,7 +35,7 @@ Tidak semua keputusan butuh ADR. Pilah dulu, lalu cek.
 
 Developer baru di tim pembayaran bertanya: kenapa notifikasi memakai tabel outbox, padahal Redis sudah ada? Tidak ada yang ingat. Raka mencari di chat lama dan menemukan diskusinya terpotong di tengah.
 
-Dua minggu kemudian, tim hampir memindahkan notifikasi ke Redis. Alasan awalnya, atomik dengan transaction pembayaran, baru teringat saat review. Setelah itu tim sepakat: keputusan yang sulit dibatalkan ditulis sebagai ADR.
+Dua minggu kemudian, tim hampir memindahkan notifikasi ke Redis. Alasan awalnya baru teringat saat review: notifikasi ditulis dalam transaction yang sama dengan pembayaran. Setelah itu tim sepakat: keputusan yang sulit dibatalkan ditulis sebagai ADR.
 
 ## Cara kerjanya
 

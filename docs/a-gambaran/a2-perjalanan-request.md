@@ -121,7 +121,7 @@ Angka 5 dan 30 detik di atas hanya contoh. Ukur waktu respons API-mu sendiri seb
 
 ??? success "Jawaban"
 
-    App bisa langsung memperbarui layar tanpa request `GET` kedua. Satu perjalanan lebih sedikit berarti lebih cepat dan lebih sedikit titik gagal.
+    App bisa langsung memperbarui layar tanpa request `GET` kedua. Satu perjalanan lebih sedikit berarti lebih cepat dan lebih sedikit tempat yang bisa gagal.
 
 **3.** Jelaskan kenapa app tidak boleh otomatis mengulang `POST /transfers` setelah timeout.
 

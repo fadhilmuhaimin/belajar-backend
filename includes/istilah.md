@@ -151,6 +151,8 @@
 *[Signature]: Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah.
 *[signature]: Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah.
 *[Signed URL]: URL berbatas waktu yang memberi akses langsung ke satu file di object storage.
+*[Source of truth]: Satu tempat yang isinya dianggap benar ketika salinan lain berbeda, mis. database backend untuk saldo; cache dan data di HP hanya salinan.
+*[source of truth]: Satu tempat yang isinya dianggap benar ketika salinan lain berbeda, mis. database backend untuk saldo; cache dan data di HP hanya salinan.
 *[SSE]: Koneksi HTTP yang dibiarkan terbuka sehingga server bisa mengirim pesan satu arah ke client.
 *[Stale]: Data yang sudah tidak terbaru, mis. harga lama yang masih tersimpan di cache.
 *[stale]: Data yang sudah tidak terbaru, mis. harga lama yang masih tersimpan di cache.
