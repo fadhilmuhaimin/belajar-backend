@@ -6,8 +6,15 @@ cd "$(dirname "$0")/.."
 PY=.venv/bin/python
 echo "== sinkron cerita, kartu, angka asumsi";  $PY tools/sinkron_cerita.py --check
 echo "== istilah";                              $PY tools/build_istilah.py --check
-echo "== build strict";                         .venv/bin/mkdocs build --strict -q 2>&1 | grep -v "│\|^\s*$\|MkDocs 2.0\|squidfunk" || true
-test -f site/index.html
+echo "== build strict"
+# Tanpa -q: WARNING harus terlihat. Exit code mkdocs dipakai langsung, karena site/ tetap
+# tertulis walau strict membatalkan build (test -f site/index.html tidak cukup).
+LOG_BUILD=$(mktemp)
+if .venv/bin/mkdocs build --strict >"$LOG_BUILD" 2>&1; then BUILD_OK=1; else BUILD_OK=0; fi
+if grep -E "^(WARNING|ERROR)|Aborted" "$LOG_BUILD"; then :; fi   # banner Material dan baris INFO tidak dicetak
+rm -f "$LOG_BUILD"
+if [ "$BUILD_OK" != 1 ]; then echo "GAGAL: build strict"; exit 1; fi
+echo "build strict lolos"
 for f in tools/lokal/cek-*.sh; do [ -f "$f" ] && { echo "== lokal: $f"; bash "$f"; }; done   # opsional, tidak ikut repo
 echo "== ID internal tidak tampil";           $PY tools/cek_id_tampil.py
 echo "== audit bahasa";                         $PY tools/audit_bahasa.py --check | tail -3
