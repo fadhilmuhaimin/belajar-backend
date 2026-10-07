@@ -55,7 +55,7 @@ Tiga istilah ini sering tertukar:
 --8<-- "labs/b11-2-proxy/main.go:proxy"
 ```
 
-Tanpa timeout, proxy menunggu selama layanan menunggu. Rekaman C: layanan lambat 8 detik, Budi menunggu 8,0 detik. Dengan timeout 3 detik (rekaman B), Budi mendapat `504` setelah 3,0 detik.
+Tanpa timeout, proxy menunggu selama layanan menunggu. Rekaman C (`labs/b11-2-proxy/output/c-tanpa-timeout.txt`): layanan lambat 8 detik, Budi menunggu 8,0 detik. Dengan timeout 3 detik (rekaman B, `b-timeout.txt`), Budi mendapat `504` setelah 3,0 detik.
 
 **File: lewat proxy atau signed URL?** Bukti bayar disimpan di object storage. Ada dua cara memberikannya ke app:
 
