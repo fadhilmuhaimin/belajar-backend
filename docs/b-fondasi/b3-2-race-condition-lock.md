@@ -269,6 +269,6 @@ return tx.Commit()
 - [Laravel: Pessimistic locking](https://laravel.com/docs/12.x/queries#pessimistic-locking) · [Django: select_for_update](https://docs.djangoproject.com/en/stable/ref/models/querysets/) · [Jakarta Persistence: Locking](https://jakarta.ee/learn/jakartaee-tutorial/9.1/persist/persistence-locking/persistence-locking.html)
 - [Firestore: Transaction serializability and isolation](https://firebase.google.com/docs/firestore/transaction-data-contention)
 
-Halaman lain di Tahap 2 dan Tahap 3 menyusul. [Kembali ke halaman Tahap 2](../cerita/tahap-2.md) untuk melihat daftar masalahnya.
+[Kembali ke halaman Tahap 2](../cerita/tahap-2.md) untuk melihat daftar masalahnya.
 
 <div data-bb="umpan-balik"></div>

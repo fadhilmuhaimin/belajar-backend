@@ -414,7 +414,7 @@
   "judul": "1.18 Menulis spesifikasi untuk AI",
   "url": "f-ai-belajar/f1-spesifikasi-untuk-ai/",
   "tanya": "Spesifikasimu berisi \"pastikan aman dari race condition\". Kenapa kalimat ini lemah?",
-  "jawab": "Tidak bisa dicek. AI bisa menjawab dengan menambah komentar atau mutex di memori, yang tidak melindungi dari dua instance. Tulis sifatnya (UPDATE atomik dengan syarat saldo) dan test penerimaannya (dua transfer paralel, total saldo tetap)."
+  "jawab": "Tidak bisa dicek. AI bisa menjawab dengan menambah komentar atau mutex di memori, yang tidak melindungi dari dua instance. Tulis sifatnya (UPDATE atomik dengan syarat saldo, dibahas di 2.1 Race condition) dan test penerimaannya (dua transfer paralel, total saldo tetap)."
  },
  {
   "id": "F1-2",

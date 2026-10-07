@@ -58,7 +58,7 @@ Kalau kamu pernah memakai `database.transaction((txn) async { ... })` di [sqflit
 <figcaption>Tanpa transaction: langkah 2 permanen, Rp70.000 hilang.</figcaption>
 </figure>
 
-- **`BEGIN`** membuka transaction. Di PostgreSQL, perubahan sesudahnya belum terlihat oleh koneksi lain sampai `COMMIT`. Rekaman di [[B3.2]] menunjukkannya: saldo yang dilihat koneksi lain tetap Rp100.000 walau A sudah menjalankan `UPDATE`.
+- **`BEGIN`** membuka transaction. Di PostgreSQL, perubahan sesudahnya belum terlihat oleh koneksi lain sampai `COMMIT`. Koneksi lain tetap membaca saldo lama, dan [[B3.2]] menunjukkannya dengan rekaman dua koneksi.
 - **`COMMIT`** membuat semua perubahan permanen sekaligus.
 - **`ROLLBACK`** membatalkan semua perubahan sejak `BEGIN`.
 
@@ -184,7 +184,7 @@ Yang sama di semua stack: buka transaction, jalankan dua `UPDATE`, `ROLLBACK` sa
 | Perlu memanggil API luar, mis. payment gateway atau kirim email | Jangan di dalam transaction. API luar tidak ikut di-rollback, dan koneksi database tertahan selama menunggu |
 | Data tersebar di dua database atau dua service | Transaction biasa tidak bisa menjangkau keduanya. Butuh pola lain (outbox, saga), dibahas di [[B10.2]] dan [[D3]] |
 
-Biaya transaction: selama terbuka, ia memegang koneksi dari pool, dan baris yang diubahnya ter-lock. Transaction yang lama membuat request lain menunggu. Itu inti [[B3.2]].
+Biaya transaction: selama terbuka, ia memegang satu koneksi dari pool (kumpulan koneksi yang dipakai bergantian, [[B2.5]]). Baris yang diubahnya juga terkena lock, jadi transaction lain yang mengubah baris yang sama harus menunggu. Transaction yang lama membuat request lain ikut menunggu. Lock dibahas di [[B3.2]].
 
 ## Cek diri
 

@@ -132,7 +132,7 @@ Rule of thumb: untuk kode yang menyentuh uang, izin, atau data user, tulis spesi
 
 ??? success "Jawaban"
 
-    Tidak bisa dicek. AI bisa menjawab dengan menambah komentar atau mutex di memori, yang tidak melindungi dari dua instance. Tulis sifatnya (UPDATE atomik dengan syarat saldo) dan test penerimaannya (dua transfer paralel, total saldo tetap).
+    Tidak bisa dicek. AI bisa menjawab dengan menambah komentar atau mutex di memori, yang tidak melindungi dari dua instance. Tulis sifatnya (UPDATE atomik dengan syarat saldo, dibahas di [[B3.2]]) dan test penerimaannya (dua transfer paralel, total saldo tetap).
 
 **2.** Jelaskan kenapa aturan "pengirim selalu dari token" perlu ditulis eksplisit.
 

@@ -57,7 +57,7 @@ Unit test memakai data palsu yang memenuhi interface `Data` ([[B7.1]]):
 
 **Yang tidak bisa dibuktikan data palsu:** perilaku PostgreSQL. Constraint, transaction, dan lock hanya teruji di database sungguhan. Lab memakai PostgreSQL di Docker. Library seperti Testcontainers melakukan hal yang sama secara otomatis dari kode test.
 
-**Regression test untuk race condition (Tahap 2).** Bug dua penarikan di [[B3.2]] dijadikan test yang mengirim dua request paralel, lalu memeriksa total saldo:
+**Regression test untuk race condition (pratinjau Tahap 2).** Race condition terjadi saat dua request membaca saldo yang sama, lalu sama-sama menulis hasil hitungannya sendiri. Bug dua penarikan di [[B3.2]] dijadikan test yang mengirim dua request paralel, lalu memeriksa total saldo:
 
 ```go
 --8<-- "labs/api-t1/api_test.go:race"
@@ -67,7 +67,7 @@ Unit test memakai data palsu yang memenuhi interface `Data` ([[B7.1]]):
 --8<-- "labs/api-t1/output/c1-race.txt"
 ```
 
-Test yang sama lolos untuk `UPDATE` atomik dan gagal untuk pola baca-hitung-tulis. Itulah syarat regression test yang berguna: ia harus gagal untuk bug yang ingin dicegahnya. Satu catatan jujur: implementasi naif di lab diberi jeda 50 ms supaya race-nya terjadi setiap kali. Di production, jendela race lebih sempit, dan test seperti ini bisa lolos secara kebetulan.
+Test yang sama lolos untuk `UPDATE` atomik (saldo dikurangi di database dalam satu perintah) dan gagal untuk pola baca-hitung-tulis. Itulah syarat regression test yang berguna: ia harus gagal untuk bug yang ingin dicegahnya. Satu catatan jujur: implementasi naif di lab diberi jeda 50 ms supaya race-nya terjadi setiap kali. Di production, jendela race lebih sempit, dan test seperti ini bisa lolos secara kebetulan.
 
 `go test -race` mendeteksi data race di memori proses Go yang sedang berjalan ([Go: Data Race Detector](https://go.dev/doc/articles/race_detector)). Ia tidak melihat dua transaction yang bertabrakan di PostgreSQL. Untuk itu butuh test seperti di atas.
 
