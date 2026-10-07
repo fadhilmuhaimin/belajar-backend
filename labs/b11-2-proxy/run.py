@@ -92,8 +92,12 @@ def c(log, t0):
     catat(log, t0, f"app Budi unduh langsung dari storage → {st}, {len(body)} byte")
     st, body = http("GET", url)
     catat(log, t0, f"app Ani  memakai URL yang diteruskan Budi → {st}, {len(body)} byte")
+    if st != 200:
+        raise SystemExit(f"GAGAL: URL yang masih berlaku dijawab {st}, seharusnya 200")
     time.sleep(3.5)
     st, body = http("GET", url)
+    if st != 403:
+        raise SystemExit(f"GAGAL: URL 3,5 detik kemudian dijawab {st}, seharusnya 403 (berlaku 3 detik)")
     catat(log, t0, f"app Ani  memakai URL yang sama 3,5 detik kemudian → {st} {body.decode().strip()}")
 
 

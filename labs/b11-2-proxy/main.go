@@ -110,7 +110,7 @@ func storage() {
 			tulis(w, 403, map[string]string{"error": "signature_mismatch"})
 			return
 		}
-		if time.Now().Unix() > exp {
+		if time.Now().UnixMilli() >= exp {
 			log.Printf("storage  GET %s → 403 kedaluwarsa", k)
 			tulis(w, 403, map[string]string{"error": "expired"})
 			return
@@ -124,7 +124,9 @@ func storage() {
 // ---- Monolith API: file dan BFF ---------------------------------------------------------------
 
 func urlBertanda(kunci string, berlaku time.Duration) string {
-	exp := time.Now().Add(berlaku).Unix()
+	// exp dalam milidetik: dengan detik penuh (Unix()), masa berlaku efektif jadi 3–4 detik
+	// tergantung pecahan detik saat URL dibuat, dan rekaman 3,5 detik kadang 200, kadang 403.
+	exp := time.Now().Add(berlaku).UnixMilli()
 	return fmt.Sprintf("http://127.0.0.1:18113/obj/%s?exp=%d&sig=%s", kunci, exp, tandaTangan(kunci, exp))
 }
 

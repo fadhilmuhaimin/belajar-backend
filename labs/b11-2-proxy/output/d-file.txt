@@ -5,7 +5,7 @@
   0.0 s  api      GET /bukti/123 oleh ani → 404 (bukan pemilik)
   0.0 s  app Ani  GET /bukti/123 lewat API → 404 {"title":"Bukti tidak ditemukan"}
   0.0 s  api      GET /bukti/123/url oleh budi → URL berlaku 3 detik
-  0.0 s  app Budi minta signed URL → 200 http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…
+  0.0 s  app Budi minta signed URL → 200 http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791375110825&sig=a54fb821…
   0.0 s  storage  GET bukti/123.jpg → 200 245760 byte
   0.0 s  app Budi unduh langsung dari storage → 200, 245760 byte
   0.0 s  storage  GET bukti/123.jpg → 200 245760 byte

@@ -156,28 +156,28 @@
     "dari": "budi",
     "ke": "api",
     "judul": "Budi meminta signed URL",
-    "kirim": "GET /bukti/123/url\n→ 200 {\"url\":\"http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…\"}",
+    "kirim": "GET /bukti/123/url\n→ 200 {\"url\":\"http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791375110825&sig=a54fb821…\"}",
     "jelas": "Pemilik dicek sekali, saat URL dibuat. URL berlaku 3 detik."
    },
    {
     "dari": "budi",
     "ke": "storage",
     "judul": "App mengunduh langsung dari storage",
-    "kirim": "GET http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…\n→ 200 · 245760 byte",
+    "kirim": "GET http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791375110825&sig=a54fb821…\n→ 200 · 245760 byte",
     "jelas": "Byte file tidak lewat API. Itu kelebihan utama signed URL."
    },
    {
     "dari": "budi",
     "ke": "ani",
     "judul": "Budi meneruskan URL ke Ani",
-    "kirim": "http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…",
+    "kirim": "http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791375110825&sig=a54fb821…",
     "jelas": "Misalnya lewat chat, atau URL tersimpan di log dan riwayat browser."
    },
    {
     "dari": "ani",
     "ke": "storage",
     "judul": "Ani membuka URL itu",
-    "kirim": "GET http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…\n→ 200 · 245760 byte",
+    "kirim": "GET http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791375110825&sig=a54fb821…\n→ 200 · 245760 byte",
     "jelas": "Storage tidak tahu siapa Ani. Siapa pun yang memegang URL bisa memakainya sampai kedaluwarsa.",
     "nada": "warn",
     "layar": {
@@ -200,7 +200,7 @@
     "dari": "ani",
     "ke": "storage",
     "judul": "3,5 detik kemudian: kedaluwarsa",
-    "kirim": "GET http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791336403&sig=390885d3…\n→ 403 {\"error\":\"expired\"}",
+    "kirim": "GET http://127.0.0.1:18113/obj/bukti/123.jpg?exp=1791375110825&sig=a54fb821…\n→ 403 {\"error\":\"expired\"}",
     "jelas": "Masa berlaku pendek membatasi kerusakan, tapi tidak menutupnya."
    }
   ]
