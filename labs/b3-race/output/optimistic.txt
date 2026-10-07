@@ -1,6 +1,6 @@
 -- Optimistic lock (kolom version)
 -- PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2), isolation: read committed, saldo awal 100000, A tarik 70000, B tarik 50000
--- direkam 2026-10-06 oleh labs/b3-race/run.py
+-- direkam 2026-10-07 oleh labs/b3-race/run.py
 
  1 [A] SELECT saldo, version FROM akun WHERE id = 1  -> (100000, 1)
  2 [B] SELECT saldo, version FROM akun WHERE id = 1  -> (100000, 1)

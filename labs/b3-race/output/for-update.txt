@@ -1,6 +1,6 @@
 -- SELECT ... FOR UPDATE
 -- PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2), isolation: read committed, saldo awal 100000, A tarik 70000, B tarik 50000
--- direkam 2026-10-06 oleh labs/b3-race/run.py
+-- direkam 2026-10-07 oleh labs/b3-race/run.py
 
  1 [A] BEGIN  -> BEGIN
  2 [B] BEGIN  -> BEGIN

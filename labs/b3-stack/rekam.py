@@ -47,8 +47,12 @@ def logs():
 
 def reset():
     for f in ("schema.sql", "supabase/fungsi.sql"):
-        subprocess.run(PSQL + ["-e", "PGAPPNAME=setup", "db", "psql", "-U", "lab", "-d", "lab", "-q"],
-                       input=(HERE / f).read_text(), text=True, capture_output=True, check=True)
+        # ON_ERROR_STOP=1: tanpa ini psql keluar 0 walau DROP/CREATE gagal, dan lab merekam hasil skema lama.
+        r = subprocess.run(PSQL + ["-e", "PGAPPNAME=setup", "db", "psql", "-U", "lab", "-d", "lab", "-q",
+                               "-v", "ON_ERROR_STOP=1"],
+                           input=(HERE / f).read_text(), text=True, capture_output=True)
+        if r.returncode:
+            raise SystemExit(f"GAGAL reset {f}:\n{r.stderr.strip()}\nRekaman lama tidak ditimpa.")
 
 
 def run(stack, scen):
@@ -62,6 +66,9 @@ def run(stack, scen):
             cwd, env = step[2]
             procs = [subprocess.Popen(c, cwd=cwd, env=env, stdout=subprocess.PIPE, text=True) for c in step[1]]
             out += [p.communicate()[0] for p in procs]
+            for c, p in zip(step[1], procs):
+                if p.returncode:
+                    raise SystemExit(f"GAGAL: {' '.join(c)} keluar dengan kode {p.returncode}")
         elif step[0] == "PSQL":
             r = subprocess.run(PSQL + ["-e", f"PGAPPNAME={step[2]}", "db", "psql", "-U", "lab", "-d", "lab", "-q",
                                        "-v", "ON_ERROR_STOP=0", "-t", "-A"],
@@ -121,8 +128,34 @@ def parse(lines, app):
     return [(f"[{labels[k['pid']]}] " if multi else "") + k["sql"] for k in keep]
 
 
+# Error yang memang bagian skenario: CHECK saldo <= batas di transfer. Error lain berarti lab rusak
+# (skema lama, kolom hilang, koneksi gagal), dan program stack menangkapnya lalu keluar 0.
+DIHARAPKAN = "akun_check"
+TANDA_ERROR = re.compile(r"error|sqlstate|exception|does not exist|fatal|traceback", re.I)
+
+
+def periksa(stack, scen, stdout):
+    """Gagal keras bila hasil tidak sesuai skenario. Mengembalikan pesan, atau None bila benar."""
+    for line in stdout.splitlines():
+        if TANDA_ERROR.search(line) and not (scen == "transfer" and DIHARAPKAN in line):
+            return f"error tak terduga: {line.strip()[:200]}"
+    saldo = dict(re.findall(r"(budi|ani)=(\d+)", stdout))
+    if scen == "transfer":
+        if DIHARAPKAN not in stdout:
+            return "transfer seharusnya ditolak CHECK akun_check"
+        if saldo != {"budi": "100000", "ani": "980000"}:
+            return f"saldo setelah transfer gagal seharusnya tidak berubah, didapat {saldo}"
+    else:
+        if stdout.count(": sukses") != 1 or stdout.count(": saldo tidak cukup") != 1:
+            return "tepat satu penarikan harus sukses dan satu ditolak"
+        if saldo.get("ani") != "980000" or saldo.get("budi") not in ("30000", "50000"):
+            return f"saldo akhir tidak mungkin: {saldo}"
+    return None
+
+
 def main():
     OUT.mkdir(exist_ok=True)
+    hasil = {}
     version = subprocess.run(PSQL + ["db", "psql", "-U", "lab", "-d", "lab", "-tAc", "SHOW server_version"],
                              capture_output=True, text=True).stdout.split()[0]
     for stack in ("go", "node", "laravel", "django", "supabase"):
@@ -130,10 +163,16 @@ def main():
             if stack != "supabase":
                 reset()
             shown, stdout, received = run(stack, scen)
+            salah = periksa(stack, scen, stdout)
+            if salah:
+                raise SystemExit(f"GAGAL {stack} {scen}: {salah}\nOutput:\n{stdout}\nRekaman lama tidak ditimpa.")
             text = [f"$ {shown}", stdout, "",
                     f"-- diterima PostgreSQL {version} (log_statement=all), urut saat diterima:"] + received
-            (OUT / f"{stack}-{scen}.txt").write_text("\n".join(text) + "\n")
+            hasil[f"{stack}-{scen}.txt"] = "\n".join(text) + "\n"
             print("\n".join(text), "\n")
+    # Ditulis hanya bila semua stack dan skenario lolos, supaya rekaman tidak setengah lama setengah baru.
+    for nama, isi in hasil.items():
+        (OUT / nama).write_text(isi)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,0 @@
-transfer budi -> ani 70: ERROR: new row for relation "akun" violates check constraint "akun_check" (SQLSTATE 23514)
-saldo budi=100 ani=980 total=1080
-tarik 50: sukses
-tarik 70: saldo tidak cukup
-saldo budi=50 ani=980 total=1030
