@@ -26,11 +26,11 @@ Feed promo dan notifikasi dikirim ke ratusan ribu user sekaligus. Tagihan cloud 
 | Besaran | Nilai | Cara hitung |
 |---|---|---|
 | User terdaftar | 1.000.000 | asumsi |
-| User aktif harian (DAU) | 200.000 | 1.000.000 × 20% |
-| Request per hari | 12 juta | 200.000 × 60 request |
-| Puncak request per detik | ±1.400 | 12 juta ÷ 86.400 × 10 |
-| Data transaksi per tahun | ±44 GB | 200.000 × 2 transaksi × 365 × 300 B |
-| File per tahun | ±3,6 TB | 20.000 upload per hari × 500 KB × 365 |
+| User aktif harian (DAU) | 200.000 | 1.000.000 × 20% (asumsi) |
+| Request per hari | 12 juta | 200.000 × 60 request (asumsi) |
+| Puncak request per detik | ±1.400 | 12 juta ÷ 86.400 × 10 (asumsi) |
+| Data transaksi per tahun | ±44 GB | 200.000 × 2 transaksi × 365 × 300 B (asumsi) |
+| File per tahun | ±3,6 TB | 20.000 upload per hari × 500 KB × 365 (asumsi) |
 
 Angka ini tidak menjawab "butuh berapa server". Jawaban itu hanya datang dari load test di sistemmu sendiri.
 

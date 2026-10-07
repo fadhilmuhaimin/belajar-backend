@@ -28,11 +28,11 @@ Foto produk dan bukti pembayaran mulai menumpuk di server. Tim kini delapan oran
 | Besaran | Nilai | Cara hitung |
 |---|---|---|
 | User terdaftar | 100.000 | asumsi |
-| User aktif harian (DAU) | 20.000 | 100.000 × 20% |
-| Request per hari | 1,2 juta | 20.000 × 60 request |
-| Puncak request per detik | ±140 | 1,2 juta ÷ 86.400 × 10 |
-| Data transaksi per tahun | ±4,4 GB | 20.000 × 2 transaksi × 365 × 300 B |
-| File per tahun | ±365 GB | 2.000 upload per hari × 500 KB × 365 |
+| User aktif harian (DAU) | 20.000 | 100.000 × 20% (asumsi) |
+| Request per hari | 1,2 juta | 20.000 × 60 request (asumsi) |
+| Puncak request per detik | ±140 | 1,2 juta ÷ 86.400 × 10 (asumsi) |
+| Data transaksi per tahun | ±4,4 GB | 20.000 × 2 transaksi × 365 × 300 B (asumsi) |
+| File per tahun | ±365 GB | 2.000 upload per hari × 500 KB × 365 (asumsi) |
 
 Angka file jauh lebih besar dari data transaksi. Karena itu file disimpan di object storage, bukan di database.
 

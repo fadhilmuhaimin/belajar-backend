@@ -35,10 +35,10 @@ Semua angka adalah asumsi cerita. Ganti angkanya kalau mau menghitung untuk apli
 | Besaran | Nilai | Cara hitung |
 |---|---|---|
 | User terdaftar | 100 | asumsi |
-| User aktif harian (DAU) | 30 | 100 × 30% |
-| Request per hari | 1.200 | 30 × 40 request |
-| Puncak request per detik | ±0,14 | 1.200 ÷ 86.400 × 10 (faktor jam makan siang) |
-| Data transaksi per tahun | ±6,6 MB | 30 × 2 transaksi × 365 × 300 B |
+| User aktif harian (DAU) | 30 | 100 × 30% (asumsi) |
+| Request per hari | 1.200 | 30 × 40 request (asumsi) |
+| Puncak request per detik | ±0,14 | 1.200 ÷ 86.400 × 10 (faktor jam makan siang, asumsi) |
+| Data transaksi per tahun | ±6,6 MB | 30 × 2 transaksi × 365 × 300 B (asumsi) |
 
 Satu request per tujuh detik di jam paling sibuk. Server mana pun sanggup. Yang bisa salah adalah datanya.
 

@@ -37,10 +37,10 @@ Semua transfer sudah memakai transaction sejak Tahap 1. Jadi Raka sempat yakin d
 | Besaran | Nilai | Cara hitung |
 |---|---|---|
 | User terdaftar | 1.000 | asumsi |
-| User aktif harian (DAU) | 300 | 1.000 × 30% |
-| Request per hari | 12.000 | 300 × 40 request |
-| Puncak request per detik | ±1,4 | 12.000 ÷ 86.400 × 10 |
-| Data transaksi per tahun | ±66 MB | 300 × 2 transaksi × 365 × 300 B |
+| User aktif harian (DAU) | 300 | 1.000 × 30% (asumsi) |
+| Request per hari | 12.000 | 300 × 40 request (asumsi) |
+| Puncak request per detik | ±1,4 | 12.000 ÷ 86.400 × 10 (asumsi) |
+| Data transaksi per tahun | ±66 MB | 300 × 2 transaksi × 365 × 300 B (asumsi) |
 
 Puncaknya masih di bawah dua request per detik. Tapi dua request yang menyentuh saldo yang sama, dalam milidetik yang sama, sudah cukup untuk membuat saldo salah.
 

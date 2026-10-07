@@ -32,10 +32,10 @@ Semua angka adalah asumsi cerita.
 | Besaran | Nilai | Cara hitung |
 |---|---|---|
 | User terdaftar | 10.000 | asumsi |
-| User aktif harian (DAU) | 2.500 | 10.000 × 25% |
-| Request per hari | 150.000 | 2.500 × 60 request (polling status pesanan menambah request) |
-| Puncak request per detik | ±17 | 150.000 ÷ 86.400 × 10 |
-| Data transaksi per tahun | ±550 MB | 2.500 × 2 transaksi × 365 × 300 B |
+| User aktif harian (DAU) | 2.500 | 10.000 × 25% (asumsi) |
+| Request per hari | 150.000 | 2.500 × 60 request (polling status pesanan menambah request, asumsi) |
+| Puncak request per detik | ±17 | 150.000 ÷ 86.400 × 10 (asumsi) |
+| Data transaksi per tahun | ±550 MB | 2.500 × 2 transaksi × 365 × 300 B (asumsi) |
 
 Kenapa 17 request per detik bisa membuat app lambat? **Little's Law**: jumlah koneksi yang sedang dipegang (L) sama dengan laju request (λ) dikali lama koneksi dipegang (W).
 
