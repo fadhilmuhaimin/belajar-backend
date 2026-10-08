@@ -363,10 +363,10 @@
     },
     {
       "id": "A4",
-      "judul": "BaaS atau backend sendiri",
+      "judul": "Backend sendiri, bukan BaaS",
       "tahap": 1,
       "topik": "Gambaran besar",
-      "path": "a-gambaran/a4-baas-vs-backend-sendiri.md",
+      "path": "tahap-1/adr-1-backend-sendiri.md",
       "prasyarat": [
         "A1"
       ],
@@ -381,7 +381,6 @@
       "adr": [
         1
       ],
-      "lama": true,
       "nomor": "1.4",
       "menit": 8
     },

@@ -34,9 +34,10 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 |---|---|
 | 1.1 PRD v1 | Ditulis (keputusan 122); T1 lama dihapus |
 | 1.2 Dari fitur ke pekerjaan teknis | Ditulis (keputusan 125) |
-| 1.3 Apa yang dikerjakan backend | Ditulis ulang dari A1 (keputusan 126) |
+| 1.3 Apa yang dikerjakan backend | Ditulis ulang dari A1 (keputusan 126, 127) |
+| 1.4 ADR 1: Backend sendiri, bukan BaaS | Ditulis ulang dari A4 (keputusan 129) |
 
-Berikutnya: 1.4 ADR 1: Backend sendiri, bukan BaaS (tulis ulang A4 ke templat ADR).
+Berikutnya: 1.5 Perjalanan satu request (tulis ulang A2).
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 

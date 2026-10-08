@@ -1,5 +1,5 @@
 {
-  "judul": "Rekeningo dibangun dengan dua cara",
+  "judul": "Rekeningo v1 dibangun dengan dua cara",
   "opsi": [
     {
       "id": "baas",
@@ -88,7 +88,7 @@
   ],
   "fitur": [
     {
-      "label": "Login",
+      "label": "Login karyawan",
       "sorot": {
         "baas": [
           "app",
@@ -107,7 +107,7 @@
       }
     },
     {
-      "label": "Daftar toko",
+      "label": "Daftar warung",
       "sorot": {
         "baas": [
           "app",
@@ -123,8 +123,8 @@
         ]
       },
       "catatan": {
-        "baas": "Kamu tidak menulis kode server. App membaca tabel lewat API otomatis.",
-        "own": "Satu endpoint GET sederhana. Untuk data publik seperti ini, BaaS jelas lebih cepat."
+        "baas": "Kamu tidak menulis kode server. App membaca tabel warung lewat API otomatis.",
+        "own": "Satu endpoint GET sederhana. Untuk data yang hanya dibaca seperti ini, BaaS jelas lebih cepat."
       }
     },
     {
@@ -147,7 +147,7 @@
       }
     },
     {
-      "label": "Transfer saldo",
+      "label": "Bayar ke warung",
       "sorot": {
         "baas": [
           "app",
@@ -167,25 +167,26 @@
         "baas": "warn"
       },
       "catatan": {
-        "baas": "Logika uang ditulis sebagai fungsi PL/pgSQL. Bisa benar, tapi tes, review, dan debug-nya terpisah dari kode lain dan lebih jarang dikuasai tim mobile.",
+        "baas": "Logika uang ditulis sebagai fungsi PL/pgSQL yang dipanggil lewat rpc. Bisa benar, tapi tes, review, dan debug-nya terpisah dari kode lain dan jarang dikuasai mobile engineer.",
         "own": "Logika uang ada di satu tempat: lapisan logika bisnis, dalam satu transaction ([[B3.1]])."
       }
     },
     {
-      "label": "Notifikasi ke Ani",
+      "label": "Catatan siapa, kapan, kenapa",
       "sorot": {
         "baas": [
-          "db",
-          "edge"
+          "fn",
+          "db"
         ],
         "own": [
-          "api",
-          "logic"
+          "logic",
+          "data",
+          "db"
         ]
       },
       "catatan": {
-        "baas": "Butuh komponen tambahan: webhook database atau Edge Function yang memanggil layanan push.",
-        "own": "Logika bisnis memanggil layanan push setelah transfer tersimpan."
+        "baas": "Aturan Pak Hadi harus dijaga di setiap jalan yang bisa mengubah saldo: policy, fungsi SQL, dan Edge Function. Satu jalan yang lupa mencatat cukup untuk membuat selisih.",
+        "own": "Hanya satu jalan yang bisa mengubah saldo: lapisan logika bisnis. Catatan ditulis di sana, sekali."
       }
     }
   ]

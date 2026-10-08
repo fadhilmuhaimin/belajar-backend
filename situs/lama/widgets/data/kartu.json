@@ -26,24 +26,24 @@
  {
   "id": "A4-1",
   "halaman": "A4",
-  "judul": "1.4 BaaS atau backend sendiri",
-  "url": "a-gambaran/a4-baas-vs-backend-sendiri/",
+  "judul": "1.4 Backend sendiri, bukan BaaS",
+  "url": "tahap-1/adr-1-backend-sendiri/",
   "tanya": "Di Supabase, Raka membuat tabel `transaksi` baru tapi lupa menulis policy RLS-nya. Apa risikonya?",
-  "jawab": "Tergantung RLS aktif atau tidak di tabel itu. Kalau RLS tidak diaktifkan, tabel bisa diakses lewat API otomatis sesuai hak role yang dipakai app. Kalau RLS aktif tapi tanpa policy, semua akses ditolak. Karena itu setiap tabel baru di BaaS harus dicek RLS-nya (Supabase: Row Level Security)."
+  "jawab": "Tergantung RLS aktif atau tidak di tabel itu. Tanpa RLS, tabel di skema terbuka bisa dibaca dan ditulis oleh role yang punya grant, termasuk lewat API otomatis. Dengan RLS aktif tapi tanpa policy, semua akses lewat API ditolak. Karena itu setiap tabel baru di BaaS harus diperiksa RLS-nya (Supabase: Row Level Security)."
  },
  {
   "id": "A4-2",
   "halaman": "A4",
-  "judul": "1.4 BaaS atau backend sendiri",
-  "url": "a-gambaran/a4-baas-vs-backend-sendiri/",
-  "tanya": "Jelaskan kenapa \"daftar toko\" cocok untuk BaaS, tapi \"transfer saldo\" kurang cocok.",
-  "jawab": "Daftar toko adalah data publik yang hanya dibaca. API otomatis langsung cukup. Transfer mengubah dua baris sekaligus dengan aturan saldo, dan semuanya harus berhasil bersama. Di BaaS, itu jadi fungsi SQL atau Cloud Function tersendiri, terpisah dari kode lain."
+  "judul": "1.4 Backend sendiri, bukan BaaS",
+  "url": "tahap-1/adr-1-backend-sendiri/",
+  "tanya": "Jelaskan kenapa \"daftar warung\" cocok untuk BaaS, tapi \"bayar ke warung\" kurang cocok untuk Rekeningo.",
+  "jawab": "Daftar warung adalah data yang hanya dibaca, dan API otomatis langsung cukup. Bayar mengubah dua saldo dan menulis catatan, dan semuanya harus berhasil bersama. Di BaaS, itu jadi fungsi SQL atau Cloud Function tersendiri, satu dari beberapa jalan yang bisa mengubah saldo."
  },
  {
   "id": "A4-3",
   "halaman": "A4",
-  "judul": "1.4 BaaS atau backend sendiri",
-  "url": "a-gambaran/a4-baas-vs-backend-sendiri/",
+  "judul": "1.4 Backend sendiri, bukan BaaS",
+  "url": "tahap-1/adr-1-backend-sendiri/",
   "tanya": "Benar atau salah: memakai Supabase berarti tidak punya backend.",
   "jawab": "Salah. Backend-nya ada (PostgREST, Auth, PostgreSQL), hanya saja dijalankan oleh Supabase. Aturan bisnis tetap harus kamu tulis, dalam bentuk policy dan fungsi."
  },

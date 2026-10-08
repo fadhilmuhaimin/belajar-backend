@@ -99,10 +99,10 @@ window.ISTILAH = {
  "BaaS": {
   "b": "A4",
   "d": "Layanan yang menyediakan database, auth, dan API siap pakai, mis. Supabase dan Firebase.",
-  "n": "1.4 BaaS atau backend sendiri",
+  "n": "1.4 Backend sendiri, bukan BaaS",
   "s": "istilah-baas",
   "t": "BaaS (Backend-as-a-Service)",
-  "u": "a-gambaran/a4-baas-vs-backend-sendiri/"
+  "u": "tahap-1/adr-1-backend-sendiri/"
  },
  "Backend for Frontend": {
   "b": "B11.2",
