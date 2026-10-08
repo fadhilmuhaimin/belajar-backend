@@ -545,9 +545,9 @@ def rekam_http():
 
 
 def rekam_m2():
-    """1.17 M2: amount lawan jumlah (kontrak yang belum tertulis)."""
+    """1.17 M2: amount lawan jumlah (kontrak yang belum tertulis); E: sesudah ADR 3 (1.18)."""
     reset()
-    mulai()
+    mulai("-rentan", "m2")
     bagian("A. Persiapan")
     topup_awal()
     budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
@@ -566,6 +566,15 @@ def rekam_m2():
     s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 25000}', token=budi)
     harap(s, 201, "bentuk benar")
     sql("SELECT count(*) AS transaksi FROM transaksi")
+    stop()
+
+    bagian("E. Sesudah kontrak (ADR 3): field wajib dan tipe yang salah dijawab 400 dengan namanya")
+    mulai()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    s, b = curl("POST", "/transfers", '{"ke": 418, "amount": 25000}', token=budi)
+    harap((s, json.loads(b)["errors"]), (400, [{"field": "jumlah", "pesan": "wajib diisi"}]), "jumlah wajib")
+    s, b = curl("POST", "/transfers", '{"ke": "418", "jumlah": 25000}', token=budi)
+    harap((s, json.loads(b)["errors"][0]["field"]), (400, "ke"), "tipe ke")
     tulis("m2.txt")
 
 

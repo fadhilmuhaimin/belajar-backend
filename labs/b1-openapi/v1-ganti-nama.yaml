@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Rekeningo API v1 (fiktif)
-  version: 1.0.0
+  version: 1.1.0
   description: Kontrak API uji coba Gedung A, sama dengan labs/api-t1. Lab, bukan layanan sungguhan.
   license: { name: MIT, identifier: MIT }
 servers:
@@ -68,7 +68,6 @@ paths:
         '401': { $ref: '#/components/responses/Problem' }
         '403': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/Problem' }
-  # --8<-- [start:transfer]
   /transfers:
     post:
       operationId: bayar
@@ -93,7 +92,6 @@ paths:
         '400': { $ref: '#/components/responses/Problem' }
         '401': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/Problem' }
-  # --8<-- [end:transfer]
   /transfers/{id}:
     get:
       operationId: lihatTransaksi
@@ -190,7 +188,6 @@ components:
           schema: { $ref: '#/components/schemas/Problem' }
   schemas:
     Rupiah: { type: integer, format: int64, description: 'Rupiah, tanpa desimal' }
-    # --8<-- [start:skema-bayar]
     PermintaanBayar:
       type: object
       required: [ke, jumlah]
@@ -203,15 +200,14 @@ components:
       properties:
         id: { type: integer, format: int64 }
         saldo: { $ref: '#/components/schemas/Rupiah' }
-    # --8<-- [end:skema-bayar]
     Akun:
       type: object
-      required: [id, jenis, nama, saldo]
+      required: [id, jenis, nama, balance]
       properties:
         id: { type: integer, format: int64 }
         jenis: { type: string, enum: [karyawan, warung, admin] }
         nama: { type: string }
-        saldo: { $ref: '#/components/schemas/Rupiah' }
+        balance: { $ref: '#/components/schemas/Rupiah' }
     Transaksi:
       type: object
       required: [id, dari, ke, jumlah, waktu]
