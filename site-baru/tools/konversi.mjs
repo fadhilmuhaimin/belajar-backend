@@ -19,7 +19,7 @@ const peringatan = [];
 
 const SKRIP = { arsitektur: ["cerita"], "kamu-di-sini": ["cerita"], "peta-cerita": ["cerita"], "indeks-masalah": ["cerita"],
   runsql: ["runsql-core", "runsql"], stackstep: ["stackstep"], alur: ["hp", "alur-core", "alur"], hp: ["hp"],
-  pilah: ["pilah"], banding: ["banding"], kartu: ["kartu"], ember: ["ember"], race: ["race"], selesai: [], "umpan-balik": [] };
+  pilah: ["pilah"], banding: ["banding"], kartu: ["kartu"], ember: ["ember"], race: ["race"], selesai: [], "umpan-balik": [], "umpan-balik-data": [] };
 const URUTAN = ["cerita", "hp", "alur-core", "alur", "runsql-core", "runsql", "stackstep", "pilah", "banding", "kartu", "ember", "race"];
 const skrip = new Set();
 
@@ -44,7 +44,7 @@ function snippetDari(fence) {
     return `<Snippet ${attrs.join(" ")} />`;
   }
   const baris = fence.body.map((l) => l.trim()).filter(Boolean);
-  const semua = baris.map((l) => l.match(/^--8<-- "([^":]+)"$/));
+  const semua = baris.map((l) => l.match(/^--8<-- "([^":]+(?::\d*:\d*)?)"$/));
   if (baris.length > 1 && semua.every(Boolean)) {
     const attrs = [`files={${JSON.stringify(semua.map((x) => x[1]))}}`];
     if (fence.lang && fence.lang !== "text") attrs.push(`lang="${fence.lang}"`);
