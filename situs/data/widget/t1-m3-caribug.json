@@ -1,0 +1,51 @@
+{
+  "id": "t1-m3-caribug",
+  "judul": "Dua kesalahan di satu fungsi pencarian",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Kode versi minggu 2 dari labs/api-t1 mode -rentan m3. Tandai baris yang jadi sumber dua masalah: kebocoran saldo dan SQL injection."
+  },
+  "bahasa": "go",
+  "baris": [
+    "func (r Repo) CariWarung(ctx context.Context, cari string) ([]Akun, error) {",
+    "\tq := \"SELECT id, jenis, nama, saldo FROM akun \" +",
+    "\t\t\"WHERE nama LIKE '%\" + cari + \"%'\"",
+    "\trows, err := r.db.QueryContext(ctx, q)",
+    "\t// ... scan tiap baris ke Akun, lalu dikirim apa adanya ke app",
+    "}"
+  ],
+  "bug": [
+    1,
+    2
+  ],
+  "alasan": {
+    "1": "SELECT mengambil saldo, dan tidak ada WHERE jenis = 'warung'. Hasilnya setiap akun, beserta saldonya, bisa ikut terkirim ke app.",
+    "2": "Isi pencarian cari disambung langsung ke teks SQL. Tanda kutip dari penyerang jadi bagian perintah, bukan data. Inilah SQL injection."
+  },
+  "tebak": {
+    "q": "Dua baris di fungsi ini jadi sumber dua masalah: Dimas melihat saldo semua akun, dan tanda kutip membuat server 500. Baris yang mana?",
+    "petunjuk": "Satu baris menentukan field dan akun mana yang diambil. Satu baris menentukan dari mana isi pencarian masuk ke SQL."
+  },
+  "perbaikan": {
+    "label": "Versi benar: parameter query dan field minimal",
+    "baris": [
+      "func (r Repo) CariWarung(ctx context.Context, cari string) ([]WarungRingkas, error) {",
+      "\trows, err := r.db.QueryContext(ctx,",
+      "\t\t`SELECT id, nama FROM akun WHERE jenis = 'warung' AND nama ILIKE '%' || $1 || '%'`, cari)",
+      "\t// ... scan ke WarungRingkas: hanya id dan nama",
+      "}"
+    ],
+    "catatan": "Parameter $1 memisahkan data dari perintah, jadi tanda kutip jadi teks biasa. Hanya akun warung, hanya kolom yang dibutuhkan layar."
+  },
+  "label": {
+    "sumber": "Rekaman lab",
+    "tebakDulu": "Tebak dulu:",
+    "perintah": "Klik baris yang jadi sumber bug, lalu Periksa.",
+    "periksa": "Periksa tanda saya",
+    "ulang": "Ulang",
+    "benar": "sumber bug",
+    "lewat": "bug yang terlewat",
+    "salahTanda": "baris ini tidak salah",
+    "perbaikanTombol": "Lihat versi benar"
+  }
+}

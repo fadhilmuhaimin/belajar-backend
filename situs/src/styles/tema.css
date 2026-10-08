@@ -652,3 +652,26 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
 /* Diagram rujukan (1.12): beberapa tabel menunjuk ke satu tabel; bukan urutan, jadi tanpa nomor dan panah antar kotak. */
 .sl-markdown-content figure.bb-fig ol.bb-flow.is-rujuk > li::before,
 .sl-markdown-content figure.bb-fig ol.bb-flow.is-rujuk > li:not(:last-child)::after { content: none; }
+
+/* Widget React cari-bug (keputusan 158): pembaca menandai baris kode sumber bug. */
+.sl-markdown-content .cb-petunjuk { margin: 0.3rem 0 0; font-size: 0.9em; }
+.sl-markdown-content .cb-perintah { margin: 0.6rem 0 0.4rem; }
+.sl-markdown-content .cb-kode { list-style: none; margin: 0.4rem 0 0.8rem; padding: 0; border: 1px solid var(--garis); border-radius: 8px; overflow: hidden; font-family: var(--sl-font-mono); font-size: 0.85em; }
+.sl-markdown-content .cb-kode > li.cb-baris { margin: 0; }
+.sl-markdown-content .cb-tombol { display: flex; gap: 0.6rem; width: 100%; text-align: left; background: transparent; border: 0; border-left: 3px solid transparent; padding: 0.25rem 0.6rem; cursor: pointer; color: var(--teks); font: inherit; }
+.sl-markdown-content .cb-tombol:hover:not(:disabled) { background: var(--bg-2); }
+.sl-markdown-content .cb-tombol:focus-visible { outline: 2px solid var(--aksen); outline-offset: -2px; }
+.sl-markdown-content .cb-tombol:disabled { cursor: default; }
+.sl-markdown-content .cb-no { color: var(--teks-2); min-width: 1.2rem; text-align: right; user-select: none; flex: none; }
+.sl-markdown-content .cb-baris code { background: transparent; padding: 0; white-space: pre-wrap; word-break: break-word; }
+.sl-markdown-content .cb-baris.is-tandai .cb-tombol { background: var(--k-system-fill); border-left-color: var(--k-system-edge); }
+.sl-markdown-content .cb-baris.is-benar .cb-tombol { background: var(--k-good-fill); border-left-color: var(--k-good-edge); }
+.sl-markdown-content .cb-baris.is-lewat .cb-tombol { background: var(--k-warn-fill); border-left-color: var(--k-warn-edge); }
+.sl-markdown-content .cb-baris.is-salah .cb-tombol { background: var(--bg-3); border-left-color: var(--teks-2); text-decoration: line-through; color: var(--teks-2); }
+.sl-markdown-content .cb-hasil { margin-top: 0.4rem; }
+.sl-markdown-content .cb-alasan { list-style: none; padding: 0; margin: 0 0 0.6rem; display: grid; gap: 0.5rem; }
+.sl-markdown-content .cb-alasan li { display: flex; flex-wrap: wrap; gap: 0.3rem 0.6rem; align-items: baseline; }
+.sl-markdown-content .cb-perbaikan { margin-top: 0.6rem; }
+.sl-markdown-content .cb-perbaikan__label { margin: 0 0 0.3rem; }
+.sl-markdown-content .cb-kode.is-benar-kode { border-color: var(--k-good-edge); }
+.sl-markdown-content .cb-kode.is-benar-kode .cb-baris { display: flex; gap: 0.6rem; padding: 0.25rem 0.6rem; }
