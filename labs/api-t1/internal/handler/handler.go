@@ -66,6 +66,36 @@ func tulisJSON(w http.ResponseWriter, status int, v any) {
 	json.NewEncoder(w).Encode(v)
 }
 
+// bacaJSON membaca body sesuai kontrak (ADR 3). Tipe yang salah dijawab 400 dengan nama field-nya;
+// field yang tidak dikenal dibiarkan, supaya app versi baru tidak ditolak server lama.
+func bacaJSON(body io.Reader, v any) *Problem {
+	err := json.NewDecoder(body).Decode(v)
+	var errTipe *json.UnmarshalTypeError
+	switch {
+	case err == nil:
+		return nil
+	case errors.As(err, &errTipe):
+		return &Problem{Type: "/problems/tipe-salah", Title: "Tipe field tidak sesuai kontrak", Status: 400,
+			Errors: []map[string]string{{"field": errTipe.Field, "pesan": errTipe.Value + " bukan " + errTipe.Type.String()}}}
+	default:
+		return &Problem{Type: "/problems/json-rusak", Title: "Body bukan JSON yang valid", Status: 400}
+	}
+}
+
+// wajibAda: field wajib yang tidak dikirim dijawab 400 dengan namanya, bukan dianggap 0.
+func wajibAda(nama []string, ada ...bool) *Problem {
+	var hilang []map[string]string
+	for i, ok := range ada {
+		if !ok {
+			hilang = append(hilang, map[string]string{"field": nama[i], "pesan": "wajib diisi"})
+		}
+	}
+	if hilang == nil {
+		return nil
+	}
+	return &Problem{Type: "/problems/field-wajib", Title: "Field wajib tidak dikirim", Status: 400, Errors: hilang}
+}
+
 func (s Server) errorInternal(w http.ResponseWriter, err error) {
 	log.Printf("error internal: %v", err)
 	tulisProblem(w, Problem{Type: "/problems/internal", Title: "Terjadi kesalahan di server", Status: 500})
@@ -193,19 +223,33 @@ func (s Server) topup(w http.ResponseWriter, r *http.Request) {
 
 // --8<-- [start:bayar]
 func (s Server) bayar(w http.ResponseWriter, r *http.Request) {
-	var in struct {
-		Ke     int64 `json:"ke"`
-		Jumlah int64 `json:"jumlah"`
-	}
-	if json.NewDecoder(r.Body).Decode(&in) != nil {
-		tulisProblem(w, Problem{Type: "/problems/json-rusak", Title: "Body bukan JSON yang valid", Status: 400})
+	if s.rentan == "m2" {
+		s.bayarM2(w, r)
 		return
 	}
+	// Pointer: field yang tidak dikirim berbeda dari field yang dikirim 0 (ADR 3).
+	var in struct {
+		Ke     *int64 `json:"ke"`
+		Jumlah *int64 `json:"jumlah"`
+	}
+	if p := bacaJSON(r.Body, &in); p != nil {
+		tulisProblem(w, *p)
+		return
+	}
+	if p := wajibAda([]string{"ke", "jumlah"}, in.Ke != nil, in.Jumlah != nil); p != nil {
+		tulisProblem(w, *p)
+		return
+	}
+	s.selesaikanBayar(w, r, *in.Ke, *in.Jumlah)
+}
+
+// selesaikanBayar memanggil service dan memetakan hasilnya ke status code.
+func (s Server) selesaikanBayar(w http.ResponseWriter, r *http.Request, ke, jumlah int64) {
 	bayar := s.svc.Bayar
 	if s.rentan == "m1" {
 		bayar = s.svc.BayarM1
 	}
-	id, saldo, err := bayar(r.Context(), peminta(r), in.Ke, in.Jumlah)
+	id, saldo, err := bayar(r.Context(), peminta(r), ke, jumlah)
 	var errV service.ErrValidasi
 	switch {
 	case errors.As(err, &errV):

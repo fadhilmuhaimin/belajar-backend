@@ -1,4 +1,4 @@
-# server: ./api-t1
+# server: ./api-t1 -rentan m2
 
 # --- A. Persiapan ---
 # persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
@@ -47,3 +47,22 @@ $ psql -c "SELECT count(*) AS transaksi FROM transaksi"
          1
 (1 row)
 
+server log: PERINGATAN: mode rentan m2 menyala
+
+# --- E. Sesudah kontrak (ADR 3): field wajib dan tipe yang salah dijawab 400 dengan namanya ---
+# server: ./api-t1
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "amount": 25000}'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+
+{"type":"/problems/field-wajib","title":"Field wajib tidak dikirim","status":400,"errors":[{"field":"jumlah","pesan":"wajib diisi"}]}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": "418", "jumlah": 25000}'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+
+{"type":"/problems/tipe-salah","title":"Tipe field tidak sesuai kontrak","status":400,"errors":[{"field":"ke","pesan":"string bukan int64"}]}
