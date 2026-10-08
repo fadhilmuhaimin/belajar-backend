@@ -385,4 +385,20 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 .sl-markdown-content .bb-btn--opt[aria-pressed="true"] { border-color: var(--k-system-edge); background: var(--k-system-fill); color: var(--k-system-ink); }
 .sl-markdown-content .bb-pilah__why { grid-column: 1 / -1; margin: 0.1rem 0 0; font-size: 0.85em; color: var(--teks-2); }
 @media (max-width: 50em) { .sl-markdown-content .bb-pilah__item { grid-template-columns: 1fr; } }
+/* Banding (banding.js): dua opsi berdampingan, fitur yang dipilih menyorot langkahnya */
+.sl-markdown-content .bb-banding__features { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.7rem; }
+.sl-markdown-content .bb-banding__cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.sl-markdown-content .bb-banding__opt { border: 1px solid var(--garis); border-radius: 10px; padding: 0.55rem 0.6rem; }
+.sl-markdown-content .bb-banding__name { display: block; margin-bottom: 0.4rem; font-size: 0.92em; }
+.sl-markdown-content .bb-banding__row { list-style: none; display: flex; flex-direction: column; align-items: stretch; gap: 1.1rem; margin: 0 0 0.6rem; padding: 0; }
+.sl-markdown-content .bb-banding__row.is-sub { flex-direction: row; flex-wrap: wrap; gap: 0.35rem; }
+.sl-markdown-content .bb-banding__sublabel { display: block; font-size: 0.75em; color: var(--teks-2); margin: 0 0 0.25rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.sl-markdown-content .bb-banding__row > li { position: relative; margin: 0; padding: 0.3rem 0.5rem; border-radius: 8px; font-size: 0.82em; border: 1px solid var(--k-old-edge); background: var(--k-old-fill); color: var(--k-old-ink); }
+.sl-markdown-content .bb-banding__row:not(.is-sub) > li:not(:last-child)::after { content: "↓"; position: absolute; left: 50%; bottom: -1.05rem; transform: translateX(-50%); color: var(--teks-2); font-weight: 700; }
+.sl-markdown-content .bb-banding__row > li small { display: block; font-size: 0.8em; }
+.sl-markdown-content .bb-banding__row > li.is-on { border-color: var(--k-system-edge); background: var(--k-system-fill); color: var(--k-system-ink); font-weight: 700; }
+.sl-markdown-content .bb-banding__row > li.is-warn { border-color: var(--k-warn-edge); background: var(--k-warn-fill); color: var(--k-warn-ink); font-weight: 700; }
+.sl-markdown-content .bb-banding__note { margin: 0.3rem 0 0; font-size: 0.85em; padding-left: 0.5rem; border-left: 3px solid var(--k-system-edge); }
+.sl-markdown-content .bb-banding__note.is-warn { border-left-color: var(--k-warn-edge); }
+@media (max-width: 50em) { .sl-markdown-content .bb-banding__cols { grid-template-columns: 1fr; } }
 /* === akhir widget lama === */
