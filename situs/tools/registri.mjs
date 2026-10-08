@@ -18,7 +18,7 @@ function cariRoot() {
 }
 export const ROOT = cariRoot();
 export const DOCS = path.join(ROOT, "docs");
-export const SITE_DOCS = path.join(ROOT, "site-baru/src/content/docs");
+export const SITE_DOCS = path.join(ROOT, "situs/src/content/docs");
 const URUT_BACA = ["pembuka", 1, 2, 3, 4, 5, "sampingan"]; // "alat" di luar urutan baca
 
 export function muat() {
