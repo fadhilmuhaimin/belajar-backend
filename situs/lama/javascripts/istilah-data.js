@@ -22,7 +22,7 @@ window.ISTILAH = {
   "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-api",
   "t": "API (Application Programming Interface)",
-  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+  "u": "tahap-1/apa-yang-dikerjakan-backend/"
  },
  "API gateway": {
   "b": "C4",
@@ -38,7 +38,7 @@ window.ISTILAH = {
   "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-api",
   "t": "API (Application Programming Interface)",
-  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+  "u": "tahap-1/apa-yang-dikerjakan-backend/"
  },
  "Architecture Decision Record": {
   "b": "D5",
@@ -478,7 +478,7 @@ window.ISTILAH = {
   "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-monolith",
   "t": "Monolith",
-  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+  "u": "tahap-1/apa-yang-dikerjakan-backend/"
  },
  "N+1": {
   "b": "B2.4",
@@ -886,7 +886,7 @@ window.ISTILAH = {
   "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-source-of-truth",
   "t": "Source of truth",
-  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+  "u": "tahap-1/apa-yang-dikerjakan-backend/"
  },
  "Stale": {
   "b": "B9",
@@ -1326,7 +1326,7 @@ window.ISTILAH = {
   "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-monolith",
   "t": "Monolith",
-  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+  "u": "tahap-1/apa-yang-dikerjakan-backend/"
  },
  "n+1 query": {
   "b": "B2.4",
@@ -1614,7 +1614,7 @@ window.ISTILAH = {
   "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-source-of-truth",
   "t": "Source of truth",
-  "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
+  "u": "tahap-1/apa-yang-dikerjakan-backend/"
  },
  "stale": {
   "b": "B9",

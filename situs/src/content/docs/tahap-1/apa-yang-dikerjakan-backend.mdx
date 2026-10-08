@@ -1,51 +1,59 @@
 ---
 title: "1.3 Apa yang dikerjakan backend"
+description: Backend menyimpan data bersama, menegakkan aturan uang, dan memegang izin. App boleh memeriksa apa saja, tapi keputusan akhir ada di backend.
 ---
+import Blok from "../../../components/Blok.astro";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
 
-<p class="meta">Baca 5 menit · coba 2 menit · Prasyarat: tidak ada · Jalur inti</p>
+<p class="meta">Baca 5 menit · coba 2 menit · Prasyarat: [[t1-fitur-teknis]] · Jalur inti</p>
 
-<WidgetLama nama="selesai" />
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Backend adalah program di server milik tim. Ia menyimpan data bersama, menegakkan aturan uang, dan memutuskan siapa boleh apa. App boleh memeriksa apa saja, tapi keputusan akhir ada di backend.
+
+<WidgetLama nama="arsitektur" tahap={1} />
 
 <details class="question">
 <summary>Sudah tahu? Cek 3 pertanyaan</summary>
 
-1. App sudah mengecek "saldo cukup" sebelum tombol Kirim aktif. Kenapa backend tetap harus mengecek ulang?
-2. Apa bedanya database lokal di HP (Room, sqflite) dengan database di backend?
+1. App sudah memeriksa "saldo cukup" sebelum tombol Bayar aktif. Kenapa backend tetap harus memeriksa ulang?
+2. Apa bedanya database lokal di HP (sqflite, Room) dengan database di backend?
 3. Sebutkan tiga hal yang hanya bisa dikerjakan backend, bukan app.
 
 Yakin dengan ketiganya? Lompat ke [[berikutnya]].
 
 </details>
 
-## Inti
+</Blok>
 
-Backend adalah program di server milik tim. Ia menyimpan data bersama, menegakkan aturan bisnis, dan menghubungi sistem lain. App boleh mengecek apa saja, tapi keputusan akhir ada di backend.
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu pola dasarnya: tampilan di app, uang dan izin di backend.">
 
-<WidgetLama nama="arsitektur" tahap={1} />
-
-## Lihat sendiri
-
-Fitur pertama Rekeningo adalah transfer saldo. Untuk setiap tugas di bawah, tebak siapa yang mengerjakannya, lalu cek.
+Fitur inti PRD v1 adalah bayar ke warung. Untuk setiap tugas di bawah, tebak siapa yang mengerjakannya, lalu periksa.
 
 <WidgetLama nama="pilah" src="data/a1-pilah.json" />
 
-## Kenapa ini ada
+</Blok>
 
-Hari pertama proyek. Raka menulis daftar kebutuhan transfer di papan tulis. Sebagai mobile engineer, naluri pertamanya adalah menaruh semuanya di app. Saldo disimpan di HP, lalu dicek sebelum tombol Kirim aktif.
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Hari pertama, Raka menulis kebutuhan "bayar ke warung" di papan tulis. Sebagai mobile engineer, nalurinya adalah menaruh semuanya di app. Saldo disimpan di HP, lalu diperiksa sebelum tombol Bayar aktif.
 
 Lalu Raka membayangkan tiga orang:
 
-- **Budi** memakai HP dan tablet. Saldo di dua perangkat harus sama.
-- **Ani** harus melihat uang masuk di HP-nya sendiri, padahal HP Budi tidak tahu HP Ani.
-- **User iseng** bisa memodifikasi APK atau mengirim request langsung dengan alat seperti curl, tanpa lewat app.
+- **Budi** membuka Rekeningo di HP dan di laptop kerjanya. Saldo di dua perangkat harus sama.
+- **Ani** harus melihat pembayaran masuk di HP warungnya, padahal HP Budi tidak tahu HP Ani.
+- **Dimas**, staf TI yang penasaran, bisa memodifikasi APK atau mengirim request langsung dengan `curl`, tanpa lewat app.
 
 <WidgetLama nama="hp" src="data/a1-hp.json" />
 
-Di Android, kamu terbiasa dengan Room atau sqflite sebagai sumber data. Itu benar untuk **satu perangkat**. Backend adalah sumber data untuk **semua perangkat dan semua orang**, dan satu-satunya tempat yang tidak bisa diubah oleh user.
+Di Flutter, kamu terbiasa dengan sqflite atau Hive sebagai sumber data. Itu benar untuk **satu perangkat**. Backend adalah sumber data untuk **semua perangkat dan semua orang**, dan satu-satunya tempat yang tidak bisa diubah oleh user.
 
-## Cara kerjanya
+### Cara kerjanya
 
 <figure class="bb-map" role="img" aria-label="Pembagian kerja Rekeningo Tahap 1: App Flutter untuk tampilan, validasi cepat, dan draft. Monolith API dengan tiga lapisan: handler, logika bisnis, akses data. PostgreSQL menyimpan akun dan transaksi dengan constraint.">
 <div class="bb-map__grid">
@@ -60,8 +68,8 @@ Di Android, kamu terbiasa dengan Room atau sqflite sebagai sumber data. Itu bena
 <div class="bb-map__arrow"><b>⇄</b>HTTPS<br />JSON</div>
 <div class="bb-map__box">
 <strong>Monolith API</strong>
-<div class="bb-map__layer"><b>handler</b><span>terima request, cek token dan format</span></div>
-<div class="bb-map__layer"><b>logika bisnis</b><span>aturan: saldo cukup, bukan ke diri sendiri</span></div>
+<div class="bb-map__layer"><b>handler</b><span>terima request, periksa sesi dan format</span></div>
+<div class="bb-map__layer"><b>logika bisnis</b><span>aturan: saldo cukup, nominal lebih dari 0</span></div>
 <div class="bb-map__layer"><b>akses data</b><span>query ke database</span></div>
 </div>
 <div class="bb-map__arrow"><b>⇄</b>SQL</div>
@@ -77,47 +85,51 @@ Di Android, kamu terbiasa dengan Room atau sqflite sebagai sumber data. Itu bena
 <figcaption>Abu-abu = di HP user. Biru = di server milik tim, tempat keputusan diambil.</figcaption>
 </figure>
 
-Di Tahap 1, backend Rekeningo adalah satu monolith: satu aplikasi yang memuat semua fitur dan di-deploy sebagai satu unit.
+Di Tahap 1, backend Rekeningo adalah satu monolith: satu aplikasi yang memuat semua fitur dan di-deploy sebagai satu unit. Backend itu punya empat tugas:
 
-Backend Rekeningo punya empat tugas:
-
-1. **Source of truth untuk data bersama.** Saldo, riwayat, dan pesanan disimpan di satu database. Semua perangkat membaca dari sana.
-2. **Aturan bisnis yang tidak bisa dilewati.** "Saldo harus cukup" dicek di server. App boleh mengecek lebih dulu, tapi hanya untuk memberi kabar cepat.
+1. **Source of truth untuk data bersama.** Saldo dan riwayat disimpan di satu database. Semua perangkat membaca dari sana, termasuk laporan Keuangan.
+2. **Aturan uang yang tidak bisa dilewati.** "Saldo harus cukup" diperiksa di server. App boleh memeriksa lebih dulu, tapi hanya untuk memberi kabar cepat.
 3. **Identitas dan izin.** Backend tahu siapa yang mengirim request (authentication) dan apa yang boleh ia lakukan (authorization). Dibahas di [[B5.1]] dan [[B5.3]].
-4. **Penghubung ke sistem lain.** Notifikasi ke HP Ani, bank untuk top-up, email struk. HP tidak memegang secret untuk sistem-sistem itu.
+4. **Penghubung ke sistem lain.** Di v1, ini berarti membaca CSV dari HR. Bank dan notifikasi datang di PRD berikutnya, dan HP tidak pernah memegang secret untuk sistem-sistem itu.
 
-Di dalam API ada tiga lapisan. **Handler** mengurus HTTP. **Logika bisnis** memegang aturan Rekeningo. **Akses data** berbicara dengan database.
+Di dalam API ada tiga lapisan: **handler** mengurus HTTP, **logika bisnis** memegang aturan Rekeningo, dan **akses data** berbicara dengan database. Pemisahan ini dibahas di [[t1-struktur-folder]] dan [[B7.1]].
 
-Pemisahan ini dibahas di [[B7.1]]. Untuk sekarang, cukup tahu bahwa aturan uang tidak ditulis di handler.
-
-## Di stack lain
+### Di stack lain
 
 Keempat tugas di atas sama di semua stack. Yang berbeda adalah di mana kamu menulisnya.
 
-| Stack | Aturan bisnis ditulis di | Izin "hanya data sendiri" ditulis di |
+| Stack | Aturan uang ditulis di | Izin "hanya data sendiri" ditulis di |
 |---|---|---|
-| Go, Node.js, Laravel, Django, Spring | Kode aplikasi di server (lapisan logika bisnis) | Kode aplikasi: query memakai id user dari token |
+| Go, Node.js, Laravel, Django, Dart (Serverpod) | Kode aplikasi di server (lapisan logika bisnis) | Kode aplikasi: query memakai id user dari sesi |
 | Supabase | Fungsi SQL di database, atau Edge Function | Policy RLS di tabel |
 | Firebase | Cloud Functions | Security Rules |
 
 Supabase dan Firebase tetap punya "backend". Bedanya, sebagian besar sudah jadi, dan aturanmu ditulis dalam bentuk yang berbeda. Itu topik [[A4]].
 
-## Trade-off: kapan pakai apa
+</Blok>
+
+<Blok nama="Putuskan">
+
+### Trade-off: kapan memeriksa di mana
 
 | Pilihan | Kelebihan | Kekurangan | Pakai saat |
 |---|---|---|---|
-| Cek hanya di app | Paling cepat dibuat | Bisa dilewati | Hanya untuk hal tampilan, bukan aturan |
-| Cek hanya di backend | Aman | User baru tahu salah setelah request kembali | Aturan yang butuh data server, mis. saldo cukup |
-| Cek di app **dan** backend | Aman dan responsif | Aturan ditulis dua kali | Validasi format: nominal, nomor HP |
+| Periksa hanya di app | Paling cepat dibuat | Bisa dilewati | Hanya untuk hal tampilan, bukan aturan |
+| Periksa hanya di backend | Aman | User baru tahu salah setelah response kembali | Aturan yang butuh data server, mis. saldo cukup |
+| Periksa di app **dan** backend | Aman dan responsif | Aturan ditulis dua kali | Validasi format: nominal, email |
 
-## Cek diri
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
 
 **1.** App Rekeningo menyembunyikan tombol "Lihat riwayat Ani" dari Budi. Apakah data Ani sudah aman?
 
 <details class="success">
 <summary>Jawaban</summary>
 
-Belum. Budi bisa mengirim request `GET /akun/ani/riwayat` tanpa lewat app. Backend harus menolaknya karena token milik Budi, bukan Ani.
+Belum. Budi bisa mengirim request `GET /akun/ani/riwayat` tanpa lewat app. Backend harus menolaknya karena sesi milik Budi, bukan Ani.
 
 </details>
 
@@ -126,33 +138,35 @@ Belum. Budi bisa mengirim request `GET /akun/ani/riwayat` tanpa lewat app. Backe
 <details class="success">
 <summary>Jawaban</summary>
 
-Pertama, Budi punya dua perangkat, dan sqflite tidak berbagi data antar-perangkat. Kedua, Ani harus melihat uang masuk di HP-nya. Ketiga, data di HP bisa diubah pemiliknya. Semua itu butuh satu source of truth yang dipegang tim: database di backend.
+Pertama, Budi memakai dua perangkat, dan sqflite tidak berbagi data antar-perangkat. Kedua, Ani dan Keuangan harus melihat angka yang sama. Ketiga, data di HP bisa diubah pemiliknya. Semua itu butuh satu source of truth yang dipegang tim: database di backend.
 
 </details>
 
-**3.** Siapa yang memanggil layanan push untuk memberi tahu Ani?
+**3.** Budi membayar Rp25.000 ke Warung Ani. Dari mana HP Ani tahu ada uang masuk?
 
 <details class="success">
 <summary>Jawaban</summary>
 
-Backend. Hanya backend yang tahu penerima transfer dan menyimpan API key layanan push.
+Dari backend. HP Budi tidak tahu HP Ani. Di v1 belum ada notifikasi push, jadi app Ani membaca daftar pembayaran dari backend saat dibuka.
 
 </details>
 
-## Saat me-review kode AI, cek ini
+### Saat me-review kode AI, cek ini
 
-- [ ] Setiap aturan bisnis yang dicek di app juga dicek di backend.
+- [ ] Setiap aturan uang yang diperiksa di app juga diperiksa di backend.
 - [ ] Endpoint tidak percaya nilai dari client untuk hal yang bisa dihitung server, mis. saldo atau harga.
-- [ ] Secret (API key bank, layanan push) hanya ada di server, tidak di kode app.
+- [ ] Secret (kunci layanan pihak ketiga) hanya ada di server, tidak di kode app.
 - [ ] Aturan uang tidak ditulis di handler, tapi di lapisan logika bisnis.
 
-## Bacaan lanjut
+### Bacaan lanjut
 
-- [OWASP: Input Validation Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html) (bagian client-side vs server-side)
+- [OWASP: Input Validation Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html) (bagian client-side dan server-side)
 - [OWASP Mobile Top 10](https://owasp.org/www-project-mobile-top-10/)
 - [Flutter: Networking](https://docs.flutter.dev/data-and-backend/networking)
+- [Supabase: Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security) dan [Firebase Security Rules](https://firebase.google.com/docs/rules), untuk kolom BaaS di tabel "Di stack lain"
 
 <WidgetLama nama="umpan-balik" />
 
+</Blok>
 
 <SkripLama daftar={["cerita","hp","pilah"]} />
