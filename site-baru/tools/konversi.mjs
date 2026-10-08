@@ -6,7 +6,7 @@
 // dicek tangan; hasil konversi selalu dibaca ulang sebelum di-commit.
 import fs from "node:fs";
 import path from "node:path";
-import { DOCS, SITE_DOCS, muat } from "./registri.mjs";
+import { DOCS, SITE_DOCS, muat, url } from "./registri.mjs";
 
 const rel = process.argv[2];
 if (!rel) { console.error("pakai: node tools/konversi.mjs <path relatif docs/> [--tulis]"); process.exit(2); }
@@ -91,7 +91,7 @@ function konversiBlok(ls, dalamTab) {
       let j = i + 1;
       while (j < ls.length && (ls[j].startsWith("    ") || ls[j].trim() === "")) isi.push(ls[j++]);
       while (isi.length && isi[isi.length - 1].trim() === "") isi.pop();
-      out.push(`<details class="${q[1]}">`, `<summary>${q[2]}</summary>`, "", ...konversiBlok(dedent(isi), dalamTab), "", "</details>");
+      out.push(`<details class="${q[1]}">`, `<summary>${q[2]}</summary>`, "", ...konversiBlok(dedent(isi), dalamTab), "", "</details>", "");
       i = j - 1; continue;
     }
     // tabs
@@ -109,7 +109,7 @@ function konversiBlok(ls, dalamTab) {
       const id = "stack" + (out.filter((x) => x.startsWith("<TabSet")).length || "");
       out.push(`<TabSet id="${id}" labels={${JSON.stringify(tabs.map((t) => t.label))}}>`);
       tabs.forEach((t, k) => { out.push(`<Fragment slot="t${k}">`, "", ...konversiBlok(t.isi, true), "", "</Fragment>"); });
-      out.push("</TabSet>");
+      out.push("</TabSet>", "");
       i = j - 1; continue;
     }
     // widget
@@ -127,6 +127,14 @@ function konversiBlok(ls, dalamTab) {
       continue;
     }
     if (/^# /.test(l)) continue; // H1 dari frontmatter
+    // Link Markdown relatif ke file .md lain -> URL absolut situs (registry menentukan path-nya)
+    const lnk = l.replace(/\]\(((?:\.\.?\/)[^)#\s]+\.md)(#[^)]*)?\)/g, (m, target, hash) => {
+      const abs = path.posix.normalize(path.posix.join(path.posix.dirname(rel), target));
+      const h = d.halaman.find((x) => x.path === abs);
+      if (!h) { peringatan.push("link relatif ke halaman di luar registry: " + target); return m; }
+      return `](${url(h)}${hash || ""})`;
+    });
+    if (lnk !== l) { out.push(lnk); continue; }
     if (l.includes("<!--")) peringatan.push("komentar HTML perlu jadi {/* */}: " + l.trim());
     if (/!\[/.test(l)) peringatan.push("gambar perlu path baru: " + l.trim());
     if (/<\w+[^>]*\bmarkdown\b/.test(l)) peringatan.push("atribut markdown pada HTML: " + l.trim());
