@@ -369,4 +369,15 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
   .sl-markdown-content .bb-alur__lane { padding: 0.35rem 0.25rem; font-size: 0.78em; }
   .sl-markdown-content .bb-alur__layers li { font-size: 0.7em; padding: 0.05rem 0.15rem; }
 }
+/* Pilah (pilah.js): pilih lapisan per baris, lalu cek */
+.sl-markdown-content .bb-pilah__list { list-style: none; margin: 0; padding: 0; counter-reset: none; }
+.sl-markdown-content .bb-pilah__item { margin: 0; padding: 0.45rem 0.3rem; border-bottom: 1px solid var(--garis); display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 0.8rem; align-items: center; }
+.sl-markdown-content .bb-pilah__item.is-good { background: var(--k-good-fill); }
+.sl-markdown-content .bb-pilah__item.is-warn { background: var(--k-warn-fill); }
+.sl-markdown-content .bb-pilah__task { font-size: 0.92em; }
+.sl-markdown-content .bb-pilah__task code { background: transparent; padding: 0; }
+.sl-markdown-content .bb-pilah__opts { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.sl-markdown-content .bb-btn--opt[aria-pressed="true"] { border-color: var(--k-system-edge); background: var(--k-system-fill); color: var(--k-system-ink); }
+.sl-markdown-content .bb-pilah__why { grid-column: 1 / -1; margin: 0.1rem 0 0; font-size: 0.85em; color: var(--teks-2); }
+@media (max-width: 50em) { .sl-markdown-content .bb-pilah__item { grid-template-columns: 1fr; } }
 /* === akhir widget lama === */
