@@ -458,8 +458,49 @@ def rekam_relasi():
     tulis("relasi.txt")
 
 
+def rekam_m1():
+    """1.14 M1: Nominal minus lolos (mode rentan m1, keputusan 148)."""
+    SALDO = "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+    reset()
+    bagian("A. Minggu 1: service belum memeriksa jumlah, skema belum punya constraint uang")
+    sql("ALTER TABLE akun DROP CONSTRAINT saldo_tidak_negatif")
+    sql("ALTER TABLE transaksi DROP CONSTRAINT jumlah_positif")
+    mulai("-rentan", "m1")
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+
+    bagian("B. Raka menguji sendiri: bayar minus Rp5.000 ke Warung Ani")
+    s, b = curl("POST", "/transfers", '{"ke": 418, "jumlah": -5000}', token=budi)
+    harap((s, json.loads(b)["saldo"]), (201, 255000), "minus lolos")
+    hasil = sql(SALDO)
+    if "-5000" not in hasil or "255000" not in hasil:
+        gagal("saldo Ani -5000 dan Budi 255000")
+    harap(total(), ["25000000", "25000000", "1"], "total tetap walau saldo negatif")
+    stop()
+
+    bagian("C. Constraint ada di skema, service masih tanpa pemeriksaan")
+    reset()
+    mulai("-rentan", "m1")
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": -5000}', token=budi)
+    harap(s, 500, "constraint menolak, tapi app dapat 500")
+    sql(SALDO)
+    stop()
+
+    bagian("D. Versi benar: service memeriksa jumlah sebelum uang disentuh")
+    reset()
+    mulai()
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    s, b = curl("POST", "/transfers", '{"ke": 418, "jumlah": -5000}', token=budi)
+    harap((s, json.loads(b)["errors"][0]["field"]), (422, "jumlah"), "jumlah minus ditolak 422")
+    sql(SALDO)
+    tulis("m1.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()

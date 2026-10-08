@@ -1,0 +1,77 @@
+
+# --- A. Minggu 1: service belum memeriksa jumlah, skema belum punya constraint uang ---
+$ psql -c "ALTER TABLE akun DROP CONSTRAINT saldo_tidak_negatif"
+$ psql -c "ALTER TABLE transaksi DROP CONSTRAINT jumlah_positif"
+# server: ./api-t1 -rentan m1
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+
+# --- B. Raka menguji sendiri: bayar minus Rp5.000 ke Warung Ani ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": -5000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/1
+
+{"id":1,"saldo":255000}
+$ psql -c "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+ id  |    nama    | saldo  
+-----+------------+--------
+ 418 | Warung Ani |  -5000
+ 419 | Budi       | 255000
+(2 rows)
+
+$ psql -c "SELECT (SELECT sum(saldo) FROM akun) AS total_saldo, (SELECT sum(nominal) FROM topup) AS total_topup, (SELECT count(*) FROM transaksi) AS transaksi"
+ total_saldo | total_topup | transaksi 
+-------------+-------------+-----------
+    25000000 |    25000000 |         1
+(1 row)
+
+server log: PERINGATAN: mode rentan m1 menyala
+
+# --- C. Constraint ada di skema, service masih tanpa pemeriksaan ---
+# server: ./api-t1 -rentan m1
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": -5000}'
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/problem+json
+
+{"type":"/problems/internal","title":"Terjadi kesalahan di server","status":500}
+$ psql -c "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+ id  |    nama    | saldo  
+-----+------------+--------
+ 418 | Warung Ani |      0
+ 419 | Budi       | 250000
+(2 rows)
+
+server log: PERINGATAN: mode rentan m1 menyala
+server log: error internal: ERROR: new row for relation "akun" violates check constraint "saldo_tidak_negatif" (SQLSTATE 23514)
+
+# --- D. Versi benar: service memeriksa jumlah sebelum uang disentuh ---
+# server: ./api-t1
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": -5000}'
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+
+{"type":"/problems/validasi","title":"Input tidak memenuhi aturan","status":422,"errors":[{"field":"jumlah","pesan":"harus lebih dari 0 dan paling banyak 200000"}]}
+$ psql -c "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+ id  |    nama    | saldo  
+-----+------------+--------
+ 418 | Warung Ani |      0
+ 419 | Budi       | 250000
+(2 rows)
+
