@@ -1,0 +1,91 @@
+---
+/**
+ * Beranda satu layar (PROPOSAL "Layar pertama", keputusan 121): judul, satu kalimat, tombol "Mulai dari PRD", tiga
+ * kartu pintu (Cerita, Peran, Masalah), peta enam tahap. Semua data dari registry. Kartu Masalah mencari field
+ * `masalah` di registry tanpa server. Kartu Peran memakai tombol yang sama dengan pemilih peran di sidebar.
+ */
+import { muat, label, url, urutanBaca } from "../../tools/registri.mjs";
+
+type H = { id: string; judul: string; tahap: unknown; path: string; ada?: boolean; masalah?: string; nomor?: string };
+type T = { no: number; nama: string; user: string; versi?: string };
+const d = muat();
+const hs: H[] = d.halaman;
+const prd = hs.find((h) => h.id === "t1-prd" && h.ada);
+const awalT1 = urutanBaca(d).find((h: H) => h.tahap === 1);
+const mulai = prd ?? awalT1;
+const awalTahap = (no: number) => urutanBaca(d).find((h: H) => h.tahap === no);
+const tahap = [
+  ...d.tahap.map((t: T) => ({ no: t.no, nama: t.nama, user: t.user, status: t.versi === "lama" ? "versi lama" : "sedang ditulis", href: awalTahap(t.no) ? url(awalTahap(t.no)) : undefined })),
+  ...d.proyeksi.map((t: T) => ({ no: t.no, nama: t.nama, user: t.user, status: "proyeksi", href: undefined })),
+];
+const masalah = hs.filter((h) => h.ada && h.masalah).map((h) => ({ m: h.masalah, l: label(h), u: url(h) }));
+const cara = hs.find((h) => h.id === "A0");
+const PERAN = [["generalis", "Generalis"], ["mobile", "Mobile"], ["web", "Web"], ["backend", "Backend"], ["devops", "DevOps"], ["security", "Security"]];
+---
+<div class="beranda not-content">
+  <h1 class="beranda__judul">Rekeningo Tech Journey</h1>
+  <p class="beranda__janji">Belajar backend lewat satu dompet digital fiktif yang tumbuh dari 100 karyawan sampai jutaan user.</p>
+  {mulai && <a class="beranda__mulai" href={url(mulai)}>{prd ? "Mulai dari PRD" : "Mulai dari Tahap 1"} →</a>}
+
+  <div class="beranda__pintu">
+    <section class="pintu" aria-labelledby="pintu-cerita">
+      <h2 id="pintu-cerita">Cerita</h2>
+      <p>Ikuti urutannya: PRD, fitur, masalah yang muncul, lalu konsepnya.</p>
+      {mulai && <a href={url(mulai)}>Buka Tahap 1 →</a>}
+    </section>
+    <section class="pintu" aria-labelledby="pintu-peran">
+      <h2 id="pintu-peran">Peran</h2>
+      <p>Pilih jalurmu. Halaman pentingnya disorot di sidebar.</p>
+      <div class="peran__pilihan">
+        {PERAN.map(([v, l]) => <button type="button" class="peran__chip" data-peran-pilih={v} aria-pressed={v === "generalis" ? "true" : "false"}>{l}</button>)}
+      </div>
+    </section>
+    <section class="pintu" aria-labelledby="pintu-masalah">
+      <h2 id="pintu-masalah">Masalah</h2>
+      <label class="pintu__label" for="cari-masalah">Ketik gejalanya</label>
+      <input id="cari-masalah" class="pintu__cari" type="search" placeholder="mis. dobel bayar" autocomplete="off" />
+      <ul class="pintu__hasil" role="status" aria-live="polite"></ul>
+    </section>
+  </div>
+
+  <ol class="beranda__peta" aria-label="Enam tahap cerita">
+    {tahap.map((t) => (
+      <li class:list={["tahap", `tahap--${t.status.replace(" ", "-")}`]}>
+        {t.href ? <a href={t.href}><b>Tahap {t.no}</b> {t.nama}</a> : <span><b>Tahap {t.no}</b> {t.nama}</span>}{" "}
+        <small>{t.user} · {t.status}</small>
+      </li>
+    ))}
+  </ol>
+  {cara && <p class="beranda__kecil"><a href={url(cara)}>Cara pakai panduan ini</a></p>}
+</div>
+<script type="application/json" id="data-masalah" set:html={JSON.stringify(masalah)} />
+
+<script>
+  const data: { m: string; l: string; u: string }[] = JSON.parse(document.getElementById("data-masalah")!.textContent!);
+  const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const input = document.getElementById("cari-masalah") as HTMLInputElement;
+  const hasil = document.querySelector(".pintu__hasil")!;
+  input.addEventListener("input", () => {
+    const kata = norm(input.value).split(/\s+/).filter(Boolean);
+    hasil.replaceChildren();
+    if (!kata.length) return;
+    const cocok = data.filter((x) => { const t = norm(x.m + " " + x.l); return kata.every((k) => t.includes(k)); }).slice(0, 4);
+    if (!cocok.length) { const li = document.createElement("li"); li.textContent = "Belum ada halaman untuk gejala itu."; hasil.append(li); return; }
+    for (const x of cocok) {
+      const li = document.createElement("li"), a = document.createElement("a");
+      a.href = x.u; a.textContent = x.l; li.append(a, document.createTextNode(" · " + x.m)); hasil.append(li);
+    }
+  });
+  // Pemilih peran di kartu: sama dengan sidebar (localStorage rtj-peran).
+  const pakai = (p: string) => {
+    document.documentElement.dataset.peran = p;
+    document.querySelectorAll<HTMLButtonElement>("[data-peran-pilih]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.peranPilih === p)));
+  };
+  document.addEventListener("click", (e) => {
+    const b = (e.target as Element).closest<HTMLButtonElement>("[data-peran-pilih]");
+    if (!b) return;
+    try { localStorage.setItem("rtj-peran", b.dataset.peranPilih!); } catch { /* mode privat */ }
+    pakai(b.dataset.peranPilih!);
+  });
+  try { pakai(localStorage.getItem("rtj-peran") || "generalis"); } catch { pakai("generalis"); }
+</script>

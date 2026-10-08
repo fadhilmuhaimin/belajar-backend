@@ -19,6 +19,11 @@ if (!lama) {
   if (h?.adr?.length) bagian.push(`ADR ${h.adr.join(" dan ")}`);
 }
 ---
-<KamuDiSini />
-{bagian.length > 0 && <p class="kicker">{bagian.join(" · ")}</p>}
-<Default />
+{/* Beranda (template splash) menulis judulnya sendiri di Beranda.astro. */}
+{Astro.locals.starlightRoute.entry.data.template !== "splash" && (
+  <>
+    <KamuDiSini />
+    {bagian.length > 0 && <p class="kicker">{bagian.join(" · ")}</p>}
+    <Default />
+  </>
+)}

@@ -1,0 +1,75 @@
+---
+title: "Cara pakai panduan ini"
+---
+import WidgetLama from "../../components/WidgetLama.astro";
+import SkripLama from "../../components/SkripLama.astro";
+
+<p class="meta">Baca 3 menit · Mulai dari sini · Jalur inti</p>
+
+## Inti
+
+Panduan ini mengajarkan konsep backend lewat satu aplikasi fiktif yang tumbuh. Setiap halaman memakai susunan yang sama. Kamu boleh melompat kalau sudah tahu.
+
+<figure class="bb-fig" role="img" aria-label="Susunan satu halaman: Inti dengan diagram, Lihat sendiri, Kenapa ini ada, Di stack lain, Cek diri.">
+<ol class="bb-flow">
+<li>Inti + diagram</li>
+<li>Lihat sendiri</li>
+<li>Kenapa ini ada</li>
+<li>Di stack lain</li>
+<li>Cek diri</li>
+</ol>
+<figcaption>Lima bagian utama yang ada di setiap halaman konsep.</figcaption>
+</figure>
+
+## Untuk siapa
+
+Panduan ini untuk mobile engineer yang ingin paham backend secara utuh, lintas stack. Targetnya bukan menghafal framework. Targetnya tiga kemampuan:
+
+1. Memahami konsep dan memilih opsi beserta trade-off-nya.
+2. Menulis spesifikasi yang jelas, termasuk untuk AI.
+3. Me-review kode backend buatan AI dan tahu apa yang harus dicek.
+
+Kode di setiap halaman ditampilkan di beberapa stack: Go, Node.js, Laravel, Django, Spring, dan Supabase atau Firebase. Konsepnya sama. Yang berbeda hanya siapa yang mengerjakan apa.
+
+## Susunan satu halaman
+
+| Bagian | Isinya | Kenapa ada |
+|---|---|---|
+| **Kamu di sini** | Tahap cerita dan rekapnya | Supaya kamu tahu posisimu tanpa membuka halaman lain |
+| **Sudah tahu? Cek 3 pertanyaan** | Pertanyaan pembuka yang dilipat | Kalau bisa menjawab ketiganya, lompat. Kalau salah, pertanyaannya tetap membantu belajar |
+| **Inti** + diagram | Tiga kalimat dan arsitektur tahap itu | Gambaran utuh sebelum detail |
+| **Lihat sendiri** | Widget: skenario langkah demi langkah atau SQL yang bisa dijalankan | Kamu menebak dulu, lalu melihat hasilnya |
+| **Kenapa ini ada** | Adegan cerita yang memunculkan masalahnya | Konsep muncul karena kebutuhan, bukan karena daftar materi |
+| **Cara kerjanya** | Penjelasan netral, tanpa stack tertentu | Konsep dulu, framework belakangan |
+| **Di stack lain** | Kode yang sama di beberapa stack | Melihat bahwa konsepnya sama |
+| **Trade-off** | Kelebihan dan kekurangan tiap opsi | Bahan keputusan |
+| **Cek diri** | Tiga soal, minimal satu "jelaskan kenapa" | Mengingat lebih kuat dari membaca ulang |
+| **Saat me-review kode AI** | Daftar cek 3–5 butir | Langsung bisa dipakai saat review |
+
+## Label yang perlu kamu kenal
+
+- **Ilustrasi**: widget atau contoh disusun dari konsep, bukan direkam dari sistem sungguhan.
+- **Rekaman lab**: output asli dari program yang dijalankan di `labs/`, mis. PostgreSQL 17 di Docker.
+- **Tidak dijalankan**: kode hanya dicek ke dokumentasi resmi, tidak dijalankan di lab.
+- **Asumsi**: angka beban di cerita. Rumusnya selalu ditulis, jadi kamu bisa mengganti angkanya.
+- **[perlu verifikasi]**: klaim yang belum bisa dicek ke sumber primer.
+
+## Alat bantu
+
+- **Tandai selesai** di baris meta setiap halaman. Statusnya muncul di [Peta cerita](cerita/peta.md).
+- **[Kartu ulang](alat/kartu-ulang.md)**: soal Cek diri dari halaman yang sudah kamu baca, dengan jadwal ulang bertingkat.
+- **[Glosarium](alat/glosarium.md)**: definisi satu kalimat. Istilah bergaris titik-titik di halaman mana pun bisa disentuh untuk melihat definisinya.
+- **Terlalu berat · Pas · Terlalu ringan** di akhir halaman. Semua penilaian terkumpul di [Umpan balik](alat/umpan-balik.md).
+
+Semua data di atas hanya tersimpan di browser ini (`localStorage`).
+
+!!! note "Penafian"
+
+    Rekeningo dan seluruh ceritanya fiktif. Cerita ini tidak mengklaim kepatuhan terhadap regulasi pembayaran, perlindungan data, atau aturan lain yang berlaku di dunia nyata.
+
+<a class="tombol" href="/cerita/">Mulai cerita Rekeningo →</a>
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={[]} />

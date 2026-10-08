@@ -573,3 +573,50 @@ html[data-peran="security"] .sidebar-content a[data-peran~="security"] { box-sha
   html[data-fokus="ya"] .main-pane { width: 100%; }
   html[data-fokus="ya"] .content-panel > .sl-container { margin-inline: auto; }
 }
+
+/* === Beranda satu layar (keputusan 121): diukur tools/layar.mjs di 4 ukuran, tanpa scroll === */
+/* Panel judul Starlight kosong di beranda (judul ditulis Beranda.astro): disembunyikan beserta garisnya. */
+body:has(.beranda) .content-panel:not(:has(.beranda)) { display: none; }
+body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
+.beranda { max-width: 68rem; margin: 0 auto; }
+.beranda__judul { margin: 0; font-size: clamp(1.9rem, 3.6vw, 2.8rem); line-height: 1.1; color: var(--judul); font-weight: 600; }
+.beranda__janji { margin: 0.5rem 0 0.9rem; max-width: 42rem; font-size: 1.1rem; line-height: 1.5; color: var(--teks); }
+.beranda a.beranda__mulai { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 8px; background: var(--aksen); color: var(--ink-di-aksen); font-weight: 600; text-decoration: none; }
+.beranda a:focus-visible { outline: 3px solid var(--judul); outline-offset: 2px; }
+.beranda__pintu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; margin: 1.1rem 0 1rem; align-items: start; }
+.pintu { border: 1px solid var(--garis); border-radius: 10px; padding: 0.75rem 0.9rem; background: var(--bg-2); }
+.pintu h2 { margin: 0 0 0.25rem; font-size: 1.05rem; color: var(--judul); }
+.pintu p { margin: 0 0 0.5rem; font-size: 0.88rem; color: var(--teks-2); line-height: 1.4; }
+.pintu a { color: var(--aksen); text-decoration: none; font-weight: 600; font-size: 0.92rem; }
+.pintu .peran__pilihan { gap: 0.3rem; }
+.pintu .peran__chip { font-size: 0.78rem; padding: 0.15rem 0.55rem; }
+.pintu__label { display: block; font-size: 0.88rem; color: var(--teks-2); margin-bottom: 0.35rem; }
+.pintu__cari { width: 100%; box-sizing: border-box; font: inherit; font-size: 0.92rem; padding: 0.4rem 0.55rem; border-radius: 6px; border: 1px solid var(--garis-2); background: var(--bg); color: var(--teks); }
+.pintu__cari:focus-visible { outline: 2px solid var(--aksen); outline-offset: 1px; }
+.pintu__hasil { list-style: none; margin: 0.35rem 0 0; padding: 0; font-size: 0.82rem; color: var(--teks-2); }
+.pintu__hasil li { margin: 0.2rem 0; line-height: 1.35; }
+.beranda__peta { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.4rem; }
+.beranda__peta .tahap { border-top: 3px solid var(--k-old-edge); padding: 0.35rem 0.15rem 0; font-size: 0.82rem; line-height: 1.3; }
+.beranda__peta .tahap--sedang-ditulis { border-top-color: var(--aksen); }
+.beranda__peta .tahap--proyeksi { border-top-style: dashed; }
+.beranda__peta a, .beranda__peta span { color: var(--teks); text-decoration: none; display: block; }
+.beranda__peta b { color: var(--judul); }
+.beranda__peta small { color: var(--teks-2); font-size: 0.74rem; display: block; }
+.beranda__kecil { margin: 0.7rem 0 0; font-size: 0.82rem; }
+.beranda__kecil a { color: var(--teks-2); }
+@media (max-width: 50em) {
+  .beranda__judul { font-size: 1.5rem; }
+  .beranda__janji { font-size: 0.95rem; margin: 0.35rem 0 0.6rem; }
+  .beranda a.beranda__mulai { padding: 0.5rem 1rem; }
+  .beranda__pintu { grid-template-columns: 1fr; gap: 0.4rem; margin: 0.7rem 0 0.6rem; }
+  .pintu { padding: 0.45rem 0.7rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.6rem; }
+  .pintu h2 { margin: 0; font-size: 0.95rem; }
+  .pintu p, .pintu__label { display: none; }
+  .pintu__cari { flex: 1 1 10rem; width: auto; padding: 0.3rem 0.5rem; }
+  .pintu__hasil { flex-basis: 100%; margin: 0; }
+  .pintu .peran__chip { font-size: 0.72rem; padding: 0.1rem 0.45rem; }
+  .beranda__peta { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.3rem; }
+  .beranda__peta .tahap { font-size: 0.74rem; }
+  .beranda__peta small { display: none; }
+  .beranda__kecil { margin-top: 0.5rem; }
+}

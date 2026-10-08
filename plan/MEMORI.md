@@ -10,6 +10,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - 112–114: MkDocs, halaman Markdown lama, dan `docs/` dihapus; registry di `situs/data/cerita.json`, widget lama di `situs/lama/`.
 - 115: Cloudflare Pages Direct Upload dari CI; menunggu secret pemilik.
 - 116: React 19.3, TS 6.0.3 (bukan 7: peer @astrojs/check), Zod 4.6, Vitest 5; `astro check` strict di gerbang.
+- 121: beranda satu layar (splash); A0 pindah ke /cara-pakai/ (lama); layar.mjs memeriksa beranda.
 - 120: breadcrumb otomatis di atas judul (jangan tulis `<KamuDiSini>` di halaman), pemilih peran, mode fokus.
 - 119: tema hanya Gelap/Terang; kunjungan pertama selalu gelap.
 - 118: `Blok.astro` + `data/templat.json`; kerangka di `situs/templat/`; daftar isi = blok (route middleware).
@@ -24,6 +25,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - 1.33 (E1, app versi lama): prasyarat B4.2 (Tahap 2) dibuang; isi lama memakai rekaman crash B4.2. Saat ditulis ulang, ADR 10 (expand lalu contract) harus berdiri sendiri.
 - 1.15 (B6) menyerap B1.2; 1.39 (F1) menyerap F2. Hapus halaman B1.2/F2 di PR yang sama, catat di KEPUTUSAN.
 - 1.1 PRD menggantikan T1 lama (`cerita/tahap-1`); pindahkan ilustrasi dan arsitektur tahap bila masih dipakai.
+- `/cara-pakai/` (A0) masih menjelaskan susunan 5 bagian lama; tulis ulang untuk lima blok dan tiga pintu setelah halaman Tahap 1 pertama jadi.
+- Tombol beranda otomatis berubah ke "Mulai dari PRD" begitu `t1-prd` ada.
 - Audit bahasa menolak kata "kantor"; naskah menulis "email kantor", di halaman pakai "email perusahaan".
 
 ## Perlu dicek pemilik
@@ -32,14 +35,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Tugas 0 dimulai (pemilik: "mulai"). PR 67 (arahan, keputusan 109–110) sudah di-merge. Rencana, satu PR per langkah:
-1. `tahap-1/pemeriksaan-situs`: sinkron registry, istilah, audit bahasa, cek ID membaca `situs/` (MDX + `situs/dist`), bukan `docs/*.md` + `site/`; skrip gerbang `tools/cek_situs.sh` dipakai CI job situs. File: `tools/sinkron_cerita.py`, `build_istilah.py`, `audit_bahasa.py`, `cek_id_tampil.py`, `registri.py`, `cek_batch.sh`, `.github/workflows/cek.yml`.
-2. Hapus build MkDocs: `mkdocs.yml`, `tools/mkdocs_hooks.py`, `cek_batch.sh`, job CI `cek_batch`, alat khusus situs lama, `requirements.txt` bila tinggal MkDocs.
-3. Hapus halaman Markdown lama `docs/**/*.md` (sudah ada di `situs/`).
-4. Pindahkan data hidup dari `docs/` ke `situs/` (registry, widget lama, vendor, ilustrasi, istilah); hapus `docs/`.
-5. Cloudflare Pages + preview per PR (butuh akun/token pemilik: cek dulu `gh secret list`).
-6. ADR dependency React/TypeScript/Zod/Vitest/PGlite (versi dari npm hari itu), lalu template halaman, beranda satu layar, peran, breadcrumb.
-Lalu Tugas 1 halaman 1–42.
+2026-10-08 · Tugas 0 selesai kecuali secret Cloudflare (lihat "Perlu dicek pemilik"). PR 68–78: pemeriksaan pindah ke `situs/` (111), MkDocs, halaman Markdown lama, dan `docs/` dihapus (112–114), deploy Cloudflare Pages (115), React/TS/Zod/Vitest (116), registry v2 42 halaman (117), Blok + templat (118), tema gelap default (119), breadcrumb/peran/fokus (120), beranda (121). Berikutnya: Tugas 1 halaman 1.1 PRD v1 (`t1-prd`, `tahap-1/prd-v1.mdx`, jenis prd, mulai dari `situs/templat/prd.mdx`), satu PR per halaman, branch `tahap-1/<halaman>`. Gerbang: `bash tools/cek_situs.sh --layar`.
 
 2026-10-08 · Fase 1 selesai secara isi: 60/60 halaman ada di `situs/` (Astro 7.3.7 + Starlight 0.42.5, tanpa React), semua widget lama jalan apa adanya, tooltip istilah jalan, CI job `situs` (build strict, tes token, kontras 2 mode, tangkapan 2 ukuran × 2 mode, layar pertama 4 ukuran) hijau di `main` (PR #2–#64). Belum: hapus MkDocs (gerbang PROPOSAL: kedua situs dibangun di CI sampai fase 1 dinyatakan lolos; keputusan pemilik), beranda satu layar dan lima blok (fase 3), hosting Cloudflare Pages dan link checker (fase 0 tersisa). Berikutnya menurut PROPOSAL: fase 2, satu widget per PR ditulis ulang ke TypeScript (mulai `alur` dan `pilah`, yang paling banyak dipakai: 22 dan 13 halaman), Zod untuk JSON, PGlite menggantikan sql.js di `runsql`; React masuk bersama widget React pertama (ADR dependency wajib). Perintah kerja: `cd situs && npm run build && npm test && node tools/layar.mjs && node tools/tangkap.mjs` dengan `npm run preview` di 127.0.0.1:4321.
 
