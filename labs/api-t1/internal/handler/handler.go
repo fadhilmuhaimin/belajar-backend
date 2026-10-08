@@ -36,6 +36,7 @@ func (s Server) Rute() *http.ServeMux {
 	mux.HandleFunc("POST /transfers", s.wajibLogin(s.bayar))
 	mux.HandleFunc("GET /transfers/{id}", s.wajibLogin(s.lihatTransaksi))
 	mux.HandleFunc("GET /akun/{id}/riwayat", s.wajibLogin(s.riwayat))
+	mux.HandleFunc("GET /warung", s.wajibLogin(s.cariWarung))
 	mux.HandleFunc("GET /warung/{id}/laporan", s.wajibLogin(s.laporan))
 	return mux
 }
@@ -197,6 +198,21 @@ func (s Server) lihatTransaksi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tulisJSON(w, 200, t)
+}
+
+// GET /warung?cari=<teks>: cari warung menurut nama. Versi benar; mode rentan m3 di rentan.go.
+func (s Server) cariWarung(w http.ResponseWriter, r *http.Request) {
+	cari := r.URL.Query().Get("cari")
+	if s.rentan == "m3" {
+		s.cariWarungM3(w, r, cari)
+		return
+	}
+	hasil, err := s.svc.CariWarung(r.Context(), cari)
+	if err != nil {
+		s.errorInternal(w, err)
+		return
+	}
+	tulisJSON(w, 200, map[string]any{"warung": hasil})
 }
 
 // --8<-- [start:topup]

@@ -71,3 +71,52 @@ func (r Repo) SeedAkun(ctx context.Context, a Akun, email, passwordHash string) 
 		a.ID, a.Jenis, a.Nama, email, passwordHash, a.Saldo)
 	return err
 }
+
+// WarungRingkas adalah hasil pencarian warung yang aman dikirim ke app: hanya id dan nama.
+type WarungRingkas struct {
+	ID   int64  `json:"id"`
+	Nama string `json:"nama"`
+}
+
+// --8<-- [start:cari-warung]
+// CariWarung memakai parameter query ($1), jadi isi pencarian tidak pernah jadi bagian perintah SQL.
+// Hanya akun warung, hanya kolom yang dibutuhkan layar.
+func (r Repo) CariWarung(ctx context.Context, cari string) ([]WarungRingkas, error) {
+	rows, err := r.db.QueryContext(ctx,
+		`SELECT id, nama FROM akun WHERE jenis = 'warung' AND nama ILIKE '%' || $1 || '%' ORDER BY id`, cari)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []WarungRingkas{}
+	for rows.Next() {
+		var w WarungRingkas
+		if err := rows.Scan(&w.ID, &w.Nama); err != nil {
+			return nil, err
+		}
+		out = append(out, w)
+	}
+	return out, rows.Err()
+}
+
+// --8<-- [end:cari-warung]
+
+// CariWarungRentanM3 menyambung string pencarian langsung ke SQL, dan mengambil semua kolom semua akun.
+// Dua kesalahan sekaligus: SQL injection, dan response yang membocorkan saldo. Hanya dipakai mode -rentan m3.
+func (r Repo) CariWarungRentanM3(ctx context.Context, cari string) ([]Akun, error) {
+	q := "SELECT id, jenis, nama, saldo FROM akun WHERE nama LIKE '%" + cari + "%'"
+	rows, err := r.db.QueryContext(ctx, q) //nolint:rowserrcheck // lab: rows.Err dicek di bawah
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []Akun{}
+	for rows.Next() {
+		var a Akun
+		if err := rows.Scan(&a.ID, &a.Jenis, &a.Nama, &a.Saldo); err != nil {
+			return nil, err
+		}
+		out = append(out, a)
+	}
+	return out, rows.Err()
+}

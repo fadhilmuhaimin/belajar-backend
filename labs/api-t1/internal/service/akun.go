@@ -28,3 +28,8 @@ func (s Service) LihatTransaksi(ctx context.Context, peminta, id int64) (repo.Tr
 	}
 	return t, err
 }
+
+// CariWarung: siapa pun yang login boleh mencari warung. Hasilnya hanya id dan nama warung.
+func (s Service) CariWarung(ctx context.Context, cari string) ([]repo.WarungRingkas, error) {
+	return s.repo.CariWarung(ctx, cari)
+}

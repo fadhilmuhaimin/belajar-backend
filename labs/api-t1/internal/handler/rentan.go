@@ -23,3 +23,17 @@ func (s Server) bayarM2(w http.ResponseWriter, r *http.Request) {
 }
 
 // --8<-- [end:m2]
+
+// --8<-- [start:m3]
+// cariWarungM3 menyambung teks pencarian ke SQL dan mengembalikan semua field semua akun (minggu 2 Raka).
+func (s Server) cariWarungM3(w http.ResponseWriter, r *http.Request, cari string) {
+	hasil, err := s.svc.CariWarungRentanM3(r.Context(), cari)
+	if err != nil {
+		// Pencarian dengan tanda kutip membuat SQL tidak valid; app menerima 500.
+		s.errorInternal(w, err)
+		return
+	}
+	tulisJSON(w, 200, map[string]any{"warung": hasil})
+}
+
+// --8<-- [end:m3]
