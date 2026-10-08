@@ -3,25 +3,25 @@
   "id": "A1-1",
   "halaman": "A1",
   "judul": "1.3 Apa yang dikerjakan backend",
-  "url": "a-gambaran/a1-apa-yang-dikerjakan-backend/",
+  "url": "tahap-1/apa-yang-dikerjakan-backend/",
   "tanya": "App Rekeningo menyembunyikan tombol \"Lihat riwayat Ani\" dari Budi. Apakah data Ani sudah aman?",
-  "jawab": "Belum. Budi bisa mengirim request `GET /akun/ani/riwayat` tanpa lewat app. Backend harus menolaknya karena token milik Budi, bukan Ani."
+  "jawab": "Belum. Budi bisa mengirim request `GET /akun/ani/riwayat` tanpa lewat app. Backend harus menolaknya karena sesi milik Budi, bukan Ani."
  },
  {
   "id": "A1-2",
   "halaman": "A1",
   "judul": "1.3 Apa yang dikerjakan backend",
-  "url": "a-gambaran/a1-apa-yang-dikerjakan-backend/",
+  "url": "tahap-1/apa-yang-dikerjakan-backend/",
   "tanya": "Jelaskan kenapa saldo tidak cukup disimpan di sqflite HP Budi.",
-  "jawab": "Pertama, Budi punya dua perangkat, dan sqflite tidak berbagi data antar-perangkat. Kedua, Ani harus melihat uang masuk di HP-nya. Ketiga, data di HP bisa diubah pemiliknya. Semua itu butuh satu source of truth yang dipegang tim: database di backend."
+  "jawab": "Pertama, Budi memakai dua perangkat, dan sqflite tidak berbagi data antar-perangkat. Kedua, Ani dan Keuangan harus melihat angka yang sama. Ketiga, data di HP bisa diubah pemiliknya. Semua itu butuh satu source of truth yang dipegang tim: database di backend."
  },
  {
   "id": "A1-3",
   "halaman": "A1",
   "judul": "1.3 Apa yang dikerjakan backend",
-  "url": "a-gambaran/a1-apa-yang-dikerjakan-backend/",
-  "tanya": "Siapa yang memanggil layanan push untuk memberi tahu Ani?",
-  "jawab": "Backend. Hanya backend yang tahu penerima transfer dan menyimpan API key layanan push."
+  "url": "tahap-1/apa-yang-dikerjakan-backend/",
+  "tanya": "Budi membayar Rp25.000 ke Warung Ani. Dari mana HP Ani tahu ada uang masuk?",
+  "jawab": "Dari backend. HP Budi tidak tahu HP Ani. Di v1 belum ada notifikasi push, jadi app Ani membaca daftar pembayaran dari backend saat dibuka."
  },
  {
   "id": "A4-1",

@@ -346,7 +346,7 @@
       "judul": "Apa yang dikerjakan backend",
       "tahap": 1,
       "topik": "Gambaran besar",
-      "path": "a-gambaran/a1-apa-yang-dikerjakan-backend.md",
+      "path": "tahap-1/apa-yang-dikerjakan-backend.md",
       "inti": true,
       "masalah": "Bingung apa saja yang harus ditulis di backend",
       "ada": true,
@@ -355,7 +355,9 @@
       "peran": [
         "backend"
       ],
-      "lama": true,
+      "prasyarat": [
+        "t1-fitur-teknis"
+      ],
       "nomor": "1.3",
       "menit": 7
     },
