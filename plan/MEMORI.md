@@ -4,7 +4,19 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 109: konten dulu, satu tahap sampai tuntas; CERITA jadi sumber tertinggi; tiga skill wajib.
+
+## Usulan perubahan cerita
+
+(kosong)
+
+## Perlu dicek pemilik
+
+(kosong)
+
 ## Sedang dikerjakan
+
+2026-10-08 · Pemasangan arahan baru (keputusan 109): `plan/CERITA-TAHAP-1.md` (naskah pemilik), tiga skill di `.claude/skills/`, `CLAUDE.md` versi XML, paragraf revisi di PROPOSAL "Rencana migrasi". Belum ada kode yang disentuh. Berikutnya saat pemilik mengetik "mulai": Tugas 0 (hapus MkDocs satu PR per penghapusan; pindahkan audit bahasa, sinkron registry, cek ID ke `situs/`; Cloudflare Pages preview per PR; enam template, lima blok, beranda satu layar, peran + breadcrumb; ADR dependency React/TypeScript/Zod/Vitest/PGlite dicek ke npm hari itu), lalu Tugas 1 halaman 1–42 satu PR per halaman. Paragraf fase 1 di bawah dipertahankan sebagai keadaan `situs/` saat ini.
 
 2026-10-08 · Fase 1 selesai secara isi: 60/60 halaman ada di `situs/` (Astro 7.3.7 + Starlight 0.42.5, tanpa React), semua widget lama jalan apa adanya, tooltip istilah jalan, CI job `situs` (build strict, tes token, kontras 2 mode, tangkapan 2 ukuran × 2 mode, layar pertama 4 ukuran) hijau di `main` (PR #2–#64). Belum: hapus MkDocs (gerbang PROPOSAL: kedua situs dibangun di CI sampai fase 1 dinyatakan lolos; keputusan pemilik), beranda satu layar dan lima blok (fase 3), hosting Cloudflare Pages dan link checker (fase 0 tersisa). Berikutnya menurut PROPOSAL: fase 2, satu widget per PR ditulis ulang ke TypeScript (mulai `alur` dan `pilah`, yang paling banyak dipakai: 22 dan 13 halaman), Zod untuk JSON, PGlite menggantikan sql.js di `runsql`; React masuk bersama widget React pertama (ADR dependency wajib). Perintah kerja: `cd situs && npm run build && npm test && node tools/layar.mjs && node tools/tangkap.mjs` dengan `npm run preview` di 127.0.0.1:4321.
 

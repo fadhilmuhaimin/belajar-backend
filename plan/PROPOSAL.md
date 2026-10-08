@@ -725,6 +725,8 @@ Fase 0 sampai 2 hanya mengganti wadah; konten 60 halaman tidak berubah artinya. 
 
 MkDocs dihapus hanya setelah fase 1 lolos gerbangnya. Sampai saat itu dua situs dibangun di CI, dan `cek_layar_pertama` dijalankan ke keduanya supaya regresi tampilan langsung terlihat.
 
+**Revisi urutan kerja, 2026-10-08 (setelah fase 1 selesai).** Fase 0 dan 1 di atas sudah dijalankan: 60 halaman lama ada di `situs/` tanpa perubahan isi. Mulai sekarang urutannya dibalik menjadi **konten dulu, satu tahap sampai tuntas**: Tahap 1 dibangun utuh sesuai `plan/CERITA-TAHAP-1.md` (PRD → fitur ke teknis → pertukaran saldo → masalah → konsep → ADR, 42 halaman, enam template, lima blok lipat, beranda satu layar, widget React pertama), lalu Tahap 2 menunggu naskahnya. Fase 2–4 di tabel tidak dihapus; isinya dikerjakan di dalam tahap cerita yang membutuhkannya. Yang tetap dikerjakan sebelum konten: hapus MkDocs, pindahkan audit bahasa, sinkron registry, dan cek ID ke `situs/`, lalu Cloudflare Pages dengan preview per PR. Dicatat sebagai keputusan 109.
+
 ## Risiko terbesar
 
 Risiko terbesar bukan teknis, tapi cakupan: lima dimensi baru dikalikan lima tahap bisa jadi 100+ halaman baru untuk satu orang. Tabel ini mengurutkan dari yang paling mungkin menggagalkan project.
