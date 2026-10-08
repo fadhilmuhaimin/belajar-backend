@@ -1,0 +1,79 @@
+# server: ./api-t1
+
+# --- A. Persiapan ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+
+# --- B. Sebelum bayar: semua saldo dijumlah, dan sama dengan semua top-up ---
+$ psql -c "SELECT (SELECT sum(saldo) FROM akun) AS total_saldo, (SELECT sum(nominal) FROM topup) AS total_topup, (SELECT count(*) FROM transaksi) AS transaksi"
+ total_saldo | total_topup | transaksi 
+-------------+-------------+-----------
+    25000000 |    25000000 |         0
+(1 row)
+
+$ psql -c "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+ id  |    nama    | saldo  
+-----+------------+--------
+ 418 | Warung Ani |      0
+ 419 | Budi       | 250000
+(2 rows)
+
+
+# --- C. Budi membayar Rp25.000 ke Warung Ani ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 25000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/1
+
+{"id":1,"saldo":225000}
+
+# --- D. Sesudah bayar: dua saldo berubah, totalnya tidak ---
+$ psql -c "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+ id  |    nama    | saldo  
+-----+------------+--------
+ 418 | Warung Ani |  25000
+ 419 | Budi       | 225000
+(2 rows)
+
+$ psql -c "SELECT (SELECT sum(saldo) FROM akun) AS total_saldo, (SELECT sum(nominal) FROM topup) AS total_topup, (SELECT count(*) FROM transaksi) AS transaksi"
+ total_saldo | total_topup | transaksi 
+-------------+-------------+-----------
+    25000000 |    25000000 |         1
+(1 row)
+
+
+# --- E. Budi membayar Rp200.000 ke Warung Sari; sisa saldonya Rp25.000 ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 502, "jumlah": 200000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/2
+
+{"id":2,"saldo":25000}
+
+# --- F. Budi mencoba membayar Rp30.000: ditolak, tidak ada yang berubah ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 30000}'
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+
+{"type":"/problems/saldo-kurang","title":"Saldo tidak cukup","status":422}
+$ psql -c "SELECT (SELECT sum(saldo) FROM akun) AS total_saldo, (SELECT sum(nominal) FROM topup) AS total_topup, (SELECT count(*) FROM transaksi) AS transaksi"
+ total_saldo | total_topup | transaksi 
+-------------+-------------+-----------
+    25000000 |    25000000 |         2
+(1 row)
+
+
+# --- G. Pagar terakhir: UPDATE langsung yang membuat saldo negatif ditolak database ---
+$ psql -c "UPDATE akun SET saldo = saldo - 30000 WHERE id = 419"
+ERROR:  new row for relation "akun" violates check constraint "saldo_tidak_negatif"
+
+$ psql -c "SELECT saldo FROM akun WHERE id = 419"
+ saldo 
+-------
+ 25000
+(1 row)
+
