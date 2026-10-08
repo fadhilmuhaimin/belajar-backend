@@ -302,7 +302,7 @@ window.ISTILAH = {
   "n": "1.5 Perjalanan satu request",
   "s": "istilah-handler",
   "t": "Handler",
-  "u": "a-gambaran/a2-perjalanan-request/"
+  "u": "tahap-1/perjalanan-request/"
  },
  "Header": {
   "b": "B1.1",
@@ -1190,7 +1190,7 @@ window.ISTILAH = {
   "n": "1.5 Perjalanan satu request",
   "s": "istilah-handler",
   "t": "Handler",
-  "u": "a-gambaran/a2-perjalanan-request/"
+  "u": "tahap-1/perjalanan-request/"
  },
  "header": {
   "b": "B1.1",

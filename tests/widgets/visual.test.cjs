@@ -27,7 +27,7 @@ test("a2-alur: layar HP terakhir berlaku sampai ada layar baru, paket di tengah 
   const list = core.steps(d, false);
   assert.equal(core.layarAt(d, list, -1, "hp"), d.layarAwal.hp);
   assert.equal(core.layarAt(d, list, 3, "hp"), list[0].layar.hp);
-  assert.equal(core.layarAt(d, list, list.length - 1, "hp").saldo, 30000);
+  assert.equal(core.layarAt(d, list, list.length - 1, "hp").saldo, 225000);
   assert.equal(core.packetPos(d, { dari: "k0", ke: "k1" }), (100 / 6 + 50) / 2);
   assert.equal(core.pemilikLapisan(d, list[4]), "k1"); // akses data milik API, walau paket menuju DB
 });
@@ -65,9 +65,9 @@ test("alur v2: banyak perangkat, masing-masing dengan layar terakhirnya sendiri"
   assert.equal(core.layarAt(d, list, 0, "tablet").saldo, 1);
 });
 
-test("a2-alur: saldo konsisten (Rp100.000 - Rp70.000 = Rp30.000)", () => {
+test("a2-alur: saldo konsisten (Rp250.000 - Rp25.000 = Rp225.000)", () => {
   const d = json("situs/lama/widgets/data/a2-alur.json");
-  assert.equal(d.hpAwal.saldo - 70000, d.langkah[d.langkah.length - 1].hp.saldo);
+  assert.equal(d.hpAwal.saldo - 25000, d.langkah[d.langkah.length - 1].hp.saldo);
 });
 
 // Semua data widget pilah (bukan hanya a1): jawaban menunjuk kelompok yang ada, alasan terisi.
@@ -93,7 +93,7 @@ test("a1-hp: layar valid", () => {
 });
 
 test("A2 'Kenapa ini ada': rujukan (langkah N) menunjuk langkah yang benar", () => {
-  const md = fs.readFileSync(path.join(ROOT, "situs/src/content/docs/a-gambaran/a2-perjalanan-request.mdx"), "utf8");
+  const md = fs.readFileSync(path.join(ROOT, "situs/src/content/docs/tahap-1/perjalanan-request.mdx"), "utf8");
   const d = json("situs/lama/widgets/data/a2-alur.json");
   const teks = (n) => { const s = d.langkah[n - 1]; return [s.judul, s.kirim || "", s.jelas].join(" "); };
   const refs = [...md.matchAll(/\(langkah (\d+)\)/g)].map((m) => Number(m[1]));

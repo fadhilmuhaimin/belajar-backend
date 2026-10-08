@@ -51,25 +51,25 @@
   "id": "A2-1",
   "halaman": "A2",
   "judul": "1.5 Perjalanan satu request",
-  "url": "a-gambaran/a2-perjalanan-request/",
-  "tanya": "Budi mengirim nominal `\"tujuh puluh ribu\"` (teks, bukan angka). Lapisan mana yang menolak, dan status apa yang ia terima?",
+  "url": "tahap-1/perjalanan-request/",
+  "tanya": "Budi mengirim nominal `\"dua puluh lima ribu\"` (teks, bukan angka). Lapisan mana yang menolak, dan status apa yang ia terima?",
   "jawab": "Handler yang menolaknya, karena ini soal format data. App menerima status `400 Bad Request`. Logika bisnis tidak perlu dijalankan sama sekali."
  },
  {
   "id": "A2-2",
   "halaman": "A2",
   "judul": "1.5 Perjalanan satu request",
-  "url": "a-gambaran/a2-perjalanan-request/",
-  "tanya": "Response transfer membawa `saldo` terbaru. Apa untungnya bagi app?",
+  "url": "tahap-1/perjalanan-request/",
+  "tanya": "Response pembayaran membawa `saldo` terbaru. Apa gunanya bagi app?",
   "jawab": "App bisa langsung memperbarui layar tanpa request `GET` kedua. Satu perjalanan lebih sedikit berarti lebih cepat dan lebih sedikit tempat yang bisa gagal."
  },
  {
   "id": "A2-3",
   "halaman": "A2",
   "judul": "1.5 Perjalanan satu request",
-  "url": "a-gambaran/a2-perjalanan-request/",
+  "url": "tahap-1/perjalanan-request/",
   "tanya": "Jelaskan kenapa app tidak boleh otomatis mengulang `POST /transfers` setelah timeout.",
-  "jawab": "Timeout tidak berarti gagal. Database mungkin sudah COMMIT, dan hanya response yang hilang. Mengulang request berarti meminta transfer kedua. Tanpa idempotency key, backend akan memprosesnya, dan Budi tertagih dua kali."
+  "jawab": "Timeout tidak berarti gagal. Database mungkin sudah COMMIT, dan hanya response yang hilang. Mengulang request berarti meminta pembayaran kedua. Tanpa idempotency key, backend akan memprosesnya, dan Budi membayar dua kali."
  },
  {
   "id": "B2.1-1",
