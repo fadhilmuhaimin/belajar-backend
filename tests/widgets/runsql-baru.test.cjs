@@ -58,3 +58,12 @@ test("1.8 top-up: tanpa transaction 2 dari 4 terisi; dengan transaction 0; CSV d
   assert.deepEqual(baris(core.runPanel(SQL, s, "after", [])).slice(-2), ["TOTAL|0", "CATATAN TOP-UP|0"]);
   for (const p of ["before", "after"]) assert.deepEqual(baris(core.runPanel(SQL, s, p, s.toggles)).slice(-2), ["TOTAL|1000000", "CATATAN TOP-UP|4"]);
 });
+
+test("1.10 laporan: tanggal UTC memindahkan sarapan ke hari lain; WIB sama dengan buku Ani", () => {
+  const s = load("t1-laporan");
+  assert.deepEqual(baris(core.runPanel(SQL, s, "before", [])), ["2026-10-06|1|15000", "2026-10-07|3|67000", "2026-10-08|2|65000"]);
+  const wib = ["2026-10-07|3|70000", "2026-10-08|3|77000"];
+  assert.deepEqual(baris(core.runPanel(SQL, s, "after", [])), wib);
+  assert.equal(s.predict.options[s.predict.answer], "Rp67.000");
+  for (const p of ["before", "after"]) assert.deepEqual(baris(core.runPanel(SQL, s, p, s.toggles)), wib);
+});

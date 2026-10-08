@@ -1,0 +1,90 @@
+---
+title: "1.10 Fitur: saldo, riwayat, laporan warung"
+description: Budi melihat saldo dan riwayatnya, Ani melihat total per hari. Tiga endpoint baca, masing-masing hanya untuk pemilik akunnya.
+---
+import Blok from "../../../components/Blok.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import Snippet from "../../../components/Snippet.astro";
+
+<p class="meta">Baca 5 menit · coba 2 menit · Prasyarat: [[t1-fitur-bayar]]</p>
+
+Top-up dan bayar mengubah angka. Fitur ini hanya membaca angka, dan pembacanya paling teliti: Ani mencocokkan setiap baris dengan buku tulisnya.
+
+<Blok nama="Yang diminta PRD" buka>
+
+| Prioritas | Fitur | Keterangan |
+|---|---|---|
+| P0 | Saldo dan riwayat | Saldo saat ini dan daftar transaksi per akun |
+| P1 | Laporan harian warung | Total per hari dan daftar transaksi, di HP warung |
+
+PRD juga menulis kapan Ani berhenti memakai Rekeningo: angkanya beda dengan bukunya.
+
+| Di app | Di backend | Di database |
+|---|---|---|
+| Layar saldo, riwayat, dan laporan warung | Tiga endpoint baca, hanya untuk pemilik akun | Index per akun dan waktu; `SUM` + `GROUP BY` |
+
+Ketiga endpoint: `GET /akun/{id}` untuk saldo, `GET /akun/{id}/riwayat`, dan `GET /warung/{id}/laporan`. Index-nya `transaksi(dari, dibuat)` dan `transaksi(ke, dibuat)`.
+
+</Blok>
+
+<Blok nama="Coba: laporan yang beda dengan buku Ani" buka aman="Kalau berhenti di sini, kamu sudah tahu: laporan per hari bergantung pada jam siapa yang dipakai untuk menentukan tanggal.">
+
+Laporan harian menjumlahkan pembayaran per tanggal. PostgreSQL menyimpan `timestamptz` dalam UTC, sedangkan Ani menulis bukunya dalam WIB, tujuh jam di depan UTC. Jalankan kedua panel. Data enam pembayaran ini ilustrasi, dan SQL-nya dijalankan sungguhan di browser.
+
+<WidgetLama nama="runsql" src="data/t1-laporan.json" />
+
+</Blok>
+
+<Blok nama="Endpoint, query, dan rekaman">
+
+Dokumentasi PostgreSQL menulis bahwa nilai `timestamptz` disimpan dalam UTC dan diubah ke zona `TimeZone` sesi saat dibaca ([PostgreSQL 18, 8.5.3](https://www.postgresql.org/docs/current/datatype-datetime.html#DATATYPE-TIMEZONES)). Jadi `dibuat::date` memberi tanggal menurut zona server, bukan zona warung. Laporan di lab tidak bergantung pada pengaturan itu: query menyebut zona Asia/Jakarta, baru mengambil tanggal dan menjumlahkan:
+
+<Snippet file="labs/api-t1/internal/repo/riwayat.go" region="laporan" lang="go" title="labs/api-t1/internal/repo/riwayat.go" />
+
+Database yang menjumlahkan, bukan app. HP Ani hanya menerima satu baris per hari. Kalau app yang menjumlahkan, setiap transaksi harus dikirim lewat sinyal warung yang buruk.
+
+Service memeriksa dua hal sebelum query jalan: yang meminta adalah pemilik warung, dan rentang tanggalnya paling panjang 31 hari.
+
+<Snippet file="labs/api-t1/internal/service/riwayat.go" region="laporan" lang="go" title="labs/api-t1/internal/service/riwayat.go" />
+
+Rekaman lab dari database bersih. Lab menggeser waktu dua pembayaran ke hari sebelumnya, supaya laporan berisi tiga hari. Total ketiga hari sama dengan `SUM` langsung di database:
+
+<Snippet file="labs/api-t1/output/riwayat.txt" lines="70:80" title="Rekaman lab: labs/api-t1/output/riwayat.txt" />
+
+Riwayat Budi diurutkan dari yang terbaru. Query yang sama melayani pembayaran keluar dan masuk, dengan batas 20 baris:
+
+<Snippet file="labs/api-t1/internal/repo/riwayat.go" region="riwayat" lang="go" title="labs/api-t1/internal/repo/riwayat.go" />
+
+<Snippet file="labs/api-t1/output/riwayat.txt" lines="56:61" title="Rekaman lab: labs/api-t1/output/riwayat.txt" />
+
+Budi tidak bisa membuka riwayat Warung Ani, dan Dimas tidak bisa membuka laporannya. Keduanya mendapat `404`, sama dengan akun yang tidak ada:
+
+<Snippet file="labs/api-t1/output/riwayat.txt" lines="63:68" title="Rekaman lab: labs/api-t1/output/riwayat.txt" />
+
+<Snippet file="labs/api-t1/output/riwayat.txt" lines="83:88" title="Rekaman lab: labs/api-t1/output/riwayat.txt" />
+
+Saldo dibaca dari `GET /akun/{id}`. Setelah satu pembayaran Rp25.000, Ani melihat saldonya:
+
+<Snippet file="labs/api-t1/output/bayar.txt" lines="76:80" title="Rekaman lab: labs/api-t1/output/bayar.txt" />
+
+</Blok>
+
+<Blok nama="Konsep yang akan dibutuhkan">
+
+- [[B5.3]]: kenapa backend bertanya "apakah yang login ini pemilik akun 418?", dan kenapa jawabannya `404`, bukan `403`.
+- [[B2.1]]: relasi `transaksi` ke `akun` yang membuat riwayat bisa menampilkan nama lawan.
+- [[B2.3]] (Tahap 2): kapan index benar-benar dipakai. Index sudah dibuat di v1, tapi halaman ini belum mengukurnya.
+- [[t1-pertukaran-saldo]]: kalau saldo dan riwayat tidak cocok, dari baris mana kamu tahu kenapa?
+
+**Sengaja belum dilakukan** di v1:
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| Halaman berikutnya di riwayat | Asumsi: Budi makan di warung 5 hari kerja per minggu, jadi 20 baris terakhir mencakup ±4 minggu; PRD hanya meminta daftar transaksi | Tahap 2: [[B1.3]] |
+| Top-up di riwayat | Top-up disimpan di tabel `topup`, riwayat hanya membaca `transaksi`; Budi melihat Rp210.000 tanpa baris Rp250.000 yang masuk | Tahap 2: ledger, satu tempat untuk semua pergerakan uang |
+| Ekspor laporan untuk Keuangan | Admin merekap mingguan di luar sistem (PRD P1) | Tahap 2: tutup buku otomatis |
+
+</Blok>
+
+<SkripLama daftar={["runsql-core","runsql"]} />
