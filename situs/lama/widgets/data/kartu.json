@@ -2,7 +2,7 @@
  {
   "id": "A1-1",
   "halaman": "A1",
-  "judul": "1.1 Apa yang dikerjakan backend",
+  "judul": "1.3 Apa yang dikerjakan backend",
   "url": "a-gambaran/a1-apa-yang-dikerjakan-backend/",
   "tanya": "App Rekeningo menyembunyikan tombol \"Lihat riwayat Ani\" dari Budi. Apakah data Ani sudah aman?",
   "jawab": "Belum. Budi bisa mengirim request `GET /akun/ani/riwayat` tanpa lewat app. Backend harus menolaknya karena token milik Budi, bukan Ani."
@@ -10,7 +10,7 @@
  {
   "id": "A1-2",
   "halaman": "A1",
-  "judul": "1.1 Apa yang dikerjakan backend",
+  "judul": "1.3 Apa yang dikerjakan backend",
   "url": "a-gambaran/a1-apa-yang-dikerjakan-backend/",
   "tanya": "Jelaskan kenapa saldo tidak cukup disimpan di sqflite HP Budi.",
   "jawab": "Pertama, Budi punya dua perangkat, dan sqflite tidak berbagi data antar-perangkat. Kedua, Ani harus melihat uang masuk di HP-nya. Ketiga, data di HP bisa diubah pemiliknya. Semua itu butuh satu source of truth yang dipegang tim: database di backend."
@@ -18,7 +18,7 @@
  {
   "id": "A1-3",
   "halaman": "A1",
-  "judul": "1.1 Apa yang dikerjakan backend",
+  "judul": "1.3 Apa yang dikerjakan backend",
   "url": "a-gambaran/a1-apa-yang-dikerjakan-backend/",
   "tanya": "Siapa yang memanggil layanan push untuk memberi tahu Ani?",
   "jawab": "Backend. Hanya backend yang tahu penerima transfer dan menyimpan API key layanan push."
@@ -26,7 +26,7 @@
  {
   "id": "A4-1",
   "halaman": "A4",
-  "judul": "1.2 BaaS atau backend sendiri",
+  "judul": "1.4 BaaS atau backend sendiri",
   "url": "a-gambaran/a4-baas-vs-backend-sendiri/",
   "tanya": "Di Supabase, Raka membuat tabel `transaksi` baru tapi lupa menulis policy RLS-nya. Apa risikonya?",
   "jawab": "Tergantung RLS aktif atau tidak di tabel itu. Kalau RLS tidak diaktifkan, tabel bisa diakses lewat API otomatis sesuai hak role yang dipakai app. Kalau RLS aktif tapi tanpa policy, semua akses ditolak. Karena itu setiap tabel baru di BaaS harus dicek RLS-nya (Supabase: Row Level Security)."
@@ -34,7 +34,7 @@
  {
   "id": "A4-2",
   "halaman": "A4",
-  "judul": "1.2 BaaS atau backend sendiri",
+  "judul": "1.4 BaaS atau backend sendiri",
   "url": "a-gambaran/a4-baas-vs-backend-sendiri/",
   "tanya": "Jelaskan kenapa \"daftar toko\" cocok untuk BaaS, tapi \"transfer saldo\" kurang cocok.",
   "jawab": "Daftar toko adalah data publik yang hanya dibaca. API otomatis langsung cukup. Transfer mengubah dua baris sekaligus dengan aturan saldo, dan semuanya harus berhasil bersama. Di BaaS, itu jadi fungsi SQL atau Cloud Function tersendiri, terpisah dari kode lain."
@@ -42,7 +42,7 @@
  {
   "id": "A4-3",
   "halaman": "A4",
-  "judul": "1.2 BaaS atau backend sendiri",
+  "judul": "1.4 BaaS atau backend sendiri",
   "url": "a-gambaran/a4-baas-vs-backend-sendiri/",
   "tanya": "Benar atau salah: memakai Supabase berarti tidak punya backend.",
   "jawab": "Salah. Backend-nya ada (PostgREST, Auth, PostgreSQL), hanya saja dijalankan oleh Supabase. Aturan bisnis tetap harus kamu tulis, dalam bentuk policy dan fungsi."
@@ -50,7 +50,7 @@
  {
   "id": "A2-1",
   "halaman": "A2",
-  "judul": "1.3 Perjalanan satu request",
+  "judul": "1.5 Perjalanan satu request",
   "url": "a-gambaran/a2-perjalanan-request/",
   "tanya": "Budi mengirim nominal `\"tujuh puluh ribu\"` (teks, bukan angka). Lapisan mana yang menolak, dan status apa yang ia terima?",
   "jawab": "Handler yang menolaknya, karena ini soal format data. App menerima status `400 Bad Request`. Logika bisnis tidak perlu dijalankan sama sekali."
@@ -58,7 +58,7 @@
  {
   "id": "A2-2",
   "halaman": "A2",
-  "judul": "1.3 Perjalanan satu request",
+  "judul": "1.5 Perjalanan satu request",
   "url": "a-gambaran/a2-perjalanan-request/",
   "tanya": "Response transfer membawa `saldo` terbaru. Apa untungnya bagi app?",
   "jawab": "App bisa langsung memperbarui layar tanpa request `GET` kedua. Satu perjalanan lebih sedikit berarti lebih cepat dan lebih sedikit tempat yang bisa gagal."
@@ -66,111 +66,15 @@
  {
   "id": "A2-3",
   "halaman": "A2",
-  "judul": "1.3 Perjalanan satu request",
+  "judul": "1.5 Perjalanan satu request",
   "url": "a-gambaran/a2-perjalanan-request/",
   "tanya": "Jelaskan kenapa app tidak boleh otomatis mengulang `POST /transfers` setelah timeout.",
   "jawab": "Timeout tidak berarti gagal. Database mungkin sudah COMMIT, dan hanya response yang hilang. Mengulang request berarti meminta transfer kedua. Tanpa idempotency key, backend akan memprosesnya, dan Budi tertagih dua kali."
  },
  {
-  "id": "B1.1-1",
-  "halaman": "B1.1",
-  "judul": "1.4 HTTP: method, status, header",
-  "url": "b-fondasi/b1-1-http/",
-  "tanya": "Budi mengirim `GET /akun/budi` dengan token yang sudah kedaluwarsa. Status apa yang tepat: `401` atau `403`?",
-  "jawab": "`401`. Token kedaluwarsa berarti server tidak bisa memastikan siapa pengirimnya. `403` dipakai kalau server tahu siapa kamu, tapi aksinya tidak diizinkan. Rekaman lab: `{\"detail\":\"token kedaluwarsa\"}` dengan status `401`."
- },
- {
-  "id": "B1.1-2",
-  "halaman": "B1.1",
-  "judul": "1.4 HTTP: method, status, header",
-  "url": "b-fondasi/b1-1-http/",
-  "tanya": "Jelaskan kenapa app tidak boleh bergantung pada teks \"Unprocessable Entity\" di status line.",
-  "jawab": "RFC 9112 menyatakan client harus mengabaikan teks itu, karena bisa diterjemahkan, diubah perantara, atau hilang di HTTP/2. Buktinya ada di lab: Go menulis \"Unprocessable Entity\", padahal RFC 9110 menamainya \"Unprocessable Content\". Yang bisa diandalkan hanya angka `422`."
- },
- {
-  "id": "B1.1-3",
-  "halaman": "B1.1",
-  "judul": "1.4 HTTP: method, status, header",
-  "url": "b-fondasi/b1-1-http/",
-  "tanya": "Response `201` membawa header `Location: /transfers/1`. Apa gunanya bagi app?",
-  "jawab": "App tahu alamat transfer yang baru dibuat. App bisa membukanya lagi, mis. untuk layar detail atau bukti transfer, tanpa menyusun URL sendiri."
- },
- {
-  "id": "B1.2-1",
-  "halaman": "B1.2",
-  "judul": "1.5 Resource dan format error",
-  "url": "b-fondasi/b1-2-resource-error/",
-  "tanya": "App menampilkan pesan dengan `if (body['detail'].contains('Saldo'))`. Apa yang salah?",
-  "jawab": "`detail` ditulis untuk manusia dan bisa berubah kapan saja, mis. diterjemahkan atau dirapikan. RFC 9457 melarang client mem-parse-nya. App harus memilih pesan dari `type`, lalu mengambil angka dari extension member seperti `saldo`."
- },
- {
-  "id": "B1.2-2",
-  "halaman": "B1.2",
-  "judul": "1.5 Resource dan format error",
-  "url": "b-fondasi/b1-2-resource-error/",
-  "tanya": "Jelaskan kenapa `POST /transfers` lebih baik daripada `POST /doTransfer`, padahal keduanya bekerja.",
-  "jawab": "Method sudah menyatakan aksinya. Dengan nama benda, satu path bisa melayani beberapa aksi: `POST /transfers` membuat, `GET /transfers/7` membaca. Pola URL jadi bisa ditebak, dan log serta metric per resource lebih mudah dikelompokkan."
- },
- {
-  "id": "B1.2-3",
-  "halaman": "B1.2",
-  "judul": "1.5 Resource dan format error",
-  "url": "b-fondasi/b1-2-resource-error/",
-  "tanya": "Transfer ke `cici` (akun tidak ada) dijawab `422` dengan `errors: [{\"field\": \"ke\", ...}]`. Bagaimana app memakainya?",
-  "jawab": "App menampilkan pesan di bawah input \"Kirim ke\", bukan toast umum. Field `field` memberi tahu input mana yang salah. Lihat layar ketiga di widget."
- },
- {
-  "id": "B6-1",
-  "halaman": "B6",
-  "judul": "1.6 Validation dan error handling",
-  "url": "b-fondasi/b6-validation-error/",
-  "tanya": "Transfer ke akun sendiri ditolak di app. Di server tidak ada pemeriksaan, tapi tabel punya `CHECK (dari <> ke)`. Apa yang diterima `curl` yang mengirim transfer ke diri sendiri?",
-  "jawab": "`500` dengan pesan umum. PostgreSQL menolak baris itu, jadi data tetap benar. Tapi user tidak mendapat pesan yang jelas, dan error ini seharusnya memicu perbaikan: pindahkan aturannya ke logika bisnis, supaya dijawab `422` dengan `field: \"ke\"`."
- },
- {
-  "id": "B6-2",
-  "halaman": "B6",
-  "judul": "1.6 Validation dan error handling",
-  "url": "b-fondasi/b6-validation-error/",
-  "tanya": "Jelaskan kenapa `UPDATE ... WHERE saldo >= jumlah` tidak cukup melindungi dari jumlah negatif.",
-  "jawab": "Dengan jumlah −70.000, syaratnya jadi `saldo >= -70000`, yang selalu benar untuk saldo positif. Lalu `saldo - (-70000)` menambah saldo. Syarat itu melindungi dari saldo kurang, bukan dari input yang tidak masuk akal. Rekaman lab menunjukkan saldo Budi naik ke Rp170.000."
- },
- {
-  "id": "B6-3",
-  "halaman": "B6",
-  "judul": "1.6 Validation dan error handling",
-  "url": "b-fondasi/b6-validation-error/",
-  "tanya": "Error dari database ditangkap dengan `catch (e) { return null; }`. Apa risikonya?",
-  "jawab": "Error di-swallow: tidak tercatat di log, dan pemanggil mengira tidak ada data. Bug jadi tidak terlihat, dan user mungkin melihat layar kosong tanpa penjelasan. Minimal catat errornya, lalu kembalikan error yang bisa dipetakan ke `500`."
- },
- {
-  "id": "B1.4-1",
-  "halaman": "B1.4",
-  "judul": "1.7 Kontrak API dengan OpenAPI",
-  "url": "b-fondasi/b1-4-openapi/",
-  "tanya": "App v1.4 masih banyak dipakai. Endpoint transfer ingin menambah field `catatan` yang wajib di request. Aman?",
-  "jawab": "Tidak. App v1.4 tidak mengirim `catatan`, jadi semua transfernya akan ditolak. Jadikan opsional dulu, dengan nilai bawaan di server. Baru wajibkan setelah versi minimum app dinaikkan (2.9 App versi lama yang tidak bisa dipaksa update)."
- },
- {
-  "id": "B1.4-2",
-  "halaman": "B1.4",
-  "judul": "1.7 Kontrak API dengan OpenAPI",
-  "url": "b-fondasi/b1-4-openapi/",
-  "tanya": "Jelaskan kenapa lint OpenAPI saja tidak cukup untuk melindungi app lama.",
-  "jawab": "Lint memeriksa apakah file valid dan rapi. Kontrak yang menghapus field `saldo` tetap valid. Yang menangkapnya adalah perbandingan dengan kontrak sebelumnya, seperti `oasdiff breaking` di rekaman."
- },
- {
-  "id": "B1.4-3",
-  "halaman": "B1.4",
-  "judul": "1.7 Kontrak API dengan OpenAPI",
-  "url": "b-fondasi/b1-4-openapi/",
-  "tanya": "Kenapa kontrak OpenAPI berguna saat meminta AI menulis endpoint?",
-  "jawab": "AI mendapat bentuk request, response, dan error yang tepat, bukan tebakan dari deskripsi. Hasilnya juga bisa dicek: response kode AI harus cocok dengan kontrak."
- },
- {
   "id": "B2.1-1",
   "halaman": "B2.1",
-  "judul": "1.8 Data modeling dan relasi",
+  "judul": "1.12 Data modeling dan relasi",
   "url": "b-fondasi/b2-1-data-modeling/",
   "tanya": "Ani mengganti nama warungnya. Pesanan bulan lalu sebaiknya menampilkan nama lama atau nama baru, dan apa akibatnya ke desain tabel?",
   "jawab": "Untuk Rekeningo, nama baru, supaya Budi tetap mengenali tokonya. Jadi nama tidak disalin ke pesanan, cukup `toko_id`. Kalau suatu saat butuh nama persis seperti di struk, simpan salinannya di kolom terpisah, sama seperti harga."
@@ -178,7 +82,7 @@
  {
   "id": "B2.1-2",
   "halaman": "B2.1",
-  "judul": "1.8 Data modeling dan relasi",
+  "judul": "1.12 Data modeling dan relasi",
   "url": "b-fondasi/b2-1-data-modeling/",
   "tanya": "Jelaskan kenapa `harga` di `item_pesanan` disalin, padahal sudah ada di `produk`.",
   "jawab": "`produk.harga` adalah harga sekarang dan bisa berubah. Pesanan mencatat kejadian di masa lalu, dan totalnya sudah dibayar. Kalau harga hanya dirujuk, total pesanan lama ikut berubah setiap harga naik. Rekaman lab: harga nasi goreng Rp28.000, total pesanan 1 tetap Rp35.000."
@@ -186,7 +90,7 @@
  {
   "id": "B2.1-3",
   "halaman": "B2.1",
-  "judul": "1.8 Data modeling dan relasi",
+  "judul": "1.12 Data modeling dan relasi",
   "url": "b-fondasi/b2-1-data-modeling/",
   "tanya": "Di app Flutter dengan sqflite, kamu mendeklarasikan `REFERENCES` tapi data yatim tetap bisa masuk. Kenapa?",
   "jawab": "SQLite tidak menegakkan foreign key kecuali koneksi menjalankan `PRAGMA foreign_keys = ON`. Tanpa itu, `REFERENCES` hanya tulisan di skema. Panel Before di widget menunjukkan efeknya."
@@ -194,7 +98,7 @@
  {
   "id": "B2.2-1",
   "halaman": "B2.2",
-  "judul": "1.9 SQL atau NoSQL",
+  "judul": "1.13 SQL atau NoSQL",
   "url": "b-fondasi/b2-2-sql-vs-nosql/",
   "tanya": "Benar atau salah: \"Document database tidak punya transaction, jadi tidak bisa dipakai untuk uang.\"",
   "jawab": "Salah. Firestore dan MongoDB punya transaction multi-dokumen. Alasan memilih SQL untuk uang di Rekeningo adalah constraint dan relasi yang dijaga database, ditambah kebutuhan laporan, bukan ketiadaan transaction."
@@ -202,7 +106,7 @@
  {
   "id": "B2.2-2",
   "halaman": "B2.2",
-  "judul": "1.9 SQL atau NoSQL",
+  "judul": "1.13 SQL atau NoSQL",
   "url": "b-fondasi/b2-2-sql-vs-nosql/",
   "tanya": "Jelaskan kenapa \"lebih cepat\" bukan alasan yang cukup untuk memilih database di Tahap 1.",
   "jawab": "Kecepatan bergantung pada pola akses, dan setiap jenis cepat untuk pola yang berbeda. Di Tahap 1, puncaknya ±0,14 request per detik, jadi mesin apa pun cukup. Yang menentukan adalah kebenaran data: transaction, constraint, dan kemudahan query yang belum terpikir hari ini."
@@ -210,39 +114,135 @@
  {
   "id": "B2.2-3",
   "halaman": "B2.2",
-  "judul": "1.9 SQL atau NoSQL",
+  "judul": "1.13 SQL atau NoSQL",
   "url": "b-fondasi/b2-2-sql-vs-nosql/",
   "tanya": "Pengaturan notifikasi tiap user bentuknya sering berubah. Perlu database kedua?",
   "jawab": "Tidak. Kolom `jsonb` di PostgreSQL cukup. Satu database lebih sedikit untuk di-backup, dimonitor, dan dijaga konsistensinya."
  },
  {
-  "id": "B4.1-1",
-  "halaman": "B4.1",
-  "judul": "1.10 Migration: skema sebagai kode",
-  "url": "b-fondasi/b4-1-migration/",
-  "tanya": "Migration 2 sudah jalan di production. Raka sadar kolom `jumlah` seharusnya `bigint`, lalu mengedit file 2. Apa yang terjadi saat deploy?",
-  "jawab": "Tidak ada. Database sudah mencatat versi 2, jadi file 2 tidak dijalankan lagi. Production tetap memakai tipe lama, sementara database baru di laptop orang lain memakai tipe baru. Perbaikan yang benar adalah migration 4 yang mengubah tipe kolom."
+  "id": "B6-1",
+  "halaman": "B6",
+  "judul": "1.15 Validation dan error handling",
+  "url": "b-fondasi/b6-validation-error/",
+  "tanya": "Transfer ke akun sendiri ditolak di app. Di server tidak ada pemeriksaan, tapi tabel punya `CHECK (dari <> ke)`. Apa yang diterima `curl` yang mengirim transfer ke diri sendiri?",
+  "jawab": "`500` dengan pesan umum. PostgreSQL menolak baris itu, jadi data tetap benar. Tapi user tidak mendapat pesan yang jelas, dan error ini seharusnya memicu perbaikan: pindahkan aturannya ke logika bisnis, supaya dijawab `422` dengan `field: \"ke\"`."
  },
  {
-  "id": "B4.1-2",
-  "halaman": "B4.1",
-  "judul": "1.10 Migration: skema sebagai kode",
-  "url": "b-fondasi/b4-1-migration/",
-  "tanya": "Jelaskan kenapa alat migration menolak `migrate up` saat versinya dirty, padahal bisa saja mencoba lagi.",
-  "jawab": "Alat tidak tahu seberapa jauh migration yang gagal sempat berjalan. Mengulang bisa menjalankan statement yang sudah berhasil dua kali, atau melewati yang belum. Manusia harus memeriksa skema dulu, baru menandai versi yang benar dengan `force`."
+  "id": "B6-2",
+  "halaman": "B6",
+  "judul": "1.15 Validation dan error handling",
+  "url": "b-fondasi/b6-validation-error/",
+  "tanya": "Jelaskan kenapa `UPDATE ... WHERE saldo >= jumlah` tidak cukup melindungi dari jumlah negatif.",
+  "jawab": "Dengan jumlah −70.000, syaratnya jadi `saldo >= -70000`, yang selalu benar untuk saldo positif. Lalu `saldo - (-70000)` menambah saldo. Syarat itu melindungi dari saldo kurang, bukan dari input yang tidak masuk akal. Rekaman lab menunjukkan saldo Budi naik ke Rp170.000."
  },
  {
-  "id": "B4.1-3",
-  "halaman": "B4.1",
-  "judul": "1.10 Migration: skema sebagai kode",
-  "url": "b-fondasi/b4-1-migration/",
-  "tanya": "Di rekaman, kolom `telp` tidak ada setelah migration 3 gagal. Apa yang membuat PostgreSQL membatalkan `ADD COLUMN`?",
-  "jawab": "Isi file dikirim sebagai satu query berisi beberapa statement. PostgreSQL menjalankannya sebagai satu transaction implisit, jadi error di statement kedua membatalkan statement pertama juga."
+  "id": "B6-3",
+  "halaman": "B6",
+  "judul": "1.15 Validation dan error handling",
+  "url": "b-fondasi/b6-validation-error/",
+  "tanya": "Error dari database ditangkap dengan `catch (e) { return null; }`. Apa risikonya?",
+  "jawab": "Error di-swallow: tidak tercatat di log, dan pemanggil mengira tidak ada data. Bug jadi tidak terlihat, dan user mungkin melihat layar kosong tanpa penjelasan. Minimal catat errornya, lalu kembalikan error yang bisa dipetakan ke `500`."
+ },
+ {
+  "id": "B1.1-1",
+  "halaman": "B1.1",
+  "judul": "1.16 HTTP: method, status, header",
+  "url": "b-fondasi/b1-1-http/",
+  "tanya": "Budi mengirim `GET /akun/budi` dengan token yang sudah kedaluwarsa. Status apa yang tepat: `401` atau `403`?",
+  "jawab": "`401`. Token kedaluwarsa berarti server tidak bisa memastikan siapa pengirimnya. `403` dipakai kalau server tahu siapa kamu, tapi aksinya tidak diizinkan. Rekaman lab: `{\"detail\":\"token kedaluwarsa\"}` dengan status `401`."
+ },
+ {
+  "id": "B1.1-2",
+  "halaman": "B1.1",
+  "judul": "1.16 HTTP: method, status, header",
+  "url": "b-fondasi/b1-1-http/",
+  "tanya": "Jelaskan kenapa app tidak boleh bergantung pada teks \"Unprocessable Entity\" di status line.",
+  "jawab": "RFC 9112 menyatakan client harus mengabaikan teks itu, karena bisa diterjemahkan, diubah perantara, atau hilang di HTTP/2. Buktinya ada di lab: Go menulis \"Unprocessable Entity\", padahal RFC 9110 menamainya \"Unprocessable Content\". Yang bisa diandalkan hanya angka `422`."
+ },
+ {
+  "id": "B1.1-3",
+  "halaman": "B1.1",
+  "judul": "1.16 HTTP: method, status, header",
+  "url": "b-fondasi/b1-1-http/",
+  "tanya": "Response `201` membawa header `Location: /transfers/1`. Apa gunanya bagi app?",
+  "jawab": "App tahu alamat transfer yang baru dibuat. App bisa membukanya lagi, mis. untuk layar detail atau bukti transfer, tanpa menyusun URL sendiri."
+ },
+ {
+  "id": "B1.2-1",
+  "halaman": "B1.2",
+  "judul": "Resource dan format error",
+  "url": "b-fondasi/b1-2-resource-error/",
+  "tanya": "App menampilkan pesan dengan `if (body['detail'].contains('Saldo'))`. Apa yang salah?",
+  "jawab": "`detail` ditulis untuk manusia dan bisa berubah kapan saja, mis. diterjemahkan atau dirapikan. RFC 9457 melarang client mem-parse-nya. App harus memilih pesan dari `type`, lalu mengambil angka dari extension member seperti `saldo`."
+ },
+ {
+  "id": "B1.2-2",
+  "halaman": "B1.2",
+  "judul": "Resource dan format error",
+  "url": "b-fondasi/b1-2-resource-error/",
+  "tanya": "Jelaskan kenapa `POST /transfers` lebih baik daripada `POST /doTransfer`, padahal keduanya bekerja.",
+  "jawab": "Method sudah menyatakan aksinya. Dengan nama benda, satu path bisa melayani beberapa aksi: `POST /transfers` membuat, `GET /transfers/7` membaca. Pola URL jadi bisa ditebak, dan log serta metric per resource lebih mudah dikelompokkan."
+ },
+ {
+  "id": "B1.2-3",
+  "halaman": "B1.2",
+  "judul": "Resource dan format error",
+  "url": "b-fondasi/b1-2-resource-error/",
+  "tanya": "Transfer ke `cici` (akun tidak ada) dijawab `422` dengan `errors: [{\"field\": \"ke\", ...}]`. Bagaimana app memakainya?",
+  "jawab": "App menampilkan pesan di bawah input \"Kirim ke\", bukan toast umum. Field `field` memberi tahu input mana yang salah. Lihat layar ketiga di widget."
+ },
+ {
+  "id": "B1.4-1",
+  "halaman": "B1.4",
+  "judul": "1.18 Kontrak API dengan OpenAPI",
+  "url": "b-fondasi/b1-4-openapi/",
+  "tanya": "App v1.4 masih banyak dipakai. Endpoint transfer ingin menambah field `catatan` yang wajib di request. Aman?",
+  "jawab": "Tidak. App v1.4 tidak mengirim `catatan`, jadi semua transfernya akan ditolak. Jadikan opsional dulu, dengan nilai bawaan di server. Baru wajibkan setelah versi minimum app dinaikkan (1.33 App versi lama yang tidak bisa dipaksa update)."
+ },
+ {
+  "id": "B1.4-2",
+  "halaman": "B1.4",
+  "judul": "1.18 Kontrak API dengan OpenAPI",
+  "url": "b-fondasi/b1-4-openapi/",
+  "tanya": "Jelaskan kenapa lint OpenAPI saja tidak cukup untuk melindungi app lama.",
+  "jawab": "Lint memeriksa apakah file valid dan rapi. Kontrak yang menghapus field `saldo` tetap valid. Yang menangkapnya adalah perbandingan dengan kontrak sebelumnya, seperti `oasdiff breaking` di rekaman."
+ },
+ {
+  "id": "B1.4-3",
+  "halaman": "B1.4",
+  "judul": "1.18 Kontrak API dengan OpenAPI",
+  "url": "b-fondasi/b1-4-openapi/",
+  "tanya": "Kenapa kontrak OpenAPI berguna saat meminta AI menulis endpoint?",
+  "jawab": "AI mendapat bentuk request, response, dan error yang tepat, bukan tebakan dari deskripsi. Hasilnya juga bisa dicek: response kode AI harus cocok dengan kontrak."
+ },
+ {
+  "id": "B7.1-1",
+  "halaman": "B7.1",
+  "judul": "1.21 Lapisan dasar",
+  "url": "b-fondasi/b7-1-lapisan-dasar/",
+  "tanya": "Fitur transfer terjadwal dijalankan worker tiap tanggal 1. Lapisan mana yang dipakai worker?",
+  "jawab": "Logika bisnis dan akses data. Worker tidak menerima HTTP request, jadi handler tidak terlibat. Karena aturan ada di `Layanan.Transfer`, batas dan cek saldo otomatis berlaku untuk transfer terjadwal."
+ },
+ {
+  "id": "B7.1-2",
+  "halaman": "B7.1",
+  "judul": "1.21 Lapisan dasar",
+  "url": "b-fondasi/b7-1-lapisan-dasar/",
+  "tanya": "Jelaskan kenapa pemetaan `ErrSaldoKurang` ke `422` ditulis di handler, bukan di logika bisnis.",
+  "jawab": "Status code adalah konsep HTTP. Worker atau test tidak butuh `422`, mereka butuh tahu \"saldo kurang\". Kalau logika bisnis mengembalikan status HTTP, ia jadi bergantung pada HTTP dan sulit dipakai di luar request."
+ },
+ {
+  "id": "B7.1-3",
+  "halaman": "B7.1",
+  "judul": "1.21 Lapisan dasar",
+  "url": "b-fondasi/b7-1-lapisan-dasar/",
+  "tanya": "AI menghasilkan `TransferService`, `TransferServiceImpl`, `TransferRepository`, `TransferRepositoryImpl`, `TransferDTO`, `TransferEntity`, dan `TransferMapper` untuk satu endpoint. Apa yang kamu tanyakan?",
+  "jawab": "Masalah apa yang dijawab setiap file. Interface tanpa implementasi kedua, atau DTO dan entity yang bentuknya sama, menambah kode tanpa manfaat. Pertahankan yang punya alasan, mis. interface yang dipakai unit test."
  },
  {
   "id": "B3.1-1",
   "halaman": "B3.1",
-  "judul": "1.11 Transaction",
+  "judul": "1.23 Transaction",
   "url": "b-fondasi/b3-1-transaction/",
   "tanya": "Kode Go ini memakai `db.ExecContext` (bukan `tx.ExecContext`) untuk `UPDATE` pertama. `UPDATE` kedua lewat `tx` dan gagal. Berapa total saldo sesudahnya?",
   "jawab": "Total jadi Rp1.010.000, sama seperti panel Before. `db.ExecContext` berjalan di luar transaction, jadi langsung permanen. `tx.Rollback()` hanya membatalkan perintah yang lewat `tx`. Dokumentasi Go memperingatkan hal ini secara khusus: jangan memanggil method `sql.DB` di dalam transaction (sumber).",
@@ -251,7 +251,7 @@
  {
   "id": "B3.1-2",
   "halaman": "B3.1",
-  "judul": "1.11 Transaction",
+  "judul": "1.23 Transaction",
   "url": "b-fondasi/b3-1-transaction/",
   "tanya": "Di Django, kamu menangkap `IntegrityError` di dalam blok `atomic()`, lalu menjalankan query lain di blok yang sama. Apa risikonya?",
   "jawab": "Setelah error database, transaction sudah dalam keadaan rusak. Query berikutnya bisa gagal dengan `TransactionManagementError`. Dokumentasi Django menyarankan membungkus bagian yang boleh gagal dengan `atomic()` sendiri, lalu menangkap error di luar blok itu (sumber)."
@@ -259,15 +259,39 @@
  {
   "id": "B3.1-3",
   "halaman": "B3.1",
-  "judul": "1.11 Transaction",
+  "judul": "1.23 Transaction",
   "url": "b-fondasi/b3-1-transaction/",
   "tanya": "Jelaskan dalam satu kalimat: kenapa memanggil API payment gateway di dalam transaction itu ide buruk?",
   "jawab": "Kalau transaction di-rollback, uang di payment gateway sudah terlanjur ditarik, karena API luar tidak ikut rollback. Selain itu, koneksi dan lock tertahan selama menunggu respons yang bisa lambat."
  },
  {
+  "id": "B4.1-1",
+  "halaman": "B4.1",
+  "judul": "1.25 Migration: skema sebagai kode",
+  "url": "b-fondasi/b4-1-migration/",
+  "tanya": "Migration 2 sudah jalan di production. Raka sadar kolom `jumlah` seharusnya `bigint`, lalu mengedit file 2. Apa yang terjadi saat deploy?",
+  "jawab": "Tidak ada. Database sudah mencatat versi 2, jadi file 2 tidak dijalankan lagi. Production tetap memakai tipe lama, sementara database baru di laptop orang lain memakai tipe baru. Perbaikan yang benar adalah migration 4 yang mengubah tipe kolom."
+ },
+ {
+  "id": "B4.1-2",
+  "halaman": "B4.1",
+  "judul": "1.25 Migration: skema sebagai kode",
+  "url": "b-fondasi/b4-1-migration/",
+  "tanya": "Jelaskan kenapa alat migration menolak `migrate up` saat versinya dirty, padahal bisa saja mencoba lagi.",
+  "jawab": "Alat tidak tahu seberapa jauh migration yang gagal sempat berjalan. Mengulang bisa menjalankan statement yang sudah berhasil dua kali, atau melewati yang belum. Manusia harus memeriksa skema dulu, baru menandai versi yang benar dengan `force`."
+ },
+ {
+  "id": "B4.1-3",
+  "halaman": "B4.1",
+  "judul": "1.25 Migration: skema sebagai kode",
+  "url": "b-fondasi/b4-1-migration/",
+  "tanya": "Di rekaman, kolom `telp` tidak ada setelah migration 3 gagal. Apa yang membuat PostgreSQL membatalkan `ADD COLUMN`?",
+  "jawab": "Isi file dikirim sebagai satu query berisi beberapa statement. PostgreSQL menjalankannya sebagai satu transaction implisit, jadi error di statement kedua membatalkan statement pertama juga."
+ },
+ {
   "id": "B5.1-1",
   "halaman": "B5.1",
-  "judul": "1.12 Authentication: session atau token",
+  "judul": "1.27 Authentication: session atau token",
   "url": "b-fondasi/b5-1-authentication/",
   "tanya": "Budi mendekode token-nya dan membaca `\"sub\": \"budi\"`. Apakah ini celah keamanan?",
   "jawab": "Bukan. Payload JWT memang tidak rahasia, hanya tidak bisa diubah tanpa ketahuan. Karena itu, jangan pernah menaruh data rahasia (PIN, nomor identitas) di payload."
@@ -275,7 +299,7 @@
  {
   "id": "B5.1-2",
   "halaman": "B5.1",
-  "judul": "1.12 Authentication: session atau token",
+  "judul": "1.27 Authentication: session atau token",
   "url": "b-fondasi/b5-1-authentication/",
   "tanya": "HP Budi hilang. Dengan JWT 15 menit + refresh token, apa yang dilakukan server supaya pencuri tidak bisa memakai akun Budi?",
   "jawab": "Mencabut refresh token milik HP itu di database. Token akses yang sudah ada masih berlaku sampai `exp`, paling lama 15 menit. Setelah itu, refresh ditolak dan pencuri harus login ulang, padahal ia tidak tahu PIN."
@@ -283,7 +307,7 @@
  {
   "id": "B5.1-3",
   "halaman": "B5.1",
-  "judul": "1.12 Authentication: session atau token",
+  "judul": "1.27 Authentication: session atau token",
   "url": "b-fondasi/b5-1-authentication/",
   "tanya": "Jelaskan kenapa server harus menolak token dengan `\"alg\": \"none\"`, walau token itu \"valid\" menurut format JWT.",
   "jawab": "`\"none\"` berarti tanpa signature. Kalau server mempercayai algoritma dari header token, siapa pun bisa membuat token tanpa secret. RFC 8725 mewajibkan daftar algoritma yang diizinkan ditentukan server, bukan oleh token."
@@ -291,7 +315,7 @@
  {
   "id": "B5.3-1",
   "halaman": "B5.3",
-  "judul": "1.13 Authorization: siapa boleh apa",
+  "judul": "1.28 Authorization: siapa boleh apa",
   "url": "b-fondasi/b5-3-authorization/",
   "tanya": "Endpoint `GET /transfers/{id}` sudah memeriksa token. Apa yang masih kurang?",
   "jawab": "Cek bahwa transfer itu milik peminta: peminta adalah pengirim atau penerima. Tanpa itu, Budi bisa membaca transfer siapa pun dengan menebak ID, yang biasanya berurutan."
@@ -299,7 +323,7 @@
  {
   "id": "B5.3-2",
   "halaman": "B5.3",
-  "judul": "1.13 Authorization: siapa boleh apa",
+  "judul": "1.28 Authorization: siapa boleh apa",
   "url": "b-fondasi/b5-3-authorization/",
   "tanya": "Jelaskan kenapa menyembunyikan tombol di app bukan authorization.",
   "jawab": "Request bisa dikirim tanpa app, mis. lewat proxy atau `curl`, dengan token yang sah. Server tidak bisa membedakan request dari tombol dan request buatan tangan. Hanya pemeriksaan di server yang berlaku untuk semua jalur."
@@ -307,63 +331,15 @@
  {
   "id": "B5.3-3",
   "halaman": "B5.3",
-  "judul": "1.13 Authorization: siapa boleh apa",
+  "judul": "1.28 Authorization: siapa boleh apa",
   "url": "b-fondasi/b5-3-authorization/",
   "tanya": "Di rekaman RLS, `UPDATE akun SET saldo = 0 WHERE id = 'ani'` sebagai Budi menghasilkan `UPDATE 0`. Kenapa bukan error?",
   "jawab": "Policy menyaring baris yang terlihat. Bagi Budi, baris Ani tidak ada, jadi `UPDATE` tidak menemukan baris untuk diubah. Artinya, kode yang memakai RLS harus memeriksa jumlah baris berubah, bukan hanya ada tidaknya error."
  },
  {
-  "id": "B7.1-1",
-  "halaman": "B7.1",
-  "judul": "1.14 Lapisan dasar",
-  "url": "b-fondasi/b7-1-lapisan-dasar/",
-  "tanya": "Fitur transfer terjadwal dijalankan worker tiap tanggal 1. Lapisan mana yang dipakai worker?",
-  "jawab": "Logika bisnis dan akses data. Worker tidak menerima HTTP request, jadi handler tidak terlibat. Karena aturan ada di `Layanan.Transfer`, batas dan cek saldo otomatis berlaku untuk transfer terjadwal."
- },
- {
-  "id": "B7.1-2",
-  "halaman": "B7.1",
-  "judul": "1.14 Lapisan dasar",
-  "url": "b-fondasi/b7-1-lapisan-dasar/",
-  "tanya": "Jelaskan kenapa pemetaan `ErrSaldoKurang` ke `422` ditulis di handler, bukan di logika bisnis.",
-  "jawab": "Status code adalah konsep HTTP. Worker atau test tidak butuh `422`, mereka butuh tahu \"saldo kurang\". Kalau logika bisnis mengembalikan status HTTP, ia jadi bergantung pada HTTP dan sulit dipakai di luar request."
- },
- {
-  "id": "B7.1-3",
-  "halaman": "B7.1",
-  "judul": "1.14 Lapisan dasar",
-  "url": "b-fondasi/b7-1-lapisan-dasar/",
-  "tanya": "AI menghasilkan `TransferService`, `TransferServiceImpl`, `TransferRepository`, `TransferRepositoryImpl`, `TransferDTO`, `TransferEntity`, dan `TransferMapper` untuk satu endpoint. Apa yang kamu tanyakan?",
-  "jawab": "Masalah apa yang dijawab setiap file. Interface tanpa implementasi kedua, atau DTO dan entity yang bentuknya sama, menambah kode tanpa manfaat. Pertahankan yang punya alasan, mis. interface yang dipakai unit test."
- },
- {
-  "id": "C1-1",
-  "halaman": "C1",
-  "judul": "1.15 Testing: apa dites di level mana",
-  "url": "c-operasional/c1-testing/",
-  "tanya": "AI menulis test transfer dengan mock repository yang selalu mengembalikan \"sukses\". Test lolos. Apa yang belum terbukti?",
-  "jawab": "Semua yang dikerjakan database: SQL-nya benar, constraint berlaku, transaction rollback saat gagal, dan lock mencegah race. Mock hanya membuktikan logika bisnis memanggil method yang benar."
- },
- {
-  "id": "C1-2",
-  "halaman": "C1",
-  "judul": "1.15 Testing: apa dites di level mana",
-  "url": "c-operasional/c1-testing/",
-  "tanya": "Jelaskan kenapa regression test race di rekaman memeriksa total saldo, bukan saldo Budi saja.",
-  "jawab": "Urutan dua request paralel tidak bisa ditebak, jadi saldo akhir Budi bisa Rp30.000 atau Rp50.000, dan keduanya sah. Yang selalu benar adalah invarian: total uang Budi + Ani tetap Rp350.000. Di mode naif, total juga bergantung urutan: rekaman ini Rp400.000 (Rp50.000 tercipta), dan run lain bisa Rp420.000 (Rp70.000 tercipta)."
- },
- {
-  "id": "C1-3",
-  "halaman": "C1",
-  "judul": "1.15 Testing: apa dites di level mana",
-  "url": "c-operasional/c1-testing/",
-  "tanya": "`go test -race ./...` lolos tanpa peringatan. Apakah endpoint transfer aman dari race condition?",
-  "jawab": "Belum tentu. Race detector hanya melihat akses memori di dalam proses Go. Race di 2.1 Race condition terjadi di antara dua transaction di PostgreSQL, di luar pengamatannya. Yang membuktikan adalah test dengan request paralel ke database sungguhan."
- },
- {
   "id": "C3-1",
   "halaman": "C3",
-  "judul": "1.16 Deployment dan rollback",
+  "judul": "1.31 Deployment dan rollback",
   "url": "c-operasional/c3-deployment/",
   "tanya": "Rollback ke image v2 berhasil, health check 200, tapi semua request profil error `column \"telp\" does not exist`. Apa yang terjadi?",
   "jawab": "Deploy v3 sudah menjalankan migration yang menghapus atau me-rename kolom `telp`. Image v2 masih membaca kolom itu. Rollback kode tidak membatalkan migration. Karena itu migration harus kompatibel mundur: hapus kolom hanya setelah kode yang memakainya sudah tidak mungkin di-rollback (2.8 Ubah skema tanpa downtime)."
@@ -371,7 +347,7 @@
  {
   "id": "C3-2",
   "halaman": "C3",
-  "judul": "1.16 Deployment dan rollback",
+  "judul": "1.31 Deployment dan rollback",
   "url": "c-operasional/c3-deployment/",
   "tanya": "Jelaskan kenapa aplikasi sebaiknya menolak start kalau `TOKEN_SECRET` kosong, bukan memakai nilai bawaan.",
   "jawab": "Dengan nilai bawaan, aplikasi tampak sehat tapi menandatangani token dengan secret yang diketahui siapa pun yang membaca kodenya. Kesalahan konfigurasi jadi celah keamanan yang tidak terlihat. Dengan fail-fast, kesalahan langsung terlihat di log dan health check, lalu deploy di-rollback."
@@ -379,15 +355,63 @@
  {
   "id": "C3-3",
   "halaman": "C3",
-  "judul": "1.16 Deployment dan rollback",
+  "judul": "1.31 Deployment dan rollback",
   "url": "c-operasional/c3-deployment/",
   "tanya": "Health check hanya mengembalikan `200` tanpa memeriksa apa pun. Apa yang terlewat?",
   "jawab": "Instance yang tidak bisa menghubungi database tetap dianggap sehat, dan deploy dinyatakan berhasil. Health check di lab memanggil `PingContext` ke database supaya kegagalan koneksi terlihat."
  },
  {
+  "id": "C1-1",
+  "halaman": "C1",
+  "judul": "1.32 Testing: apa dites di level mana",
+  "url": "c-operasional/c1-testing/",
+  "tanya": "AI menulis test transfer dengan mock repository yang selalu mengembalikan \"sukses\". Test lolos. Apa yang belum terbukti?",
+  "jawab": "Semua yang dikerjakan database: SQL-nya benar, constraint berlaku, transaction rollback saat gagal, dan lock mencegah race. Mock hanya membuktikan logika bisnis memanggil method yang benar."
+ },
+ {
+  "id": "C1-2",
+  "halaman": "C1",
+  "judul": "1.32 Testing: apa dites di level mana",
+  "url": "c-operasional/c1-testing/",
+  "tanya": "Jelaskan kenapa regression test race di rekaman memeriksa total saldo, bukan saldo Budi saja.",
+  "jawab": "Urutan dua request paralel tidak bisa ditebak, jadi saldo akhir Budi bisa Rp30.000 atau Rp50.000, dan keduanya sah. Yang selalu benar adalah invarian: total uang Budi + Ani tetap Rp350.000. Di mode naif, total juga bergantung urutan: rekaman ini Rp400.000 (Rp50.000 tercipta), dan run lain bisa Rp420.000 (Rp70.000 tercipta)."
+ },
+ {
+  "id": "C1-3",
+  "halaman": "C1",
+  "judul": "1.32 Testing: apa dites di level mana",
+  "url": "c-operasional/c1-testing/",
+  "tanya": "`go test -race ./...` lolos tanpa peringatan. Apakah endpoint transfer aman dari race condition?",
+  "jawab": "Belum tentu. Race detector hanya melihat akses memori di dalam proses Go. Race di 2.1 Race condition terjadi di antara dua transaction di PostgreSQL, di luar pengamatannya. Yang membuktikan adalah test dengan request paralel ke database sungguhan."
+ },
+ {
+  "id": "E1-1",
+  "halaman": "E1",
+  "judul": "1.33 App versi lama yang tidak bisa dipaksa update",
+  "url": "e-mobile/e1-app-versi-lama/",
+  "tanya": "Kenapa app membaca `/config` saat dibuka, bukan saat request pertama gagal?",
+  "jawab": "Kalau menunggu gagal, Budi sudah melihat error atau crash lebih dulu. Membaca di awal memberi kesempatan menampilkan layar update yang jelas sebelum fitur yang rusak dipakai."
+ },
+ {
+  "id": "E1-2",
+  "halaman": "E1",
+  "judul": "1.33 App versi lama yang tidak bisa dipaksa update",
+  "url": "e-mobile/e1-app-versi-lama/",
+  "tanya": "Jelaskan kenapa `426 Upgrade Required` kurang tepat untuk \"versi app terlalu lama\".",
+  "jawab": "RFC 9110 mendefinisikan `426` untuk meminta client pindah protokol, dengan header `Upgrade` yang wajib. Versi app bukan protokol. Memakai `426` tetap bisa berjalan kalau app memahaminya, tapi maknanya tidak sesuai standar dan bisa membingungkan proxy atau developer lain."
+ },
+ {
+  "id": "E1-3",
+  "halaman": "E1",
+  "judul": "1.33 App versi lama yang tidak bisa dipaksa update",
+  "url": "e-mobile/e1-app-versi-lama/",
+  "tanya": "Metric menunjukkan 3% request masih dari v1.4. Apa yang kamu lakukan sebelum menaikkan versi minimum?",
+  "jawab": "Naikkan `versi_disarankan` dulu supaya app menampilkan ajakan update yang bisa dilewati. Pantau beberapa minggu, cek apakah ada kelompok yang tidak bisa update (OS lama), lalu putuskan bersama pemilik produk. Baru kemudian naikkan versi minimum."
+ },
+ {
   "id": "D1-1",
   "halaman": "D1",
-  "judul": "1.17 Kerangka berpikir dan estimasi",
+  "judul": "1.38 Kerangka berpikir dan estimasi",
   "url": "d-system-design/d1-kerangka-berpikir/",
   "tanya": "Tahap 2 punya 1.000 user, 30% aktif, 40 request per user aktif, faktor puncak 10. Hitung puncak request per detik.",
   "jawab": "DAU = 1.000 × 30% = 300. Request per hari = 300 × 40 = 12.000. Rata-rata = 12.000 ÷ 86.400 ≈ 0,14 per detik. Puncak ≈ 1,4 per detik."
@@ -395,7 +419,7 @@
  {
   "id": "D1-2",
   "halaman": "D1",
-  "judul": "1.17 Kerangka berpikir dan estimasi",
+  "judul": "1.38 Kerangka berpikir dan estimasi",
   "url": "d-system-design/d1-kerangka-berpikir/",
   "tanya": "Jelaskan kenapa angka puncak RPS saja tidak cukup untuk memutuskan perlu menambah server.",
   "jawab": "Beban juga bergantung pada lama kerja setiap request dan sumber daya yang dipegangnya, mis. koneksi database. 17 request per detik bisa ringan atau berat, tergantung apakah tiap request menahan koneksi 20 ms atau 2 detik. Kapasitas server hanya bisa diketahui lewat pengukuran."
@@ -403,7 +427,7 @@
  {
   "id": "D1-3",
   "halaman": "D1",
-  "judul": "1.17 Kerangka berpikir dan estimasi",
+  "judul": "1.38 Kerangka berpikir dan estimasi",
   "url": "d-system-design/d1-kerangka-berpikir/",
   "tanya": "Sinta meminta \"sistem harus bisa menangani sejuta user\". Apa pertanyaan pertamamu?",
   "jawab": "Kapan, dan berapa yang aktif bersamaan? Sejuta user terdaftar dengan 20% aktif harian berbeda jauh dari sejuta user online di detik yang sama. Pertanyaan itu mengubah permintaan jadi angka yang bisa dihitung, lalu diputuskan per tahap."
@@ -411,7 +435,7 @@
  {
   "id": "F1-1",
   "halaman": "F1",
-  "judul": "1.18 Menulis spesifikasi untuk AI",
+  "judul": "1.39 Menulis spesifikasi untuk AI",
   "url": "f-ai-belajar/f1-spesifikasi-untuk-ai/",
   "tanya": "Spesifikasimu berisi \"pastikan aman dari race condition\". Kenapa kalimat ini lemah?",
   "jawab": "Tidak bisa dicek. AI bisa menjawab dengan menambah komentar atau mutex di memori, yang tidak melindungi dari dua instance. Tulis sifatnya (UPDATE atomik dengan syarat saldo, dibahas di 2.1 Race condition) dan test penerimaannya (dua transfer paralel, total saldo tetap)."
@@ -419,15 +443,15 @@
  {
   "id": "F1-2",
   "halaman": "F1",
-  "judul": "1.18 Menulis spesifikasi untuk AI",
+  "judul": "1.39 Menulis spesifikasi untuk AI",
   "url": "f-ai-belajar/f1-spesifikasi-untuk-ai/",
   "tanya": "Jelaskan kenapa aturan \"pengirim selalu dari token\" perlu ditulis eksplisit.",
-  "jawab": "Bentuk yang paling umum di contoh internet adalah `{\"dari\": ..., \"ke\": ..., \"jumlah\": ...}`. Tanpa aturan itu, AI mungkin mempercayai `dari` dari body, dan siapa pun bisa mentransfer dari akun orang lain. Ini masalah authorization (1.13 Authorization) yang tidak terlihat di demo."
+  "jawab": "Bentuk yang paling umum di contoh internet adalah `{\"dari\": ..., \"ke\": ..., \"jumlah\": ...}`. Tanpa aturan itu, AI mungkin mempercayai `dari` dari body, dan siapa pun bisa mentransfer dari akun orang lain. Ini masalah authorization (1.28 Authorization) yang tidak terlihat di demo."
  },
  {
   "id": "F1-3",
   "halaman": "F1",
-  "judul": "1.18 Menulis spesifikasi untuk AI",
+  "judul": "1.39 Menulis spesifikasi untuk AI",
   "url": "f-ai-belajar/f1-spesifikasi-untuk-ai/",
   "tanya": "Apa gunanya bagian Batasan?",
   "jawab": "Membatasi luas perubahan: tidak ada dependency baru, migration lama tidak disentuh, endpoint lain tidak diubah. Perubahan di luar lingkup sulit direview dan bisa merusak hal yang tidak kamu periksa."
@@ -435,7 +459,7 @@
  {
   "id": "F2-1",
   "halaman": "F2",
-  "judul": "1.19 Review kode backend buatan AI",
+  "judul": "Review kode backend buatan AI",
   "url": "f-ai-belajar/f2-review-kode-ai/",
   "tanya": "gosec melaporkan \"Errors unhandled\" di 8 baris. Kamu memperbaiki semuanya dan gosec bersih. Masalah apa yang masih ada di handler contoh?",
   "jawab": "Enam masalah tersisa, dan tidak satu pun ditandai alat di rekaman: - SQL disusun dari string input user. - Pengirim diambil dari body. - Uang memakai `float64`. - Saldo dihitung dengan baca-lalu-tulis. - Saldo kurang dijawab `200`. - HTTP keluar di dalam transaction."
@@ -443,7 +467,7 @@
  {
   "id": "F2-2",
   "halaman": "F2",
-  "judul": "1.19 Review kode backend buatan AI",
+  "judul": "Review kode backend buatan AI",
   "url": "f-ai-belajar/f2-review-kode-ai/",
   "tanya": "Jelaskan kenapa izin diperiksa lebih dulu dari penamaan.",
   "jawab": "Kesalahan izin membuka data atau uang orang lain, dan dampaknya tidak bisa dibatalkan setelah dieksploitasi. Penamaan yang buruk hanya memperlambat developer. Review punya waktu dan perhatian terbatas, jadi dipakai untuk risiko terbesar dulu."
@@ -451,7 +475,7 @@
  {
   "id": "F2-3",
   "halaman": "F2",
-  "judul": "1.19 Review kode backend buatan AI",
+  "judul": "Review kode backend buatan AI",
   "url": "f-ai-belajar/f2-review-kode-ai/",
   "tanya": "AI mengusulkan Redis cache untuk saldo di Tahap 1. Pertanyaan mana dari daftar di atas yang paling cepat memutuskan?",
   "jawab": "Pertanyaan 1: metric mana yang menunjukkan masalahnya hari ini. Di Tahap 1, puncaknya ±0,14 request per detik, jadi tidak ada masalah kecepatan. Pertanyaan 3 juga menentukan: saldo di cache bisa stale, padahal saldo adalah data uang."
@@ -650,30 +674,6 @@
   "jawab": "Kode versi sebelumnya masih membaca kolom `telp`, padahal kolomnya sudah hilang. Rollback kode jadi gagal. Karena itu contract di database biasanya dijalankan satu deploy setelah kode berhenti memakai kolom lama."
  },
  {
-  "id": "E1-1",
-  "halaman": "E1",
-  "judul": "2.9 App versi lama yang tidak bisa dipaksa update",
-  "url": "e-mobile/e1-app-versi-lama/",
-  "tanya": "Kenapa app membaca `/config` saat dibuka, bukan saat request pertama gagal?",
-  "jawab": "Kalau menunggu gagal, Budi sudah melihat error atau crash lebih dulu. Membaca di awal memberi kesempatan menampilkan layar update yang jelas sebelum fitur yang rusak dipakai."
- },
- {
-  "id": "E1-2",
-  "halaman": "E1",
-  "judul": "2.9 App versi lama yang tidak bisa dipaksa update",
-  "url": "e-mobile/e1-app-versi-lama/",
-  "tanya": "Jelaskan kenapa `426 Upgrade Required` kurang tepat untuk \"versi app terlalu lama\".",
-  "jawab": "RFC 9110 mendefinisikan `426` untuk meminta client pindah protokol, dengan header `Upgrade` yang wajib. Versi app bukan protokol. Memakai `426` tetap bisa berjalan kalau app memahaminya, tapi maknanya tidak sesuai standar dan bisa membingungkan proxy atau developer lain."
- },
- {
-  "id": "E1-3",
-  "halaman": "E1",
-  "judul": "2.9 App versi lama yang tidak bisa dipaksa update",
-  "url": "e-mobile/e1-app-versi-lama/",
-  "tanya": "Metric menunjukkan 3% request masih dari v1.4. Apa yang kamu lakukan sebelum menaikkan versi minimum?",
-  "jawab": "Naikkan `versi_disarankan` dulu supaya app menampilkan ajakan update yang bisa dilewati. Pantau beberapa minggu, cek apakah ada kelompok yang tidak bisa update (OS lama), lalu putuskan bersama pemilik produk. Baru kemudian naikkan versi minimum."
- },
- {
   "id": "C2-1",
   "halaman": "C2",
   "judul": "3.1 Observability: log, metric, trace",
@@ -815,7 +815,7 @@
   "judul": "3.6 Caching dan invalidation",
   "url": "b-fondasi/b9-caching/",
   "tanya": "Ada tiga endpoint yang bisa mengubah harga produk, dan hanya dua yang menghapus cache. Apa akibatnya, dan apa pengamannya?",
-  "jawab": "Perubahan lewat endpoint ketiga tidak terlihat sampai TTL habis. Pengamannya: TTL yang tetap dipasang, dan menaruh logika \"ubah harga\" di satu fungsi di logika bisnis (1.14 Lapisan dasar) yang selalu menghapus cache."
+  "jawab": "Perubahan lewat endpoint ketiga tidak terlihat sampai TTL habis. Pengamannya: TTL yang tetap dipasang, dan menaruh logika \"ubah harga\" di satu fungsi di logika bisnis (1.21 Lapisan dasar) yang selalu menghapus cache."
  },
  {
   "id": "C4-1",
@@ -943,7 +943,7 @@
   "judul": "4.4 OAuth dan login sosial",
   "url": "b-fondasi/b5-2-oauth-oidc/",
   "tanya": "App Rekeningo versi baru selalu mengirim PKCE, tapi server identitas tidak mewajibkannya. Apakah serangan di widget sudah tertutup?",
-  "jawab": "Belum. App versi lama yang belum mengirim PKCE masih terpasang di banyak HP (2.9 App versi lama yang tidak bisa dipaksa update). Selama server menerima alur tanpa PKCE, code dari versi lama bisa dicegat dan ditukar. Serangan baru tertutup setelah server menolak setiap alur tanpa PKCE."
+  "jawab": "Belum. App versi lama yang belum mengirim PKCE masih terpasang di banyak HP (1.33 App versi lama yang tidak bisa dipaksa update). Selama server menerima alur tanpa PKCE, code dari versi lama bisa dicegat dan ditukar. Serangan baru tertutup setelah server menolak setiap alur tanpa PKCE."
  },
  {
   "id": "B5.2-2",
@@ -959,7 +959,7 @@
   "judul": "4.4 OAuth dan login sosial",
   "url": "b-fondasi/b5-2-oauth-oidc/",
   "tanya": "Setelah login sosial berhasil, apakah app sebaiknya memakai ID token untuk setiap request ke API Rekeningo?",
-  "jawab": "Tidak. ID token adalah bukti identitas saat login, dengan masa berlaku dari server identitas. Rekeningo menukarnya dengan token Rekeningo sendiri, yang umur, refresh, dan pencabutannya dikendalikan Rekeningo (1.12 Authentication)."
+  "jawab": "Tidak. ID token adalah bukti identitas saat login, dengan masa berlaku dari server identitas. Rekeningo menukarnya dengan token Rekeningo sendiri, yang umur, refresh, dan pencabutannya dikendalikan Rekeningo (1.27 Authentication)."
  },
  {
   "id": "B7.2-1",
@@ -991,7 +991,7 @@
   "judul": "4.6 Template ADR",
   "url": "d-system-design/d5-adr/",
   "tanya": "Rekeningo memutuskan saldo kurang dijawab `422`. Tulis bagian \"Alternatif yang ditolak\" dalam dua butir.",
-  "jawab": "Contoh: \"`400`: ditolak, supaya `400` tetap berarti format salah dan app bisa membedakannya dari saldo kurang.\" \"`409`: sah juga, tapi ditolak supaya `409` disimpan untuk bentrok versi data.\" Alasan lengkapnya ada di 1.3 Perjalanan satu request."
+  "jawab": "Contoh: \"`400`: ditolak, supaya `400` tetap berarti format salah dan app bisa membedakannya dari saldo kurang.\" \"`409`: sah juga, tapi ditolak supaya `409` disimpan untuk bentrok versi data.\" Alasan lengkapnya ada di 1.5 Perjalanan satu request."
  },
  {
   "id": "D5-2",

@@ -1,39 +1,45 @@
-// Sidebar Starlight dari cerita.json: satu grup per tahap, sub-grup per kelompok, ★ untuk jalur inti.
-// Halaman yang belum dipindah ke situs baru tetap tampil (urutan dan nomor tidak berubah) dengan kelas
-// nav-menyusul; link-nya mengarah ke path yang akan dipakai setelah dipindah (keputusan 104).
-import { muat, label, url } from "./registri.mjs";
+// Sidebar Starlight dari cerita.json: satu grup per tahap, ★ untuk jalur inti (keputusan 117).
+// Tahap 1 dikelompokkan per bagian naskah (PRD, fitur ke teknis, ...); tahap lain per kelompok lama dan ditandai
+// "versi lama". Halaman yang belum ditulis tetap tampil (urutan dan nomor tidak berubah) dengan kelas nav-menyusul
+// (keputusan 104). Peran yang ditonjolkan dibawa sebagai data-peran untuk pemilih peran.
+import { muat, label, url, byId } from "./registri.mjs";
 
-function item(h) {
-  const kelas = [h.inti ? "nav-inti" : "", h.diporting ? "" : "nav-menyusul"].filter(Boolean).join(" ");
+function item(h, by) {
+  const kelas = [h.inti ? "nav-inti" : "", h.ada ? "" : "nav-menyusul", h.lebur_ke || h.diganti_oleh ? "nav-lama" : ""]
+    .filter(Boolean).join(" ");
   const attrs = {};
   if (kelas) attrs.class = kelas;
-  if (!h.diporting) attrs.title = "Belum dipindah ke situs baru";
+  if (!h.ada) attrs.title = "Belum ditulis";
+  if (h.lebur_ke) attrs.title = `Versi lama; isinya digabung ke ${label(by[h.lebur_ke])}`;
+  if (h.diganti_oleh) attrs.title = `Versi lama; digantikan ${label(by[h.diganti_oleh])}`;
   if (h.inti) attrs["data-inti"] = "★ jalur inti";
+  if (h.peran?.length) attrs["data-peran"] = h.peran.join(" ");
   return { label: label(h), link: url(h), attrs };
 }
 
-function grupTahap(d, t) {
+function grupTahap(d, t, by) {
   const hs = d.halaman.filter((h) => h.tahap === t.no);
   const items = [];
   for (const h of hs) {
-    if (/^T\d$/.test(h.id)) { items.push(item(h)); continue; }
-    if (!h.kelompok) { items.push(item(h)); continue; } // tahap tanpa kelompok: daftar langsung, tanpa sub-grup
-    const kel = h.kelompok;
+    const kel = t.bagian ? t.bagian.find((b) => b.no === h.bagian)?.nama : h.kelompok;
+    if (/^T\d$/.test(h.id) || !kel) { items.push(item(h, by)); continue; }
     let g = items.find((x) => x.items && x.label === kel);
     if (!g) { g = { label: kel, collapsed: false, items: [] }; items.push(g); }
-    g.items.push(item(h));
+    g.items.push(item(h, by));
   }
-  return { label: `Tahap ${t.no} · ${t.nama}`, collapsed: true, items };
+  const versi = t.versi === "lama" ? " · versi lama" : "";
+  return { label: `Tahap ${t.no} · ${t.nama}${versi}`, collapsed: t.no !== 1, items };
 }
 
 export function sidebar() {
   const d = muat();
+  const by = byId(d);
   const out = [];
-  out.push({ label: "Pembuka", collapsed: false, items: d.halaman.filter((h) => h.tahap === "pembuka").map(item) });
-  for (const t of d.tahap) out.push(grupTahap(d, t));
+  out.push({ label: "Pembuka", collapsed: false, items: d.halaman.filter((h) => h.tahap === "pembuka").map((h) => item(h, by)) });
+  for (const t of d.tahap) out.push(grupTahap(d, t, by));
   const samping = d.halaman.filter((h) => h.tahap === "sampingan");
-  if (samping.length) out.push({ label: "Studi sampingan", collapsed: true, items: samping.map(item) });
+  if (samping.length) out.push({ label: "Studi sampingan", collapsed: true, items: samping.map((h) => item(h, by)) });
   const alat = d.halaman.filter((h) => h.tahap === "alat");
-  if (alat.length) out.push({ label: "Alat", collapsed: true, items: alat.map(item) });
+  if (alat.length) out.push({ label: "Alat", collapsed: true, items: alat.map((h) => item(h, by)) });
   return out;
 }

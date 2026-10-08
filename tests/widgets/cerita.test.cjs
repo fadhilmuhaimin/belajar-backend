@@ -21,10 +21,17 @@ test("cerita.json: lima tahap berurutan, diagram maks 6 elemen", () => {
   }
 });
 
-test("cerita.json sama dengan STORY.md (rentang user per tahap)", () => {
+// Tahap dengan naskah baru (plan/CERITA-TAHAP-N.md, keputusan 109) dicocokkan ke tabel skala naskah;
+// tahap versi lama tetap ke heading plan/STORY.md.
+test("cerita.json sama dengan naskah (rentang user per tahap)", () => {
   const story = read("plan/STORY.md");
   for (const t of json("situs/data/cerita.json").tahap) {
-    assert.ok(story.includes(`### Tahap ${t.no} · ${t.user}`), `heading Tahap ${t.no} · ${t.user}`);
+    if (t.naskah) {
+      const baris = read(t.naskah).split("\n").find((l) => l.startsWith(`| ${t.no} |`));
+      assert.ok(baris && baris.includes(`| ${t.user} |`), `${t.naskah}: baris Tahap ${t.no} memuat "${t.user}"`);
+    } else {
+      assert.ok(story.includes(`### Tahap ${t.no} · ${t.user}`), `heading Tahap ${t.no} · ${t.user}`);
+    }
   }
 });
 

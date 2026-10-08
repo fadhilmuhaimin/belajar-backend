@@ -3,7 +3,7 @@ window.ISTILAH = {
  "ACID": {
   "b": "B3.1",
   "d": "Empat jaminan transaction di database relasional: atomicity, consistency, isolation, durability.",
-  "n": "1.11 Transaction",
+  "n": "1.23 Transaction",
   "s": "istilah-acid",
   "t": "ACID",
   "u": "b-fondasi/b3-1-transaction/"
@@ -19,7 +19,7 @@ window.ISTILAH = {
  "API": {
   "b": "A1",
   "d": "Sekumpulan endpoint yang disediakan server supaya program lain, mis. app Flutter, bisa membaca dan mengubah data.",
-  "n": "1.1 Apa yang dikerjakan backend",
+  "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-api",
   "t": "API (Application Programming Interface)",
   "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
@@ -35,7 +35,7 @@ window.ISTILAH = {
  "Application Programming Interface": {
   "b": "A1",
   "d": "Sekumpulan endpoint yang disediakan server supaya program lain, mis. app Flutter, bisa membaca dan mengubah data.",
-  "n": "1.1 Apa yang dikerjakan backend",
+  "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-api",
   "t": "API (Application Programming Interface)",
   "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
@@ -59,7 +59,7 @@ window.ISTILAH = {
  "Atomicity": {
   "b": "B3.1",
   "d": "Jaminan bahwa semua perubahan dalam satu transaction terjadi seluruhnya atau tidak sama sekali.",
-  "n": "1.11 Transaction",
+  "n": "1.23 Transaction",
   "s": "istilah-atomicity",
   "t": "Atomicity",
   "u": "b-fondasi/b3-1-transaction/"
@@ -67,7 +67,7 @@ window.ISTILAH = {
  "Auth": {
   "b": "B5.1",
   "d": "Proses memastikan siapa yang mengirim request, mis. lewat token login.",
-  "n": "1.12 Authentication",
+  "n": "1.27 Authentication",
   "s": "istilah-authentication",
   "t": "Authentication",
   "u": "b-fondasi/b5-1-authentication/"
@@ -75,7 +75,7 @@ window.ISTILAH = {
  "Authentication": {
   "b": "B5.1",
   "d": "Proses memastikan siapa yang mengirim request, mis. lewat token login.",
-  "n": "1.12 Authentication",
+  "n": "1.27 Authentication",
   "s": "istilah-authentication",
   "t": "Authentication",
   "u": "b-fondasi/b5-1-authentication/"
@@ -83,7 +83,7 @@ window.ISTILAH = {
  "Authorization": {
   "b": "B5.3",
   "d": "Proses memastikan user yang sudah dikenal boleh melakukan aksi itu pada data itu.",
-  "n": "1.13 Authorization",
+  "n": "1.28 Authorization",
   "s": "istilah-authorization",
   "t": "Authorization",
   "u": "b-fondasi/b5-3-authorization/"
@@ -99,7 +99,7 @@ window.ISTILAH = {
  "BaaS": {
   "b": "A4",
   "d": "Layanan yang menyediakan database, auth, dan API siap pakai, mis. Supabase dan Firebase.",
-  "n": "1.2 BaaS atau backend sendiri",
+  "n": "1.4 BaaS atau backend sendiri",
   "s": "istilah-baas",
   "t": "BaaS (Backend-as-a-Service)",
   "u": "a-gambaran/a4-baas-vs-backend-sendiri/"
@@ -131,7 +131,7 @@ window.ISTILAH = {
  "CI": {
   "b": "B1.4",
   "d": "Pemeriksaan otomatis (build, test, lint) yang berjalan di server setiap kali kode dikirim, sebelum perubahan boleh digabung.",
-  "n": "1.7 Kontrak API dengan OpenAPI",
+  "n": "1.18 Kontrak API dengan OpenAPI",
   "s": "istilah-ci",
   "t": "CI (Continuous Integration)",
   "u": "b-fondasi/b1-4-openapi/"
@@ -139,7 +139,7 @@ window.ISTILAH = {
  "COMMIT": {
   "b": "B3.1",
   "d": "Perintah yang membuat semua perubahan dalam transaction menjadi permanen dan terlihat oleh koneksi lain.",
-  "n": "1.11 Transaction",
+  "n": "1.23 Transaction",
   "s": "istilah-commit",
   "t": "COMMIT",
   "u": "b-fondasi/b3-1-transaction/"
@@ -171,7 +171,7 @@ window.ISTILAH = {
  "Constraint": {
   "b": "B2.1",
   "d": "Aturan yang dipaksakan database pada data, mis. UNIQUE, CHECK, atau NOT NULL.",
-  "n": "1.8 Data modeling dan relasi",
+  "n": "1.12 Data modeling dan relasi",
   "s": "istilah-constraint",
   "t": "Constraint",
   "u": "b-fondasi/b2-1-data-modeling/"
@@ -179,7 +179,7 @@ window.ISTILAH = {
  "Container": {
   "b": "C3",
   "d": "Paket aplikasi beserta semua dependensinya yang berjalan dengan cara sama di laptop maupun server.",
-  "n": "1.16 Deployment dan rollback",
+  "n": "1.31 Deployment dan rollback",
   "s": "istilah-container",
   "t": "Container",
   "u": "c-operasional/c3-deployment/"
@@ -187,7 +187,7 @@ window.ISTILAH = {
  "Continuous Integration": {
   "b": "B1.4",
   "d": "Pemeriksaan otomatis (build, test, lint) yang berjalan di server setiap kali kode dikirim, sebelum perubahan boleh digabung.",
-  "n": "1.7 Kontrak API dengan OpenAPI",
+  "n": "1.18 Kontrak API dengan OpenAPI",
   "s": "istilah-ci",
   "t": "CI (Continuous Integration)",
   "u": "b-fondasi/b1-4-openapi/"
@@ -203,7 +203,7 @@ window.ISTILAH = {
  "Database": {
   "b": "B2.1",
   "d": "Program yang menyimpan data secara permanen dan menjamin aturan seperti constraint dan transaction.",
-  "n": "1.8 Data modeling dan relasi",
+  "n": "1.12 Data modeling dan relasi",
   "s": "istilah-database",
   "t": "Database",
   "u": "b-fondasi/b2-1-data-modeling/"
@@ -227,7 +227,7 @@ window.ISTILAH = {
  "Endpoint": {
   "b": "B1.1",
   "d": "Pasangan method dan path yang dilayani server, mis. POST /transfers.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-endpoint",
   "t": "Endpoint",
   "u": "b-fondasi/b1-1-http/"
@@ -275,7 +275,7 @@ window.ISTILAH = {
  "Foreign key": {
   "b": "B2.1",
   "d": "Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada.",
-  "n": "1.8 Data modeling dan relasi",
+  "n": "1.12 Data modeling dan relasi",
   "s": "istilah-foreign-key",
   "t": "Foreign key",
   "u": "b-fondasi/b2-1-data-modeling/"
@@ -283,7 +283,7 @@ window.ISTILAH = {
  "GET": {
   "b": "B1.1",
   "d": "Kata kerja request (GET, POST, PUT, PATCH, DELETE) yang menyatakan maksud request terhadap resource.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-http-method",
   "t": "HTTP method",
   "u": "b-fondasi/b1-1-http/"
@@ -291,7 +291,7 @@ window.ISTILAH = {
  "HTTP method": {
   "b": "B1.1",
   "d": "Kata kerja request (GET, POST, PUT, PATCH, DELETE) yang menyatakan maksud request terhadap resource.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-http-method",
   "t": "HTTP method",
   "u": "b-fondasi/b1-1-http/"
@@ -299,7 +299,7 @@ window.ISTILAH = {
  "Handler": {
   "b": "A2",
   "d": "Fungsi di server yang menerima satu request, memeriksa formatnya, lalu memanggil logika bisnis.",
-  "n": "1.3 Perjalanan satu request",
+  "n": "1.5 Perjalanan satu request",
   "s": "istilah-handler",
   "t": "Handler",
   "u": "a-gambaran/a2-perjalanan-request/"
@@ -307,7 +307,7 @@ window.ISTILAH = {
  "Header": {
   "b": "B1.1",
   "d": "Pasangan nama-nilai di request atau response yang membawa informasi tambahan, mis. token atau tipe konten.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-header",
   "t": "Header",
   "u": "b-fondasi/b1-1-http/"
@@ -331,7 +331,7 @@ window.ISTILAH = {
  "Invarian": {
   "b": "C1",
   "d": "Aturan yang harus selalu benar apa pun yang terjadi, mis. transfer tidak mengubah total saldo semua akun.",
-  "n": "1.15 Testing",
+  "n": "1.32 Testing",
   "s": "istilah-invarian",
   "t": "Invarian",
   "u": "c-operasional/c1-testing/"
@@ -347,7 +347,7 @@ window.ISTILAH = {
  "JSON Web Token": {
   "b": "B5.1",
   "d": "Token berisi data JSON plus signature, sehingga server bisa memeriksa keasliannya tanpa query ke database.",
-  "n": "1.12 Authentication",
+  "n": "1.27 Authentication",
   "s": "istilah-jwt",
   "t": "JWT (JSON Web Token)",
   "u": "b-fondasi/b5-1-authentication/"
@@ -355,7 +355,7 @@ window.ISTILAH = {
  "JWT": {
   "b": "B5.1",
   "d": "Token berisi data JSON plus signature, sehingga server bisa memeriksa keasliannya tanpa query ke database.",
-  "n": "1.12 Authentication",
+  "n": "1.27 Authentication",
   "s": "istilah-jwt",
   "t": "JWT (JSON Web Token)",
   "u": "b-fondasi/b5-1-authentication/"
@@ -451,7 +451,7 @@ window.ISTILAH = {
  "Middleware": {
   "b": "B7.1",
   "d": "Fungsi yang dijalankan sebelum atau sesudah semua handler, mis. pemeriksa token atau pencatat log.",
-  "n": "1.14 Lapisan dasar",
+  "n": "1.21 Lapisan dasar",
   "s": "istilah-middleware",
   "t": "Middleware",
   "u": "b-fondasi/b7-1-lapisan-dasar/"
@@ -459,7 +459,7 @@ window.ISTILAH = {
  "Migration": {
   "b": "B4.1",
   "d": "File berurutan yang mengubah skema database, disimpan dan direview seperti kode.",
-  "n": "1.10 Migration",
+  "n": "1.25 Migration",
   "s": "istilah-migration",
   "t": "Migration",
   "u": "b-fondasi/b4-1-migration/"
@@ -475,7 +475,7 @@ window.ISTILAH = {
  "Monolith": {
   "b": "A1",
   "d": "Satu aplikasi backend yang memuat semua fitur dan di-deploy sebagai satu unit.",
-  "n": "1.1 Apa yang dikerjakan backend",
+  "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-monolith",
   "t": "Monolith",
   "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
@@ -523,7 +523,7 @@ window.ISTILAH = {
  "ORM": {
   "b": "B2.1",
   "d": "Library yang memetakan tabel database ke objek di kode, sehingga query ditulis sebagai pemanggilan method, mis. Eloquent di Laravel atau ORM bawaan Django.",
-  "n": "1.8 Data modeling dan relasi",
+  "n": "1.12 Data modeling dan relasi",
   "s": "istilah-orm",
   "t": "ORM (Object-Relational Mapping)",
   "u": "b-fondasi/b2-1-data-modeling/"
@@ -547,7 +547,7 @@ window.ISTILAH = {
  "OpenAPI": {
   "b": "B1.4",
   "d": "Format standar untuk menulis kontrak API (endpoint, request, response) yang bisa dibaca manusia dan mesin.",
-  "n": "1.7 Kontrak API dengan OpenAPI",
+  "n": "1.18 Kontrak API dengan OpenAPI",
   "s": "istilah-openapi",
   "t": "OpenAPI",
   "u": "b-fondasi/b1-4-openapi/"
@@ -579,7 +579,7 @@ window.ISTILAH = {
  "PATCH": {
   "b": "B1.1",
   "d": "Kata kerja request (GET, POST, PUT, PATCH, DELETE) yang menyatakan maksud request terhadap resource.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-http-method",
   "t": "HTTP method",
   "u": "b-fondasi/b1-1-http/"
@@ -595,7 +595,7 @@ window.ISTILAH = {
  "POST": {
   "b": "B1.1",
   "d": "Kata kerja request (GET, POST, PUT, PATCH, DELETE) yang menyatakan maksud request terhadap resource.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-http-method",
   "t": "HTTP method",
   "u": "b-fondasi/b1-1-http/"
@@ -603,7 +603,7 @@ window.ISTILAH = {
  "PUT": {
   "b": "B1.1",
   "d": "Kata kerja request (GET, POST, PUT, PATCH, DELETE) yang menyatakan maksud request terhadap resource.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-http-method",
   "t": "HTTP method",
   "u": "b-fondasi/b1-1-http/"
@@ -667,7 +667,7 @@ window.ISTILAH = {
  "Primary key": {
   "b": "B2.1",
   "d": "Kolom yang nilainya unik dan dipakai untuk mengenali satu baris.",
-  "n": "1.8 Data modeling dan relasi",
+  "n": "1.12 Data modeling dan relasi",
   "s": "istilah-primary-key",
   "t": "Primary key",
   "u": "b-fondasi/b2-1-data-modeling/"
@@ -675,7 +675,7 @@ window.ISTILAH = {
  "Problem Details": {
   "b": "B1.2",
   "d": "Format error JSON standar dari RFC 9457, dengan field seperti type, title, status, dan detail.",
-  "n": "1.5 Resource dan format error",
+  "n": "Resource dan format error",
   "s": "istilah-problem-details",
   "t": "Problem Details",
   "u": "b-fondasi/b1-2-resource-error/"
@@ -707,7 +707,7 @@ window.ISTILAH = {
  "RBAC": {
   "b": "B5.3",
   "d": "Authorization berdasarkan peran, mis. hanya peran admin yang boleh membekukan akun.",
-  "n": "1.13 Authorization",
+  "n": "1.28 Authorization",
   "s": "istilah-rbac",
   "t": "RBAC (Role-Based Access Control)",
   "u": "b-fondasi/b5-3-authorization/"
@@ -715,7 +715,7 @@ window.ISTILAH = {
  "RLS": {
   "b": "B5.3",
   "d": "Fitur PostgreSQL yang menyaring baris berdasarkan aturan per user, dijalankan di dalam database.",
-  "n": "1.13 Authorization",
+  "n": "1.28 Authorization",
   "s": "istilah-rls",
   "t": "RLS (Row Level Security)",
   "u": "b-fondasi/b5-3-authorization/"
@@ -723,7 +723,7 @@ window.ISTILAH = {
  "ROLLBACK": {
   "b": "B3.1",
   "d": "Perintah yang membatalkan semua perubahan sejak BEGIN.",
-  "n": "1.11 Transaction",
+  "n": "1.23 Transaction",
   "s": "istilah-rollback",
   "t": "ROLLBACK",
   "u": "b-fondasi/b3-1-transaction/"
@@ -787,7 +787,7 @@ window.ISTILAH = {
  "Rolling deploy": {
   "b": "C3",
   "d": "Mengganti instance satu per satu, supaya selalu ada instance yang melayani request.",
-  "n": "1.16 Deployment dan rollback",
+  "n": "1.31 Deployment dan rollback",
   "s": "istilah-rolling-deploy",
   "t": "Rolling deploy",
   "u": "c-operasional/c3-deployment/"
@@ -803,7 +803,7 @@ window.ISTILAH = {
  "Router": {
   "b": "B1.1",
   "d": "Bagian framework yang mencocokkan method dan path request dengan handler yang tepat.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-router",
   "t": "Router",
   "u": "b-fondasi/b1-1-http/"
@@ -811,7 +811,7 @@ window.ISTILAH = {
  "Row Level Security": {
   "b": "B5.3",
   "d": "Fitur PostgreSQL yang menyaring baris berdasarkan aturan per user, dijalankan di dalam database.",
-  "n": "1.13 Authorization",
+  "n": "1.28 Authorization",
   "s": "istilah-rls",
   "t": "RLS (Row Level Security)",
   "u": "b-fondasi/b5-3-authorization/"
@@ -859,7 +859,7 @@ window.ISTILAH = {
  "Signature": {
   "b": "B5.1",
   "d": "Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah.",
-  "n": "1.12 Authentication",
+  "n": "1.27 Authentication",
   "s": "istilah-signature",
   "t": "Signature",
   "u": "b-fondasi/b5-1-authentication/"
@@ -883,7 +883,7 @@ window.ISTILAH = {
  "Source of truth": {
   "b": "A1",
   "d": "Satu tempat yang isinya dianggap benar ketika salinan lain berbeda, mis. database backend untuk saldo; cache dan data di HP hanya salinan.",
-  "n": "1.1 Apa yang dikerjakan backend",
+  "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-source-of-truth",
   "t": "Source of truth",
   "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
@@ -907,7 +907,7 @@ window.ISTILAH = {
  "Status code": {
   "b": "B1.1",
   "d": "Angka tiga digit di response yang menyatakan hasil request, mis. 201 berhasil dibuat atau 401 belum login.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-status-code",
   "t": "Status code",
   "u": "b-fondasi/b1-1-http/"
@@ -947,7 +947,7 @@ window.ISTILAH = {
  "Token": {
   "b": "B5.1",
   "d": "String yang dibawa request sebagai bukti siapa pengirimnya, mis. token login di header Authorization; siapa pun yang memegangnya bisa memakainya. Di token bucket, token berarti satu jatah request.",
-  "n": "1.12 Authentication",
+  "n": "1.27 Authentication",
   "s": "istilah-token",
   "t": "Token",
   "u": "b-fondasi/b5-1-authentication/"
@@ -971,7 +971,7 @@ window.ISTILAH = {
  "Trade-off": {
   "b": "D1",
   "d": "Pilihan yang memberi satu kelebihan dengan membayar satu kekurangan.",
-  "n": "1.17 Kerangka berpikir dan estimasi",
+  "n": "1.38 Kerangka berpikir dan estimasi",
   "s": "istilah-trade-off",
   "t": "Trade-off",
   "u": "d-system-design/d1-kerangka-berpikir/"
@@ -979,7 +979,7 @@ window.ISTILAH = {
  "Transaction": {
   "b": "B3.1",
   "d": "Sekelompok perintah database yang berhasil semua atau batal semua.",
-  "n": "1.11 Transaction",
+  "n": "1.23 Transaction",
   "s": "istilah-transaction",
   "t": "Transaction",
   "u": "b-fondasi/b3-1-transaction/"
@@ -1027,7 +1027,7 @@ window.ISTILAH = {
  "atomicity": {
   "b": "B3.1",
   "d": "Jaminan bahwa semua perubahan dalam satu transaction terjadi seluruhnya atau tidak sama sekali.",
-  "n": "1.11 Transaction",
+  "n": "1.23 Transaction",
   "s": "istilah-atomicity",
   "t": "Atomicity",
   "u": "b-fondasi/b3-1-transaction/"
@@ -1035,7 +1035,7 @@ window.ISTILAH = {
  "auth": {
   "b": "B5.1",
   "d": "Proses memastikan siapa yang mengirim request, mis. lewat token login.",
-  "n": "1.12 Authentication",
+  "n": "1.27 Authentication",
   "s": "istilah-authentication",
   "t": "Authentication",
   "u": "b-fondasi/b5-1-authentication/"
@@ -1043,7 +1043,7 @@ window.ISTILAH = {
  "authentication": {
   "b": "B5.1",
   "d": "Proses memastikan siapa yang mengirim request, mis. lewat token login.",
-  "n": "1.12 Authentication",
+  "n": "1.27 Authentication",
   "s": "istilah-authentication",
   "t": "Authentication",
   "u": "b-fondasi/b5-1-authentication/"
@@ -1051,7 +1051,7 @@ window.ISTILAH = {
  "authorization": {
   "b": "B5.3",
   "d": "Proses memastikan user yang sudah dikenal boleh melakukan aksi itu pada data itu.",
-  "n": "1.13 Authorization",
+  "n": "1.28 Authorization",
   "s": "istilah-authorization",
   "t": "Authorization",
   "u": "b-fondasi/b5-3-authorization/"
@@ -1099,7 +1099,7 @@ window.ISTILAH = {
  "constraint": {
   "b": "B2.1",
   "d": "Aturan yang dipaksakan database pada data, mis. UNIQUE, CHECK, atau NOT NULL.",
-  "n": "1.8 Data modeling dan relasi",
+  "n": "1.12 Data modeling dan relasi",
   "s": "istilah-constraint",
   "t": "Constraint",
   "u": "b-fondasi/b2-1-data-modeling/"
@@ -1107,7 +1107,7 @@ window.ISTILAH = {
  "container": {
   "b": "C3",
   "d": "Paket aplikasi beserta semua dependensinya yang berjalan dengan cara sama di laptop maupun server.",
-  "n": "1.16 Deployment dan rollback",
+  "n": "1.31 Deployment dan rollback",
   "s": "istilah-container",
   "t": "Container",
   "u": "c-operasional/c3-deployment/"
@@ -1123,7 +1123,7 @@ window.ISTILAH = {
  "database": {
   "b": "B2.1",
   "d": "Program yang menyimpan data secara permanen dan menjamin aturan seperti constraint dan transaction.",
-  "n": "1.8 Data modeling dan relasi",
+  "n": "1.12 Data modeling dan relasi",
   "s": "istilah-database",
   "t": "Database",
   "u": "b-fondasi/b2-1-data-modeling/"
@@ -1147,7 +1147,7 @@ window.ISTILAH = {
  "endpoint": {
   "b": "B1.1",
   "d": "Pasangan method dan path yang dilayani server, mis. POST /transfers.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-endpoint",
   "t": "Endpoint",
   "u": "b-fondasi/b1-1-http/"
@@ -1179,7 +1179,7 @@ window.ISTILAH = {
  "foreign key": {
   "b": "B2.1",
   "d": "Kolom yang menunjuk primary key tabel lain, dan database menjamin rujukannya ada.",
-  "n": "1.8 Data modeling dan relasi",
+  "n": "1.12 Data modeling dan relasi",
   "s": "istilah-foreign-key",
   "t": "Foreign key",
   "u": "b-fondasi/b2-1-data-modeling/"
@@ -1187,7 +1187,7 @@ window.ISTILAH = {
  "handler": {
   "b": "A2",
   "d": "Fungsi di server yang menerima satu request, memeriksa formatnya, lalu memanggil logika bisnis.",
-  "n": "1.3 Perjalanan satu request",
+  "n": "1.5 Perjalanan satu request",
   "s": "istilah-handler",
   "t": "Handler",
   "u": "a-gambaran/a2-perjalanan-request/"
@@ -1195,7 +1195,7 @@ window.ISTILAH = {
  "header": {
   "b": "B1.1",
   "d": "Pasangan nama-nilai di request atau response yang membawa informasi tambahan, mis. token atau tipe konten.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-header",
   "t": "Header",
   "u": "b-fondasi/b1-1-http/"
@@ -1219,7 +1219,7 @@ window.ISTILAH = {
  "invarian": {
   "b": "C1",
   "d": "Aturan yang harus selalu benar apa pun yang terjadi, mis. transfer tidak mengubah total saldo semua akun.",
-  "n": "1.15 Testing",
+  "n": "1.32 Testing",
   "s": "istilah-invarian",
   "t": "Invarian",
   "u": "c-operasional/c1-testing/"
@@ -1299,7 +1299,7 @@ window.ISTILAH = {
  "middleware": {
   "b": "B7.1",
   "d": "Fungsi yang dijalankan sebelum atau sesudah semua handler, mis. pemeriksa token atau pencatat log.",
-  "n": "1.14 Lapisan dasar",
+  "n": "1.21 Lapisan dasar",
   "s": "istilah-middleware",
   "t": "Middleware",
   "u": "b-fondasi/b7-1-lapisan-dasar/"
@@ -1307,7 +1307,7 @@ window.ISTILAH = {
  "migration": {
   "b": "B4.1",
   "d": "File berurutan yang mengubah skema database, disimpan dan direview seperti kode.",
-  "n": "1.10 Migration",
+  "n": "1.25 Migration",
   "s": "istilah-migration",
   "t": "Migration",
   "u": "b-fondasi/b4-1-migration/"
@@ -1323,7 +1323,7 @@ window.ISTILAH = {
  "monolith": {
   "b": "A1",
   "d": "Satu aplikasi backend yang memuat semua fitur dan di-deploy sebagai satu unit.",
-  "n": "1.1 Apa yang dikerjakan backend",
+  "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-monolith",
   "t": "Monolith",
   "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
@@ -1451,7 +1451,7 @@ window.ISTILAH = {
  "primary key": {
   "b": "B2.1",
   "d": "Kolom yang nilainya unik dan dipakai untuk mengenali satu baris.",
-  "n": "1.8 Data modeling dan relasi",
+  "n": "1.12 Data modeling dan relasi",
   "s": "istilah-primary-key",
   "t": "Primary key",
   "u": "b-fondasi/b2-1-data-modeling/"
@@ -1539,7 +1539,7 @@ window.ISTILAH = {
  "rolling deploy": {
   "b": "C3",
   "d": "Mengganti instance satu per satu, supaya selalu ada instance yang melayani request.",
-  "n": "1.16 Deployment dan rollback",
+  "n": "1.31 Deployment dan rollback",
   "s": "istilah-rolling-deploy",
   "t": "Rolling deploy",
   "u": "c-operasional/c3-deployment/"
@@ -1555,7 +1555,7 @@ window.ISTILAH = {
  "router": {
   "b": "B1.1",
   "d": "Bagian framework yang mencocokkan method dan path request dengan handler yang tepat.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-router",
   "t": "Router",
   "u": "b-fondasi/b1-1-http/"
@@ -1595,7 +1595,7 @@ window.ISTILAH = {
  "signature": {
   "b": "B5.1",
   "d": "Nilai hasil perhitungan kriptografi atas data dan secret, untuk membuktikan data tidak diubah.",
-  "n": "1.12 Authentication",
+  "n": "1.27 Authentication",
   "s": "istilah-signature",
   "t": "Signature",
   "u": "b-fondasi/b5-1-authentication/"
@@ -1611,7 +1611,7 @@ window.ISTILAH = {
  "source of truth": {
   "b": "A1",
   "d": "Satu tempat yang isinya dianggap benar ketika salinan lain berbeda, mis. database backend untuk saldo; cache dan data di HP hanya salinan.",
-  "n": "1.1 Apa yang dikerjakan backend",
+  "n": "1.3 Apa yang dikerjakan backend",
   "s": "istilah-source-of-truth",
   "t": "Source of truth",
   "u": "a-gambaran/a1-apa-yang-dikerjakan-backend/"
@@ -1635,7 +1635,7 @@ window.ISTILAH = {
  "status code": {
   "b": "B1.1",
   "d": "Angka tiga digit di response yang menyatakan hasil request, mis. 201 berhasil dibuat atau 401 belum login.",
-  "n": "1.4 HTTP",
+  "n": "1.16 HTTP",
   "s": "istilah-status-code",
   "t": "Status code",
   "u": "b-fondasi/b1-1-http/"
@@ -1659,7 +1659,7 @@ window.ISTILAH = {
  "token": {
   "b": "B5.1",
   "d": "String yang dibawa request sebagai bukti siapa pengirimnya, mis. token login di header Authorization; siapa pun yang memegangnya bisa memakainya. Di token bucket, token berarti satu jatah request.",
-  "n": "1.12 Authentication",
+  "n": "1.27 Authentication",
   "s": "istilah-token",
   "t": "Token",
   "u": "b-fondasi/b5-1-authentication/"
@@ -1683,7 +1683,7 @@ window.ISTILAH = {
  "trade-off": {
   "b": "D1",
   "d": "Pilihan yang memberi satu kelebihan dengan membayar satu kekurangan.",
-  "n": "1.17 Kerangka berpikir dan estimasi",
+  "n": "1.38 Kerangka berpikir dan estimasi",
   "s": "istilah-trade-off",
   "t": "Trade-off",
   "u": "d-system-design/d1-kerangka-berpikir/"
@@ -1691,7 +1691,7 @@ window.ISTILAH = {
  "transaction": {
   "b": "B3.1",
   "d": "Sekelompok perintah database yang berhasil semua atau batal semua.",
-  "n": "1.11 Transaction",
+  "n": "1.23 Transaction",
   "s": "istilah-transaction",
   "t": "Transaction",
   "u": "b-fondasi/b3-1-transaction/"

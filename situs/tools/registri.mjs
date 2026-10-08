@@ -31,7 +31,7 @@ export function muat() {
     h.diporting = h.ada; // nama lama yang dipakai komponen; halaman yang belum ditulis tetap tampil sebagai "menyusul"
     delete h.nomor;
     const t = h.tahap;
-    if (Number.isInteger(t) && !/^T\d$/.test(h.id)) {
+    if (Number.isInteger(t) && !/^T\d$/.test(h.id) && !h.lebur_ke) { // halaman yang akan dilebur tanpa nomor sendiri
       hitung[t] = (hitung[t] || 0) + 1;
       h.nomor = `${t}.${hitung[t]}`;
     }

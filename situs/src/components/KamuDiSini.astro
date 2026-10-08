@@ -17,7 +17,8 @@ const NAMA: Record<string, string> = { pembuka: "Pembuka", sampingan: "Studi sam
   <ol class="kamu__jalur">
     <li><span class="kamu__tag">Kamu di sini</span></li>
     {t ? <li>Tahap {t.no}<span class="kamu__panjang"> dari {d.tahap.length} · {t.nama}</span></li> : <li>{NAMA[h.tahap] ?? h.tahap}</li>}
-    {h.kelompok && <li>{h.kelompok}</li>}
+    {(t?.bagian?.find((b: { no: number; nama: string }) => b.no === h.bagian)?.nama ?? h.kelompok) &&
+      <li>{t?.bagian?.find((b: { no: number; nama: string }) => b.no === h.bagian)?.nama ?? h.kelompok}</li>}
     <li aria-current="page">{label(h)}</li>
   </ol>
   {t && <p class="kamu__rekap"><strong>{d.app} (fiktif).</strong> {t.rekap} <span class="teks-2">Sebelumnya: {t.sebelumnya}</span></p>}

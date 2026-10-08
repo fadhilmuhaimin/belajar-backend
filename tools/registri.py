@@ -45,7 +45,8 @@ def lengkapi(d):
         h["ada"] = file_situs(h).exists()
         h.pop("nomor", None)
         t = h["tahap"]
-        if isinstance(t, int) and not re.fullmatch(r"T\d", h["id"]):
+        # Halaman yang akan dilebur ke halaman lain (lebur_ke) tidak mendapat nomor sendiri.
+        if isinstance(t, int) and not re.fullmatch(r"T\d", h["id"]) and not h.get("lebur_ke"):
             hitung[t] = hitung.get(t, 0) + 1
             h["nomor"] = f"{t}.{hitung[t]}"
     return d
