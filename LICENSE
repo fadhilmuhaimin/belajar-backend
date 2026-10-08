@@ -1,9 +1,9 @@
 Proyek ini memakai dua lisensi:
 
-- Kode (tools/, labs/, tests/, docs/widgets/*.js dan *.css, docs/javascripts/,
-  docs/stylesheets/, mkdocs.yml): MIT License, teks di bawah.
-- Teks dan gambar panduan (docs/**/*.md, docs/widgets/data/, docs/assets/cerita/,
-  includes/, plan/): Creative Commons Attribution-ShareAlike 4.0
+- Kode (tools/, labs/, tests/, situs/ selain situs/src/content/, docs/widgets/*.js
+  dan *.css, docs/javascripts/): MIT License, teks di bawah.
+- Teks dan gambar panduan (situs/src/content/, docs/**/*.md, docs/widgets/data/,
+  docs/assets/cerita/, includes/, plan/): Creative Commons Attribution-ShareAlike 4.0
   International (CC BY-SA 4.0), teks lengkap di LICENSES/CC-BY-SA-4.0.txt.
 
 Pengecualian: docs/vendor/ (sql.js, lisensinya di folder itu) dan dependency

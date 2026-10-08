@@ -12,7 +12,7 @@ Yang ditulis:
   - widgets/data/kartu.json  kartu ulang, diambil dari bagian "## Cek diri" setiap halaman
   - cerita/tahap-N.mdx  tabel "Masalah yang muncul" di antara {/* daftar-tahap */} dan {/* /daftar-tahap */}
 
-Yang diperiksa (--check, juga dijalankan tools/cek_batch.sh):
+Yang diperiksa (--check, juga dijalankan tools/cek_situs.sh):
   - semua file di atas sinkron dengan cerita.json
   - tidak ada halaman yang muncul sebelum prasyaratnya (urutan registry = urutan baca)
   - setiap rujukan [[ID]] di halaman situs dan data widget menunjuk ID yang ada

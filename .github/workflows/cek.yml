@@ -1,6 +1,6 @@
-# Fase 0 (plan/PROPOSAL.md, "Rencana migrasi"): gerbang kualitas yang sama dengan laptop,
-# dijalankan di setiap PR dan setiap push ke main. Isinya persis `tools/cek_batch.sh`;
-# yang disiapkan di sini hanya lingkungannya (Python 3.14, Node 22, Chrome, font).
+# Gerbang kualitas yang sama dengan laptop, dijalankan di setiap PR dan setiap push ke main.
+# Job situs menjalankan `tools/cek_situs.sh --layar` (keputusan 111); yang disiapkan di sini hanya
+# lingkungannya (Node 22, Chromium Playwright, font). MkDocs dihapus (keputusan 112).
 # Versi action dicek ke halaman rilis masing-masing pada 2026-10-08 (keputusan 99).
 name: cek
 
@@ -18,52 +18,6 @@ permissions:
   contents: read
 
 jobs:
-  cek_batch:
-    name: cek_batch.sh
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.14"
-          cache: pip
-          cache-dependency-path: requirements.txt
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: "22"
-
-      # cek_layar_pertama.mjs mencari Chrome lewat CHROME_PATH (tools/lib/chrome.mjs).
-      - uses: browser-actions/setup-chrome@v2
-        id: chrome
-        with:
-          chrome-version: stable
-
-      # cek_batch.sh memanggil .venv/bin/python dan .venv/bin/mkdocs, sama seperti di laptop.
-      - name: Siapkan .venv
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install -q -r requirements.txt
-
-      # Ubuntu 24.04 (ubuntu-latest) membatasi user namespace tanpa hak akses lewat AppArmor, dan sandbox
-      # Chrome membutuhkannya; tanpa ini Chrome berhenti sebelum menulis DevToolsActivePort.
-      # Sumber: https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md
-      # Runner CI sekali pakai, jadi melonggarkan ini di runner lebih baik daripada --no-sandbox di kode alat.
-      - name: Izinkan sandbox Chrome di Ubuntu 24.04
-        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-
-      # Font asli wajib: dengan font fallback, teks lebih tinggi dan layar 375x667 bisa gagal (README).
-      # Satoshi diunduh dari Fontshare saat build (self-host), tidak disimpan di repo (lisensi FFL).
-      - name: Unduh font
-        run: bash tools/get_fonts.sh
-
-      - name: Jalankan gerbang kualitas
-        env:
-          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
-        run: bash tools/cek_batch.sh
-
   pesan_commit:
     name: pesan commit
     runs-on: ubuntu-latest

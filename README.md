@@ -14,62 +14,43 @@ Yang membedakan panduan ini:
 
 | Folder | Isi |
 |---|---|
-| `docs/` | Halaman panduan (Markdown), widget interaktif, dan data cerita |
-| `docs/widgets/data/cerita.json` | Registry semua halaman dan angka asumsi cerita; satu-satunya sumber urutan baca |
+| `situs/` | Situs Astro + Starlight: halaman (MDX di `src/content/docs`), komponen, tema, dan alat tangkapan layar |
+| `docs/widgets/data/cerita.json` | Registry semua halaman dan angka asumsi cerita; satu-satunya sumber urutan baca. Dipindah ke `situs/` di langkah berikutnya |
+| `docs/` | Widget interaktif lama, data widget, dan aset yang dimuat situs apa adanya |
 | `labs/` | Lab yang menghasilkan rekaman di halaman (Go, Python, Dart, Node, PostgreSQL, Redis) |
-| `tools/` | Skrip sinkronisasi, pemeriksaan, dan hook MkDocs |
-| `tests/` | Tes widget (Node) |
-| `plan/` | Rancangan cerita (`STORY.md`), catatan keputusan desain (`KEPUTUSAN.md`), dan status pekerjaan terbuka (`STATUS.md`) |
+| `tools/` | Skrip sinkronisasi registry, istilah, audit bahasa, kontras, dan gerbang kualitas |
+| `tests/` | Tes widget lama (Node) |
+| `plan/` | Proposal, naskah cerita (`CERITA-TAHAP-N.md`), keputusan (`KEPUTUSAN.md`), memori kerja, dan status |
 
 ## Menjalankan situs
 
-Butuh Python 3.10 atau lebih baru (dikunci dan dites dengan 3.14).
-
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/mkdocs serve
-```
-
-Buka `http://127.0.0.1:8000`. Versi yang dikunci di `requirements.txt` antara lain `mkdocs==1.6.1` dan `mkdocs-material==9.7.7`. Versi lain belum dites, dan build strict bisa gagal karena perubahan perilaku plugin.
-
-Setiap build dan `serve` mencetak banner peringatan dari Material for MkDocs tentang MkDocs 2.0. Banner itu informasi dari pembuat theme, bukan error di repo ini. Untuk mematikannya, jalankan dengan `NO_MKDOCS_2_WARNING=1` (dipakai otomatis oleh `tools/cek_batch.sh`).
-
-Build statis, wajib lolos sebelum perubahan dikirim:
-
-```bash
-.venv/bin/mkdocs build --strict
-```
-
-### Font
-
-File font tidak ikut repo. Satoshi memakai ITF Free Font License, yang mengizinkan self-host untuk situs sendiri tetapi melarang redistribusi file font, termasuk lewat repo publik. Unduh font ke folder proyek (bukan instalasi sistem):
+Butuh Node 22 atau lebih baru.
 
 ```bash
 bash tools/get_fonts.sh
+npm --prefix situs ci
+npm --prefix situs run dev
 ```
+
+Buka `http://127.0.0.1:4321`. Versi dependency dikunci di `situs/package.json` dan `situs/package-lock.json`.
+
+### Font
+
+File font tidak ikut repo. Satoshi memakai ITF Free Font License, yang mengizinkan self-host untuk situs sendiri tetapi melarang redistribusi file font, termasuk lewat repo publik. `tools/get_fonts.sh` mengunduh font ke folder proyek, bukan ke instalasi sistem.
 
 Tanpa langkah ini situs tetap berjalan dengan font fallback (`Inter, system-ui, sans-serif`). JetBrains Mono untuk kode memakai SIL Open Font License 1.1.
 
 ## Pemeriksaan
 
 ```bash
-bash tools/cek_batch.sh
+bash tools/cek_situs.sh --layar
 ```
 
-Skrip yang sama dijalankan GitHub Actions di setiap pull request (`.github/workflows/cek.yml`). Skrip ini memeriksa sinkronisasi cerita dan angka asumsi, istilah, build strict, ID internal yang tidak boleh tampil, audit bahasa, tes widget, dan layar pertama setiap halaman di empat ukuran layar. Selain Python, kamu butuh Node 22 atau lebih baru, dan Chrome atau Chromium untuk pemeriksaan layar pertama (`CHROME_PATH` kalau lokasinya tidak standar). Pemeriksaan layar pertama mengukur dengan font asli, jadi jalankan `bash tools/get_fonts.sh` dulu. Dengan font fallback, teks lebih tinggi dan halaman bisa gagal di layar 375×667. Lama jalannya sekitar 2–3 menit.
+Skrip yang sama dijalankan GitHub Actions di setiap pull request (`.github/workflows/cek.yml`). Isinya: sinkron registry dan angka asumsi, istilah, audit bahasa, build strict, ID internal yang tidak boleh tampil, kontras dua mode, tes, layar pertama setiap halaman di empat ukuran, dan tangkapan layar desktop dan HP dalam mode gelap dan terang.
+
+Pemeriksaan layar butuh Chromium Playwright (`cd situs && npx playwright install chromium`) dan font asli. Dengan font fallback, teks lebih tinggi dan halaman bisa gagal di layar 375×667. Tanpa `--layar`, skrip melewati pemeriksaan yang butuh browser. Lama jalannya sekitar 3 menit.
 
 Lolos semua adalah syarat minimum, bukan bukti kualitas.
-
-## Situs baru (fase 1, `situs/`)
-
-Situs sedang dipindah ke Astro + Starlight sesuai `plan/PROPOSAL.md`. Keduanya dibangun berdampingan sampai fase 1 selesai; MkDocs tetap jadi situs utama.
-
-```bash
-npm --prefix situs ci && npm --prefix situs run build
-```
-
-`npm --prefix situs test` memeriksa token tema, `python3 tools/contrast.py` memeriksa kontras dua mode, `node situs/tools/tangkap.mjs` (butuh `npx playwright install chromium` dan `npm --prefix situs run preview`) mengambil tangkapan layar desktop dan HP dalam mode gelap dan terang, dan `node situs/tools/banding.mjs <slug>` membandingkan teks, heading, dan link halaman lama vs baru.
 
 ## Menjalankan lab
 
@@ -194,5 +175,5 @@ Repo ini adalah tempat kerja utama panduan. Lihat [CONTRIBUTING.md](CONTRIBUTING
 ## Lisensi
 
 - **Teks dan gambar panduan** (`docs/**/*.md`, data cerita dan skenario di `docs/widgets/data/`, ilustrasi di `docs/assets/cerita/`, `includes/`, `plan/`): [CC BY-SA 4.0](LICENSES/CC-BY-SA-4.0.txt). Kamu boleh menyalin, mengubah, dan menerbitkan ulang, termasuk untuk tujuan komersial, asal mencantumkan sumber dan membagikan hasil turunannya dengan lisensi yang sama.
-- **Kode** (`tools/`, `labs/`, `tests/`, JavaScript dan CSS widget, `mkdocs.yml`): [MIT](LICENSE).
+- **Kode** (`tools/`, `labs/`, `tests/`, `situs/` selain halaman, JavaScript dan CSS widget): [MIT](LICENSE).
 - **Pengecualian:** `docs/vendor/` (sql.js) dan dependency yang diunduh package manager memakai lisensinya masing-masing. File font tidak ikut repo (lihat bagian Font).
