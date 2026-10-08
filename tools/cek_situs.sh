@@ -28,7 +28,12 @@ echo "build strict lolos (0 warning)"
 
 echo "== ID internal tidak tampil"; $PY tools/cek_id_tampil.py
 echo "== kontras dua mode";          $PY tools/contrast.py | tail -1
-echo "== tes situs";                 npm --prefix situs test 2>&1 | grep -E "^# (pass|fail)"
+echo "== tipe (astro check, strict)"
+LOG=$(mktemp)
+if ! npm --prefix situs run cek-tipe >"$LOG" 2>&1; then sed 's/\x1b\[[0-9;]*m//g' "$LOG" | grep -B1 -A4 " - error" || true; rm -f "$LOG"; echo "GAGAL: tipe"; exit 1; fi
+sed 's/\x1b\[[0-9;]*m//g' "$LOG" | grep -E "^- [0-9]+ errors"; rm -f "$LOG"
+echo "== tes situs (node:test + Vitest)"
+npm --prefix situs test 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | grep -E "^# (pass|fail)|Tests +[0-9]"
 echo "== tes widget lama";           node --test tests/widgets/*.cjs 2>&1 | grep -E "^# (pass|fail)"
 node --test tests/widgets/*.cjs >/dev/null 2>&1
 

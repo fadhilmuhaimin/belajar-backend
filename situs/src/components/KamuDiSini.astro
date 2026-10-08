@@ -9,9 +9,9 @@ const d = muat();
 const h = byId(d)[Astro.props.id];
 if (!h) throw new Error(`KamuDiSini: halaman ${Astro.props.id} tidak ada di cerita.json`);
 // Halaman pembuka/sampingan/alat punya tahap non-angka: breadcrumb tanpa rekap tahap.
-const t = Number.isInteger(h.tahap) ? d.tahap.find((x) => x.no === h.tahap) : null;
+const t = Number.isInteger(h.tahap) ? d.tahap.find((x: { no: number }) => x.no === h.tahap) : null;
 if (Number.isInteger(h.tahap) && !t) throw new Error(`KamuDiSini: tahap ${h.tahap} tidak ada di cerita.json`);
-const NAMA = { pembuka: "Pembuka", sampingan: "Studi sampingan", alat: "Alat" };
+const NAMA: Record<string, string> = { pembuka: "Pembuka", sampingan: "Studi sampingan", alat: "Alat" };
 ---
 <nav class="kamu" aria-label="Kamu di sini">
   <ol class="kamu__jalur">
