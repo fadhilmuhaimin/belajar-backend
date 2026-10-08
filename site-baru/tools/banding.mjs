@@ -22,7 +22,7 @@ function bersih(html) {
     .replace(/<a[^>]*class="[^"]*headerlink[^"]*"[^>]*>[^<]*<\/a>/g, "").replace(/<a[^>]*anchor-link[^>]*>[\s\S]*?<\/a>/g, "");
 }
 function teks(html) {
-  return bersih(html).replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&#x27;/g, "'").replace(/&nbsp;/g, " ")
+  return bersih(html).replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&#x27;/g, "'").replace(/&nbsp;/g, " ").replace(/&#x([0-9a-f]+);/gi, (m, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(Number(n)))
     .replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\s+([.,:;!?)])/g, "$1").replace(/\(\s+/g, "(")
     .replace(/\s+/g, " ").trim();
 }

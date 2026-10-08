@@ -449,4 +449,54 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 .sl-markdown-content .bb-ember__log { margin: 0.3rem 0 0; padding-left: 1.1rem; font-size: 0.85em; }
 .sl-markdown-content .bb-ember__log li { margin: 0.15rem 0; }
 .sl-markdown-content .bb-ember__log li:first-child { font-weight: 600; }
+/* Tombol tautan (pengganti .md-button Material) */
+.sl-markdown-content a.tombol { display: inline-block; padding: 0.55rem 1rem; border-radius: 8px; background: var(--aksen); color: var(--ink-di-aksen); font-weight: 600; text-decoration: none; }
+.sl-markdown-content a.tombol:hover, .sl-markdown-content a.tombol:focus-visible { text-decoration: none; opacity: 0.9; }
+/* Mockup HP berurutan (hp.js dipakai langsung) */
+.sl-markdown-content .bb-hps-wrap { margin: 1.2em 0; }
+.sl-markdown-content .bb-hps { display: flex; flex-wrap: nowrap; align-items: flex-start; gap: 0.5rem; }
+.sl-markdown-content .bb-hps__item { margin: 0; flex: 0 1 11.5rem; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+.sl-markdown-content .bb-hps__item .bb-hp { width: 100%; }
+.sl-markdown-content .bb-hps__item figcaption { max-width: 11.5rem; font-size: 0.8em; color: var(--teks-2); text-align: center; margin: 0; }
+.sl-markdown-content .bb-hps__arrow { align-self: center; font-size: 1.2em; font-weight: 700; color: var(--teks-2); }
+.sl-markdown-content .bb-hps__cap { font-size: 0.85em; margin: 0.5rem 0 0; }
+/* Peta cerita (cerita.js): lima tahap, progres, daftar halaman; indeks masalah */
+.sl-markdown-content .bb-peta { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.8rem; margin: 1em 0; }
+.sl-markdown-content .bb-peta__tahap { border: 1px solid var(--garis); border-radius: 12px; padding: 0.6rem 0.7rem; }
+.sl-markdown-content .bb-peta__tahap h3 { margin: 0 0 0.2rem; font-size: 1em; }
+.sl-markdown-content .bb-peta__user { margin: 0 0 0.35rem; font-size: 0.8em; }
+.sl-markdown-content .bb-peta__bar { height: 0.4rem; border-radius: 999px; background: var(--k-old-fill); overflow: hidden; margin-bottom: 0.5rem; }
+.sl-markdown-content .bb-peta__bar i { display: block; height: 100%; background: var(--k-good-edge); }
+.sl-markdown-content figure.bb-peta__arch { margin: 0 0 0.4rem; }
+.sl-markdown-content figure.bb-peta__arch ol.bb-flow > li { font-size: 0.78em; padding: 0.2rem 0.4rem; }
+.sl-markdown-content .bb-peta__list { margin: 0.3rem 0 0; padding-left: 1rem; font-size: 0.85em; }
+.sl-markdown-content .bb-peta__list li.is-todo { color: var(--teks-2); }
+.sl-markdown-content .bb-peta__list li.is-done a { color: var(--k-good-ink); }
+.sl-markdown-content .bb-peta__kel { list-style: none; margin: 0.8em 0 0.2em -1.2em; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--teks-2); }
+.sl-markdown-content .bb-peta__tahap details { border: 0; background: transparent; padding: 0; font-size: inherit; }
+.sl-markdown-content .bb-input { font: inherit; font-size: 0.92em; width: 100%; max-width: 26rem; padding: 0.4rem 0.6rem; border: 1px solid var(--garis-2); border-radius: 8px; margin: 0.3rem 0 0.6rem; background: var(--bg); color: var(--teks); }
+.bb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.bb-inti { color: var(--k-warn-edge); font-size: 0.8em; margin-left: 0.3em; }
+/* Peta komponen besar (HTML statis, 1.1) */
+.sl-markdown-content figure.bb-map { margin: 1.2em 0; padding: 0.8rem; border: 1px solid var(--garis); border-radius: 12px; }
+.sl-markdown-content .bb-map__grid { display: grid; grid-template-columns: 1fr auto 1.3fr auto 1fr; gap: 0.5rem; align-items: stretch; }
+.sl-markdown-content .bb-map__box { border: 1px solid var(--k-system-edge); background: var(--k-system-fill); border-radius: 10px; padding: 0.5rem 0.6rem; font-size: 0.85em; }
+.sl-markdown-content .bb-map__box > strong { display: block; color: var(--k-system-ink); margin-bottom: 0.3rem; font-size: 1.05em; }
+.sl-markdown-content .bb-map__box ul { margin: 0; padding-left: 1rem; }
+.sl-markdown-content .bb-map__box li { margin: 0.1rem 0; }
+.sl-markdown-content .bb-map__box.is-old { border-color: var(--k-old-edge); background: var(--k-old-fill); }
+.sl-markdown-content .bb-map__box.is-old > strong { color: var(--k-old-ink); }
+.sl-markdown-content .bb-map__layer { background: var(--bg); border: 1px dashed var(--k-system-edge); border-radius: 8px; padding: 0.3rem 0.45rem; margin: 0.3rem 0; }
+.sl-markdown-content .bb-map__layer b { display: block; font-size: 0.85em; color: var(--judul); }
+.sl-markdown-content .bb-map__layer span { font-size: 0.8em; color: var(--teks-2); }
+.sl-markdown-content .bb-map__arrow { align-self: center; text-align: center; font-size: 0.78em; color: var(--teks-2); }
+.sl-markdown-content .bb-map__arrow b { display: block; font-size: 1.3em; color: var(--teks); }
+.sl-markdown-content figure.bb-map figcaption { font-size: 0.85em; color: var(--teks-2); margin-top: 0.6rem; max-width: none; text-align: left; }
+@media (max-width: 50em) {
+  .sl-markdown-content .bb-map__grid { grid-template-columns: 1fr; }
+  .sl-markdown-content .bb-map__arrow b { transform: rotate(90deg); }
+  .sl-markdown-content .bb-hps { flex-direction: column; align-items: center; }
+  .sl-markdown-content .bb-hps__item { flex: none; width: 11.5rem; }
+  .sl-markdown-content .bb-hps__arrow { transform: rotate(90deg); }
+}
 /* === akhir widget lama === */

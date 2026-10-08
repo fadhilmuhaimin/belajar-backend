@@ -96,6 +96,19 @@ function konversiBlok(ls, dalamTab) {
       else { out.push(...ls.slice(i, f.akhir + 1)); }
       i = f.akhir; continue;
     }
+    // admonition terbuka (!!!) -> aside Starlight :::jenis[Judul]
+    const adm = l.match(/^!!!\s+(\w+)(?:\s+"([^"]*)")?\s*$/);
+    if (adm) {
+      const JENIS = { note: "note", info: "note", abstract: "note", tip: "tip", success: "tip", question: "note", example: "note",
+        warning: "caution", caution: "caution", danger: "danger", failure: "danger", bug: "danger" };
+      const jenis = JENIS[adm[1]] || "note";
+      const isi = [];
+      let j = i + 1;
+      while (j < ls.length && (ls[j].startsWith("    ") || ls[j].trim() === "")) isi.push(ls[j++]);
+      while (isi.length && isi[isi.length - 1].trim() === "") isi.pop();
+      out.push(`:::${jenis}${adm[2] ? `[${adm[2]}]` : ""}`, ...konversiBlok(dedent(isi), dalamTab), ":::", "");
+      i = j - 1; continue;
+    }
     // details
     const q = l.match(/^\?\?\?\s+(\w+)\s+"([^"]+)"\s*$/);
     if (q) {
@@ -149,6 +162,24 @@ function konversiBlok(ls, dalamTab) {
     });
     if (lnk !== l) { out.push(lnk); continue; }
     let baris = l;
+    // Tombol Material: [teks](url){ .md-button ... } atau [[ID|teks]]{ .md-button ... } -> <a class="tombol">
+    baris = baris.replace(/\[\[([A-Za-z0-9.\-]+)\|([^\]]+)\]\]\{[^}]*\.md-button[^}]*\}/g, (m, id, teks) => {
+      const h = d.halaman.find((x) => x.id === id);
+      if (!h) { peringatan.push("tombol ke ID tak dikenal: " + id); return m; }
+      return `<a class="tombol" href="${url(h)}">${teks}</a>`;
+    });
+    baris = baris.replace(/\[([^\]]+)\]\(([^)\s]+)\)\{[^}]*\.md-button[^}]*\}/g, (m, teks, target) => {
+      let href = target;
+      if (/\.md(#|$)/.test(target) && !/^https?:/.test(target)) {
+        const abs = path.posix.normalize(path.posix.join(path.posix.dirname(rel), target.replace(/#.*$/, "")));
+        const h = d.halaman.find((x) => x.path === abs);
+        if (!h) { peringatan.push("tombol ke halaman di luar registry: " + target); return m; }
+        href = url(h) + (target.match(/#.*$/) || [""])[0];
+      }
+      return `<a class="tombol" href="${href}">${teks}</a>`;
+    });
+    // Elemen void HTML harus menutup diri di MDX/JSX
+    baris = baris.replace(/<(br|hr|img|input)(\s[^>]*?)?(?<!\/)>/g, (m, tag, attrs) => `<${tag}${attrs || ""} />`);
     // Komentar HTML -> komentar JSX
     baris = baris.replace(/<!--([\s\S]*?)-->/g, (m, isi) => `{/*${isi}*/}`);
     // Atribut `markdown` (md_in_html) tidak perlu di MDX: isi elemen HTML tetap diproses sebagai Markdown

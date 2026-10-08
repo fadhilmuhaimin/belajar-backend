@@ -8,15 +8,17 @@ interface Props { id: string }
 const d = muat();
 const h = byId(d)[Astro.props.id];
 if (!h) throw new Error(`KamuDiSini: halaman ${Astro.props.id} tidak ada di cerita.json`);
-const t = d.tahap.find((x) => x.no === h.tahap);
-if (!t) throw new Error(`KamuDiSini: tahap ${h.tahap} tidak ada di cerita.json`);
+// Halaman pembuka/sampingan/alat punya tahap non-angka: breadcrumb tanpa rekap tahap.
+const t = Number.isInteger(h.tahap) ? d.tahap.find((x) => x.no === h.tahap) : null;
+if (Number.isInteger(h.tahap) && !t) throw new Error(`KamuDiSini: tahap ${h.tahap} tidak ada di cerita.json`);
+const NAMA = { pembuka: "Pembuka", sampingan: "Studi sampingan", alat: "Alat" };
 ---
 <nav class="kamu" aria-label="Kamu di sini">
   <ol class="kamu__jalur">
     <li><span class="kamu__tag">Kamu di sini</span></li>
-    <li>Tahap {t.no}<span class="kamu__panjang"> dari {d.tahap.length} · {t.nama}</span></li>
+    {t ? <li>Tahap {t.no}<span class="kamu__panjang"> dari {d.tahap.length} · {t.nama}</span></li> : <li>{NAMA[h.tahap] ?? h.tahap}</li>}
     {h.kelompok && <li>{h.kelompok}</li>}
     <li aria-current="page">{label(h)}</li>
   </ol>
-  <p class="kamu__rekap"><strong>{d.app} (fiktif).</strong> {t.rekap} <span class="teks-2">Sebelumnya: {t.sebelumnya}</span></p>
+  {t && <p class="kamu__rekap"><strong>{d.app} (fiktif).</strong> {t.rekap} <span class="teks-2">Sebelumnya: {t.sebelumnya}</span></p>}
 </nav>
