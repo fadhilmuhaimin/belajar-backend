@@ -4,6 +4,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 143: lab api-t1 bagian pertukaran (SUM saldo = SUM top-up).
 - 142: pengaman loop (tree bersih + main), log stream-json.
 - 141: halaman 1.10 (laporan per tanggal WIB vs UTC).
 - 140: hooks PreCompact/SessionStart, `tools/jalankan-tahap.sh` (loop headless + crosscheck akhir), CLAUDE.md butir 7.

@@ -47,6 +47,15 @@ def sql(q):
     return r.stdout
 
 
+def sql_gagal(q, harus):
+    """Perintah yang memang harus ditolak PostgreSQL; pesan error-nya masuk rekaman."""
+    r = subprocess.run(PSQL + ["-v", "ON_ERROR_STOP=1", "-v", "VERBOSITY=terse", "-c", "SET search_path = tahap1; " + q],
+                       capture_output=True, text=True)   # terse: tanpa DETAIL yang memuat seluruh baris
+    if r.returncode == 0 or harus not in r.stderr:
+        gagal(f"harus ditolak dengan '{harus}': {q}\n{r.stdout}{r.stderr}")
+    log.append(f"$ psql -c \"{q}\"\n{samarkan(r.stderr)}\n")
+
+
 def reset():
     subprocess.run(PSQL + ["-v", "ON_ERROR_STOP=1"], input=(HERE / "schema.sql").read_text(),
                    capture_output=True, text=True, check=True)
@@ -374,8 +383,51 @@ def rekam_riwayat():
     tulis("riwayat.txt")
 
 
+def total():
+    """Baris hasil TOTAL sebagai daftar nilai: [total_saldo, total_topup, transaksi]."""
+    return [x.strip() for x in sql(TOTAL).split("\n")[2].split("|")]
+
+
+TOTAL = "SELECT (SELECT sum(saldo) FROM akun) AS total_saldo, (SELECT sum(nominal) FROM topup) AS total_topup, (SELECT count(*) FROM transaksi) AS transaksi"
+
+
+def rekam_pertukaran():
+    """1.11 Pertukaran saldo: tiga hal yang harus selalu benar."""
+    reset()
+    mulai()
+    bagian("A. Persiapan")
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+
+    bagian("B. Sebelum bayar: semua saldo dijumlah, dan sama dengan semua top-up")
+    harap(total(), ["25000000", "25000000", "0"], "total sebelum")
+    sql("SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id")
+
+    bagian("C. Budi membayar Rp25.000 ke Warung Ani")
+    s, b = curl("POST", "/transfers", '{"ke": 418, "jumlah": 25000}', token=budi)
+    harap((s, json.loads(b)["saldo"]), (201, 225000), "bayar Rp25.000")
+
+    bagian("D. Sesudah bayar: dua saldo berubah, totalnya tidak")
+    sql("SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id")
+    harap(total(), ["25000000", "25000000", "1"], "total sesudah")
+
+    bagian("E. Budi membayar Rp200.000 ke Warung Sari; sisa saldonya Rp25.000")
+    s, b = curl("POST", "/transfers", '{"ke": 502, "jumlah": 200000}', token=budi)
+    harap((s, json.loads(b)["saldo"]), (201, 25000), "bayar Rp200.000")
+
+    bagian("F. Budi mencoba membayar Rp30.000: ditolak, tidak ada yang berubah")
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 30000}', token=budi)
+    harap(s, 422, "saldo kurang")
+    harap(total(), ["25000000", "25000000", "2"], "tidak ada yang berubah")
+
+    bagian("G. Pagar terakhir: UPDATE langsung yang membuat saldo negatif ditolak database")
+    sql_gagal("UPDATE akun SET saldo = saldo - 30000 WHERE id = 419", "saldo_tidak_negatif")
+    sql("SELECT saldo FROM akun WHERE id = 419")
+    tulis("pertukaran.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()
