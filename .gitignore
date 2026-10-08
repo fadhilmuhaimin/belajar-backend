@@ -15,4 +15,5 @@ docs/assets/fonts/*
 # Rahasia: jangan pernah masuk repo
 .env*
 *.pdf
-.claude/
+.claude/*
+!.claude/skills/
