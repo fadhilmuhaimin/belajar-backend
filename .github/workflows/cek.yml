@@ -78,7 +78,7 @@ jobs:
           GITLEAKS_CONFIG: .gitleaks.toml
 
   situs_baru:
-    name: site-baru (Astro)
+    name: situs (Astro)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -87,33 +87,33 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: site-baru/package-lock.json
+          cache-dependency-path: situs/package-lock.json
       - name: Unduh font
         run: bash tools/get_fonts.sh
       - name: Pasang dependency
-        run: npm --prefix site-baru ci
+        run: npm --prefix situs ci
       # Build strict: WARN atau ERROR di log Astro menggagalkan job (gerbang kualitas "warning = gagal").
       - name: Build
         run: |
           set -o pipefail
-          npm --prefix site-baru run build 2>&1 | tee build.log
+          npm --prefix situs run build 2>&1 | tee build.log
           ! grep -E "\[WARN\]|\[ERROR\]" build.log
       - name: Tes token tema
-        run: npm --prefix site-baru test
+        run: npm --prefix situs test
       - name: Kontras dua mode
         run: python3 tools/contrast.py
       - name: Pasang Chromium Playwright
-        run: cd site-baru && npx playwright install --with-deps chromium
+        run: cd situs && npx playwright install --with-deps chromium
       - name: Tangkapan layar 2 ukuran × 2 mode
         run: |
-          npm --prefix site-baru run preview -- --port 4321 --host 127.0.0.1 &
+          npm --prefix situs run preview -- --port 4321 --host 127.0.0.1 &
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:4321/ >/dev/null && break; sleep 1; done
-          cd site-baru && node tools/tangkap.mjs --url http://127.0.0.1:4321
+          cd situs && node tools/tangkap.mjs --url http://127.0.0.1:4321
       - name: Layar pertama 4 ukuran
-        run: cd site-baru && node tools/layar.mjs --url http://127.0.0.1:4321
+        run: cd situs && node tools/layar.mjs --url http://127.0.0.1:4321
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: tangkapan-site-baru
-          path: site-baru/tangkapan/*.png
+          name: tangkapan-situs
+          path: situs/tangkapan/*.png
           retention-days: 7

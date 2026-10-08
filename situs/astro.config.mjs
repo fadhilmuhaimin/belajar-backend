@@ -9,10 +9,10 @@ import { unified } from "@astrojs/markdown-remark";
 
 export default defineConfig({
   // Domain final mengikuti keputusan hosting fase 0 (Cloudflare Pages); nilai ini hanya untuk sitemap. [perlu verifikasi]
-  site: "https://belajar-backend.pages.dev",
+  site: "https://rekeningo-tech-journey.pages.dev",
   integrations: [
     starlight({
-      title: "Belajar Backend",
+      title: "Rekeningo Tech Journey",
       defaultLocale: "root",
       locales: { root: { label: "Bahasa Indonesia", lang: "id" } },
       customCss: ["./src/styles/tema.css"],

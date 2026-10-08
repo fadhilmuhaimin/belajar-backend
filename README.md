@@ -1,4 +1,4 @@
-# Belajar Backend
+# Rekeningo Tech Journey
 
 Panduan konsep backend lintas stack untuk mobile engineer. Kamu mengikuti aplikasi fiktif **Rekeningo** yang tumbuh dalam lima tahap: dari MVP, ke saldo yang salah dan request ganda, ke lambat di jam sibuk, ke integrasi pihak ketiga, sampai satu database tidak cukup. Setiap masalah di cerita membawa kamu ke satu konsep: transaction, lock, idempotency key, connection pool, queue, cache, webhook, replica, dan lainnya.
 
@@ -61,15 +61,15 @@ Skrip yang sama dijalankan GitHub Actions di setiap pull request (`.github/workf
 
 Lolos semua adalah syarat minimum, bukan bukti kualitas.
 
-## Situs baru (fase 1, `site-baru/`)
+## Situs baru (fase 1, `situs/`)
 
 Situs sedang dipindah ke Astro + Starlight sesuai `plan/PROPOSAL.md`. Keduanya dibangun berdampingan sampai fase 1 selesai; MkDocs tetap jadi situs utama.
 
 ```bash
-npm --prefix site-baru ci && npm --prefix site-baru run build
+npm --prefix situs ci && npm --prefix situs run build
 ```
 
-`npm --prefix site-baru test` memeriksa token tema, `python3 tools/contrast.py` memeriksa kontras dua mode, `node site-baru/tools/tangkap.mjs` (butuh `npx playwright install chromium` dan `npm --prefix site-baru run preview`) mengambil tangkapan layar desktop dan HP dalam mode gelap dan terang, dan `node site-baru/tools/banding.mjs <slug>` membandingkan teks, heading, dan link halaman lama vs baru.
+`npm --prefix situs test` memeriksa token tema, `python3 tools/contrast.py` memeriksa kontras dua mode, `node situs/tools/tangkap.mjs` (butuh `npx playwright install chromium` dan `npm --prefix situs run preview`) mengambil tangkapan layar desktop dan HP dalam mode gelap dan terang, dan `node situs/tools/banding.mjs <slug>` membandingkan teks, heading, dan link halaman lama vs baru.
 
 ## Menjalankan lab
 

@@ -8,7 +8,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { DOCS, ROOT, muat, tokenKeTeks } from "./registri.mjs";
 
-const PUB = path.join(ROOT, "site-baru/public");
+const PUB = path.join(ROOT, "situs/public");
 const d = muat();
 
 function salinDir(dari, ke, filter = () => true, ubah = null) {

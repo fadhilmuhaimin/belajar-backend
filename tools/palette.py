@@ -31,7 +31,7 @@ NAVY = "#051027"       # header situs
 ACCENT_ORANGE = "#FF9010"  # dekoratif saja, TIDAK untuk teks/garis bermakna
 
 
-# ---- Situs baru (site-baru/src/styles/tema.css): dua mode, nilai harus sama dengan token di tema.css ----
+# ---- Situs baru (situs/src/styles/tema.css): dua mode, nilai harus sama dengan token di tema.css ----
 # Mode gelap adalah default (PROPOSAL "Desain visual final"). Setiap warna makna punya fill/edge/ink per mode.
 TERANG = {
     "bg": "#FFFFFF", "bg_2": "#F8FAFC", "bg_3": "#F3F4F7",

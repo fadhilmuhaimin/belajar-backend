@@ -7,7 +7,7 @@ import { ROOT } from "./registri.mjs";
 
 const slug = process.argv[2] || "b-fondasi/b3-1-transaction";
 const lama = fs.readFileSync(path.join(ROOT, "site", slug, "index.html"), "utf8");
-const baru = fs.readFileSync(path.join(ROOT, "site-baru/dist", slug, "index.html"), "utf8");
+const baru = fs.readFileSync(path.join(ROOT, "situs/dist", slug, "index.html"), "utf8");
 
 function artikel(html) {
   // Situs lama: <article class="md-content__inner ...">; situs baru: <main ...> ... <article>? Starlight: <main> dengan .sl-markdown-content

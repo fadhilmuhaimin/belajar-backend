@@ -6,7 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { ROOT } from "../tools/registri.mjs";
 
-const S = path.join(ROOT, "site-baru");
+const S = path.join(ROOT, "situs");
 const css = fs.readFileSync(path.join(S, "src/styles/tema.css"), "utf8");
 const HEX = /#[0-9A-Fa-f]{6}\b/g;
 
