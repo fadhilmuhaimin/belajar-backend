@@ -557,12 +557,11 @@ starlight-toc a.toc-selesai::after, mobile-starlight-toc a.toc-selesai::after { 
 .peran__chip[aria-pressed="true"] { background: var(--aksen); border-color: var(--aksen); color: var(--ink-di-aksen); font-weight: 600; }
 .peran__chip:focus-visible { outline: 2px solid var(--aksen); outline-offset: 2px; }
 .peran__kosong { margin: 0.5rem 0 0; font-size: 0.78rem; color: var(--teks-2); }
-:is(html:not([data-peran]), html[data-peran="generalis"]) .sidebar-content a.nav-inti,
 html[data-peran="mobile"] .sidebar-content a[data-peran~="mobile"],
 html[data-peran="web"] .sidebar-content a[data-peran~="web"],
 html[data-peran="backend"] .sidebar-content a[data-peran~="backend"],
 html[data-peran="devops"] .sidebar-content a[data-peran~="devops"],
-html[data-peran="security"] .sidebar-content a[data-peran~="security"] { box-shadow: inset 3px 0 0 var(--aksen); }
+html[data-peran="security"] .sidebar-content a[data-peran~="security"] { font-weight: 600; color: var(--judul); }
 
 /* === Mode fokus (keputusan 120): sidebar dan daftar isi disembunyikan, kolom baca tetap === */
 .fokus { font: inherit; font-size: 0.85rem; padding: 0.3rem 0.7rem; border-radius: 6px; border: 1px solid var(--garis-2); background: transparent; color: var(--teks); cursor: pointer; white-space: nowrap; }
@@ -675,3 +674,40 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
 .sl-markdown-content .cb-perbaikan__label { margin: 0 0 0.3rem; }
 .sl-markdown-content .cb-kode.is-benar-kode { border-color: var(--k-good-edge); }
 .sl-markdown-content .cb-kode.is-benar-kode .cb-baris { display: flex; gap: 0.6rem; padding: 0.25rem 0.6rem; }
+
+/* ==========================================================================
+   Redesain · satu kolom baca (keputusan 202). Daftar isi tersembunyi bawaan; tombol "Isi halaman" di baris
+   breadcrumb membukanya (data-toc="buka"), dan di ≥ 100rem (1600 px) ia terlihat kecuali ditutup (data-toc="tutup").
+   Konten 680 px di tengah sisa ruang. Sorotan peran tidak lagi berupa garis biru di kiri (terbaca seperti "selesai").
+   ========================================================================== */
+:root { --rk-toc-width: 16rem; }
+@media (min-width: 72rem) {
+  html:not([data-toc="buka"]) .right-sidebar-container { display: none; }
+  html:not([data-toc="buka"]) .main-pane { width: 100% !important; --sl-content-margin-inline: auto; }
+  html[data-toc="buka"] .right-sidebar-container { width: var(--rk-toc-width); flex: none; }
+  html[data-toc="buka"][data-has-sidebar][data-has-toc] .main-pane { width: calc(100% - var(--rk-toc-width)); --sl-content-margin-inline: auto; }
+}
+@media (min-width: 100rem) {
+  html:not([data-toc="tutup"]) .right-sidebar-container { display: block; width: var(--rk-toc-width); flex: none; }
+  html:not([data-toc="tutup"])[data-has-sidebar][data-has-toc] .main-pane { width: calc(100% - var(--rk-toc-width)) !important; --sl-content-margin-inline: auto; }
+}
+@media (max-width: 71.99rem) {
+  /* Bilah daftar isi HP tersembunyi bawaan, berikut ruang 3rem yang dicadangkan Starlight untuknya. */
+  html:not([data-toc="buka"]) mobile-starlight-toc { display: none; }
+  html:not([data-toc="buka"]) { --sl-mobile-toc-height: 0rem; }
+}
+nav.kamu { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.8rem; }
+nav.kamu .kamu__jalur { flex: 1 1 auto; min-width: 0; }
+nav.kamu .kamu__rekap { flex-basis: 100%; }
+.kamu__toc { font: inherit; font-size: var(--rk-ui); padding: 0.15rem 0.6rem; border-radius: 6px; border: 1px solid var(--garis-2); background: transparent; color: var(--teks); cursor: pointer; white-space: nowrap; }
+.kamu__toc:hover { border-color: var(--aksen); color: var(--aksen); }
+.kamu__toc:focus-visible { outline: 2px solid var(--aksen); outline-offset: 2px; }
+.kamu__toc[aria-expanded="true"] { border-color: var(--aksen); color: var(--aksen); }
+/* Menu peran */
+details.peran { margin: 0 0 0.8rem; padding: 0 0 0.6rem; border-bottom: 1px solid var(--garis); }
+.peran__ringkas { cursor: pointer; font-size: var(--rk-ui); color: var(--teks-2); list-style: none; }
+.peran__ringkas::-webkit-details-marker { display: none; }
+.peran__ringkas::after { content: " ▾"; }
+details.peran[open] .peran__ringkas::after { content: " ▴"; }
+.peran__ringkas [data-peran-nama] { color: var(--judul); font-weight: 600; }
+details.peran .peran__pilihan { margin-top: 0.5rem; }

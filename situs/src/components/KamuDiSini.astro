@@ -13,6 +13,8 @@ const t: Tahap | undefined = h && Number.isInteger(h.tahap) ? d.tahap.find((x: T
 const NAMA: Record<string, string> = { pembuka: "Pembuka", sampingan: "Studi sampingan", alat: "Alat" };
 const kelompok = h ? (t?.bagian?.find((b) => b.no === h.bagian)?.nama ?? h.kelompok) : undefined;
 const pembuka = t ? d.halaman.find((x: { tahap: unknown; ada: boolean }) => x.tahap === t.no && x.ada) : undefined;
+// Redesain (keputusan 202): daftar isi tersembunyi bawaan; tombol ini membukanya di semua ukuran layar.
+const adaToc = (Astro.locals.starlightRoute.toc?.items?.length ?? 0) > 0;
 ---
 {h && (
   <nav class="kamu" aria-label="Kamu di sini">
@@ -24,6 +26,30 @@ const pembuka = t ? d.halaman.find((x: { tahap: unknown; ada: boolean }) => x.ta
       {kelompok && <li class="kamu__panjang">{kelompok}</li>}
       <li aria-current="page">{label(h, true)}</li>
     </ol>
+    {adaToc && <button type="button" class="kamu__toc" data-toc-tombol aria-expanded="false">Isi halaman</button>}
     {t && <p class="kamu__rekap"><strong>{d.app} (fiktif).</strong> {t.rekap}</p>}
   </nav>
 )}
+
+<script>
+  // Daftar isi: tersembunyi bawaan (terlihat otomatis di ≥ 1600 px). Pilihan pembaca disimpan per perangkat.
+  const KUNCI = "rtj-toc";
+  const html = document.documentElement;
+  // Desktop (≥ 72rem): kolom kanan; HP: bilah daftar isi Starlight.
+  const terlihat = () => {
+    const el = document.querySelector(matchMedia("(min-width: 72rem)").matches ? ".right-sidebar-container" : "mobile-starlight-toc");
+    return !!el && getComputedStyle(el).display !== "none";
+  };
+  const segarkan = () => document.querySelectorAll("[data-toc-tombol]").forEach((b) => b.setAttribute("aria-expanded", String(terlihat())));
+  try { const s = localStorage.getItem(KUNCI); if (s) html.dataset.toc = s; } catch { /* mode privat */ }
+  document.addEventListener("click", (e) => {
+    if (!(e.target as Element).closest("[data-toc-tombol]")) return;
+    const baru = terlihat() ? "tutup" : "buka";
+    html.dataset.toc = baru;
+    try { localStorage.setItem(KUNCI, baru); } catch { /* mode privat */ }
+    if (baru === "buka") document.querySelector<HTMLDetailsElement>("mobile-starlight-toc details")?.setAttribute("open", "");
+    segarkan();
+  });
+  addEventListener("resize", segarkan);
+  segarkan();
+</script>

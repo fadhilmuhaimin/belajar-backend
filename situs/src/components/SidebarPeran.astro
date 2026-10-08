@@ -3,17 +3,18 @@
  * Mengganti Sidebar Starlight (keputusan 120): pemilih peran di atas daftar halaman. Memilih peran menyorot halaman
  * yang ditonjolkan untuk peran itu (field `peran` di registry, dibawa sidebar.mjs sebagai data-peran); Generalis
  * menyorot jalur inti ★. Tidak ada halaman yang disembunyikan. Pilihan disimpan di localStorage `rtj-peran`.
+ * Redesain (keputusan 202): chip pindah ke menu kecil "Jalur: ..." supaya sidebar tidak padat.
  */
 import Default from "@astrojs/starlight/components/Sidebar.astro";
 const PERAN = [["generalis", "Generalis"], ["mobile", "Mobile"], ["web", "Web"], ["backend", "Backend"], ["devops", "DevOps"], ["security", "Security"]];
 ---
-<div class="peran" role="group" aria-labelledby="peran-judul">
-  <p id="peran-judul" class="peran__judul">Jalurmu</p>
-  <div class="peran__pilihan">
-    {PERAN.map(([v, l]) => <button type="button" class="peran__chip" data-peran-pilih={v} aria-pressed={v === "generalis" ? "true" : "false"}>{l}</button>)}
+<details class="peran">
+  <summary class="peran__ringkas">Jalur: <span data-peran-nama>Generalis</span></summary>
+  <div class="peran__pilihan" role="group" aria-label="Pilih jalur">
+    {PERAN.map(([v, l]) => <button type="button" class="peran__chip" data-peran-pilih={v} data-peran-label={l} aria-pressed={v === "generalis" ? "true" : "false"}>{l}</button>)}
   </div>
   <p class="peran__kosong" hidden>Belum ada halaman yang ditonjolkan untuk peran ini di tahap yang sudah ditulis.</p>
-</div>
+</details>
 <Default />
 
 <script>
@@ -22,6 +23,8 @@ const PERAN = [["generalis", "Generalis"], ["mobile", "Mobile"], ["web", "Web"],
   function pakai(p: string) {
     document.documentElement.dataset.peran = p;
     document.querySelectorAll<HTMLButtonElement>("[data-peran-pilih]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.peranPilih === p)));
+    const l = document.querySelector<HTMLElement>(`[data-peran-pilih="${p}"]`)?.dataset.peranLabel;
+    document.querySelectorAll("[data-peran-nama]").forEach((el) => { if (l) el.textContent = l; });
     const ada = p === "generalis" ? document.querySelector(".sidebar-content a.nav-inti") : document.querySelector(`.sidebar-content a[data-peran~="${p}"]`);
     document.querySelectorAll<HTMLElement>(".peran__kosong").forEach((el) => { el.hidden = !!ada; });
   }
@@ -31,6 +34,7 @@ const PERAN = [["generalis", "Generalis"], ["mobile", "Mobile"], ["web", "Web"],
     const p = b.dataset.peranPilih!;
     try { localStorage.setItem(KUNCI, p); } catch { /* mode privat */ }
     pakai(p);
+    b.closest<HTMLDetailsElement>("details.peran")?.removeAttribute("open");
   });
   pakai(baca());
 </script>
