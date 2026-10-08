@@ -24,7 +24,7 @@ func main() {
 	seed := flag.Bool("seed", false, "isi data awal uji coba Gedung A, lalu keluar")
 	alamat := flag.String("addr", "127.0.0.1:18083", "alamat server")
 	umurSesi := flag.Duration("umur-sesi", 8*time.Hour, "masa berlaku sesi (asumsi: satu hari kerja)")
-	rentan := flag.String("rentan", "", "mode rentan untuk rekaman halaman masalah: m1 (tanpa pemeriksaan jumlah), m2 (body sebelum kontrak); kosong = versi benar")
+	rentan := flag.String("rentan", "", "mode rentan untuk rekaman halaman masalah: m1 (tanpa pemeriksaan jumlah), m2 (body sebelum kontrak), m3 (pencarian rentan injection); kosong = versi benar")
 	flag.Parse()
 
 	url := os.Getenv("DATABASE_URL")
@@ -44,7 +44,7 @@ func main() {
 	}
 	srv := handler.Baru(service.Baru(r, *umurSesi))
 	if *rentan != "" {
-		if *rentan != "m1" && *rentan != "m2" {
+		if *rentan != "m1" && *rentan != "m2" && *rentan != "m3" {
 			log.Fatalf("mode rentan tidak dikenal: %s", *rentan)
 		}
 		srv = srv.DenganRentan(*rentan)

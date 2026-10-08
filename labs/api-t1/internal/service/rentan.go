@@ -31,3 +31,8 @@ func (s Service) BayarM1(ctx context.Context, peminta, ke, jumlah int64) (id, sa
 }
 
 // --8<-- [end:m1]
+
+// CariWarungRentanM3 meneruskan ke repo rentan (string concat + semua field). Hanya mode -rentan m3.
+func (s Service) CariWarungRentanM3(ctx context.Context, cari string) ([]repo.Akun, error) {
+	return s.repo.CariWarungRentanM3(ctx, cari)
+}

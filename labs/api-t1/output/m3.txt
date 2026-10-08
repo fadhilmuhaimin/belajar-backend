@@ -1,0 +1,69 @@
+# server: ./api-t1 -rentan m3
+
+# --- A. Persiapan ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/login' -d '{"email": "dimas@lestari.example", "password": "sementara-417"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Dimas>"}
+
+# --- B. Budi mencari warung bernama Ani ---
+$ curl -i -X GET '/warung?cari=Ani' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"warung":[{"id":418,"jenis":"warung","nama":"Warung Ani","saldo":0}]}
+
+# --- C. Budi mencari nama dengan tanda kutip ---
+$ curl -i -X GET '/warung?cari=' nasi' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/problem+json
+
+{"type":"/problems/internal","title":"Terjadi kesalahan di server","status":500}
+
+# --- D. Dimas mencoba ' OR 1=1 -- dan melihat semua akun beserta saldo ---
+$ curl -i -X GET '/warung?cari=' OR 1=1 --' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{"warung":[{"id":400,"jenis":"admin","nama":"Admin Tunjangan","saldo":0},{"id":418,"jenis":"warung","nama":"Warung Ani","saldo":0},{"id":419,"jenis":"karyawan","nama":"Budi","saldo":250000}, ... 99 akun lain, semuanya dengan saldo]}
+server log: PERINGATAN: mode rentan m3 menyala
+server log: error internal: ERROR: syntax error at or near "nasi" (SQLSTATE 42601)
+# server: ./api-t1
+
+# --- E. Versi benar: pencarian memakai parameter query ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/login' -d '{"email": "dimas@lestari.example", "password": "sementara-417"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Dimas>"}
+$ curl -i -X GET '/warung?cari=Ani' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"warung":[{"id":418,"nama":"Warung Ani"}]}
+
+# --- F. Tanda kutip dan ' OR 1=1 -- jadi teks biasa, bukan perintah ---
+$ curl -i -X GET '/warung?cari=' nasi' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"warung":[]}
+$ curl -i -X GET '/warung?cari=' OR 1=1 --' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"warung":[]}

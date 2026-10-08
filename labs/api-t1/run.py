@@ -104,10 +104,10 @@ def stop():
         srv = None
 
 
-def curl(method, path, body=None, token=None, jenis="application/json", tampil_body=None):
-    """tampil_body: teks yang ditampilkan di rekaman sebagai ganti body panjang (mis. CSV 100 baris)."""
+def curl(method, path, body=None, token=None, jenis="application/json", tampil_body=None, tampil_path=None, resp_tampil=None):
+    """tampil_body: teks pengganti body panjang di rekaman. tampil_path: path yang ditampilkan (path asli boleh ter-encode)."""
     cmd = ["curl", "-s", "-i", "-X", method, URL + path]
-    tampil = f"$ curl -i -X {method} '{path}'"
+    tampil = f"$ curl -i -X {method} '{tampil_path or path}'"
     if token:
         cmd += ["-H", f"Authorization: Bearer {token}"]
         tampil += f" -H 'Authorization: Bearer {samarkan(token)}'"
@@ -120,7 +120,8 @@ def curl(method, path, body=None, token=None, jenis="application/json", tampil_b
     r = "\n".join(l for l in r.splitlines() if not l.startswith(("Date:", "Content-Length:")))
     status = int(r.split()[1]) if r.startswith("HTTP/") else 0
     badan = r.split("\n\n", 1)[1] if "\n\n" in r else ""
-    log.append(f"{samarkan(tampil)}\n{samarkan(r)}\n")
+    r_log = r if resp_tampil is None else r.replace(badan, resp_tampil)
+    log.append(f"{samarkan(tampil)}\n{samarkan(r_log)}\n")
     return status, badan
 
 
@@ -578,8 +579,54 @@ def rekam_m2():
     tulis("m2.txt")
 
 
+def rekam_m3():
+    """1.19 M3: Tanda kutip di pencarian (mode rentan m3, keputusan 157)."""
+    reset()
+    mulai("-rentan", "m3")
+    bagian("A. Persiapan")
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    dimas = login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+
+    bagian("B. Budi mencari warung bernama Ani")
+    s, b = curl("GET", "/warung?cari=Ani", token=budi)
+    harap((s, [(w["nama"], w.get("saldo")) for w in json.loads(b)["warung"]]),
+          (200, [("Warung Ani", 0)]), "cari Ani: saldo ikut terkirim")
+
+    bagian("C. Budi mencari nama dengan tanda kutip")
+    s, _ = curl("GET", "/warung?cari=%27%20nasi", token=budi, tampil_path="/warung?cari=' nasi")
+    harap(s, 500, "tanda kutip: 500")
+
+    bagian("D. Dimas mencoba ' OR 1=1 -- dan melihat semua akun beserta saldo")
+    bocor = ('{"warung":[{"id":400,"jenis":"admin","nama":"Admin Tunjangan","saldo":0},'
+             '{"id":418,"jenis":"warung","nama":"Warung Ani","saldo":0},'
+             '{"id":419,"jenis":"karyawan","nama":"Budi","saldo":250000},'
+             ' ... 99 akun lain, semuanya dengan saldo]}')
+    s, b = curl("GET", "/warung?cari=%27%20OR%201%3D1%20--", token=dimas, tampil_path="/warung?cari=' OR 1=1 --", resp_tampil=bocor)
+    hasil = json.loads(b)["warung"]
+    harap((s, len(hasil) > 100, any(w["jenis"] == "karyawan" for w in hasil)),
+          (200, True, True), "injection: semua akun bocor")
+    stop()
+
+    reset()
+    mulai()
+    bagian("E. Versi benar: pencarian memakai parameter query")
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    dimas = login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+    s, b = curl("GET", "/warung?cari=Ani", token=budi)
+    harap((s, json.loads(b)["warung"]), (200, [{"id": 418, "nama": "Warung Ani"}]), "cari Ani: hanya id dan nama")
+
+    bagian("F. Tanda kutip dan ' OR 1=1 -- jadi teks biasa, bukan perintah")
+    s, b = curl("GET", "/warung?cari=%27%20nasi", token=budi, tampil_path="/warung?cari=' nasi")
+    harap((s, json.loads(b)["warung"]), (200, []), "tanda kutip: 0 hasil, bukan 500")
+    s, b = curl("GET", "/warung?cari=%27%20OR%201%3D1%20--", token=dimas, tampil_path="/warung?cari=' OR 1=1 --")
+    harap((s, json.loads(b)["warung"]), (200, []), "injection jadi teks: 0 hasil")
+    tulis("m3.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()
