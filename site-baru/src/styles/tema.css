@@ -499,4 +499,13 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
   .sl-markdown-content .bb-hps__item { flex: none; width: 11.5rem; }
   .sl-markdown-content .bb-hps__arrow { transform: rotate(90deg); }
 }
+/* Kartu ulang (kartu.js) */
+.sl-markdown-content .bb-kartu__card { border: 1px solid var(--garis); border-radius: 12px; padding: 0.9rem 1rem; margin: 0.6rem 0; min-height: 8rem; }
+.sl-markdown-content .bb-kartu__src { font-size: 0.8em; color: var(--teks-2); margin: 0 0 0.4rem; }
+.sl-markdown-content .bb-kartu__q { font-weight: 600; margin: 0 0 0.6rem; color: var(--judul); }
+.sl-markdown-content .bb-kartu__a { border-top: 1px dashed var(--garis-2); padding-top: 0.6rem; font-size: 0.92em; }
+.sl-markdown-content .bb-kartu__boxes { display: flex; gap: 0.3rem; flex-wrap: wrap; font-size: 0.8em; }
+.sl-markdown-content .bb-kartu__boxes span { border: 1px solid var(--garis); border-radius: 6px; padding: 0.1rem 0.4rem; }
+/* Halaman umpan balik (core.js: umpan-balik-data) */
+.sl-markdown-content .bb-fb-sum { color: var(--teks-2); }
 /* === akhir widget lama === */
