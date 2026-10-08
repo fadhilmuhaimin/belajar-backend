@@ -1,0 +1,45 @@
+# server: ./api-t1
+
+# --- A. Persiapan: top-up minggu 1, lalu Budi membayar Rp25.000 ke Warung Ani ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 25000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/1
+
+{"id":1,"saldo":225000}
+
+# --- B. Relasi di skema: setiap foreign key menunjuk ke akun ---
+$ psql -c "SELECT conrelid::regclass AS tabel, conname AS nama, pg_get_constraintdef(oid) AS aturan FROM pg_constraint WHERE contype = 'f' AND connamespace = 'tahap1'::regnamespace ORDER BY 1, 2"
+   tabel   |        nama         |                   aturan                   
+-----------+---------------------+--------------------------------------------
+ sesi      | sesi_akun_id_fkey   | FOREIGN KEY (akun_id) REFERENCES akun(id)
+ topup     | topup_admin_id_fkey | FOREIGN KEY (admin_id) REFERENCES akun(id)
+ topup     | topup_akun_id_fkey  | FOREIGN KEY (akun_id) REFERENCES akun(id)
+ transaksi | transaksi_dari_fkey | FOREIGN KEY (dari) REFERENCES akun(id)
+ transaksi | transaksi_ke_fkey   | FOREIGN KEY (ke) REFERENCES akun(id)
+(5 rows)
+
+
+# --- C. Transaksi ke akun yang tidak ada ditolak database ---
+$ psql -c "INSERT INTO transaksi (dari, ke, jumlah) VALUES (419, 999, 1000)"
+ERROR:  insert or update on table "transaksi" violates foreign key constraint "transaksi_ke_fkey"
+
+
+# --- D. Warung Ani punya transaksi, jadi akunnya tidak bisa dihapus ---
+$ psql -c "DELETE FROM akun WHERE id = 418"
+ERROR:  update or delete on table "akun" violates foreign key constraint "transaksi_ke_fkey" on table "transaksi"
+
+
+# --- E. Ani mengganti nama warungnya; riwayat Budi menampilkan nama baru, jumlahnya tetap ---
+$ psql -c "UPDATE akun SET nama = 'Warung Bu Ani' WHERE id = 418"
+$ curl -i -X GET '/akun/419/riwayat' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"riwayat":[{"id":1,"arah":"keluar","lawan":"Warung Bu Ani","jumlah":25000,"waktu":"<hari ini>T<jam>+07:00"}]}

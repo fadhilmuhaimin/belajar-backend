@@ -426,8 +426,40 @@ def rekam_pertukaran():
     tulis("pertukaran.txt")
 
 
+def rekam_relasi():
+    """1.12 Data modeling dan relasi."""
+    reset()
+    mulai()
+    bagian("A. Persiapan: top-up minggu 1, lalu Budi membayar Rp25.000 ke Warung Ani")
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 25000}', token=budi)
+    harap(s, 201, "bayar Rp25.000")
+
+    bagian("B. Relasi di skema: setiap foreign key menunjuk ke akun")
+    fk = sql("SELECT conrelid::regclass AS tabel, conname AS nama, pg_get_constraintdef(oid) AS aturan "
+             "FROM pg_constraint WHERE contype = 'f' AND connamespace = 'tahap1'::regnamespace ORDER BY 1, 2")
+    harap(fk.count("REFERENCES akun(id)"), 5, "lima foreign key ke akun")
+
+    bagian("C. Transaksi ke akun yang tidak ada ditolak database")
+    sql_gagal("INSERT INTO transaksi (dari, ke, jumlah) VALUES (419, 999, 1000)", "transaksi_ke_fkey")
+
+    bagian("D. Warung Ani punya transaksi, jadi akunnya tidak bisa dihapus")
+    sql_gagal("DELETE FROM akun WHERE id = 418", "transaksi_ke_fkey")
+
+    bagian("E. Ani mengganti nama warungnya; riwayat Budi menampilkan nama baru, jumlahnya tetap")
+    sql("UPDATE akun SET nama = 'Warung Bu Ani' WHERE id = 418")
+    hari_ini = subprocess.run(PSQL + ["-At", "-c", "SELECT to_char((now() AT TIME ZONE 'Asia/Jakarta')::date, 'YYYY-MM-DD')"],
+                              capture_output=True, text=True).stdout.strip()
+    samaran[hari_ini] = "<hari ini>"
+    s, b = curl("GET", "/akun/419/riwayat", token=budi)
+    r = json.loads(b)["riwayat"]
+    harap((s, [(x["lawan"], x["jumlah"]) for x in r]), (200, [("Warung Bu Ani", 25000)]), "riwayat dengan nama baru")
+    tulis("relasi.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()
