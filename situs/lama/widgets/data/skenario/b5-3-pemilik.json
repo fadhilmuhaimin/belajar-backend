@@ -1,7 +1,7 @@
 {
   "versi": 2,
   "judul": "Budi mengganti ID di URL menjadi ani",
-  "sumber": { "jenis": "rekaman", "file": "labs/api-t1/output/b5-3-pemilik.txt", "fileVarian": "labs/api-t1/output/b5-3-pemilik.txt",
+  "sumber": { "jenis": "rekaman", "file": "labs/api-t1-lama/output/b5-3-pemilik.txt", "fileVarian": "labs/api-t1-lama/output/b5-3-pemilik.txt",
     "catatan": "Server Go 1.27 (labs/api-t1) + PostgreSQL 17.11, direkam dengan curl -i 2026-10-06. Varian: flag -tanpa-cek-pemilik." },
   "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal' dan perhatikan layar HP Budi.",
   "komponen": [

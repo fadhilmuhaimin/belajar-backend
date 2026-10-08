@@ -1,8 +1,8 @@
 {
   "versi": 2,
   "judul": "Raka men-deploy versi baru API",
-  "sumber": { "jenis": "rekaman", "file": "labs/api-t1/output/c3-deploy.txt", "fileVarian": "labs/api-t1/output/c3-deploy.txt",
-    "catatan": "Docker di laptop lab, image dari labs/api-t1/Dockerfile, PostgreSQL 17.11. Prober mengirim GET /sehat setiap 100 ms. Direkam 2026-10-06." },
+  "sumber": { "jenis": "rekaman", "file": "labs/api-t1-lama/output/c3-deploy.txt", "fileVarian": "labs/api-t1-lama/output/c3-deploy.txt",
+    "catatan": "Docker di laptop lab, image dari labs/api-t1-lama/Dockerfile, PostgreSQL 17.11. Prober mengirim GET /sehat setiap 100 ms. Direkam 2026-10-06." },
   "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal': konfigurasi deploy lupa satu variabel.",
   "komponen": [
     { "id": "ci", "label": "Build (CI)" },

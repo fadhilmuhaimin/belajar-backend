@@ -3,7 +3,8 @@
 Keluaran output/*.txt, satu file per halaman:
   b1-1-http, b1-2-error, b6-validasi, b5-1-token, b5-3-pemilik, c1-test
 Header Date dihapus dari output supaya rekaman ulang mudah dibandingkan.
-Jalankan: make -C labs/api-t1 run   (butuh: make -C labs/b3-race up, Go)
+Jalankan: make -C labs/api-t1-lama run   (butuh: make -C labs/b3-race up, Go)
+Versi lab sebelum naskah Tahap 1 (keputusan 132); dipakai halaman Tahap 1 yang belum ditulis ulang.
 """
 import base64, json, os, pathlib, re, socket, subprocess, time
 

@@ -59,7 +59,7 @@ OWASP mencantumkan Argon2id, scrypt, bcrypt, dan PBKDF2 sebagai pilihan ([Passwo
 
 **Isi JWT terbuka, tapi tidak bisa diubah.** Header dan payload hanya base64url, bukan enkripsi ([RFC 7519](https://www.rfc-editor.org/rfc/rfc7519.html)). Signature mengikat keduanya ke secret server. Rekaman lab membuktikannya: payload yang diubah ditolak, dan header `"alg": "none"` juga ditolak.
 
-<Snippet file="labs/api-t1/output/b5-1-token.txt" title="Output rekaman: labs/api-t1/output/b5-1-token.txt" />
+<Snippet file="labs/api-t1-lama/output/b5-1-token.txt" title="Output rekaman: labs/api-t1-lama/output/b5-1-token.txt" />
 
 Penolakan `"alg": "none"` bukan kebetulan. RFC 8725 mewajibkan library JWT memeriksa algoritma dari daftar yang diizinkan, bukan mempercayai header token ([RFC 8725 §3.1](https://www.rfc-editor.org/rfc/rfc8725.html#name-perform-algorithm-verificat)).
 
@@ -78,7 +78,7 @@ Yang sama di semua stack: bukti dibawa di header atau cookie, diperiksa sebelum 
 
 *Dijalankan: Go 1.27.1, HMAC-SHA256 dari pustaka standar.*
 
-<Snippet file="labs/api-t1/token.go" region="token" lang="go" />
+<Snippet file="labs/api-t1-lama/token.go" region="token" lang="go" />
 
 <p class="bb-beda">**Yang berbeda di stack ini:** lab menulis JWT sendiri supaya isinya terlihat. Di production, pakai library yang teruji, mis. `golang-jwt`, dan tetap batasi algoritmanya.</p>
 

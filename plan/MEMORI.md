@@ -22,6 +22,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Catatan untuk penulisan ulang Tahap 1
 
+- Lab baru `labs/api-t1` (keputusan 132) dibangun per halaman; halaman lama memakai `labs/api-t1-lama`. Saat 1.6 sudah punya lab berfolder, ganti tiga Snippet komentar file di 1.6 dengan folder nyata. Setelah tidak ada halaman yang memakai `api-t1-lama`, tanyakan ke pemilik apakah boleh dihapus.
+- Kolom "Halaman" di tabel lab README memakai nomor lama sebelum registry v2; perbarui saat lab dipakai halaman baru.
 - 1.33 (E1, app versi lama): prasyarat B4.2 (Tahap 2) dibuang; isi lama memakai rekaman crash B4.2. Saat ditulis ulang, ADR 10 (expand lalu contract) harus berdiri sendiri.
 - 1.15 (B6) memuat ADR 2: tabel status saldo kurang 400/409/422 dengan kutipan RFC 9110 (isi lama A2, dihapus dari 1.5 di keputusan 130), plus problem+json.
 - 1.15 (B6) menyerap B1.2; 1.39 (F1) menyerap F2. Hapus halaman B1.2/F2 di PR yang sama, catat di KEPUTUSAN.

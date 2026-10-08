@@ -54,11 +54,11 @@ Validasi dikerjakan berlapis. Setiap lapisan memeriksa hal yang berbeda:
 
 Aturan bisnis ditulis **sekali**, di logika bisnis. Semua jalur masuk lewat sana: app, `curl`, worker, atau service lain.
 
-<Snippet file="labs/api-t1/layanan.go" region="aturan" lang="go" />
+<Snippet file="labs/api-t1-lama/layanan.go" region="aturan" lang="go" />
 
 Constraint database tidak menggantikan validasi. Ia menangkap bug di kodemu sendiri. Kalau constraint sampai menolak data, artinya ada jalur yang lolos dari validasi, dan itu harus terlihat di log sebagai `500`:
 
-<Snippet file="labs/api-t1/output/b6-validasi.txt" title="Output rekaman: labs/api-t1/output/b6-validasi.txt" />
+<Snippet file="labs/api-t1-lama/output/b6-validasi.txt" title="Output rekaman: labs/api-t1-lama/output/b6-validasi.txt" />
 
 Perhatikan tiga hal di rekaman:
 
@@ -83,7 +83,7 @@ Yang sama di semua stack: aturan ditulis di server, dan database punya constrain
 <TabSet id="stack" labels={["Go","Laravel","Django","Spring"]}>
 <Fragment slot="t0">
 
-*Potongan dari `labs/api-t1/layanan.go`, dijalankan: Go 1.27.1, PostgreSQL 17.11.*
+*Potongan dari `labs/api-t1-lama/layanan.go`, dijalankan: Go 1.27.1, PostgreSQL 17.11.*
 
 <Snippet lang="go" code={`if !l.tanpaValidasi {
     if jumlah <= 0 {

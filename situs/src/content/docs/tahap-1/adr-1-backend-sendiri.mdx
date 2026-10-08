@@ -56,7 +56,7 @@ Dokumentasi Supabase sendiri memperingatkan bahwa tabel di skema terbuka tanpa R
 
 Aturan bayar ada di satu fungsi lapisan logika bisnis. Di lab, bayar ke warung adalah transfer dari akun karyawan ke akun warung.
 
-<Snippet file="labs/api-t1/layanan.go" region="aturan" lang="go" title="labs/api-t1/layanan.go" />
+<Snippet file="labs/api-t1-lama/layanan.go" region="aturan" lang="go" title="labs/api-t1-lama/layanan.go" />
 
 Handler tidak memeriksa saldo, dan app tidak bisa mengubah saldo tanpa lewat fungsi ini. Satu panggilan ke `l.data.Pindahkan` menjalankan kedua `UPDATE` dalam satu transaction ([[B3.1]]).
 

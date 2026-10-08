@@ -54,7 +54,7 @@ Lolos semua adalah syarat minimum, bukan bukti kualitas.
 
 ## Menjalankan lab
 
-Setiap halaman yang menampilkan **Rekaman lab** menyebut file output-nya, misalnya `labs/api-t1/output/b1-1-http.txt`. Output yang direkam sudah ada di repo. Kamu menjalankan lab untuk melihat perilakunya sendiri, atau untuk membuat ulang rekaman setelah mengubah kode lab.
+Setiap halaman yang menampilkan **Rekaman lab** menyebut file output-nya, misalnya `labs/api-t1-lama/output/b1-1-http.txt`. Output yang direkam sudah ada di repo. Kamu menjalankan lab untuk melihat perilakunya sendiri, atau untuk membuat ulang rekaman setelah mengubah kode lab.
 
 ### Yang dibutuhkan
 
@@ -82,7 +82,7 @@ Hampir semua lab memakai satu PostgreSQL bersama di port `54333`. Setiap lab pun
 
 | Schema | Lab |
 |---|---|
-| `t1` | `api-t1` |
+| `t1` | `api-t1-lama` (versi sebelum naskah Tahap 1) |
 | `b2`, `b2q` | `b2-model`, `b2-query` (`e5-payload` membaca `b2q`, jadi jalankan `b2-query` dulu) |
 | `b3r`, `b3s`, `b33` | `b3-race`, `b3-stack`, `b3-isolasi` |
 | `b4m`, `b4` | `b4-migration`, `b4-skema` |
@@ -131,7 +131,7 @@ Lab yang punya `Makefile` dijalankan dengan `make -C labs/<nama> run`. Sisanya d
 
 | Lab | Halaman | Cara menjalankan |
 |---|---|---|
-| `api-t1` | 1.4–1.6, 1.12–1.16, 2.9 | `make -C labs/api-t1 run`; deploy: `labs/.venv/bin/python labs/api-t1/deploy.py` |
+| `api-t1-lama` | Halaman Tahap 1 versi lama (keputusan 132) | `make -C labs/api-t1-lama run`; deploy: `labs/.venv/bin/python labs/api-t1-lama/deploy.py` |
 | `b1-openapi` | 1.7 | `make -C labs/b1-openapi run` |
 | `b2-model` | 1.8 | `make -C labs/b2-model run` |
 | `b4-migration` | 1.10 | `make -C labs/b4-migration run` |
