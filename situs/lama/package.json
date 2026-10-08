@@ -1,0 +1,4 @@
+{
+  "//": "Widget lama berbentuk UMD/CommonJS; tanpa ini situs/package.json (type: module) membuat Node membacanya sebagai ES module (keputusan 114).",
+  "type": "commonjs"
+}

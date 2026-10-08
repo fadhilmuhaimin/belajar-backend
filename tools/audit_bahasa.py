@@ -11,7 +11,7 @@ Pakai:
     - pola SEDANG/RENDAH (mis. "mahal") = PERINGATAN.
     - kalimat > 25 kata dan paragraf > 4 kalimat = PERINGATAN.
     - nama merek nyata (bank, e-wallet, ride-hailing, payment gateway) = ERROR.
-      Dicek juga di data widget (docs/widgets/data/*.json) dan ilustrasi (docs/assets/cerita/*.svg).
+      Dicek juga di data widget (situs/lama/widgets/data/*.json) dan ilustrasi (situs/lama/assets/cerita/*.svg).
     - tabel "Di stack lain" dengan beberapa stack di satu sel = ERROR, kecuali di halaman
       konseptual Bagian A (a-gambaran/). Halaman konsep lain: satu stack per baris atau tab.
     - tanpa PATH: semua halaman situs (.md dan .mdx). Baris import, komentar JSX, dan tag komponen bukan prosa.
@@ -28,7 +28,7 @@ KECUALI = ()
 # Halaman konseptual: boleh merangkum beberapa stack dalam satu baris tabel "Di stack lain".
 A_DIRS = ("situs/src/content/docs/a-gambaran/",)
 # Selain Markdown, teks yang tampil ke pembaca juga ada di data widget dan ilustrasi.
-EXTRA_GLOBS = ("docs/widgets/data/**/*.json", "docs/assets/cerita/*.svg")
+EXTRA_GLOBS = ("situs/lama/widgets/data/**/*.json", "situs/lama/assets/cerita/*.svg")
 # Tidak ada konten lama yang dikecualikan.
 OLD = ()
 

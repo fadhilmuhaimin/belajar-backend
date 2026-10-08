@@ -1,12 +1,12 @@
 Proyek ini memakai dua lisensi:
 
-- Kode (tools/, labs/, tests/, situs/ selain situs/src/content/, docs/widgets/*.js
-  dan *.css, docs/javascripts/): MIT License, teks di bawah.
-- Teks dan gambar panduan (situs/src/content/, docs/widgets/data/, docs/assets/cerita/,
-  includes/, plan/): Creative Commons Attribution-ShareAlike 4.0
+- Kode (tools/, labs/, tests/, situs/ selain situs/src/content/, situs/lama/widgets/*.js
+  dan *.css, situs/lama/javascripts/): MIT License, teks di bawah.
+- Teks dan gambar panduan (situs/src/content/, situs/data/, situs/lama/widgets/data/,
+  situs/lama/assets/cerita/, plan/): Creative Commons Attribution-ShareAlike 4.0
   International (CC BY-SA 4.0), teks lengkap di LICENSES/CC-BY-SA-4.0.txt.
 
-Pengecualian: docs/vendor/ (sql.js, lisensinya di folder itu) dan dependency
+Pengecualian: situs/lama/vendor/ (sql.js, lisensinya di folder itu) dan dependency
 lab yang diunduh package manager memakai lisensinya masing-masing. Font tidak
 ikut repo.
 

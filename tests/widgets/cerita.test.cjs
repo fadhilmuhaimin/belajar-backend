@@ -9,7 +9,7 @@ const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
 const json = (p) => JSON.parse(read(p));
 
 test("cerita.json: lima tahap berurutan, diagram maks 6 elemen", () => {
-  const d = json("docs/widgets/data/cerita.json");
+  const d = json("situs/data/cerita.json");
   assert.equal(d.app, "Rekeningo");
   assert.deepEqual(d.tahap.map((t) => t.no), [1, 2, 3, 4, 5]);
   for (const t of d.tahap) {
@@ -23,7 +23,7 @@ test("cerita.json: lima tahap berurutan, diagram maks 6 elemen", () => {
 
 test("cerita.json sama dengan STORY.md (rentang user per tahap)", () => {
   const story = read("plan/STORY.md");
-  for (const t of json("docs/widgets/data/cerita.json").tahap) {
+  for (const t of json("situs/data/cerita.json").tahap) {
     assert.ok(story.includes(`### Tahap ${t.no} · ${t.user}`), `heading Tahap ${t.no} · ${t.user}`);
   }
 });
@@ -54,7 +54,7 @@ function source(spec, label) {
 
 for (const file of ["b3-1-stackstep.json", "b3-2-stackstep.json"]) {
   test(`${file}: setiap pola ada di kode yang ditampilkan`, () => {
-    const cfg = json(`docs/widgets/data/${file}`);
+    const cfg = json(`situs/lama/widgets/data/${file}`);
     const ids = cfg.langkah.map((l) => l.id);
     for (const [label, spec] of Object.entries(cfg.stack)) {
       const text = source(spec, label);

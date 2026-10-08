@@ -1,5 +1,5 @@
 ---
-/** Titik pasang widget lama (docs/widgets/*.js, dimuat apa adanya lewat SkripLama). */
+/** Titik pasang widget lama (situs/lama/widgets/*.js, dimuat apa adanya lewat SkripLama). */
 interface Props { nama: string; src?: string; tahap?: number | string; [k: `data-${string}`]: string }
 const { nama, src, tahap, ...lain } = Astro.props; // atribut data-* lain (mis. data-modes untuk race) diteruskan apa adanya
 ---

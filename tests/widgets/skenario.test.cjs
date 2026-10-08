@@ -1,12 +1,12 @@
-// Semua skenario alur di docs/widgets/data/skenario/: valid, dan angka saldo di skenario
+// Semua skenario alur di situs/lama/widgets/data/skenario/: valid, dan angka saldo di skenario
 // rekaman sama dengan file rekaman lab (aturan: angka saldo di skenario sama dengan rekaman).
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const ROOT = path.resolve(__dirname, "../..");
-const core = require(path.join(ROOT, "docs/widgets/alur-core.js"));
-const DIR = path.join(ROOT, "docs/widgets/data/skenario");
+const core = require(path.join(ROOT, "situs/lama/widgets/alur-core.js"));
+const DIR = path.join(ROOT, "situs/lama/widgets/data/skenario");
 
 for (const f of fs.readdirSync(DIR).filter((f) => f.endsWith(".json"))) {
   const d = core.normalize(JSON.parse(fs.readFileSync(path.join(DIR, f), "utf8")));

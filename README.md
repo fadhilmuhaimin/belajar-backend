@@ -15,8 +15,8 @@ Yang membedakan panduan ini:
 | Folder | Isi |
 |---|---|
 | `situs/` | Situs Astro + Starlight: halaman (MDX di `src/content/docs`), komponen, tema, dan alat tangkapan layar |
-| `docs/widgets/data/cerita.json` | Registry semua halaman dan angka asumsi cerita; satu-satunya sumber urutan baca. Dipindah ke `situs/` di langkah berikutnya |
-| `docs/` | Widget interaktif lama, data widget, dan aset yang dimuat situs apa adanya |
+| `situs/data/cerita.json` | Registry semua halaman dan angka asumsi cerita; satu-satunya sumber urutan baca |
+| `situs/lama/` | Widget interaktif lama, data widget, sql.js, dan ilustrasi yang dimuat situs apa adanya |
 | `labs/` | Lab yang menghasilkan rekaman di halaman (Go, Python, Dart, Node, PostgreSQL, Redis) |
 | `tools/` | Skrip sinkronisasi registry, istilah, audit bahasa, kontras, dan gerbang kualitas |
 | `tests/` | Tes widget lama (Node) |
@@ -174,6 +174,6 @@ Repo ini adalah tempat kerja utama panduan. Lihat [CONTRIBUTING.md](CONTRIBUTING
 
 ## Lisensi
 
-- **Teks dan gambar panduan** (`docs/**/*.md`, data cerita dan skenario di `docs/widgets/data/`, ilustrasi di `docs/assets/cerita/`, `includes/`, `plan/`): [CC BY-SA 4.0](LICENSES/CC-BY-SA-4.0.txt). Kamu boleh menyalin, mengubah, dan menerbitkan ulang, termasuk untuk tujuan komersial, asal mencantumkan sumber dan membagikan hasil turunannya dengan lisensi yang sama.
+- **Teks dan gambar panduan** (halaman di `situs/src/content/`, registry dan istilah di `situs/data/`, data cerita dan skenario di `situs/lama/widgets/data/`, ilustrasi di `situs/lama/assets/cerita/`, `plan/`): [CC BY-SA 4.0](LICENSES/CC-BY-SA-4.0.txt). Kamu boleh menyalin, mengubah, dan menerbitkan ulang, termasuk untuk tujuan komersial, asal mencantumkan sumber dan membagikan hasil turunannya dengan lisensi yang sama.
 - **Kode** (`tools/`, `labs/`, `tests/`, `situs/` selain halaman, JavaScript dan CSS widget): [MIT](LICENSE).
-- **Pengecualian:** `docs/vendor/` (sql.js) dan dependency yang diunduh package manager memakai lisensinya masing-masing. File font tidak ikut repo (lihat bagian Font).
+- **Pengecualian:** `situs/lama/vendor/` (sql.js) dan dependency yang diunduh package manager memakai lisensinya masing-masing. File font tidak ikut repo (lihat bagian Font).
