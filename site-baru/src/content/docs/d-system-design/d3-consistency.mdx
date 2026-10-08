@@ -1,0 +1,134 @@
+---
+title: "5.2 Replica dan consistency"
+---
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="D3" />
+
+<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[B3.3]], [[B10.2]]</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Budi top-up, lalu langsung membuka saldo yang dibaca dari replica. Apa yang mungkin ia lihat?
+2. Apa arti read-your-writes?
+3. Pembayaran sudah jadi service sendiri. Bagaimana membatalkan pesanan kalau pembayaran gagal, tanpa satu transaction?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+## Inti
+
+Salinan data bisa tertinggal. Tentukan per fitur: harus terbaru, atau boleh tertinggal sebentar. Saldo selalu dari primary.
+
+<WidgetLama nama="arsitektur" tahap={5} />
+
+## Lihat sendiri
+
+Replica di rekaman ini sengaja ditunda 2 detik supaya lag terlihat jelas. Lag sungguhan biasanya lebih kecil dan berubah-ubah.
+
+<WidgetLama nama="alur" src="data/skenario/d3-replika.json" />
+
+## Kenapa ini ada
+
+Seminggu setelah read replica dipasang ([[D2]]), tiket bantuan naik. Isinya mirip: "Saya top-up, saldo tidak bertambah, jadi saya top-up lagi."
+
+Saldo mereka sebenarnya sudah bertambah. Layar saldo membaca dari replica, dan replica belum menerapkan top-up itu.
+
+## Cara kerjanya
+
+**Replikasi asinkron.** Primary mengirim log perubahan (WAL) ke replica, dan replica menerapkannya setelah itu. Selama jeda itu, replica menjawab dengan data lama. Replica juga hanya bisa dibaca:
+
+<Snippet file="labs/t5-replika/output/replika.txt" title="Output rekaman: labs/t5-replika/output/replika.txt" />
+
+**Model consistency.** Vogels membedakan beberapa jaminan untuk data yang direplikasi ([Eventually Consistent](https://www.allthingsdistributed.com/2008/12/eventually_consistent.html)). Dua yang paling sering dibutuhkan app:
+
+- **Eventual consistency**: kalau tidak ada perubahan baru, semua salinan akhirnya sama. Cukup untuk katalog, promo, dan laporan.
+- **Read-your-writes**: user yang baru menulis selalu melihat tulisannya sendiri. Dibutuhkan untuk saldo dan riwayat setelah transaksi.
+
+**Cara mendapat read-your-writes** dengan replica:
+
+1. **Catat posisi tulis.** Setelah `COMMIT`, simpan LSN. Baca dari replica hanya kalau `pg_last_wal_replay_lsn()` sudah melewatinya ([PostgreSQL: fungsi admin](https://www.postgresql.org/docs/17/functions-admin.html)). Rekaman bagian B.
+2. **Primary untuk sementara.** Setelah user menulis, baca dari primary selama beberapa detik. Lebih sederhana, tapi angka "beberapa detik" adalah tebakan.
+3. **Jawab dengan nilai baru.** Response top-up langsung berisi saldo baru, dan app menampilkannya tanpa membaca ulang. Ini cara yang sudah dikenal di app mobile.
+
+Keputusan uang, mis. cek saldo sebelum transfer, tidak pernah dibaca dari replica ([[B3.2]]).
+
+**Antar service.** Sejak Tahap 4, pembayaran punya database sendiri. Tidak ada satu transaction yang mencakup pesanan dan pembayaran. Polanya disebut saga: urutan transaction lokal, dan kalau satu langkah gagal, langkah sebelumnya dibatalkan dengan transaction kompensasi ([microservices.io: saga](https://microservices.io/patterns/data/saga.html)). Event antar langkah dikirim lewat outbox ([[B10.2]]).
+
+## Di stack lain
+
+Yang sama di semua stack: tulis ke primary, baca dari replica hanya kalau data lama bisa diterima. Yang berbeda: dukungan bawaan untuk memisahkan keduanya. Hanya PostgreSQL dan Python yang dijalankan di lab. Baris lain dicek ke dokumentasi.
+
+| Stack | Pemisahan baca dan tulis | Sumber |
+|---|---|---|
+| Laravel | Koneksi `read` dan `write`; opsi `sticky` membaca dari primary setelah menulis, tapi hanya dalam request yang sama | [Laravel: database](https://laravel.com/docs/12.x/database) |
+| Django | Database router: `db_for_read`, `db_for_write` | [Django: multiple databases](https://docs.djangoproject.com/en/stable/topics/db/multi-db/) |
+| Spring | `AbstractRoutingDataSource` memilih DataSource per lookup key | [Spring: AbstractRoutingDataSource](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/jdbc/datasource/lookup/AbstractRoutingDataSource.html) |
+| Go | Dua pool koneksi, dipilih di lapisan akses data | Rekaman di atas (Python, pola yang sama) |
+
+Opsi `sticky` Laravel tidak menolong skenario di widget: top-up dan buka saldo adalah dua request berbeda.
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Semua baca dari primary | Selalu terbaru | Beban baca tidak berkurang |
+| Semua baca dari replica | Beban primary turun paling banyak | User bisa tidak melihat tulisannya sendiri |
+| Replica + read-your-writes (LSN atau jeda) | Hanya user yang baru menulis yang membebani primary | Butuh menyimpan posisi tulis per user |
+| Saga antar service | Tiap service punya database sendiri | Ada saat data antar service belum sama; kompensasi harus dirancang dan dites |
+
+## Cek diri
+
+**1.** Fitur mana yang aman dibaca dari replica: katalog Warung Ani, saldo untuk cek sebelum transfer, laporan penjualan bulan lalu?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Katalog dan laporan bulan lalu. Katalog boleh tertinggal beberapa detik, dan laporan bulan lalu tidak berubah lagi. Cek saldo sebelum transfer harus dari primary, di dalam transaction, karena memutuskan uang.
+
+</details>
+
+**2.** Jelaskan kenapa "baca dari primary selama 5 detik setelah menulis" bisa tetap gagal.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Angka 5 detik adalah tebakan tentang lag. Saat replica sedang sibuk atau jaringan lambat, lag bisa lebih dari itu, dan user kembali melihat data lama. Membandingkan LSN tidak menebak: replica dipakai hanya kalau sudah benar-benar sampai posisi tulis.
+
+</details>
+
+**3.** Pesanan dibuat, lalu pembayaran di service lain gagal. Tulis langkah kompensasinya.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Service pembayaran menulis event `pembayaran_gagal` ke outbox. Monolith menerimanya, lalu menjalankan transaction lokal yang mengubah status pesanan jadi dibatalkan dan mengembalikan stok. Setiap langkah harus tahan diproses dua kali, karena event bisa terkirim ulang.
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Query yang diarahkan ke replica memang boleh menerima data yang tertinggal.
+- [ ] Layar yang ditampilkan setelah user menulis tidak membaca dari replica tanpa pengaman.
+- [ ] Keputusan uang dibaca dari primary, di dalam transaction.
+- [ ] Alur lintas service punya langkah kompensasi untuk setiap kegagalan.
+- [ ] Langkah saga tahan diproses dua kali.
+
+## Bacaan lanjut
+
+- [Werner Vogels: Eventually Consistent](https://www.allthingsdistributed.com/2008/12/eventually_consistent.html)
+- [PostgreSQL: Hot standby](https://www.postgresql.org/docs/17/hot-standby.html)
+- [microservices.io: Saga](https://microservices.io/patterns/data/saga.html)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
