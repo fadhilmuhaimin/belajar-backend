@@ -1,0 +1,72 @@
+{
+  "versi": 2,
+  "judul": "Budi membayar Rp25.000, Ani melihatnya masuk",
+  "sumber": { "jenis": "rekaman", "file": "labs/api-t1/output/bayar.txt", "fileVarian": "labs/api-t1/output/bayar.txt",
+    "catatan": "Server Go 1.27 (labs/api-t1) + PostgreSQL 17, direkam dengan curl -i dari database bersih; SQL dari log statement PostgreSQL." },
+  "pengantar": "Jalankan jalur normal sampai HP Ani berubah. Setelah itu centang 'Ubah satu hal' dan lihat di mana pembayaran yang terlalu besar berhenti.",
+  "komponen": [
+    { "id": "app", "label": "App Budi" },
+    { "id": "api", "label": "Monolith API", "lapisan": ["handler", "service", "repo"] },
+    { "id": "db", "label": "PostgreSQL" },
+    { "id": "warung", "label": "App Warung Ani" }
+  ],
+  "perangkat": [ { "id": "budi", "label": "HP Budi" }, { "id": "ani", "label": "HP Warung Ani" } ],
+  "layarAwal": {
+    "budi": { "judul": "Bayar", "waktu": "12.10", "saldo": 250000, "isi": [
+      { "jenis": "input", "label": "Warung", "nilai": "Warung Ani" }, { "jenis": "input", "label": "Nominal", "nilai": "Rp25.000" },
+      { "jenis": "tombol", "teks": "Bayar" } ] },
+    "ani": { "judul": "Warung Ani", "waktu": "12.10", "isi": [ { "jenis": "baris", "kiri": "Masuk hari ini", "kanan": "Rp0" } ] }
+  },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: saldo Budi tinggal Rp25.000, dan ia mencoba membayar Rp30.000. Di mana permintaan itu berhenti?",
+    "options": ["Di app, sebelum request dikirim", "Di service, sebelum ada UPDATE", "Di database, saat constraint saldo menolak"],
+    "answer": 1,
+    "varian": true,
+    "explain": "Service membaca saldo, membandingkannya dengan jumlah, lalu menolak sebelum transaction dimulai. Rekaman lab: 422 \"Saldo tidak cukup\", saldo tetap Rp25.000. Constraint saldo di database adalah pagar terakhir, untuk saat kode service salah."
+  },
+  "langkah": [
+    { "dari": "app", "ke": "api", "lapisan": "handler", "judul": "Budi menekan Bayar",
+      "kirim": "POST /transfers\nAuthorization: Bearer <token sesi Budi>\n{\"ke\": 418, \"jumlah\": 25000}",
+      "jelas": "App mengirim nomor akun warung dan jumlah. App tidak mengirim saldo, karena saldo bukan urusan app.",
+      "layar": { "budi": { "judul": "Bayar", "waktu": "12.10", "saldo": 250000, "isi": [ { "jenis": "proses", "teks": "Membayar..." } ] } } },
+    { "dari": "api", "lapisan": "service", "judul": "Service memeriksa aturan Rekeningo",
+      "kirim": "0 < 25000 ≤ 200000           ✓\nakun 418 adalah warung       ✓\nsaldo Budi 250000 ≥ 25000    ✓ (dibaca dari database)",
+      "jelas": "Semua aturan diperiksa sebelum uang disentuh. Membaca saldo lalu membandingkannya benar untuk satu request. Dua request bersamaan adalah masalah Tahap 2." },
+    { "dari": "api", "ke": "db", "lapisan": "repo", "judul": "Satu transaction: dua saldo dan satu catatan",
+      "kirim": "begin\nUPDATE akun SET saldo = saldo - $1 WHERE id = $2 RETURNING saldo\nUPDATE akun SET saldo = saldo + $1 WHERE id = $2\nINSERT INTO transaksi (dari, ke, jumlah) VALUES ($1, $2, $3) RETURNING id\ncommit",
+      "jelas": "Ini salinan log statement PostgreSQL di rekaman lab. Ketiga perubahan berhasil bersama, atau batal bersama." },
+    { "dari": "api", "ke": "app", "lapisan": "handler", "judul": "201 dengan saldo baru",
+      "kirim": "201 Created\nLocation: /transfers/1\n{\"id\":1,\"saldo\":225000}",
+      "jelas": "Status 201 karena satu transaksi baru dibuat. Location menunjuk ke transaksi itu. Body membawa saldo baru, jadi app tidak perlu request kedua.",
+      "nada": "good",
+      "layar": { "budi": { "judul": "Bayar", "waktu": "12.10", "saldo": 225000, "isi": [
+        { "jenis": "toast", "teks": "Terbayar Rp25.000 ke Warung Ani", "nada": "good" } ] } } },
+    { "dari": "warung", "ke": "api", "lapisan": "handler", "judul": "Ani membuka app warungnya",
+      "kirim": "GET /akun/418\nAuthorization: Bearer <token sesi Warung Ani>",
+      "jelas": "HP Budi tidak tahu HP Ani. Di v1 belum ada notifikasi push, jadi app Ani membaca saldo dari backend saat dibuka." },
+    { "dari": "api", "ke": "warung", "lapisan": "handler", "judul": "Saldo warung bertambah",
+      "kirim": "200 {\"id\":418,\"jenis\":\"warung\",\"nama\":\"Warung Ani\",\"saldo\":25000}",
+      "jelas": "Rekaman lab: saldo Warung Ani Rp25.000. Angka ini sama dengan yang berkurang dari saldo Budi.",
+      "nada": "good",
+      "layar": { "ani": { "judul": "Warung Ani", "waktu": "12.11", "saldo": 25000, "isi": [
+        { "jenis": "baris", "kiri": "Masuk hari ini", "kanan": "Rp25.000" } ] } } }
+  ],
+  "varian": {
+    "label": "saldo tinggal Rp25.000, Budi membayar Rp30.000",
+    "mulai": 0,
+    "langkah": [
+      { "dari": "app", "ke": "api", "lapisan": "handler", "judul": "Budi membayar Rp30.000",
+        "kirim": "POST /transfers\n{\"ke\": 418, \"jumlah\": 30000}",
+        "jelas": "Siang itu Budi sudah membayar Rp200.000 di Warung Sari. Saldonya tinggal Rp25.000.",
+        "layar": { "budi": { "judul": "Bayar", "waktu": "12.40", "saldo": 25000, "isi": [ { "jenis": "proses", "teks": "Membayar..." } ] } } },
+      { "dari": "api", "lapisan": "service", "judul": "Service menolak sebelum transaction dimulai",
+        "kirim": "saldo Budi 25000 ≥ 30000    ✗  → ErrSaldoKurang",
+        "jelas": "Tidak ada begin, tidak ada UPDATE. Database tidak disentuh selain untuk membaca saldo.", "nada": "warn" },
+      { "dari": "api", "ke": "app", "lapisan": "handler", "judul": "422: saldo tidak cukup",
+        "kirim": "422 Unprocessable Entity\nContent-Type: application/problem+json\n{\"type\":\"/problems/saldo-kurang\",\"title\":\"Saldo tidak cukup\",\"status\":422}",
+        "jelas": "Rekaman lab: 422, dan saldo Budi tetap Rp25.000.", "nada": "good",
+        "layar": { "budi": { "judul": "Bayar", "waktu": "12.40", "saldo": 25000, "isi": [
+          { "jenis": "toast", "teks": "Saldo tidak cukup", "nada": "warn" } ] } } }
+    ]
+  }
+}

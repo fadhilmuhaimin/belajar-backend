@@ -1,0 +1,79 @@
+---
+title: "1.9 Fitur: bayar ke warung"
+description: Budi membayar makan ke Warung Ani. Backend memeriksa aturan, lalu mengurangi satu saldo, menambah saldo lain, dan mencatatnya dalam satu transaction.
+---
+import Blok from "../../../components/Blok.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import Snippet from "../../../components/Snippet.astro";
+
+<p class="meta">Baca 5 menit · coba 2 menit · Prasyarat: [[t1-fitur-topup]] · Jalur inti</p>
+
+Ini fitur yang menentukan uji coba berhasil atau tidak. PRD menetapkan targetnya: Budi bisa membayar makan dalam 5 detik, dan Ani melihat bayarannya masuk.
+
+<Blok nama="Yang diminta PRD" buka>
+
+| Prioritas | Fitur | Keterangan |
+|---|---|---|
+| P0 | Bayar ke warung | Karyawan memilih warung, memasukkan nominal, lalu konfirmasi; warung melihat pembayaran masuk |
+
+| Di app | Di backend | Di database |
+|---|---|---|
+| Pilih warung, nominal, konfirmasi, tampilkan hasil | `POST /transfers`: periksa aturan, kurangi saldo, tambah ke warung, catat | Tabel `transaksi`; constraint saldo ≥ 0 |
+
+Di backend, bayar ke warung adalah transfer dari akun karyawan ke akun warung. Transfer antar karyawan juga diminta Budi, tapi PRD menundanya ke v2, jadi backend v1 menolaknya.
+
+</Blok>
+
+<Blok nama="Coba: Budi membayar, Ani menerima" buka aman="Kalau berhenti di sini, kamu sudah tahu: satu pembayaran adalah dua perubahan saldo dan satu catatan, dan aturannya diperiksa sebelum uang disentuh.">
+
+Ikuti satu pembayaran dari HP Budi sampai HP Warung Ani. Status, body, dan SQL di widget ini diambil dari rekaman lab.
+
+<WidgetLama nama="alur" src="data/skenario/t1-bayar.json" />
+
+</Blok>
+
+<Blok nama="Endpoint, aturan, dan rekaman">
+
+Service memeriksa tiga aturan sebelum uang disentuh: jumlah masuk akal, penerimanya warung, dan saldo cukup.
+
+<Snippet file="labs/api-t1/internal/service/bayar.go" region="bayar" lang="go" title="labs/api-t1/internal/service/bayar.go" />
+
+Perhatikan cara saldo diperiksa: service membaca saldo, lalu membandingkannya. Untuk satu request, ini benar. Untuk dua request yang datang bersamaan, ada celah, dan celah itu baru terlihat di Tahap 2.
+
+Repo menjalankan ketiga perubahan dalam satu transaction:
+
+<Snippet file="labs/api-t1/internal/repo/transaksi.go" region="pindahkan" lang="go" title="labs/api-t1/internal/repo/transaksi.go" />
+
+Rekaman lab dari database bersih. Pembayaran Rp25.000 mendapat `201` dan saldo baru:
+
+<Snippet file="labs/api-t1/output/bayar.txt" lines="11:17" title="Rekaman lab: labs/api-t1/output/bayar.txt" />
+
+Log PostgreSQL menunjukkan urutannya:
+
+<Snippet file="labs/api-t1/output/bayar.txt" lines="34:41" title="Rekaman lab: labs/api-t1/output/bayar.txt" />
+
+Saldo yang tidak cukup ditolak dengan `422`, dan saldo Budi tidak berubah:
+
+<Snippet file="labs/api-t1/output/bayar.txt" lines="51:62" title="Rekaman lab: labs/api-t1/output/bayar.txt" />
+
+</Blok>
+
+<Blok nama="Konsep yang akan dibutuhkan">
+
+- [[t1-pertukaran-saldo]]: tiga hal yang harus selalu benar setiap kali uang berpindah.
+- [[B3.1]]: kenapa dua `UPDATE` dan satu `INSERT` harus satu unit.
+- [[B6]]: aturan yang diperiksa di service, dan format error yang ditampilkan app.
+- [[B1.1]]: arti `201`, header `Location`, dan `422`.
+
+**Sengaja belum dilakukan** di v1:
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| Dua pembayaran dari akun yang sama di detik yang sama | Satu orang jarang menekan Bayar di dua HP sekaligus | Tahap 2: race condition dan lock |
+| Mengulang pembayaran saat sinyal putus | App menampilkan "gagal" dan Budi bisa mengulang sendiri | Tahap 2: dobel bayar dan idempotency key |
+| Bayar dengan QR | Bukan lingkup v1 | PRD berikutnya |
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
