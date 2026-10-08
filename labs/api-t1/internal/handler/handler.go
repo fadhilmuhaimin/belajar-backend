@@ -271,6 +271,9 @@ func (s Server) selesaikanBayar(w http.ResponseWriter, r *http.Request, ke, juml
 	if s.rentan == "m1" {
 		bayar = s.svc.BayarM1
 	}
+	if s.rentan == "m4" {
+		bayar = s.svc.BayarM4
+	}
 	id, saldo, err := bayar(r.Context(), peminta(r), ke, jumlah)
 	var errV service.ErrValidasi
 	switch {

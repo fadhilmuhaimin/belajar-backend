@@ -1,0 +1,94 @@
+
+# --- A. Minggu 2: Raka menambah batas saldo warung langsung di server, lewat psql (tidak ada di schema.sql) ---
+$ psql -c "ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000)"
+# server: ./api-t1 -rentan m4
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+
+# --- B. Minggu 3, Jumat siang: Warung Ani ramai ---
+# persiapan: 29 karyawan lain masing-masing membayar Rp50.000 ke Warung Ani
+$ psql -c "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+ id  |    nama    |  saldo  
+-----+------------+---------
+ 418 | Warung Ani | 1450000
+ 419 | Budi       |  250000
+(2 rows)
+
+$ psql -c "SELECT (SELECT sum(saldo) FROM akun) AS total_saldo, (SELECT sum(nominal) FROM topup) AS total_topup, (SELECT count(*) FROM transaksi) AS transaksi"
+ total_saldo | total_topup | transaksi 
+-------------+-------------+-----------
+    25000000 |    25000000 |        29
+(1 row)
+
+
+# --- C. Budi membayar Rp70.000; app menampilkan gagal ---
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 70000}'
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/problem+json
+
+{"type":"/problems/internal","title":"Terjadi kesalahan di server","status":500}
+# yang diterima PostgreSQL (log_statement=all):
+UPDATE akun SET saldo = saldo - $1 WHERE id = $2 RETURNING saldo
+UPDATE akun SET saldo = saldo + $1 WHERE id = $2
+
+$ psql -c "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+ id  |    nama    |  saldo  
+-----+------------+---------
+ 418 | Warung Ani | 1450000
+ 419 | Budi       |  180000
+(2 rows)
+
+$ psql -c "SELECT count(*) AS transaksi_budi FROM transaksi WHERE dari = 419"
+ transaksi_budi 
+----------------
+              0
+(1 row)
+
+$ psql -c "SELECT (SELECT sum(saldo) FROM akun) AS total_saldo, (SELECT sum(nominal) FROM topup) AS total_topup, (SELECT count(*) FROM transaksi) AS transaksi"
+ total_saldo | total_topup | transaksi 
+-------------+-------------+-----------
+    24930000 |    25000000 |        29
+(1 row)
+
+server log: PERINGATAN: mode rentan m4 menyala
+server log: error internal: ERROR: new row for relation "akun" violates check constraint "batas_saldo_warung" (SQLSTATE 23514)
+
+# --- D. Versi benar: tiga perubahan dalam satu transaction, batas warung yang sama ---
+$ psql -c "ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000)"
+# server: ./api-t1
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+# persiapan: 29 karyawan lain masing-masing membayar Rp50.000 ke Warung Ani
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 70000}'
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/problem+json
+
+{"type":"/problems/internal","title":"Terjadi kesalahan di server","status":500}
+# yang diterima PostgreSQL (log_statement=all):
+begin
+UPDATE akun SET saldo = saldo - $1 WHERE id = $2 RETURNING saldo
+UPDATE akun SET saldo = saldo + $1 WHERE id = $2
+rollback
+
+$ psql -c "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+ id  |    nama    |  saldo  
+-----+------------+---------
+ 418 | Warung Ani | 1450000
+ 419 | Budi       |  250000
+(2 rows)
+
+$ psql -c "SELECT (SELECT sum(saldo) FROM akun) AS total_saldo, (SELECT sum(nominal) FROM topup) AS total_topup, (SELECT count(*) FROM transaksi) AS transaksi"
+ total_saldo | total_topup | transaksi 
+-------------+-------------+-----------
+    25000000 |    25000000 |        29
+(1 row)
+
+server log: error internal: ERROR: new row for relation "akun" violates check constraint "batas_saldo_warung" (SQLSTATE 23514)
