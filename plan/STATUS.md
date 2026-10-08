@@ -13,7 +13,24 @@ Diperbarui: 2026-10-08 (setelah fase 1; arahan baru keputusan 109 terpasang, men
 
 ## Arahan baru (keputusan 109)
 
-Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAHAP-1.md` (42 halaman, enam template). `CLAUDE.md` baru dan tiga skill (`gaya-bahasa`, `visualisasi`, `analisis-kritis`) terpasang 2026-10-08. Tugas 0 dan 1 dimulai saat pemilik mengetik "mulai". Tabel fase di bawah adalah keadaan yang sudah dicapai, bukan rencana ke depan.
+Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAHAP-1.md`.
+
+### Tugas 0 · Siapkan repo (selesai 2026-10-08, kecuali secret Cloudflare)
+
+| Langkah | Keadaan |
+|---|---|
+| Pemeriksaan di `situs/` | `tools/cek_situs.sh --layar`: registry, istilah, audit bahasa, build strict, ID internal, kontras, tipe strict, Vitest, tes widget lama, layar pertama 4 ukuran (termasuk beranda satu layar), tangkapan dan tema awal (111, 119, 121) |
+| MkDocs dan `docs/` | Dihapus; registry di `situs/data/cerita.json`, widget lama di `situs/lama/` (112–114) |
+| Cloudflare Pages + preview per PR | Job `deploy` siap; menunggu secret `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID` dari pemilik (115) |
+| Dependency | React 19.3, TypeScript 6.0.3, Zod 4.6, Vitest 5 dengan ADR; PGlite menunggu widget SQL pertama (116) |
+| Registry v2 | 42 halaman Tahap 1 bernomor 1.1–1.42 sesuai naskah; 18 halaman memakai isi lama (`lama`), 24 menyusul (117) |
+| Template | `Blok.astro` + `data/templat.json` untuk enam jenis; kerangka di `situs/templat/` (118) |
+| Navigasi | Breadcrumb otomatis, pemilih peran, mode fokus (120); tema gelap default benar-benar berlaku (119) |
+| Beranda | Satu layar: Mulai, tiga pintu, peta enam tahap (121) |
+
+### Tugas 1 · Tahap 1 (42 halaman)
+
+Belum dimulai. Halaman berikutnya: 1.1 PRD v1.
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 

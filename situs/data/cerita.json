@@ -274,12 +274,20 @@
   ],
   "halaman": [
     {
+      "id": "Beranda",
+      "judul": "Rekeningo Tech Journey",
+      "tahap": "pembuka",
+      "path": "index.md",
+      "ada": true
+    },
+    {
       "id": "A0",
       "judul": "Cara pakai panduan ini",
       "tahap": "pembuka",
-      "path": "index.md",
+      "path": "cara-pakai.md",
       "inti": true,
       "ada": true,
+      "lama": true,
       "menit": 3
     },
     {

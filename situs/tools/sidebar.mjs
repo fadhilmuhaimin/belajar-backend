@@ -36,7 +36,8 @@ export function sidebar() {
   const d = muat();
   const by = byId(d);
   const out = [];
-  out.push({ label: "Pembuka", collapsed: false, items: d.halaman.filter((h) => h.tahap === "pembuka").map((h) => item(h, by)) });
+  // Beranda sudah ditautkan judul situs; tidak diulang di sidebar.
+  out.push({ label: "Pembuka", collapsed: false, items: d.halaman.filter((h) => h.tahap === "pembuka" && h.id !== "Beranda").map((h) => item(h, by)) });
   for (const t of d.tahap) out.push(grupTahap(d, t, by));
   const samping = d.halaman.filter((h) => h.tahap === "sampingan");
   if (samping.length) out.push({ label: "Studi sampingan", collapsed: true, items: samping.map((h) => item(h, by)) });

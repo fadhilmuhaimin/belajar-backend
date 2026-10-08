@@ -18,7 +18,7 @@ function halaman() {
   (function walk(d, rel) {
     for (const e of fs.readdirSync(d, { withFileTypes: true })) {
       if (e.isDirectory()) { if (!["_astro", "pagefind", "widgets", "vendor", "fonts"].includes(e.name)) walk(path.join(d, e.name), rel + e.name + "/"); }
-      else if (e.name === "index.html" && rel !== "") out.push(rel);
+      else if (e.name === "index.html") out.push(rel); // termasuk beranda (rel "")
     }
   })(path.resolve("dist"), "");
   return out.sort();
@@ -50,7 +50,17 @@ for (const p of halaman()) {
     const page = await ctx.newPage();
     await page.goto(BASE + "/" + p, { waitUntil: "networkidle" });
     const r = await page.evaluate(UKUR);
+    // Beranda = satu layar (PROPOSAL): seluruh isi muat tanpa scroll vertikal maupun horizontal (keputusan 121).
+    const satu = p === "" ? await page.evaluate(() => [Math.round(document.querySelector(".beranda")?.getBoundingClientRect().bottom ?? 1e9),
+      innerHeight, document.documentElement.scrollWidth > document.documentElement.clientWidth]) : null;
     await ctx.close();
+    if (satu) {
+      const [bawah, layar, x] = satu, sisa = layar - bawah;
+      if (sisa < 0 || x) { gagal++; baris.push(`  GAGAL ${v.name} beranda terpotong ${-sisa}px${x ? " + scroll horizontal" : ""}`); }
+      else if (sisa < MIN) { tipis++; baris.push(`  tipis ${v.name} beranda sisa ${sisa}px`); }
+      else baris.push(`  ok    ${v.name} beranda satu layar, sisa ${sisa}px`);
+      continue;
+    }
     if (r.tanpaInti) { baris.push(`  info  ${v.name} tanpa Inti`); continue; }
     if (r.error) { gagal++; baris.push(`  GAGAL ${v.name} ${r.error}`); continue; }
     const margin = r.tinggi - r.bottom;

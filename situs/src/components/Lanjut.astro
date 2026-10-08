@@ -11,7 +11,7 @@ const i = urut.findIndex((h) => url(h) === sini);
 const prev = i > 0 ? urut[i - 1] : null;
 const next = i >= 0 && i + 1 < urut.length ? urut[i + 1] : null;
 ---
-{(prev || next) && (
+{(prev || next) && Astro.locals.starlightRoute.entry.data.template !== "splash" && (
   <nav class="bb-lanjut" aria-label="Urutan baca">
     {prev && <a href={url(prev)} class:list={["bb-lanjut__prev", { menyusul: !prev.diporting }]} rel="prev"><span>← Sebelumnya</span>{label(prev)}</a>}
     {next && <a href={url(next)} class:list={["bb-lanjut__next", { menyusul: !next.diporting }]} rel="next"><span>Berikutnya →</span>{label(next)}</a>}
