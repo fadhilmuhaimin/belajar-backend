@@ -389,7 +389,7 @@
       "judul": "Perjalanan satu request",
       "tahap": 1,
       "topik": "Gambaran besar",
-      "path": "a-gambaran/a2-perjalanan-request.md",
+      "path": "tahap-1/perjalanan-request.md",
       "prasyarat": [
         "A1"
       ],
@@ -402,7 +402,6 @@
         "mobile",
         "backend"
       ],
-      "lama": true,
       "nomor": "1.5",
       "menit": 9
     },

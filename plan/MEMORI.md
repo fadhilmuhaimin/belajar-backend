@@ -23,6 +23,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 ## Catatan untuk penulisan ulang Tahap 1
 
 - 1.33 (E1, app versi lama): prasyarat B4.2 (Tahap 2) dibuang; isi lama memakai rekaman crash B4.2. Saat ditulis ulang, ADR 10 (expand lalu contract) harus berdiri sendiri.
+- 1.15 (B6) memuat ADR 2: tabel status saldo kurang 400/409/422 dengan kutipan RFC 9110 (isi lama A2, dihapus dari 1.5 di keputusan 130), plus problem+json.
 - 1.15 (B6) menyerap B1.2; 1.39 (F1) menyerap F2. Hapus halaman B1.2/F2 di PR yang sama, catat di KEPUTUSAN.
 - Ilustrasi `situs/lama/assets/cerita/tahap-1.svg` (adegan cerita lama) tidak dipakai lagi sejak T1 dihapus; ganti dengan ilustrasi latar perusahaan Grup Lestari (naskah: 1 latar + M3–M6).
 - Tabel "Angka di tahap ini" Tahap 1 ikut hilang bersama T1; tulis ulang di 1.37/1.38 (estimasi), angka dari `tahap[0].asumsi`.
@@ -36,7 +37,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Tugas 0 selesai kecuali secret Cloudflare (lihat "Perlu dicek pemilik"); keputusan 111–121, PR 68–78. Tugas 1 berjalan: 1.1 (122), 1.2 (125), 1.3 (126), 1.4 (129) ditulis. Berikutnya 1.5 Perjalanan satu request (A2, konsep, widget alur a2-alur.json; tes visual.test.cjs memeriksa rujukan "(langkah N)" di halaman A2). Pola menulis ulang halaman lama: `git mv` ke `tahap-1/`, ubah `path` registry, hapus `lama`, sesuaikan cerita ke naskah, cek klaim stack ke dokumentasi resmi. Gerbang: `bash tools/cek_situs.sh --layar`; tangkapan halaman: `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/`.
+2026-10-08 · Tugas 0 selesai kecuali secret Cloudflare (lihat "Perlu dicek pemilik"); keputusan 111–121, PR 68–78. Tugas 1 berjalan: 1.1 (122), 1.2 (125), 1.3 (126), 1.4 (129), 1.5 (130) ditulis. Berikutnya 1.6 Struktur folder pertama (`t1-struktur-folder`, konsep baru, lab api-t1: tunjukkan file handler.go, layanan.go, data.go yang sudah ada). Pola menulis ulang halaman lama: `git mv` ke `tahap-1/`, ubah `path` registry, hapus `lama`, sesuaikan cerita ke naskah, cek klaim stack ke dokumentasi resmi. Gerbang: `bash tools/cek_situs.sh --layar`; tangkapan halaman: `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/`.
 
 2026-10-08 · Fase 1 selesai secara isi: 60/60 halaman ada di `situs/` (Astro 7.3.7 + Starlight 0.42.5, tanpa React), semua widget lama jalan apa adanya, tooltip istilah jalan, CI job `situs` (build strict, tes token, kontras 2 mode, tangkapan 2 ukuran × 2 mode, layar pertama 4 ukuran) hijau di `main` (PR #2–#64). Belum: hapus MkDocs (gerbang PROPOSAL: kedua situs dibangun di CI sampai fase 1 dinyatakan lolos; keputusan pemilik), beranda satu layar dan lima blok (fase 3), hosting Cloudflare Pages dan link checker (fase 0 tersisa). Berikutnya menurut PROPOSAL: fase 2, satu widget per PR ditulis ulang ke TypeScript (mulai `alur` dan `pilah`, yang paling banyak dipakai: 22 dan 13 halaman), Zod untuk JSON, PGlite menggantikan sql.js di `runsql`; React masuk bersama widget React pertama (ADR dependency wajib). Perintah kerja: `cd situs && npm run build && npm test && node tools/layar.mjs && node tools/tangkap.mjs` dengan `npm run preview` di 127.0.0.1:4321.
 
