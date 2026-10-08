@@ -14,7 +14,7 @@ if (!t) throw new Error(`KamuDiSini: tahap ${h.tahap} tidak ada di cerita.json`)
 <nav class="kamu" aria-label="Kamu di sini">
   <ol class="kamu__jalur">
     <li><span class="kamu__tag">Kamu di sini</span></li>
-    <li>Tahap {t.no} dari {d.tahap.length} · {t.nama}</li>
+    <li>Tahap {t.no}<span class="kamu__panjang"> dari {d.tahap.length} · {t.nama}</span></li>
     {h.kelompok && <li>{h.kelompok}</li>}
     <li aria-current="page">{label(h)}</li>
   </ol>
