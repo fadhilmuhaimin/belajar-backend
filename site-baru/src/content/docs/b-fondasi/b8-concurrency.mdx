@@ -1,0 +1,138 @@
+---
+title: "3.4 Concurrency dan async"
+---
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="B8" />
+
+<p class="meta">Baca 7 menit · coba 2 menit · Prasyarat: [[B10.1]]</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. 10 panggilan ke layanan yang butuh 500 ms. Berapa lama kalau berurutan, dan kalau paralel?
+2. Apa yang terjadi pada server Node.js saat satu request melakukan kerja CPU selama 1 detik?
+3. Apa itu goroutine leak, dan bagaimana mendeteksinya?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+## Inti
+
+Semua model concurrency menangani menunggu I/O dengan baik. Perbedaannya terasa saat ada kerja CPU di jalur request.
+
+<WidgetLama nama="arsitektur" tahap={3} />
+
+## Lihat sendiri
+
+Pilah pekerjaan backend Rekeningo, lalu cek. Angka di penjelasannya dari rekaman lab di bawah.
+
+<WidgetLama nama="pilah" src="data/b8-pilah.json" />
+
+## Kenapa ini ada
+
+Worker Tahap 3 ([[B10.1]]) mengirim notifikasi. Versi pertamanya mengirim satu per satu. Setiap kiriman butuh 2 detik, jadi 170 notifikasi jam makan siang baru selesai hampir 6 menit kemudian.
+
+Raka ingat `Future.wait` di Dart dan `async`/`await` di Kotlin coroutine. Konsepnya sama di backend. Tapi ia juga pernah membaca bahwa Node.js "single-threaded" dan Go "punya goroutine". Apa bedanya dalam praktik, dan kapan bedanya terasa?
+
+## Cara kerjanya
+
+**Menunggu I/O: semua model sama cepatnya.** Rekaman Go dan Node.js mengirim 10 notifikasi ke layanan tiruan (500 ms per kiriman):
+
+<Snippet file="labs/b8-concurrency/output/go.txt" title="Output rekaman: labs/b8-concurrency/output/go.txt" />
+
+<Snippet file="labs/b8-concurrency/output/node.txt" title="Output rekaman: labs/b8-concurrency/output/node.txt" />
+
+Di kedua stack, cara berurutan butuh 5 detik dan cara paralel 0,5 detik. Selama menunggu jaringan, tidak ada kerja yang menghalangi kerja lain.
+
+**Membatasi paralelisme.** "Dibatasi 3 bersamaan" butuh 2 detik. Ini yang biasanya dipakai di production: layanan luar punya kuota, dan pool koneksi punya batas ([[B2.5]]). Semaphore sederhana di Go:
+
+<Snippet file="labs/b8-concurrency/go/main.go" region="paralel" lang="go" />
+
+**Kerja CPU: di sini model berbeda.** Server menerima `/cpu` yang menghitung 1 detik penuh, lalu `/ping` dikirim dari proses lain:
+
+<Snippet file="labs/b8-concurrency/output/cpu.txt" title="Output rekaman: labs/b8-concurrency/output/cpu.txt" />
+
+Node.js menjalankan kode JavaScript di satu event loop ([Node.js: Don't block the event loop](https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop)). Selama `/cpu` menghitung, request lain menunggu. Go membagi goroutine ke beberapa thread OS, jadi `/ping` tetap dijawab ([Effective Go: Goroutines](https://go.dev/doc/effective_go#goroutines)).
+
+**Goroutine leak.** Goroutine yang menunggu selamanya tidak pernah dibersihkan. Rekaman di atas: setelah 1.000 panggilan yang menyerah duluan, ada 1.000 goroutine yang menggantung. Penyebabnya channel tanpa buffer yang tidak pernah dibaca:
+
+<Snippet file="labs/b8-concurrency/go/main.go" region="leak" lang="go" />
+
+Perbaikannya: channel dengan buffer 1 (`make(chan string, 1)`), atau batalkan pekerjaan lewat `context`. Jumlah goroutine yang terus naik di metric ([[C2]]) adalah tanda leak.
+
+## Di stack lain
+
+Yang sama di semua stack: menunggu I/O tidak memblokir request lain kalau kodenya memakai model yang benar. Yang berbeda: **unit kerja dan apa yang terjadi saat kerja CPU**. Hanya Go dan Node.js yang dijalankan di lab.
+
+| Stack | Unit konkuren | Kerja CPU di jalur request | Sumber |
+|---|---|---|---|
+| Go | Goroutine di atas beberapa thread OS | Request lain tetap jalan (rekaman: 0,35 ms) | [Effective Go](https://go.dev/doc/effective_go#goroutines) |
+| Express | Callback di satu event loop | Request lain tertahan (rekaman: 0,96 detik) | [Node.js](https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop) |
+| Laravel (PHP-FPM) | Satu proses per request, jumlahnya dibatasi `pm.max_children` | Hanya proses itu yang sibuk | [PHP-FPM](https://www.php.net/manual/en/install.fpm.configuration.php) |
+| Django | Worker WSGI (proses/thread), atau async di ASGI | Bergantung jumlah worker | [Django: Async](https://docs.djangoproject.com/en/stable/topics/async/) |
+| Spring | Thread per request; virtual thread di Java 21+ | Thread lain tetap jalan | [Spring Boot: task execution](https://docs.spring.io/spring-boot/reference/features/task-execution-and-scheduling.html) |
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Berurutan | Paling mudah dibaca dan di-debug | Waktu total = jumlah semua waktu tunggu |
+| Paralel tanpa batas | Tercepat | Membanjiri layanan luar dan pool; error bertumpuk bersamaan |
+| Paralel dengan batas (semaphore, pool) | Cepat dan terkendali | Satu angka batas lagi yang harus dipilih dan dipantau |
+| Kerja CPU ke worker | Jalur request tetap cepat di stack mana pun | Hasilnya asinkron ([[B10.1]]) |
+
+## Cek diri
+
+**1.** Kode Node.js menulis `for (const id of ids) await kirim(id)` untuk 10 notifikasi. Berapa lama, dan bagaimana mempercepatnya?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Sekitar 10 × lama satu kiriman, karena setiap `await` menunggu sebelum yang berikutnya dimulai. Rekaman: 5,03 detik untuk 500 ms per kiriman. `Promise.all` memulai semuanya dulu lalu menunggu bersama: 0,51 detik. Kalau layanannya punya kuota, batasi jumlah yang berjalan bersamaan.
+
+</details>
+
+**2.** Jelaskan kenapa kerja CPU 1 detik di handler Node.js menahan `/ping`, padahal Node.js disebut asinkron.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Asinkron di Node.js berarti tidak menunggu I/O. Kode JavaScript sendiri tetap dijalankan satu per satu di event loop. Loop yang menghitung 1 detik tidak pernah memberi giliran ke callback lain, jadi `/ping` menunggu sampai loop selesai. Kerja seperti itu dipindah ke worker thread atau proses lain.
+
+</details>
+
+**3.** Metric jumlah goroutine naik terus sepanjang hari, walau traffic stabil. Apa dugaan pertamamu?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Goroutine leak: ada goroutine yang menunggu sesuatu yang tidak pernah terjadi, mis. kirim ke channel yang tidak dibaca, atau panggilan tanpa timeout. Rekaman lab: 1.000 goroutine tertinggal karena channel tanpa buffer.
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Panggilan I/O yang saling bebas tidak ditunggu satu per satu tanpa alasan.
+- [ ] Paralelisme ke layanan luar dan database punya batas.
+- [ ] Tidak ada kerja CPU berat (hash, olah gambar, perhitungan besar) di jalur request Node.js.
+- [ ] Setiap goroutine punya jalan keluar: channel yang pasti dibaca, atau `context` yang bisa dibatalkan.
+- [ ] Setiap panggilan luar punya timeout.
+
+## Bacaan lanjut
+
+- [Node.js: Don't block the event loop](https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop)
+- [Effective Go: Concurrency](https://go.dev/doc/effective_go#concurrency)
+- [Go blog: Context](https://go.dev/blog/context)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","pilah"]} />
