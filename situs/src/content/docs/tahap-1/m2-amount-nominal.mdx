@@ -1,0 +1,70 @@
+---
+title: "1.17 M2: amount atau nominal"
+description: Minggu 1, Raka membuat app dan backend sendirian. App mengirim amount, server membaca jumlah, dan Budi diberi tahu nominalnya harus lebih dari 0 padahal ia mengetik Rp25.000.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 4 menit · coba 2 menit · Prasyarat: [[B1.1]]</p>
+
+<Blok nama="Gejala" buka>
+
+Kamis minggu 1, Raka menyambungkan layar Bayar di app ke backend yang ia tulis dua hari sebelumnya. Ia mengetik Rp25.000 untuk Warung Ani, lalu menekan Bayar.
+
+Layar menjawab "Nominal harus lebih dari 0". Raka mengulang dengan Rp30.000, lalu Rp10.000. Jawabannya sama. Saldo Budi tetap Rp250.000.
+
+Mencari penyebabnya, ia mengubah model Dart supaya nomor warung dikirim sebagai teks. Kali ini layar menulis "Body bukan JSON yang valid". Raka membuka log request di app: JSON-nya terlihat rapi.
+
+</Blok>
+
+<Blok nama="Yang Raka kira" buka>
+
+Raka mengira ia salah ketik di salah satu sisi. Rencananya, cari typo, perbaiki, lanjut ke fitur berikutnya.
+
+<details class="question">
+<summary>Tebak dulu: cukupkah memperbaiki typo-nya?</summary>
+
+Typo-nya memang ada, tapi itu gejala. Satu angka punya tiga nama: Nominal di layar, `amount` di model Dart, `jumlah` di server. Tidak ada satu tempat yang menulis nama dan tipe yang disepakati, jadi typo berikutnya hanya soal waktu.
+
+</details>
+
+</Blok>
+
+<Blok nama="Yang sebenarnya">
+
+App dan backend tidak punya kontrak tertulis. Raka-mobile dan Raka-backend adalah orang yang sama, tapi menulis di dua hari yang berbeda, dengan kebiasaan penamaan yang berbeda.
+
+Rekaman lab dari database bersih. App mengirim `amount`; server membaca `jumlah`. Go mengabaikan key yang tidak punya pasangan field di struct ([encoding/json](https://pkg.go.dev/encoding/json#Unmarshal)), jadi `jumlah` tetap 0 dan service menolaknya:
+
+<Snippet file="labs/api-t1/output/m2.txt" lines="11:21" title="Rekaman lab: labs/api-t1/output/m2.txt" />
+
+Nomor warung dikirim sebagai teks. JSON-nya valid, tapi tipenya tidak cocok dengan field `ke` yang berupa angka. Judul error bilang JSON tidak valid, dan tidak menyebut field mana yang salah:
+
+<Snippet file="labs/api-t1/output/m2.txt" lines="24:34" title="Rekaman lab: labs/api-t1/output/m2.txt" />
+
+Bentuk yang dibaca server dijawab `201`:
+
+<Snippet file="labs/api-t1/output/m2.txt" lines="37:43" title="Rekaman lab: labs/api-t1/output/m2.txt" />
+
+Ada dua masalah di sini. Nama dan tipe field tidak tertulis di mana pun. Dan server tidak memberi tahu dengan jelas apa yang salah dari request yang ia terima.
+
+</Blok>
+
+<Blok nama="Coba sendiri">
+
+Ikuti pembayaran Rp25.000 dari HP Budi. Status dan body diambil dari rekaman lab.
+
+<WidgetLama nama="alur" src="data/skenario/t1-m2.json" />
+
+</Blok>
+
+<Blok nama="Konsep yang lahir">
+
+- [[B1.4]]: kontrak OpenAPI. Satu file yang menulis nama, tipe, dan batas setiap field, dibaca app dan backend. Halaman itu memuat ADR 3: kontrak ditulis sebelum kode, dengan catatan jujur bahwa untuk satu orang ini terasa berlebihan sampai minggu 5.
+- [[B6]]: error yang menyebut field yang salah. `400` untuk tipe yang salah seharusnya bilang `ke`, bukan "JSON tidak valid".
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />

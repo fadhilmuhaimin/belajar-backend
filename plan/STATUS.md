@@ -48,8 +48,9 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.14 M1: Nominal minus lolos | Halaman masalah pertama, mode rentan `-rentan m1` (keputusan 148, 149) |
 | 1.15 Validation dua lapis + ADR 2 | Ditulis ulang dari B6, menyerap B1.2 (dihapus) (keputusan 150) |
 | 1.16 HTTP: method, status, header | Ditulis ulang dari B1.1, lab `http.txt` + `GET /transfers/{id}` (keputusan 151, 152) |
+| 1.17 M2: amount atau nominal | Halaman masalah, lab `m2.txt` (keputusan 153, 154) |
 
-Diperbarui 2026-10-08. 16 dari 42 halaman selesai; berikutnya 1.17. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
+Diperbarui 2026-10-08. 17 dari 42 halaman selesai; berikutnya 1.18. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 

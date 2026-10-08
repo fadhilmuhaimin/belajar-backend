@@ -1,0 +1,190 @@
+{
+  "versi": 2,
+  "judul": "Tiga nama untuk satu angka: Nominal, amount, jumlah",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/api-t1/output/m2.txt",
+    "fileVarian": "labs/api-t1/output/m2.txt",
+    "catatan": "Server Go (labs/api-t1) + PostgreSQL 17, direkam dengan curl -i dari database bersih. Jalur utama: bagian B. Ubah satu hal: bagian C."
+  },
+  "pengantar": "Jalankan jalur utama sampai HP Budi menampilkan pesan. Setelah itu centang 'Ubah satu hal' dan lihat kesalahan nama yang lain: tipe.",
+  "komponen": [
+    {
+      "id": "app",
+      "label": "App Budi"
+    },
+    {
+      "id": "api",
+      "label": "Monolith API",
+      "lapisan": [
+        "handler",
+        "service",
+        "repo"
+      ]
+    }
+  ],
+  "perangkat": [
+    {
+      "id": "budi",
+      "label": "HP Budi"
+    }
+  ],
+  "layarAwal": {
+    "budi": {
+      "judul": "Bayar",
+      "waktu": "10.20",
+      "saldo": 250000,
+      "isi": [
+        {
+          "jenis": "input",
+          "label": "Warung",
+          "nilai": "Warung Ani"
+        },
+        {
+          "jenis": "input",
+          "label": "Nominal",
+          "nilai": "Rp25.000"
+        },
+        {
+          "jenis": "tombol",
+          "teks": "Bayar"
+        }
+      ]
+    }
+  },
+  "predict": {
+    "q": "App mengirim {\"ke\": 418, \"amount\": 25000}. Server membaca field jumlah. Apa jawabannya?",
+    "options": [
+      "201, pembayaran berhasil",
+      "400, body tidak bisa dibaca",
+      "422, nominal harus lebih dari 0"
+    ],
+    "answer": 2,
+    "varian": false,
+    "explain": "Go mengabaikan field yang tidak dikenal, jadi amount dibuang dan jumlah tetap 0. Service menolak 0 dengan 422. Pesannya benar menurut server, tapi membingungkan Budi yang mengetik Rp25.000. Rekaman lab bagian B."
+  },
+  "langkah": [
+    {
+      "dari": "app",
+      "ke": "api",
+      "lapisan": "handler",
+      "judul": "Budi menekan Bayar",
+      "kirim": "POST /transfers\n{\"ke\": 418, \"amount\": 25000}",
+      "jelas": "Di layar namanya Nominal. Di model Dart, Raka menamainya amount. Di server, namanya jumlah.",
+      "layar": {
+        "budi": {
+          "judul": "Bayar",
+          "waktu": "10.20",
+          "saldo": 250000,
+          "isi": [
+            {
+              "jenis": "proses",
+              "teks": "Membayar..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "api",
+      "lapisan": "handler",
+      "judul": "Handler membaca body",
+      "kirim": "ke      ← 418\njumlah  ← (tidak ada) → 0\namount  → diabaikan",
+      "jelas": "Dokumentasi encoding/json Go: field yang tidak punya pasangan di struct diabaikan secara bawaan. Tidak ada error.",
+      "nada": "warn"
+    },
+    {
+      "dari": "api",
+      "lapisan": "service",
+      "judul": "Service menolak jumlah 0",
+      "kirim": "0 < 0 ≤ 200000   ✗  → ErrValidasi{jumlah}",
+      "jelas": "Service bekerja benar untuk data yang ia terima. Masalahnya ada sebelum service."
+    },
+    {
+      "dari": "api",
+      "ke": "app",
+      "lapisan": "handler",
+      "judul": "422: nominal harus lebih dari 0",
+      "kirim": "422 Unprocessable Entity\n{\"type\":\"/problems/validasi\",\"title\":\"Input tidak memenuhi aturan\",\"status\":422,\n \"errors\":[{\"field\":\"jumlah\",\"pesan\":\"harus lebih dari 0 dan paling banyak 200000\"}]}",
+      "jelas": "Rekaman lab bagian B. Budi mengetik Rp25.000, tapi layar menulis nominal harus lebih dari 0.",
+      "nada": "warn",
+      "layar": {
+        "budi": {
+          "judul": "Bayar",
+          "waktu": "10.20",
+          "saldo": 250000,
+          "isi": [
+            {
+              "jenis": "input",
+              "label": "Nominal",
+              "nilai": "Rp25.000"
+            },
+            {
+              "jenis": "toast",
+              "teks": "Nominal harus lebih dari 0",
+              "nada": "warn"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "varian": {
+    "label": "app mengirim ke sebagai teks \"418\"",
+    "mulai": 0,
+    "langkah": [
+      {
+        "dari": "app",
+        "ke": "api",
+        "lapisan": "handler",
+        "judul": "Budi menekan Bayar",
+        "kirim": "POST /transfers\n{\"ke\": \"418\", \"jumlah\": 25000}",
+        "jelas": "Nama field sudah benar. Kali ini model Dart menyimpan nomor akun sebagai String.",
+        "layar": {
+          "budi": {
+            "judul": "Bayar",
+            "waktu": "10.20",
+            "saldo": 250000,
+            "isi": [
+              {
+                "jenis": "proses",
+                "teks": "Membayar..."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "dari": "api",
+        "lapisan": "handler",
+        "judul": "Handler gagal mengisi ke",
+        "kirim": "\"418\" (string) → ke (int64)   ✗",
+        "jelas": "JSON-nya valid, tapi tipenya tidak cocok dengan struct. Go mengembalikan error tipe yang memuat nama field.",
+        "nada": "warn"
+      },
+      {
+        "dari": "api",
+        "ke": "app",
+        "lapisan": "handler",
+        "judul": "400 dengan judul yang menyesatkan",
+        "kirim": "400 Bad Request\n{\"type\":\"/problems/json-rusak\",\"title\":\"Body bukan JSON yang valid\",\"status\":400}",
+        "jelas": "Rekaman lab bagian C. JSON-nya valid, tapi judulnya bilang tidak. Nama field yang salah tidak disebut.",
+        "nada": "warn",
+        "layar": {
+          "budi": {
+            "judul": "Bayar",
+            "waktu": "10.20",
+            "saldo": 250000,
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Body bukan JSON yang valid",
+                "nada": "warn"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
