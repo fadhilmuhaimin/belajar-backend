@@ -10,7 +10,7 @@ echo "deb [signed-by=/usr/share/keyrings/dart.gpg arch=$ARCH] https://storage.go
   | sudo tee /etc/apt/sources.list.d/dart_stable.list >/dev/null
 sudo apt-get update -q && sudo apt-get install -y -q dart
 echo 'export PATH="$PATH:/usr/lib/dart/bin"' >> ~/.bashrc
-# Situs: venv + dependency MkDocs; lab: venv labs/.venv.
-python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt
+# Situs: dependency Astro + Chromium Playwright; lab: venv labs/.venv.
+npm --prefix situs ci && (cd situs && npx playwright install --with-deps chromium)
 make -C labs/b3-race setup
 echo "Dev Container siap. Jalankan: make lab"

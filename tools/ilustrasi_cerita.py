@@ -1,6 +1,6 @@
 """Ilustrasi adegan cerita Rekeningo (fiktif) sebagai SVG statis.
 
-Gaya datar, palet sama dengan stylesheets/extra.css. Teks di dalam gambar dibuat besar
+Gaya datar, palet sama dengan situs/src/styles/tema.css. Teks di dalam gambar dibuat besar
 (>= 20 unit viewBox) supaya terbaca di layar 375 px. Setiap gambar membawa informasi
 cerita (siapa, di mana, apa yang terlihat di layar), bukan dekorasi.
 

@@ -22,6 +22,6 @@ lab-down:
 	docker compose -f labs/b9-cache/docker-compose.yml down -v
 	docker compose -f labs/b3-race/docker-compose.yml down -v
 
-# Gerbang kualitas situs (sama dengan CI).
+# Gerbang kualitas situs (sama dengan CI, keputusan 111).
 cek:
-	bash tools/cek_batch.sh
+	bash tools/cek_situs.sh --layar

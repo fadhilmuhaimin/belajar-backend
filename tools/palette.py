@@ -1,4 +1,4 @@
-"""Satu-satunya sumber warna untuk gambar DAN situs (docs/stylesheets/extra.css
+"""Satu-satunya sumber warna untuk gambar DAN situs (situs/src/styles/tema.css
 memakai nilai yang sama). Cek kontras: python tools/contrast.py
 
 Setiap warna bermakna punya tiga peran:

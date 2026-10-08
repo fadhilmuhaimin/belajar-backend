@@ -68,12 +68,6 @@ def url_halaman(path):
     return path[:-3] + "/"
 
 
-def rel(dari, ke):
-    """Link Markdown relatif dari file docs/<dari> ke docs/<ke>. Hanya untuk tools/mkdocs_hooks.py (situs lama)."""
-    up = len(pathlib.PurePosixPath(dari).parent.parts)
-    return "../" * up + ke
-
-
 def url_mutlak(path):
     """path registry -> URL absolut situs: a/b.md -> /a/b/."""
     return "/" + url_halaman(path)
@@ -84,9 +78,8 @@ def urutan_baca(d):
     return [h for k in URUT_BACA for h in d["halaman"] if h["tahap"] == k and h["ada"]]
 
 
-def ganti_token(teks, d, dari=None, link=False):
-    """[[ID]] -> teks polos; link Markdown absolut (link=True); atau link relatif dari docs/<dari> (situs lama).
-    ID tak dikenal -> ValueError."""
+def ganti_token(teks, d, link=False):
+    """[[ID]] -> teks polos, atau link Markdown absolut (link=True). ID tak dikenal -> ValueError."""
     by = {h["id"]: h for h in d["halaman"]}
 
     def f(m):
@@ -94,9 +87,9 @@ def ganti_token(teks, d, dari=None, link=False):
         if not h:
             raise ValueError(f"rujukan [[{m.group(1)}]] tidak ada di cerita.json")
         teks_link = m.group(2) or label(h, singkat=True)
-        if not link and dari is None:
+        if not link:
             return teks_link
         if not h["ada"]:
             return f"{teks_link} *(menyusul)*"
-        return f"[{teks_link}]({rel(dari, h['path']) if dari else url_mutlak(h['path'])})"
+        return f"[{teks_link}]({url_mutlak(h['path'])})"
     return TOKEN.sub(f, teks)

@@ -4,17 +4,17 @@
 import fs from "node:fs";
 import path from "node:path";
 
-// Root repo dicari dari direktori kerja ke atas (penanda: mkdocs.yml), bukan dari import.meta.url,
+// Root repo dicari dari direktori kerja ke atas (penanda: situs/package.json + registry), bukan dari import.meta.url,
 // karena saat build Astro memindahkan modul ini ke dist/.prerender/chunks/.
 function cariRoot() {
   let d = process.cwd();
   for (let i = 0; i < 6; i++) {
-    if (fs.existsSync(path.join(d, "mkdocs.yml")) && fs.existsSync(path.join(d, "docs/widgets/data/cerita.json"))) return d + path.sep;
+    if (fs.existsSync(path.join(d, "situs/package.json")) && fs.existsSync(path.join(d, "docs/widgets/data/cerita.json"))) return d + path.sep;
     const up = path.dirname(d);
     if (up === d) break;
     d = up;
   }
-  throw new Error("root repo (mkdocs.yml + docs/widgets/data/cerita.json) tidak ditemukan dari " + process.cwd());
+  throw new Error("root repo (situs/package.json + docs/widgets/data/cerita.json) tidak ditemukan dari " + process.cwd());
 }
 export const ROOT = cariRoot();
 export const DOCS = path.join(ROOT, "docs");
@@ -63,7 +63,7 @@ export const byId = (d) => Object.fromEntries(d.halaman.map((h) => [h.id, h]));
 export const dariUrl = (d, u) => d.halaman.find((h) => url(h) === u);
 
 const TOKEN = /\[\[([A-Za-z0-9.\-]+)(?:\|([^\]]+))?\]\]/g;
-// [[ID]] di teks data widget -> teks polos (padanan on_post_build di mkdocs_hooks.py)
+// [[ID]] di teks data widget -> teks polos
 export function tokenKeTeks(teks, d) {
   const by = byId(d);
   return teks.replace(TOKEN, (m, id, t) => {

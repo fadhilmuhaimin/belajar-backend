@@ -30,7 +30,7 @@ function gantiToken(teks) {
   return JSON.stringify(ganti(JSON.parse(teks)));
 }
 
-// Skenario widget alur divalidasi sebelum disalin (padanan on_pre_build di mkdocs_hooks.py); gagal = build gagal.
+// Skenario widget alur divalidasi sebelum disalin; gagal = build gagal.
 execFileSync(process.execPath, [path.join(ROOT, "tools/validasi_skenario.mjs")], { stdio: "inherit" });
 
 fs.rmSync(path.join(PUB, "widgets"), { recursive: true, force: true });

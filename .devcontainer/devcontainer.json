@@ -8,9 +8,9 @@
     "ghcr.io/devcontainers/features/docker-in-docker:4": {}
   },
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
-  "forwardPorts": [8000, 54333, 56379],
+  "forwardPorts": [4321, 54333, 56379],
   "portsAttributes": {
-    "8000": { "label": "mkdocs serve" },
+    "4321": { "label": "situs (astro dev)" },
     "54333": { "label": "PostgreSQL 17 lab" },
     "56379": { "label": "Redis 8 lab" }
   },

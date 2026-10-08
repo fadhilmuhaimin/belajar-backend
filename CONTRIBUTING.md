@@ -17,7 +17,7 @@ Repo ini adalah tempat kerja utama panduan. Semua perubahan, termasuk dari pemel
 2. Jalankan pemeriksaan lengkap:
 
    ```bash
-   bash tools/cek_batch.sh
+   bash tools/cek_situs.sh --layar
    ```
 
 3. Kalau kamu mengubah lab, rekam ulang di database lab yang bersih, lalu commit output-nya bersama perubahan kode. Angka di halaman harus sama dengan file di `labs/*/output/`.
@@ -41,8 +41,8 @@ Repo ini adalah tempat kerja utama panduan. Semua perubahan, termasuk dari pemel
 ## Menambah halaman
 
 1. Daftarkan halaman di `docs/widgets/data/cerita.json` (`id`, `judul`, `tahap`, `path`, `prasyarat`, `masalah`). Urutan di registry adalah urutan baca.
-2. Tulis file-nya tanpa nomor di H1. Rujuk halaman lain dengan `[[ID]]` atau `[[ID|teks]]`, bukan link biasa. Pembaca hanya melihat nomor tampilan seperti 2.1, tidak pernah ID internal.
-3. Jalankan `.venv/bin/python tools/sinkron_cerita.py`. Skrip ini membuat nav, indeks per topik, baris prasyarat, dan kartu ulang.
+2. Tulis file-nya sebagai MDX di `situs/src/content/docs/<path>.mdx`. Rujuk halaman lain dengan `[[ID]]` atau `[[ID|teks]]`, bukan link biasa. Pembaca hanya melihat nomor tampilan seperti 2.1, tidak pernah ID internal.
+3. Jalankan `python3 tools/sinkron_cerita.py`. Skrip ini menulis nomor di judul, baris prasyarat, indeks per topik, dan kartu ulang. Sidebar dibuat langsung dari registry saat build.
 4. Catat keputusan desain yang tidak jelas dari kodenya di `plan/KEPUTUSAN.md`: apa, kenapa, dan alternatif yang ditolak. Nomornya melanjutkan baris terakhir di tabel. Nomor lama tidak pernah dipakai ulang atau digeser.
 
 ## Lisensi kontribusi
