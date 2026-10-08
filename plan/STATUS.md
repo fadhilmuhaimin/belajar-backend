@@ -1,6 +1,6 @@
 # Status
 
-Diperbarui: 2026-10-07. Catatan singkat tentang keadaan panduan dan pekerjaan yang masih terbuka. Keputusan dan alasannya ada di [KEPUTUSAN.md](KEPUTUSAN.md).
+Diperbarui: 2026-10-08. Catatan singkat tentang keadaan panduan dan pekerjaan yang masih terbuka. Keputusan dan alasannya ada di [KEPUTUSAN.md](KEPUTUSAN.md).
 
 ## Keadaan sekarang
 
@@ -10,6 +10,16 @@ Diperbarui: 2026-10-07. Catatan singkat tentang keadaan panduan dan pekerjaan ya
 - Istilah teknis ditulis dalam bahasa Inggris, idiom terjemahan literal sudah diganti, dan fragmen kalimat di prosa diberi predikat (keputusan 86, 87, 93). Tabel angka di kelima halaman tahap berlabel asumsi per baris (keputusan 88).
 - Halaman Tahap 1 yang memakai materi Tahap 2 punya penjelasan singkat di tempat (keputusan 92).
 - Link yang menolak bot sudah diverifikasi lewat API metadata (keputusan 98).
+
+## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
+
+| Langkah | Keadaan |
+|---|---|
+| `tools/cek_batch.sh` dijalankan apa adanya | Lolos lokal 2026-10-08 (catatan di MEMORI) |
+| GitHub Actions `.github/workflows/cek.yml` di tiap PR | Dibuat; hijau di branch `percobaan/ci-fase-0` (keputusan 99) |
+| `make lab` + `.devcontainer/` | Dibuat; `make -C labs/b3-race run` terbukti jalan dari nol (keputusan 100, 101) |
+| Deploy Cloudflare Pages, Playwright menggantikan CDP, link checker | Belum |
+| Rencana fase 1 untuk 1.11 Transaction | Ditulis di `plan/RENCANA-FASE-1-1-11.md`, menunggu persetujuan |
 
 ## Terbuka
 

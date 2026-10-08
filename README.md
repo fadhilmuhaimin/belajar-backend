@@ -57,7 +57,7 @@ Tanpa langkah ini situs tetap berjalan dengan font fallback (`Inter, system-ui, 
 bash tools/cek_batch.sh
 ```
 
-Skrip ini memeriksa sinkronisasi cerita dan angka asumsi, istilah, build strict, ID internal yang tidak boleh tampil, audit bahasa, tes widget, dan layar pertama setiap halaman di empat ukuran layar. Selain Python, kamu butuh Node 22 atau lebih baru, dan Chrome atau Chromium untuk pemeriksaan layar pertama (`CHROME_PATH` kalau lokasinya tidak standar). Pemeriksaan layar pertama mengukur dengan font asli, jadi jalankan `bash tools/get_fonts.sh` dulu. Dengan font fallback, teks lebih tinggi dan halaman bisa gagal di layar 375×667. Lama jalannya sekitar 2–3 menit.
+Skrip yang sama dijalankan GitHub Actions di setiap pull request (`.github/workflows/cek.yml`). Skrip ini memeriksa sinkronisasi cerita dan angka asumsi, istilah, build strict, ID internal yang tidak boleh tampil, audit bahasa, tes widget, dan layar pertama setiap halaman di empat ukuran layar. Selain Python, kamu butuh Node 22 atau lebih baru, dan Chrome atau Chromium untuk pemeriksaan layar pertama (`CHROME_PATH` kalau lokasinya tidak standar). Pemeriksaan layar pertama mengukur dengan font asli, jadi jalankan `bash tools/get_fonts.sh` dulu. Dengan font fallback, teks lebih tinggi dan halaman bisa gagal di layar 375×667. Lama jalannya sekitar 2–3 menit.
 
 Lolos semua adalah syarat minimum, bukan bukti kualitas.
 
@@ -77,6 +77,15 @@ Setiap halaman yang menampilkan **Rekaman lab** menyebut file output-nya, misaln
 | PHP + Composer | – | Hanya untuk bagian Laravel di lab perbandingan stack |
 
 ### Langkah pertama
+
+Satu perintah dari root repo memeriksa alat yang dibutuhkan, membuat venv lab, dan menjalankan PostgreSQL 17 serta Redis 8:
+
+```bash
+make lab
+```
+
+`make lab-down` mematikan keduanya dan menghapus volumenya. Repo juga punya `.devcontainer/` untuk VS Code Dev Containers atau GitHub Codespaces: Go, Node, Python, Docker, dan Dart terpasang tanpa instalasi di mesin kamu. Langkah manualnya ada di bawah.
+
 
 Hampir semua lab memakai satu PostgreSQL bersama di port `54333`. Setiap lab punya schema sendiri dan membuatnya ulang setiap kali dijalankan, jadi lab bisa dijalankan dalam urutan apa pun. Tidak ada lab yang menulis ke schema `public`.
 
