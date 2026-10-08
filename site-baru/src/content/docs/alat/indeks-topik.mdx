@@ -1,0 +1,114 @@
+---
+title: "Indeks per topik"
+---
+import SkripLama from "../../../components/SkripLama.astro";
+
+
+{/* Dibuat oleh tools/sinkron_cerita.py dari docs/widgets/data/cerita.json. Jangan diedit langsung. */}
+
+Navigasi utama mengikuti tahap cerita. Halaman ini menyusun halaman yang sama per topik, untuk kamu yang mencari satu konsep tanpa mengikuti cerita. Nomor halaman menunjukkan tahap dan urutan baca: 2.3 adalah halaman ketiga di Tahap 2.
+
+## Gambaran besar
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [1.1 Apa yang dikerjakan backend](/a-gambaran/a1-apa-yang-dikerjakan-backend/) | Tahap 1 | Bingung apa saja yang harus ditulis di backend |
+| [1.2 BaaS atau backend sendiri](/a-gambaran/a4-baas-vs-backend-sendiri/) | Tahap 1 | Ragu: cukup Supabase/Firebase atau perlu backend sendiri? |
+| [1.3 Perjalanan satu request](/a-gambaran/a2-perjalanan-request/) | Tahap 1 | Tidak tahu apa yang terjadi setelah app mengirim request |
+
+## API
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [1.4 HTTP: method, status, header](/b-fondasi/b1-1-http/) | Tahap 1 | Bingung memilih method dan status code |
+| [1.5 Resource dan format error](/b-fondasi/b1-2-resource-error/) | Tahap 1 | App menampilkan pesan error yang tidak jelas |
+| [1.6 Validation dan error handling](/b-fondasi/b6-validation-error/) | Tahap 1 | Nominal transfer negatif lolos ke database |
+| [1.7 Kontrak API dengan OpenAPI](/b-fondasi/b1-4-openapi/) | Tahap 1 | App dan backend beda paham soal bentuk JSON |
+| [2.4 Pagination dan idempotent method](/b-fondasi/b1-3-pagination-idempotent/) | Tahap 2 | Riwayat panjang, halaman berikutnya berisi data ganda |
+
+## Data
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [1.8 Data modeling dan relasi](/b-fondasi/b2-1-data-modeling/) | Tahap 1 | Bingung merancang tabel akun, transaksi, pesanan |
+| [1.9 SQL atau NoSQL](/b-fondasi/b2-2-sql-vs-nosql/) | Tahap 1 | Tergoda pindah ke NoSQL "karena lebih cepat" |
+| [1.10 Migration: skema sebagai kode](/b-fondasi/b4-1-migration/) | Tahap 1 | Skema database di laptop dan di server berbeda |
+| [1.11 Transaction](/b-fondasi/b3-1-transaction/) | Tahap 1 | Transfer gagal di tengah, saldo hilang |
+| [2.1 Race condition dan lock](/b-fondasi/b3-2-race-condition-lock/) | Tahap 2 | Saldo salah: dua penarikan bersamaan sama-sama lolos |
+| [2.2 Isolation level secara praktis](/b-fondasi/b3-3-isolation-level/) | Tahap 2 | Transaction melihat data yang "berubah sendiri" |
+| [2.5 N+1 query](/b-fondasi/b2-4-n-plus-1/) | Tahap 2 | Riwayat penjualan lambat walau datanya sedikit |
+| [2.6 Index dan query plan](/b-fondasi/b2-3-index/) | Tahap 2 | Query lambat setelah data bertambah |
+| [2.8 Ubah skema tanpa downtime](/b-fondasi/b4-2-ubah-skema-tanpa-downtime/) | Tahap 2 | Rename kolom membuat app lama crash |
+
+## Keamanan
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [1.12 Authentication: session atau token](/b-fondasi/b5-1-authentication/) | Tahap 1 | Bingung memilih session atau JWT untuk login |
+| [1.13 Authorization: siapa boleh apa](/b-fondasi/b5-3-authorization/) | Tahap 1 | Budi bisa melihat saldo Ani lewat ID di URL |
+| [3.7 Security dasar dan rate limit](/c-operasional/c4-security-dasar/) | Tahap 3 | Login dicoba ribuan kali dari satu IP |
+| [4.4 OAuth dan login sosial](/b-fondasi/b5-2-oauth-oidc/) | Tahap 4 | Ingin login dengan akun lain milik user (login sosial) |
+
+## Struktur kode
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [1.14 Lapisan dasar](/b-fondasi/b7-1-lapisan-dasar/) | Tahap 1 | Logika transfer tercampur parsing HTTP |
+| [4.5 Modular monolith](/b-fondasi/b7-2-batas-modul/) | Tahap 4 | Dua tim bentrok di satu codebase |
+
+## Operasional
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [1.15 Testing: apa dites di level mana](/c-operasional/c1-testing/) | Tahap 1 | Bug lama muncul lagi setelah perubahan |
+| [1.16 Deployment dan rollback](/c-operasional/c3-deployment/) | Tahap 1 | Deploy membuat app mati, atau harus mundur cepat |
+| [3.1 Observability: log, metric, trace](/c-operasional/c2-observability/) | Tahap 3 | Tidak tahu bagian mana yang lambat |
+
+## Skala dan kinerja
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [3.2 Connection pool](/b-fondasi/b2-5-connection-pool/) | Tahap 3 | Request menunggu koneksi database di jam sibuk |
+| [3.3 Background job, queue, retry](/b-fondasi/b10-1-background-job/) | Tahap 3 | Notifikasi dan email memperlambat request bayar |
+| [3.4 Concurrency dan async](/b-fondasi/b8-concurrency/) | Tahap 3 | Bingung: thread, event loop, goroutine, worker |
+| [3.6 Caching dan invalidation](/b-fondasi/b9-caching/) | Tahap 3 | Katalog dibaca ribuan kali dengan isi sama; harga lama muncul |
+| [5.1 Scaling](/d-system-design/d2-scaling/) | Tahap 5 | Database utama penuh oleh query baca |
+| [5.2 Replica dan consistency](/d-system-design/d3-consistency/) | Tahap 5 | User tidak melihat transaksinya sendiri sesaat |
+
+## Integrasi pihak ketiga
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [4.1 Integrasi pihak ketiga](/b-fondasi/b11-integrasi-pihak-ketiga/) | Tahap 4 | Payment gateway lambat, request ikut menggantung |
+| [4.2 Proxy dan BFF](/b-fondasi/b11-2-proxy-bff/) | Tahap 4 | Layanan luar hanya menerima IP terdaftar; layar beranda butuh 5 request |
+| [4.3 Webhook dan outbox](/b-fondasi/b10-2-webhook-outbox/) | Tahap 4 | Webhook dikirim dua kali; saldo bertambah dua kali |
+
+## Khusus app mobile
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [2.3 Retry dan idempotency key dari app](/e-mobile/e3-retry-idempotency/) | Tahap 2 | Dobel bayar setelah app retry |
+| [2.7 Ukuran payload dan kuota](/e-mobile/e5-ukuran-payload/) | Tahap 2 | Response besar membebani HP dan kuota |
+| [2.9 App versi lama yang tidak bisa dipaksa update](/e-mobile/e1-app-versi-lama/) | Tahap 2 | Perubahan API membuat app versi lama crash |
+| [3.5 Push dan real-time](/e-mobile/e4-push-real-time/) | Tahap 3 | App polling status pesanan tiap 5 detik |
+| [3.8 Offline-first dan sync](/e-mobile/e2-offline-first/) | Tahap 3 | Perubahan stok saat offline hilang |
+
+## Desain sistem
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [1.17 Kerangka berpikir dan estimasi](/d-system-design/d1-kerangka-berpikir/) | Tahap 1 | Tidak tahu harus mulai dari mana saat mendesain |
+| [4.6 Template ADR](/d-system-design/d5-adr/) | Tahap 4 | Keputusan desain lupa alasannya |
+| [5.3 Feed dan notifikasi](/d-system-design/d4b-feed-notifikasi/) | Tahap 5 | Notifikasi ke ratusan ribu user sekaligus |
+| [Studi desain: laporan lapangan offline](/d-system-design/d4c-laporan-lapangan-offline/) | Studi sampingan | Aplikasi lapangan harus jalan tanpa sinyal |
+
+## Bekerja dengan AI
+
+| Halaman | Tahap | Masalah yang dijawab |
+|---|---|---|
+| [1.18 Menulis spesifikasi untuk AI](/f-ai-belajar/f1-spesifikasi-untuk-ai/) | Tahap 1 | Kode AI tidak sesuai maksud |
+| [1.19 Review kode backend buatan AI](/f-ai-belajar/f2-review-kode-ai/) | Tahap 1 | Ragu menyetujui kode atau desain buatan AI |
+
+
+
+<SkripLama daftar={[]} />
