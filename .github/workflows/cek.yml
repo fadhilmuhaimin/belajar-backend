@@ -76,3 +76,42 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_CONFIG: .gitleaks.toml
+
+  situs_baru:
+    name: site-baru (Astro)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site-baru/package-lock.json
+      - name: Unduh font
+        run: bash tools/get_fonts.sh
+      - name: Pasang dependency
+        run: npm --prefix site-baru ci
+      # Build strict: WARN atau ERROR di log Astro menggagalkan job (gerbang kualitas "warning = gagal").
+      - name: Build
+        run: |
+          set -o pipefail
+          npm --prefix site-baru run build 2>&1 | tee build.log
+          ! grep -E "\[WARN\]|\[ERROR\]" build.log
+      - name: Tes token tema
+        run: npm --prefix site-baru test
+      - name: Kontras dua mode
+        run: python3 tools/contrast.py
+      - name: Pasang Chromium Playwright
+        run: cd site-baru && npx playwright install --with-deps chromium
+      - name: Tangkapan layar 2 ukuran × 2 mode
+        run: |
+          npm --prefix site-baru run preview -- --port 4321 --host 127.0.0.1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4321/ >/dev/null && break; sleep 1; done
+          cd site-baru && node tools/tangkap.mjs --url http://127.0.0.1:4321
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: tangkapan-site-baru
+          path: site-baru/tangkapan/*.png
+          retention-days: 7
