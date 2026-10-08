@@ -5,6 +5,7 @@
 //   docs/assets/fonts/*.woff2    -> public/fonts/          (hasil tools/get_fonts.sh; tidak di-commit)
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { DOCS, ROOT, muat, tokenKeTeks } from "./registri.mjs";
 
 const PUB = path.join(ROOT, "site-baru/public");
@@ -28,6 +29,9 @@ function gantiToken(teks) {
     : o && typeof o === "object" ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, ganti(v)])) : o;
   return JSON.stringify(ganti(JSON.parse(teks)));
 }
+
+// Skenario widget alur divalidasi sebelum disalin (padanan on_pre_build di mkdocs_hooks.py); gagal = build gagal.
+execFileSync(process.execPath, [path.join(ROOT, "tools/validasi_skenario.mjs")], { stdio: "inherit" });
 
 fs.rmSync(path.join(PUB, "widgets"), { recursive: true, force: true });
 salinDir(path.join(DOCS, "widgets"), path.join(PUB, "widgets"), (n) => n.endsWith(".js") || n.endsWith(".json"), gantiToken);
