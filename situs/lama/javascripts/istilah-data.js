@@ -673,12 +673,12 @@ window.ISTILAH = {
   "u": "tahap-1/data-modeling/"
  },
  "Problem Details": {
-  "b": "B1.2",
+  "b": "B6",
   "d": "Format error JSON standar dari RFC 9457, dengan field seperti type, title, status, dan detail.",
-  "n": "Resource dan format error",
+  "n": "1.15 Validation dua lapis dan format error",
   "s": "istilah-problem-details",
   "t": "Problem Details",
-  "u": "b-fondasi/b1-2-resource-error/"
+  "u": "tahap-1/validation-error/"
  },
  "Proxy": {
   "b": "B11.2",

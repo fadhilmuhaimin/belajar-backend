@@ -75,7 +75,7 @@ Rekaman lengkap dari server lab:
 Dua detail dari rekaman di atas:
 
 - Go menulis `422 Unprocessable Entity`, nama lama sebelum RFC 9110 menggantinya jadi "Unprocessable Content". Tidak masalah, karena client wajib mengabaikan teks itu dan hanya membaca angkanya ([RFC 9112 §4](https://www.rfc-editor.org/rfc/rfc9112.html#name-status-line)).
-- `405` dari router bawaan Go berupa teks biasa, bukan JSON. Kalau app mengharapkan semua error berformat JSON, router perlu dikonfigurasi. Format error dibahas di [[B1.2]].
+- `405` dari router bawaan Go berupa teks biasa, bukan JSON. Kalau app mengharapkan semua error berformat JSON, router perlu dikonfigurasi. Format error dibahas di [[B6]].
 
 ## Di stack lain
 
@@ -163,7 +163,7 @@ ResponseEntity<Hasil> transfer(@RequestHeader("Authorization") String auth,
 |---|---|---|
 | Selalu `200`, status di body | Satu jalur parsing di app | App, proxy, log, dan monitoring tidak bisa membedakan sukses dari gagal |
 | Status code yang tepat | App, log, dan metric error bekerja tanpa membaca body | Tim harus sepakat status mana untuk kasus mana |
-| Status yang tepat + body error standar ([[B1.2]]) | App bisa menampilkan pesan yang spesifik | Sedikit lebih banyak kode di server |
+| Status yang tepat + body error standar ([[B6]]) | App bisa menampilkan pesan yang spesifik | Sedikit lebih banyak kode di server |
 
 ## Cek diri
 

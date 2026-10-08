@@ -42,6 +42,8 @@ func (s Server) Rute() *http.ServeMux {
 // --8<-- [end:rute]
 
 // Problem adalah format error RFC 9457 (application/problem+json).
+// --8<-- [start:problem]
+// Problem adalah format error RFC 9457 (application/problem+json), sama untuk semua endpoint.
 type Problem struct {
 	Type   string `json:"type"`
 	Title  string `json:"title"`
@@ -67,6 +69,8 @@ func (s Server) errorInternal(w http.ResponseWriter, err error) {
 	log.Printf("error internal: %v", err)
 	tulisProblem(w, Problem{Type: "/problems/internal", Title: "Terjadi kesalahan di server", Status: 500})
 }
+
+// --8<-- [end:problem]
 
 // --8<-- [start:login]
 func (s Server) login(w http.ResponseWriter, r *http.Request) {
