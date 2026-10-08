@@ -1,0 +1,103 @@
+---
+title: "1.1 PRD v1: Rekeningo untuk Gedung A"
+description: Dokumen produk pertama Rekeningo. Sinta menulisnya, Pak Hadi menyetujuinya, dan Raka membangunnya sendirian dalam 6 minggu.
+---
+import Blok from "../../../components/Blok.astro";
+
+<p class="meta">Baca 4 menit · Jalur inti</p>
+
+Sinta, product manager di **Grup Lestari** (fiktif), menulis dokumen ini. Raka, mobile engineer yang belum pernah memegang backend, membangunnya sendirian.
+
+<dl class="prd-kepala" aria-label="Kepala dokumen PRD v1">
+  <div><dt>Perusahaan</dt><dd>Grup Lestari: ±1.200 karyawan, belasan warung tenant</dd></div>
+  <div><dt>Penulis</dt><dd>Sinta, unit Inisiatif Digital</dd></div>
+  <div><dt>Disetujui</dt><dd>Pak Hadi, Kepala Divisi Keuangan</dd></div>
+  <div><dt>Lingkup</dt><dd>Gedung A: 100 karyawan, 3 warung</dd></div>
+  <div><dt>Pembuat</dt><dd>Raka, Divisi TI: 3 tahun Flutter, belum pernah backend</dd></div>
+  <div><dt>Waktu</dt><dd>6 minggu, 1 engineer</dd></div>
+</dl>
+
+<Blok nama="Latar masalah" buka>
+
+Awal tahun, direksi memberi Sinta satu mandat kecil: hapus antrean kasir hari Senin dan rekonsiliasi kuitansi yang dikerjakan dengan tangan.
+
+Setiap Senin, 1.200 karyawan mengantre di kasir untuk tunjangan makan. Nilainya Rp250.000 per minggu, yaitu Rp50.000 untuk tiap hari kerja. Kasir butuh 3 jam untuk melayani semuanya.
+
+Warung tenant memberi kuitansi kertas. Tiap bulan, Keuangan butuh 4 hari kerja untuk mencocokkan kuitansi dengan tunjangan yang dibayar. Tahun lalu selisihnya Rp38 juta, dan tidak ada yang bisa menjelaskannya.
+
+</Blok>
+
+<Blok nama="Tujuan">
+
+1. Hilangkan antrean kasir.
+2. Rekonsiliasi bulanan selesai dalam satu hari, tanpa kertas.
+3. Setiap rupiah tunjangan bisa ditelusuri dari Keuangan sampai warung.
+
+</Blok>
+
+<Blok nama="User dan kebutuhannya">
+
+| User | Kebutuhan | Yang membuatnya berhenti memakai |
+|---|---|---|
+| Karyawan (Budi) | Bayar makan dalam 5 detik; tahu sisa saldo | Antre lebih lama dari tunai; saldo salah sekali saja |
+| Warung tenant (Ani) | Terima bayaran tanpa uang receh; tahu total hari ini | Angka beda dengan bukunya; sinyal buruk membuat gagal |
+| Admin tunjangan (staf Keuangan) | Isi saldo 100 orang sekali klik tiap Senin | Harus mengisi satu per satu |
+| Keuangan (Pak Hadi) | Laporan bulanan yang cocok sampai rupiah terakhir | Ada angka yang tidak bisa dijelaskan |
+
+</Blok>
+
+<Blok nama="Ruang lingkup uji coba">
+
+Uji coba berjalan di Gedung A: 100 karyawan, 3 warung, selama 6 minggu.
+
+| Prioritas | Fitur | Keterangan |
+|---|---|---|
+| P0 | Top-up tunjangan oleh admin | Admin mengunggah daftar nama dan nominal; saldo masuk ke 100 akun |
+| P0 | Bayar ke warung | Karyawan memilih warung, memasukkan nominal, lalu konfirmasi; warung melihat pembayaran masuk |
+| P0 | Saldo dan riwayat | Saldo saat ini dan daftar transaksi per akun |
+| P0 | Login karyawan | Memakai email perusahaan dan password sementara dari admin |
+| P1 | Laporan harian warung | Total per hari dan daftar transaksi, di HP warung |
+| P1 | Pencairan ke warung | Admin membayar warung dari rekap, di luar sistem, seminggu sekali |
+| P2 | Transfer antar karyawan | Untuk patungan makan siang. Diminta Budi, ditunda ke v2 |
+
+**Bukan lingkup v1:** integrasi bank, kartu, user di luar Grup Lestari, aplikasi web untuk warung, notifikasi push, dan promo.
+
+</Blok>
+
+<Blok nama="Metrik dan batasan">
+
+**Metrik keberhasilan**
+
+- Minimal 80 dari 100 penguji membayar lewat Rekeningo, minimal 3 kali per minggu.
+- Rekonsiliasi uji coba selesai dalam kurang dari satu hari.
+- Tidak ada selisih yang tidak bisa dijelaskan.
+
+**Batasan**
+
+- Satu engineer, Raka, selama 6 minggu.
+- Data karyawan datang dari sistem HR dalam bentuk CSV.
+- Server yang tersedia hanya satu VPS milik Divisi TI.
+- Aturan Pak Hadi: "Tidak ada angka yang berubah tanpa catatan siapa, kapan, kenapa."
+
+</Blok>
+
+<Blok nama="Risiko">
+
+Sinta menulis tiga risiko:
+
+1. Karyawan tetap memakai tunai.
+2. Warung dengan sinyal buruk gagal menerima pembayaran.
+3. Raka belum pernah membuat backend.
+
+</Blok>
+
+<Blok nama="Pertanyaan terbuka">
+
+Dua pertanyaan ini ada di PRD, tapi belum dijawab:
+
+1. Apa yang terjadi kalau pembayaran gagal di tengah jalan?
+2. Siapa yang memperbaiki saldo yang salah, dan bagaimana caranya?
+
+Tidak ada yang menjawabnya sebelum kode ditulis. Keduanya jadi masalah terbesar Tahap 1.
+
+</Blok>

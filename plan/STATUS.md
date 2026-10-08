@@ -30,7 +30,11 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 
 ### Tugas 1 · Tahap 1 (42 halaman)
 
-Belum dimulai. Halaman berikutnya: 1.1 PRD v1.
+| Halaman | Keadaan |
+|---|---|
+| 1.1 PRD v1 | Ditulis (keputusan 122); T1 lama dihapus |
+
+Berikutnya: 1.2 Dari fitur ke pekerjaan teknis.
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 
