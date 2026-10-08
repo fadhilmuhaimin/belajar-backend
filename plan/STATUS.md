@@ -21,11 +21,11 @@ Diperbarui: 2026-10-08 (akhir sesi fase 1). Catatan singkat tentang keadaan pand
 | Deploy Cloudflare Pages, Playwright menggantikan CDP, link checker | Belum |
 | Rencana fase 1 untuk 1.11 Transaction | Disetujui, dikerjakan (lihat Fase 1) |
 
-## Fase 1 · Situs baru (`site-baru/`, Astro 7.3.7 + Starlight 0.42.5, tanpa React)
+## Fase 1 · Situs baru (`situs/`, Astro 7.3.7 + Starlight 0.42.5, tanpa React)
 
 | Ukuran | Nilai |
 |---|---|
-| Halaman dipindah | 60 dari 60 (plus 404). Semua halaman dikonversi `site-baru/tools/konversi.mjs`, dibandingkan `tools/banding.mjs` (teks, heading, link), lolos `tools/layar.mjs` 4 ukuran, dan setiap widget terpasang tanpa error konsol. Beranda `/` masih isi A0 "Cara pakai panduan ini"; beranda satu layar = fase 3 |
+| Halaman dipindah | 60 dari 60 (plus 404). Semua halaman dikonversi `situs/tools/konversi.mjs`, dibandingkan `tools/banding.mjs` (teks, heading, link), lolos `tools/layar.mjs` 4 ukuran, dan setiap widget terpasang tanpa error konsol. Beranda `/` masih isi A0 "Cara pakai panduan ini"; beranda satu layar = fase 3 |
 | Build | 0 warning, 0 error; `npm test` 5/5; `contrast.py` 125/125 (gelap + terang) |
 | Teks artikel lama vs baru (`tools/banding.mjs`) | 1.11: 1185 vs 1185 kata, 0 berbeda; 10 heading sama; 26 vs 26 link. 1.12: 993 vs 992 kata, 1 beda pemenggalan ("token-nya"); 10 heading sama; 22 vs 22 link (16 eksternal identik). 1.13: 958 vs 957 kata, 1 beda pemenggalan; 10 heading sama; 13 vs 13 link. 1.14: 794 vs 794 kata, 0 beda; 7 vs 7 link. 1.15: 985 vs 985 kata, 0 beda; 18 vs 18 link. 1.17: 851 vs 850 kata, beda pemenggalan dan `&`; 10 heading sama. 1.18: 719 vs 717 kata, beda pemenggalan tanda kutip; 10 heading sama. 1.19: 871 vs 871 kata, 0 beda; 24 vs 24 link. Tahap 2 · Ceritanya: 375 vs 375 kata, 0 beda; 9 vs 9 link; ilustrasi SVG tampil dari /assets/cerita. 2.1: 1448 vs 1446 kata, beda pemenggalan; 12 heading sama; 18 vs 18 link. 2.3: 1074 vs 1071 (pemenggalan). 2.4: 739 = 739. 2.6: 838 = 838. 2.8: 1048 = 1048. 2.9: 824 = 824; semua heading dan jumlah link sama. Judul H1 pendek (2.3, 2.9) dipertahankan: konverter memakai H1 badan sebagai title. Tahap 3–4: T3 461/459, 3.1 752/750, 3.2 830/829, 3.3 825=825, 3.6 751/749, 3.7 1028=1028, T4 358=358, 4.1 816/814; semua beda hanya pemenggalan, heading dan link sama |
 | CSS widget ditulis ulang | 1.11: 89 aturan menggantikan 121 aturan `widgets.css`. 1.12 menambah widget `alur` + mockup HP: 70 aturan menggantikan 76 aturan lama (hp, alur, rel vertikal). Total 159 aturan widget di `tema.css` dari 302 aturan `widgets.css`; sisanya (race, pilah, banding, kartu, peta, ember, map, ilustrasi) menyusul bersama halamannya |

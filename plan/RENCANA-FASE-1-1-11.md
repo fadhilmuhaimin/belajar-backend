@@ -1,4 +1,4 @@
-# Rencana fase 1 · satu halaman: 1.11 Transaction di `site-baru/`
+# Rencana fase 1 · satu halaman: 1.11 Transaction di `situs/`
 
 Status: **disetujui 2026-10-08, dikerjakan di branch `fase-1/situs-baru`**. Revisi dari persetujuan: tanpa React (React masuk fase 2 bersama widget React pertama), lima blok lipat ditunda ke fase 3. Hasil dan angka ukur ada di `plan/STATUS.md` bagian Fase 1.
 
@@ -23,14 +23,14 @@ Setiap paket di atas butuh ADR singkat di KEPUTUSAN (aturan "menambah dependency
 
 1. Isi halaman tidak berubah (fase 1 = ganti wadah). Susunan 13 bagian tetap; lima blok lipat (Mulai, Coba, Paham, Putuskan, Kunci) dikerjakan di fase 3 sesuai tabel "Rencana migrasi" PROPOSAL. **Kalau pemilik ingin lima blok sudah ada di prototipe, tambah ±1 hari.**
 2. Widget lama (`core.js`, `runsql-core.js`, `runsql.js`, `stackstep.js`, `cerita.js` untuk "Kamu di sini", `arsitektur`) dimuat lewat `<script is:inline>` dari `public/widgets/`, yang berisi salinan (symlink saat dev, copy saat build) dari `docs/widgets/`, `docs/vendor/sql.js-1.14.2/`, dan `docs/widgets/data/`. CSS widget (`widgets.css`) dimuat apa adanya; warnanya masih memakai token lama `--c-*`, jadi `tema.css` mendefinisikan token lama itu juga dengan nilai gelap supaya widget ikut gelap tanpa mengubah kodenya.
-3. Sidebar dibuat dari `cerita.json` tapi hanya memuat halaman yang sudah ada di `site-baru/` (fase 1 = 1.11 saja); halaman lain tampil sebagai teks tanpa link supaya tidak ada 404.
+3. Sidebar dibuat dari `cerita.json` tapi hanya memuat halaman yang sudah ada di `situs/` (fase 1 = 1.11 saja); halaman lain tampil sebagai teks tanpa link supaya tidak ada 404.
 4. Rujukan `[[A2]]`, `[[B3.2]]`, `[[berikutnya]]` dibuat oleh remark plugin yang membaca `cerita.json`, meniru `tools/registri.py`. Link ke halaman yang belum diporting mengarah ke situs lama (`/b-fondasi/...`) dengan tanda kecil "situs lama".
 5. Font: Satoshi dan JetBrains Mono dari `docs/assets/fonts/` (hasil `get_fonts.sh`), disalin ke `public/fonts/` saat build; tidak masuk repo.
 
 ## File yang akan dibuat
 
 ```text
-site-baru/
+situs/
 ├── package.json, package-lock.json, tsconfig.json
 ├── astro.config.mjs                 Starlight + React; sidebar dari tools/sidebar.mjs; remark rujukan
 ├── .gitignore                       node_modules/, dist/, public/widgets/, public/fonts/
@@ -48,11 +48,11 @@ site-baru/
 ├── tools/
 │   ├── sidebar.mjs                  cerita.json → konfigurasi sidebar Starlight (grup per tahap, ★ jalur inti)
 │   ├── siapkan-aset.mjs             salin/symlink docs/widgets, docs/vendor, docs/widgets/data, font → public/
-│   └── tangkap.mjs                  Playwright: 1366×657 dan 375×667 × gelap/terang → site-baru/tangkapan/*.png (di-.gitignore)
+│   └── tangkap.mjs                  Playwright: 1366×657 dan 375×667 × gelap/terang → situs/tangkapan/*.png (di-.gitignore)
 └── tests/tema.test.mjs              node:test: semua warna di tema.css lewat token; tidak ada heksadesimal di komponen; contrast.py dijalankan untuk palet gelap dan terang
 ```
 
-Di luar `site-baru/`: `tools/contrast.py` dan `tools/palette.py` mendapat palet gelap (sekarang hanya terang); `.github/workflows/cek.yml` mendapat job `site_baru` (`npm ci`, `astro build`, `node tests`, Playwright) yang jalan saat `site-baru/` atau `docs/widgets/` berubah; KEPUTUSAN 102+ untuk dependency dan pola komponen; MEMORI "Pelajaran" untuk jebakan build.
+Di luar `situs/`: `tools/contrast.py` dan `tools/palette.py` mendapat palet gelap (sekarang hanya terang); `.github/workflows/cek.yml` mendapat job `site_baru` (`npm ci`, `astro build`, `node tests`, Playwright) yang jalan saat `situs/` atau `docs/widgets/` berubah; KEPUTUSAN 102+ untuk dependency dan pola komponen; MEMORI "Pelajaran" untuk jebakan build.
 
 ## Urutan kerja dan perkiraan waktu
 
