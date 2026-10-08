@@ -1,0 +1,71 @@
+{
+  "versi": 2,
+  "judul": "Budi masuk, lalu membuka saldonya",
+  "sumber": { "jenis": "rekaman", "file": "labs/api-t1/output/login.txt", "fileVarian": "labs/api-t1/output/login.txt",
+    "catatan": "Server Go 1.27 (labs/api-t1) + PostgreSQL 17, direkam dengan curl -i dari database bersih. Token acak disamarkan di rekaman." },
+  "pengantar": "Jalankan jalur normal sampai selesai. Setelah itu centang 'Ubah satu hal' dan lihat apa yang terjadi pada token setelah logout.",
+  "komponen": [
+    { "id": "app", "label": "App Budi" },
+    { "id": "api", "label": "Monolith API", "lapisan": ["handler", "service", "repo"] },
+    { "id": "db", "label": "PostgreSQL" }
+  ],
+  "layarAwal": { "hp": { "judul": "Masuk", "waktu": "Senin 07.55", "isi": [
+    { "jenis": "input", "label": "Email perusahaan", "nilai": "budi@lestari.example" },
+    { "jenis": "input", "label": "Password", "nilai": "••••••••••••" },
+    { "jenis": "tombol", "teks": "Masuk" } ] } },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: Budi logout, lalu token yang sama dipakai lagi untuk GET /akun/419. Apa jawaban server?",
+    "options": ["200 dengan saldo Budi", "401: belum login atau sesi sudah berakhir", "404: akun tidak ditemukan"],
+    "answer": 1,
+    "varian": true,
+    "explain": "Sesi disimpan di server. Logout menghapus barisnya dari tabel sesi, jadi token yang sama tidak menunjuk ke siapa pun lagi. Rekaman lab: 401. Token yang tidak disimpan di server, seperti JWT, tidak bisa dicabut semudah ini; itu dibahas di ADR 8."
+  },
+  "langkah": [
+    { "dari": "app", "ke": "api", "lapisan": "handler", "judul": "Budi masuk dengan email perusahaan",
+      "kirim": "POST /login\n{\"email\": \"budi@lestari.example\", \"password\": \"sementara-419\"}",
+      "jelas": "Password sementara dari admin dikirim lewat HTTPS. Ini satu-satunya request yang membawa password.",
+      "layar": { "hp": { "judul": "Masuk", "waktu": "Senin 07.55", "isi": [ { "jenis": "proses", "teks": "Memeriksa..." } ] } } },
+    { "dari": "api", "ke": "db", "lapisan": "repo", "judul": "Server membandingkan password dengan hash",
+      "kirim": "SELECT id, password_hash FROM akun WHERE email = 'budi@lestari.example';\nbcrypt.CompareHashAndPassword(hash, password)  ✓",
+      "jelas": "Database hanya menyimpan hash bcrypt, bukan password. Kalau email tidak terdaftar, server tetap menjalankan bcrypt terhadap hash palsu, supaya waktu responsnya tidak membocorkan apa pun." },
+    { "dari": "api", "lapisan": "service", "judul": "Service membuat token acak",
+      "kirim": "32 byte dari crypto/rand  → token 64 karakter hex\nSHA-256(token)            → yang disimpan di database",
+      "jelas": "Token tidak berisi data apa pun tentang Budi. Ia hanya angka acak yang terlalu besar untuk ditebak." },
+    { "dari": "api", "ke": "db", "lapisan": "repo", "judul": "Sesi disimpan, berlaku 8 jam",
+      "kirim": "INSERT INTO sesi (token_hash, akun_id, kedaluwarsa)\nVALUES ('<SHA-256 token>', 419, now() + 8 jam);",
+      "jelas": "Database menyimpan hash token, bukan tokennya. Kalau isi tabel sesi bocor, token yang dipegang HP Budi tidak ikut bocor." },
+    { "dari": "api", "ke": "app", "lapisan": "handler", "judul": "Token dikirim ke HP Budi",
+      "kirim": "200 {\"kedaluwarsa_detik\":28800,\"token\":\"<token sesi Budi>\"}",
+      "jelas": "App menyimpan token di penyimpanan aman HP (Keychain atau Keystore), bukan di SharedPreferences. 28.800 detik sama dengan 8 jam.",
+      "nada": "good" },
+    { "dari": "app", "ke": "api", "lapisan": "handler", "judul": "Request berikutnya membawa token",
+      "kirim": "GET /akun/419\nAuthorization: Bearer <token sesi Budi>",
+      "jelas": "Tidak ada password lagi. Token yang membuktikan siapa pengirimnya." },
+    { "dari": "api", "ke": "db", "lapisan": "repo", "judul": "Server mencari sesi yang masih aktif",
+      "kirim": "SELECT akun_id FROM sesi\nWHERE token_hash = SHA-256(token) AND kedaluwarsa > now();\n→ 419",
+      "jelas": "Setiap request membaca tabel sesi. Itu satu query tambahan, dan itu juga yang membuat sesi bisa dicabut kapan saja." },
+    { "dari": "api", "ke": "app", "lapisan": "handler", "judul": "Saldo tampil",
+      "kirim": "200 {\"id\":419,\"jenis\":\"karyawan\",\"nama\":\"Budi\",\"saldo\":0}",
+      "jelas": "Rekaman lab: 200, saldo Rp0. Senin pagi, tunjangan minggu ini belum diisi admin.", "nada": "good",
+      "layar": { "hp": { "waktu": "Senin 07.56", "saldo": 0, "isi": [ { "jenis": "baris", "kiri": "Masuk sebagai", "kanan": "Budi" } ] } } }
+  ],
+  "varian": {
+    "label": "Budi logout, lalu token yang sama dipakai lagi",
+    "mulai": 5,
+    "langkah": [
+      { "dari": "app", "ke": "api", "lapisan": "handler", "judul": "Budi logout dari HP",
+        "kirim": "POST /logout\nAuthorization: Bearer <token sesi Budi>\n→ 204 No Content",
+        "jelas": "Logout bukan sekadar menghapus token dari HP. Server ikut mematikan sesinya." },
+      { "dari": "api", "ke": "db", "lapisan": "repo", "judul": "Baris sesi dihapus",
+        "kirim": "DELETE FROM sesi WHERE token_hash = SHA-256(token);\nsesi_tersisa = 0",
+        "jelas": "Rekaman lab menghitung isi tabel sesi sesudahnya: 0 baris." },
+      { "dari": "app", "ke": "api", "lapisan": "handler", "judul": "Token yang sama dipakai lagi",
+        "kirim": "GET /akun/419\nAuthorization: Bearer <token sesi Budi>",
+        "jelas": "Misalnya token sempat tersalin sebelum logout. Server tetap mencarinya di tabel sesi.", "nada": "warn" },
+      { "dari": "api", "ke": "app", "lapisan": "handler", "judul": "401: sesi sudah berakhir",
+        "kirim": "401 Unauthorized\nWWW-Authenticate: Bearer error=\"invalid_token\"\n{\"type\":\"/problems/belum-login\",\"title\":\"Belum login atau sesi sudah berakhir\"}",
+        "jelas": "Rekaman lab: 401. Sesi yang sudah dihapus tidak bisa dipakai siapa pun.", "nada": "good",
+        "layar": { "hp": { "judul": "Masuk", "waktu": "Senin 07.58", "isi": [ { "jenis": "toast", "teks": "Sesi berakhir, silakan masuk lagi", "nada": "warn" } ] } } }
+    ]
+  }
+}

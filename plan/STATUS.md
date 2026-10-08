@@ -38,8 +38,9 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.4 ADR 1: Backend sendiri, bukan BaaS | Ditulis ulang dari A4 (keputusan 129) |
 | 1.5 Perjalanan satu request | Ditulis ulang dari A2 (keputusan 130) |
 | 1.6 Struktur folder pertama | Halaman baru (keputusan 131) |
+| 1.7 Fitur: login karyawan | Halaman baru, lab `api-t1` versi naskah (keputusan 132–134) |
 
-Berikutnya: 1.7 Fitur: login karyawan.
+Berikutnya: 1.8 Fitur: top-up oleh admin (lab: unggah CSV 100 akun dalam satu transaction).
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 

@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 165,
-        "halaman": 20
+        "menit": 171,
+        "halaman": 21
       },
       "bagian": [
         {
@@ -440,8 +440,13 @@
         "backend"
       ],
       "masalah": "Karyawan masuk memakai email perusahaan dan password sementara",
-      "ada": false,
-      "nomor": "1.7"
+      "ada": true,
+      "prasyarat": [
+        "t1-struktur-folder"
+      ],
+      "pendek": "Fitur login",
+      "nomor": "1.7",
+      "menit": 6
     },
     {
       "id": "t1-fitur-topup",
@@ -456,6 +461,7 @@
       ],
       "masalah": "Admin mengisi saldo 100 akun sekaligus tiap Senin",
       "ada": false,
+      "pendek": "Fitur top-up",
       "nomor": "1.8"
     },
     {
@@ -473,6 +479,7 @@
       ],
       "masalah": "Karyawan membayar makan dalam 5 detik",
       "ada": false,
+      "pendek": "Fitur bayar ke warung",
       "nomor": "1.9"
     },
     {
@@ -488,6 +495,7 @@
       ],
       "masalah": "Warung ingin tahu total hari ini",
       "ada": false,
+      "pendek": "Fitur saldo dan laporan",
       "nomor": "1.10"
     },
     {
@@ -1152,6 +1160,7 @@
       "inti": true,
       "masalah": "Keputusan Tahap 1 mana yang akan dibuka lagi?",
       "ada": false,
+      "pendek": "Pratinjau PRD v2",
       "nomor": "1.42"
     },
     {
