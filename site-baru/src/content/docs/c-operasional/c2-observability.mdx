@@ -1,0 +1,142 @@
+---
+title: "3.1 Observability"
+---
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="C2" />
+
+<p class="meta">Baca 7 menit · coba 2 menit · Prasyarat: [[C1]] · Jalur inti</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Apa beda log, metric, dan trace?
+2. Apa empat golden signals menurut buku SRE Google?
+3. Kenapa log berbentuk JSON lebih berguna daripada teks bebas?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+## Inti
+
+Ukur sebelum mengubah apa pun. Metric memberi tahu ada masalah, trace menunjukkan di mana, log menjelaskan kenapa.
+
+<WidgetLama nama="arsitektur" tahap={3} />
+
+## Lihat sendiri
+
+Pilih alat yang paling cepat menjawab tiap pertanyaan, lalu cek. Contoh-contohnya diambil dari rekaman lab Tahap 3.
+
+<WidgetLama nama="pilah" src="data/c2-pilah.json" />
+
+## Kenapa ini ada
+
+Jam makan siang, app lambat. Reaksi pertama Raka: tambah server. Sinta bertanya, "Bagian mana yang lambat?" Raka tidak tahu.
+
+Log yang ada hanya `transfer ok` dan `transfer error`, tanpa durasi dan tanpa id. Tidak ada angka berapa request yang gagal per menit. Raka bisa saja menghabiskan seminggu mempercepat query yang ternyata hanya butuh 1 ms.
+
+Langkah pertama di Tahap 3 bukan mempercepat apa pun, tapi bisa melihat.
+
+## Cara kerjanya
+
+**Tiga sinyal** ([OpenTelemetry: Observability primer](https://opentelemetry.io/docs/concepts/observability-primer/)):
+
+| Sinyal | Isinya | Contoh dari lab Tahap 3 |
+|---|---|---|
+| Log | Satu catatan per kejadian, dengan detail | `{"msg":"bayar gagal","request_id":11,"tunggu_koneksi_ms":4999,"error":"context canceled"}` |
+| Metric | Angka yang dihitung terus-menerus | `jumlah_menunggu: 160` di statistik pool |
+| Trace | Perjalanan satu request, dipecah jadi span per langkah | `tunggu_koneksi 2899 ms → query 1 ms → notifikasi 2000 ms` |
+
+**Log terstruktur.** Log berbentuk JSON dengan field tetap bisa disaring dan dihitung oleh mesin: "semua request dengan `tunggu_koneksi_ms` di atas 1000". Log teks bebas hanya bisa dibaca manusia satu per satu. Rekaman dari lab:
+
+<Snippet file="labs/t3-bayar/output/pool-dalam-tx.txt" title="Potongan output rekaman: labs/t3-bayar/output/pool-dalam-tx.txt" />
+
+Dari tiga field di log itu, jawabannya terlihat: query 1 ms, notifikasi 2.000 ms, menunggu koneksi 2.899 ms. Masalahnya bukan database dan bukan jumlah server. Perbaikannya ada di [[B2.5]] dan [[B10.1]].
+
+Rincian di lab ditulis manual sebagai field log. Di production, rincian seperti ini biasanya berasal dari tracing, mis. OpenTelemetry, yang juga bisa mengikuti request lintas service ([OpenTelemetry: Traces](https://opentelemetry.io/docs/concepts/signals/traces/)).
+
+**Apa yang diukur.** Buku SRE Google menyebut empat golden signals: latency, traffic, errors, dan saturation ([SRE book, bab 6](https://sre.google/sre-book/monitoring-distributed-systems/)). Untuk Rekeningo Tahap 3:
+
+| Signal | Metric Rekeningo |
+|---|---|
+| Latency | p50 dan p95 durasi `POST /bayar` |
+| Traffic | Request per detik per endpoint |
+| Errors | Persentase response 5xx dan timeout |
+| Saturation | Koneksi pool dipakai dan jumlah menunggu, panjang outbox |
+
+**Yang tidak boleh masuk log:** token, PIN, password, dan data pribadi utuh. Log disimpan lama dan dibaca banyak orang ([[F2]], [[C4]]).
+
+## Di stack lain
+
+Yang sama di semua stack: log JSON dengan request id, metric yang bisa dipasangi alert, dan tracing lewat OpenTelemetry. Yang berbeda: library bawaannya. Hanya baris Go yang dijalankan di lab.
+
+| Stack | Log terstruktur | Metric | Sumber |
+|---|---|---|---|
+| Go | `log/slog` (pustaka standar, dipakai di lab) | Library terpisah, mis. OpenTelemetry | [log/slog](https://pkg.go.dev/log/slog) |
+| Express | Library, mis. pino | Library terpisah | [pino](https://getpino.io/) |
+| Laravel | `Log` facade (Monolog), formatter JSON | Library terpisah | [Laravel: Logging](https://laravel.com/docs/12.x/logging) |
+| Django | Modul `logging` Python, formatter JSON | Library terpisah | [Django: Logging](https://docs.djangoproject.com/en/stable/topics/logging/) |
+| Spring | Logback bawaan Spring Boot | Micrometer lewat Actuator | [Spring Boot: Metrics](https://docs.spring.io/spring-boot/reference/actuator/metrics.html) |
+| Semua | – | – | [OpenTelemetry: SDK per bahasa](https://opentelemetry.io/docs/languages/) |
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Log teks bebas saja | Tanpa usaha | Tidak bisa dihitung atau disaring; masalah ditebak |
+| Log terstruktur + metric dasar | Mudah dimulai, menjawab sebagian besar pertanyaan | Rincian lintas service sulit dirangkai |
+| Ditambah tracing | Melihat di mana waktu habis, lintas komponen | Instrumentasi, penyimpanan, dan biaya alat |
+
+## Cek diri
+
+**1.** Log hanya menulis `bayar lambat 4902ms`. Apa yang kurang?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Rincian per langkah dan id request. Tanpa rincian, tidak jelas apakah waktunya habis di query, menunggu koneksi, atau panggilan luar. Tanpa id, log ini tidak bisa dihubungkan dengan log lain dari request yang sama.
+
+</details>
+
+**2.** Jelaskan kenapa "tambah server" bisa jadi keputusan yang salah di Tahap 3, menurut rekaman.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Rekaman menunjukkan waktu habis untuk menunggu koneksi database dan notifikasi, bukan untuk CPU server. Server tambahan dengan pool masing-masing hanya memindahkan penantian ke PostgreSQL. Tanpa pengukuran, keputusan itu menambah biaya tanpa menyelesaikan masalah.
+
+</details>
+
+**3.** Metric mana yang akan memberi tanda paling awal sebelum timeout jam 12.00 terjadi?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Saturation: jumlah koneksi pool yang dipakai dan jumlah yang menunggu. Pool penuh muncul sebelum latency naik tajam dan sebelum timeout. Alert pada pool yang hampir penuh memberi waktu bertindak.
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Log berbentuk terstruktur (JSON) dengan request id di setiap baris.
+- [ ] Langkah lambat (query, panggilan luar) punya durasi sendiri, lewat span atau field log.
+- [ ] Tidak ada token, password, PIN, atau data pribadi utuh di log.
+- [ ] Ada metric untuk latency, traffic, errors, dan saturation di endpoint penting.
+
+## Bacaan lanjut
+
+- [Google SRE book: Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/)
+- [OpenTelemetry: Concepts](https://opentelemetry.io/docs/concepts/)
+- [Go: log/slog](https://pkg.go.dev/log/slog)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","pilah"]} />
