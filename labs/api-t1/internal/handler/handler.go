@@ -28,6 +28,8 @@ func (s Server) Rute() *http.ServeMux {
 	mux.HandleFunc("GET /akun/{id}", s.wajibLogin(s.lihatAkun))
 	mux.HandleFunc("POST /topup", s.wajibLogin(s.topup))
 	mux.HandleFunc("POST /transfers", s.wajibLogin(s.bayar))
+	mux.HandleFunc("GET /akun/{id}/riwayat", s.wajibLogin(s.riwayat))
+	mux.HandleFunc("GET /warung/{id}/laporan", s.wajibLogin(s.laporan))
 	return mux
 }
 
@@ -186,3 +188,35 @@ func (s Server) bayar(w http.ResponseWriter, r *http.Request) {
 }
 
 // --8<-- [end:bayar]
+
+func (s Server) riwayat(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	daftar, err := s.svc.Riwayat(r.Context(), peminta(r), id)
+	if errors.Is(err, service.ErrTidakDitemukan) {
+		tulisProblem(w, Problem{Type: "/problems/tidak-ditemukan", Title: "Akun tidak ditemukan", Status: 404})
+		return
+	}
+	if err != nil {
+		s.errorInternal(w, err)
+		return
+	}
+	tulisJSON(w, 200, map[string]any{"riwayat": daftar})
+}
+
+func (s Server) laporan(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	q := r.URL.Query()
+	baris, err := s.svc.Laporan(r.Context(), peminta(r), id, q.Get("dari"), q.Get("sampai"))
+	var errV service.ErrValidasi
+	switch {
+	case errors.Is(err, service.ErrTidakDitemukan):
+		tulisProblem(w, Problem{Type: "/problems/tidak-ditemukan", Title: "Warung tidak ditemukan", Status: 404})
+	case errors.As(err, &errV):
+		tulisProblem(w, Problem{Type: "/problems/validasi", Title: "Input tidak memenuhi aturan", Status: 422,
+			Errors: []map[string]string{{"field": errV.Field, "pesan": errV.Pesan}}})
+	case err != nil:
+		s.errorInternal(w, err)
+	default:
+		tulisJSON(w, 200, map[string]any{"warung": id, "per_hari": baris})
+	}
+}

@@ -13,7 +13,7 @@ OUT = HERE / "output"
 PORT = 18083
 URL = f"http://127.0.0.1:{PORT}"
 DB = "postgres://lab:lab@127.0.0.1:54333/lab?search_path=tahap1&application_name=api-t1"
-ENV = dict(os.environ, DATABASE_URL=DB)
+ENV = dict(os.environ, DATABASE_URL=DB, TZ="Asia/Jakarta")   # waktu di response sama di mesin mana pun
 PSQL = ["docker", "compose", "-f", str(HERE / "../b3-race/docker-compose.yml"), "exec", "-T", "db",
         "psql", "-U", "lab", "-d", "lab", "-q"]
 BIN = HERE / "api-t1"
@@ -27,7 +27,12 @@ def gagal(pesan):
     raise SystemExit("GAGAL: " + pesan)
 
 
+WAKTU = re.compile(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)")
+
+
 def samarkan(teks):
+    # Stempel waktu dulu: tanggalnya diganti label hari (bila ada), jamnya disamarkan.
+    teks = WAKTU.sub(lambda m: f"{samaran.get(m.group(0)[:10], m.group(0)[:10])}T<jam>{m.group(0)[-6:] if m.group(0)[-6] in '+-' else 'Z'}", teks)
     for asli, label in samaran.items():
         teks = teks.replace(asli, label)
     return teks
@@ -99,7 +104,7 @@ def curl(method, path, body=None, token=None, jenis="application/json", tampil_b
     r = "\n".join(l for l in r.splitlines() if not l.startswith(("Date:", "Content-Length:")))
     status = int(r.split()[1]) if r.startswith("HTTP/") else 0
     badan = r.split("\n\n", 1)[1] if "\n\n" in r else ""
-    log.append(f"{tampil}\n{samarkan(r)}\n")
+    log.append(f"{samarkan(tampil)}\n{samarkan(r)}\n")
     return status, badan
 
 
@@ -322,8 +327,55 @@ def rekam_bayar():
     tulis("bayar.txt")
 
 
+def rekam_riwayat():
+    """1.10 Fitur: saldo, riwayat, laporan warung."""
+    reset()
+    mulai()
+    bagian("A. Persiapan")
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    dimas = login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+    k420 = login("karyawan420@lestari.example", "sementara-420", "<token sesi Karyawan 420>")
+    ani = login("warung.ani@lestari.example", "sementara-418", "<token sesi Warung Ani>")
+
+    bagian("B. Empat pembayaran")
+    for token, ke, jumlah in [(budi, 418, 25000), (dimas, 418, 30000), (k420, 418, 40000), (budi, 502, 15000)]:
+        s, _ = curl("POST", "/transfers", json.dumps({"ke": ke, "jumlah": jumlah}), token=token)
+        harap(s, 201, f"bayar {jumlah} ke {ke}")
+
+    bagian("C. Lab menggeser waktu dua transaksi, supaya laporan berisi tiga hari")
+    sql("UPDATE transaksi SET dibuat = dibuat - interval '2 days' WHERE id = 1")
+    sql("UPDATE transaksi SET dibuat = dibuat - interval '1 day' WHERE id = 2")
+    hari = subprocess.run(PSQL + ["-At", "-c", "SELECT to_char((now() AT TIME ZONE 'Asia/Jakarta')::date - n, 'YYYY-MM-DD') "
+                                  "FROM generate_series(2, 0, -1) n"], capture_output=True, text=True).stdout.split()
+    harap(len(hari), 3, "tiga tanggal Jakarta")
+    for tgl, label in zip(hari, ["<2 hari lalu>", "<kemarin>", "<hari ini>"]):
+        samaran[tgl] = label
+
+    bagian("D. Budi membuka riwayatnya: terbaru dulu")
+    s, b = curl("GET", "/akun/419/riwayat", token=budi)
+    r = json.loads(b)["riwayat"]
+    harap((s, [(x["arah"], x["lawan"], x["jumlah"]) for x in r]),
+          (200, [("keluar", "Warung Sari", 15000), ("keluar", "Warung Ani", 25000)]), "riwayat Budi")
+
+    bagian("E. Budi mencoba membuka riwayat Warung Ani")
+    s, _ = curl("GET", "/akun/418/riwayat", token=budi)
+    harap(s, 404, "riwayat milik orang lain")
+
+    bagian("F. Ani membuka laporan tiga hari terakhir")
+    s, b = curl("GET", f"/warung/418/laporan?dari={hari[0]}&sampai={hari[2]}", token=ani)
+    harap((s, [(x["transaksi"], x["total"]) for x in json.loads(b)["per_hari"]]),
+          (200, [(1, 25000), (1, 30000), (1, 40000)]), "laporan per hari")
+    sql("SELECT count(*) AS transaksi, sum(jumlah) AS total FROM transaksi WHERE ke = 418")
+
+    bagian("G. Dimas mencoba membuka laporan Warung Ani")
+    s, _ = curl("GET", f"/warung/418/laporan?dari={hari[0]}&sampai={hari[2]}", token=dimas)
+    harap(s, 404, "laporan milik warung lain")
+    tulis("riwayat.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()
