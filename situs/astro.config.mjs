@@ -23,6 +23,7 @@ export default defineConfig({
         Pagination: "./src/components/Lanjut.astro",
         MarkdownContent: "./src/components/MarkdownContent.astro",
         PageTitle: "./src/components/JudulHalaman.astro",
+        ThemeSelect: "./src/components/PilihTema.astro",
       },
       // Halaman berblok: daftar isi kanan hanya memuat blok (keputusan 118).
       routeMiddleware: "./src/rute-blok.ts",

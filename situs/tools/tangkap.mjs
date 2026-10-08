@@ -39,5 +39,18 @@ for (const p of PATHS) {
     await ctx.close();
   }
 }
+// Pembaca baru tanpa pilihan tersimpan, sistem memakai tema terang: situs tetap gelap (keputusan 105, 119).
+{
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 657 }, colorScheme: "light" });
+  const page = await ctx.newPage();
+  await page.goto(BASE + PATHS[0], { waitUntil: "networkidle" });
+  await page.waitForTimeout(300);
+  const [tema, simpan, pilih] = await page.evaluate(() => [document.documentElement.dataset.theme,
+    localStorage.getItem("starlight-theme"), document.querySelector("starlight-theme-select select")?.value]);
+  const ok = tema === "dark" && pilih === "dark";
+  if (!ok) masalah++;
+  console.log(`${ok ? "ok  " : "GAGAL"} tema awal tanpa pilihan, sistem terang: ${tema} (pemilih ${pilih}, tersimpan ${JSON.stringify(simpan)})`);
+  await ctx.close();
+}
 await browser.close();
 if (masalah) { console.log(`${masalah} tangkapan bermasalah`); process.exit(1); }
