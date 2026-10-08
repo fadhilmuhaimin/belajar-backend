@@ -1,0 +1,138 @@
+---
+title: "3.2 Connection pool"
+---
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="B2.5" />
+
+<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[B3.1]] · Jalur inti</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Pool 10 koneksi, setiap request memegang koneksi 2 detik. Berapa request per detik yang bisa dilayani?
+2. App lambat karena pool penuh. Kenapa memperbesar pool bukan perbaikan utama?
+3. Berapa ukuran pool bawaan `database/sql` Go?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+## Inti
+
+Koneksi yang dibutuhkan = laju request × lama koneksi dipegang. Perbaiki lama memegangnya, bukan ukuran pool.
+
+<WidgetLama nama="arsitektur" tahap={3} />
+
+## Lihat sendiri
+
+Ini rekaman beban sungguhan: 17 pembayaran per detik selama 10 detik ke server Go dengan pool 10 koneksi dan PostgreSQL 17. Tebak dulu, lalu jalankan.
+
+<WidgetLama nama="alur" src="data/skenario/b2-5-pool.json" />
+
+## Kenapa ini ada
+
+Jam 12.00–12.30 setiap hari, tombol Bayar di Rekeningo berputar lama lalu muncul "Waktu habis". Puncaknya hanya ±17 request per detik, jauh di bawah angka yang biasa disebut untuk satu server.
+
+Raka memasang log yang mencatat lama tiap langkah ([[C2]]). Hasilnya mengejutkan: hampir 3 detik habis untuk **menunggu koneksi database**, sebelum query pertama dijalankan. Penyebabnya ada di kode yang ia tulis di Tahap 1: notifikasi dan email dikirim di dalam transaction, supaya "kalau notifikasi gagal, pembayaran dibatalkan".
+
+## Cara kerjanya
+
+**Kenapa ada pool.** Membuka koneksi PostgreSQL butuh beberapa langkah (TCP, autentikasi, proses server baru), dan jumlahnya dibatasi `max_connections`, yang bawaannya biasanya 100 ([PostgreSQL](https://www.postgresql.org/docs/current/runtime-config-connection.html)). Pool membuka koneksi sekali, lalu meminjamkannya.
+
+**Little's Law** menghubungkan tiga angka: L = λ × W. Jumlah yang sedang di dalam sistem (L) sama dengan laju kedatangan (λ) dikali lama tiap item tinggal (W) ([Little 1961](https://doi.org/10.1287/opre.9.3.383)). Untuk pool, L adalah koneksi yang sedang dipinjam.
+
+| Kondisi | λ (asumsi Tahap 3) | W | L = koneksi dibutuhkan | Rekaman lab |
+|---|---|---|---|---|
+| Notifikasi di dalam transaction | 17 per detik | ±2 detik | ±34 | 54 dari 170 berhasil, 116 timeout |
+| Notifikasi lewat outbox | 17 per detik | ±0,02 detik | ±0,34 | 170 dari 170 berhasil, p50 5 ms |
+
+Dengan pool 10 dan W 2 detik, kapasitasnya hanya 10 ÷ 2 = 5 request per detik. Rekaman cocok: 54 berhasil dalam ±11 detik.
+
+<Snippet file="labs/t3-bayar/output/pool-dalam-tx.txt" title="Output rekaman: labs/t3-bayar/output/pool-dalam-tx.txt" />
+
+<Snippet file="labs/t3-bayar/output/pool-outbox.txt" title="Output rekaman: labs/t3-bayar/output/pool-outbox.txt" />
+
+**Kenapa memperbesar pool bukan jawabannya.** Pool 34 koneksi memang menampung beban ini di satu instance. Tapi dengan dua instance (rolling deploy, [[C3]]) jadi 68 koneksi, mendekati `max_connections` 100. Setiap koneksi PostgreSQL juga satu proses server yang memakai memori ([PostgreSQL: How connections are established](https://www.postgresql.org/docs/current/connect-estab.html)). Memperkecil W menyelesaikan masalahnya di sumbernya.
+
+Kode yang menahan koneksi:
+
+<Snippet file="labs/t3-bayar/api/main.go" region="dalamtx" lang="go" />
+
+## Di stack lain
+
+Yang sama di semua stack: ada batas jumlah koneksi, dan request menunggu kalau semuanya dipinjam. Yang berbeda: **ukuran bawaan dan berapa lama menunggu**.
+
+| Stack | Ukuran pool bawaan | Menunggu koneksi | Sumber |
+|---|---|---|---|
+| Go `database/sql` | **Tanpa batas** (`MaxOpenConns` 0) | Sampai context dibatalkan | [database/sql](https://pkg.go.dev/database/sql#DB.SetMaxOpenConns) |
+| Go `pgxpool` | max(4, jumlah CPU) | Sampai context dibatalkan | [pgxpool](https://pkg.go.dev/github.com/jackc/pgx/v5/pgxpool#Config) |
+| Express (`pg.Pool`) | 10 (dicek di lab: `pg` 8.23.1) | Tanpa batas waktu, kecuali `connectionTimeoutMillis` diisi | [node-postgres Pool](https://node-postgres.com/apis/pool) |
+| Spring (HikariCP) | 10 | 30 detik, lalu exception | [HikariCP](https://github.com/brettwooldridge/HikariCP) |
+| Django | Tanpa pool secara bawaan; opsi pool psycopg tersedia | – | [Django: databases](https://docs.djangoproject.com/en/stable/ref/databases/) |
+| Laravel (PHP-FPM) | Setiap proses PHP memegang koneksinya sendiri [perlu verifikasi] | – | – |
+| Supabase | Pooler Supavisor di depan PostgreSQL | – | [Supabase: Connecting](https://supabase.com/docs/guides/database/connecting-to-postgres) |
+
+Perhatikan baris pertama. Go `database/sql` tanpa batas berarti masalahnya tidak muncul sebagai request yang menunggu di aplikasi, tapi sebagai koneksi yang menumpuk di PostgreSQL sampai `max_connections` habis. Lab ini memakai `SetMaxOpenConns(10)` supaya perilakunya sama dengan stack lain.
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Pool kecil + W kecil | Beban PostgreSQL rendah, request jarang menunggu | Butuh disiplin: tidak ada pekerjaan lambat di dalam transaction |
+| Pool besar | Menunda gejala | Koneksi menumpuk di PostgreSQL; masalah pindah ke database |
+| Pool tanpa batas | Tidak pernah menunggu di aplikasi | Satu lonjakan bisa menghabiskan `max_connections` untuk semua instance |
+| Pooler terpisah (mis. PgBouncer, Supavisor) | Banyak instance berbagi sedikit koneksi | Satu komponen lagi; mode tertentu membatasi fitur session |
+
+## Cek diri
+
+**1.** Pool 20 koneksi, setiap request memegang koneksi 50 ms. Kira-kira berapa request per detik maksimal sebelum mulai mengantre?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+λ = L ÷ W = 20 ÷ 0,05 = ±400 request per detik. Ini batas teoretis dari pool saja. Batas sebenarnya bisa lebih rendah karena CPU, database, atau jaringan, dan harus diukur dengan load test.
+
+</details>
+
+**2.** Jelaskan kenapa log `tunggu_koneksi_ms: 2899` lebih berguna daripada `durasi_ms: 4902` saja.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+`durasi_ms` hanya bilang request lambat. Rincian menunjukkan di mana waktunya habis: hampir 3 detik menunggu koneksi, 2 detik notifikasi, 1 ms query. Dari situ jelas query bukan masalahnya, dan memperbesar server tidak menolong.
+
+</details>
+
+**3.** Aplikasi Go memakai `database/sql` tanpa `SetMaxOpenConns`, dengan 4 instance. Di jam sibuk, PostgreSQL menolak koneksi baru. Kenapa?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Pool tanpa batas membuka koneksi baru setiap kali semua koneksi sedang dipakai. Dengan W yang besar, setiap instance bisa membuka puluhan koneksi. Empat instance bersama-sama menghabiskan `max_connections`, dan request baru di instance mana pun ditolak.
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Ukuran pool ditetapkan eksplisit, dan total semua instance di bawah `max_connections`.
+- [ ] Tidak ada panggilan HTTP, email, atau pekerjaan lambat lain di dalam transaction.
+- [ ] Ada batas waktu menunggu koneksi (context deadline, `connectionTimeout`), bukan menunggu selamanya.
+- [ ] Statistik pool (dipakai, menunggu) bisa dilihat sebagai metric ([[C2]]).
+
+## Bacaan lanjut
+
+- [node-postgres: Pool sizing](https://node-postgres.com/guides/pool-sizing)
+- [HikariCP: About pool sizing](https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing)
+- [PostgreSQL: max_connections](https://www.postgresql.org/docs/current/runtime-config-connection.html)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
