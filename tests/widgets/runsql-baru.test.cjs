@@ -66,3 +66,13 @@ test("1.12 relasi: tanpa FK pembayaran yatim, dengan FK DELETE ditolak, CASCADE 
   assert.deepEqual(baris(core.runPanel(SQL, s, "after", s.toggles)), ["3|15000|Warung Sari"]);
   assert.equal(s.predict.options[s.predict.answer], "Tetap ada, tapi penerimanya hilang");
 });
+
+test("1.14 M1: tanpa constraint minus lolos (Budi 255000, Ani -5000); dengan constraint ditolak dan dibatalkan", () => {
+  const s = load("t1-m1");
+  assert.deepEqual(baris(core.runPanel(SQL, s, "before", [])), ["Warung Ani|-5000", "Budi|255000", "BARIS TRANSAKSI|1"]);
+  const after = core.runPanel(SQL, s, "after", []);
+  assert.ok(after.log.some((l) => l.ok === false && /CHECK/.test(l.result)));
+  assert.deepEqual(baris(after), ["Warung Ani|0", "Budi|250000", "BARIS TRANSAKSI|0"]);
+  for (const p of ["before", "after"]) assert.deepEqual(baris(core.runPanel(SQL, s, p, s.toggles)), ["Warung Ani|5000", "Budi|245000", "BARIS TRANSAKSI|1"]);
+  assert.equal(s.predict.options[s.predict.answer], "Rp255.000");
+});
