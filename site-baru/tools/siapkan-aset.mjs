@@ -38,6 +38,10 @@ salinDir(path.join(DOCS, "widgets"), path.join(PUB, "widgets"), (n) => n.endsWit
 fs.rmSync(path.join(PUB, "vendor"), { recursive: true, force: true });
 salinDir(path.join(DOCS, "vendor"), path.join(PUB, "vendor"));
 
+// Tooltip istilah: data (dibuat tools/build_istilah.py) + skrip lama, dimuat apa adanya
+fs.rmSync(path.join(PUB, "javascripts"), { recursive: true, force: true });
+salinDir(path.join(DOCS, "javascripts"), path.join(PUB, "javascripts"), (n) => n.endsWith(".js"));
+
 // Ilustrasi cerita (SVG dari tools/ilustrasi_cerita.py) dipakai halaman tahap: ../assets/cerita/*.svg -> /assets/cerita/
 fs.rmSync(path.join(PUB, "assets/cerita"), { recursive: true, force: true });
 if (fs.existsSync(path.join(DOCS, "assets/cerita"))) salinDir(path.join(DOCS, "assets/cerita"), path.join(PUB, "assets/cerita"));
