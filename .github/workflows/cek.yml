@@ -109,6 +109,8 @@ jobs:
           npm --prefix site-baru run preview -- --port 4321 --host 127.0.0.1 &
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:4321/ >/dev/null && break; sleep 1; done
           cd site-baru && node tools/tangkap.mjs --url http://127.0.0.1:4321
+      - name: Layar pertama 4 ukuran
+        run: cd site-baru && node tools/layar.mjs --url http://127.0.0.1:4321
       - uses: actions/upload-artifact@v7
         if: always()
         with:

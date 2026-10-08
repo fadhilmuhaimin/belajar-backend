@@ -81,8 +81,8 @@
   --sl-text-code: 0.9em;
   --sl-text-code-sm: 0.85em;
   --sl-line-height: 1.65;
-  --sl-text-h1: 1.9rem;
-  --sl-text-h2: 1.45rem;
+  --sl-text-h1: 1.6rem;
+  --sl-text-h2: 1.4rem;
   --sl-text-h3: 1.2rem;
   --sl-text-h4: 1.05rem;
   --sl-content-width: 44rem;      /* 704 px, di rentang 680–720 */
@@ -108,7 +108,7 @@
 @media (min-width: 50em) {
   :root, :root[data-theme="light"] {
     --sl-text-body: 1.1875rem;    /* 19 px di desktop */
-    --sl-text-h1: 2.4rem;
+    --sl-text-h1: 2.2rem;
     --sl-text-h2: 1.7rem;
     --sl-text-h3: 1.3rem;
     --sl-text-h4: 1.1rem;
@@ -119,6 +119,8 @@
 body { background: var(--bg); }
 .sl-markdown-content :is(h1, h2, h3, h4) { font-weight: 600; color: var(--judul); letter-spacing: -0.01em; }
 .sl-markdown-content h2 { margin-top: 2.2em; }
+/* Layar pertama (tools/layar.mjs): judul, "Kamu di sini", meta, pretest, Inti, dan diagram muat di 1366×657 dan 375×667. */
+.content-panel { padding-block: 0.75rem; }
 .sl-markdown-content a { color: var(--aksen); text-decoration: none; }
 .sl-markdown-content a:hover, .sl-markdown-content a:focus-visible { text-decoration: underline; }
 .sl-markdown-content strong { color: var(--judul); font-weight: 600; }
@@ -135,7 +137,8 @@ body { background: var(--bg); }
 .sl-markdown-content details > :not(summary) { margin-top: 0.6em; }
 .sl-markdown-content details.success { border-left-color: var(--k-good-edge); }
 .sl-markdown-content details.question { border-left-color: var(--k-old-edge); }
-.sl-markdown-content details.question + h2 { margin-top: 1em; }
+.sl-markdown-content details.question { padding-block: 0.35rem; }
+.sl-markdown-content details.question + h2 { margin-top: 0.5em; }
 /* Gerak hanya karena klik; pembaca yang meminta sedikit gerak tidak mendapat transisi. */
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 
@@ -152,7 +155,7 @@ body { background: var(--bg); }
 .sl-markdown-content pre.shiki .line { display: inline-block; min-width: 100%; }
 
 /* ── "Kamu di sini" (breadcrumb + rekap) ───────────────────────────────── */
-.sl-markdown-content nav.kamu { margin: 0 0 1.2em; padding: 0.5rem 0.8rem; border: 1px solid var(--k-system-edge); border-left-width: 3px; border-radius: 8px; background: var(--k-system-fill); font-size: 0.82em; }
+.sl-markdown-content nav.kamu { margin: 0 0 0.8em; padding: 0.5rem 0.8rem; border: 1px solid var(--k-system-edge); border-left-width: 3px; border-radius: 8px; background: var(--k-system-fill); font-size: 0.82em; }
 .sl-markdown-content .kamu__jalur { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.15rem 0.3rem; align-items: baseline; }
 .sl-markdown-content .kamu__jalur li { margin: 0; }
 .sl-markdown-content .kamu__jalur li + li::before { content: "›"; color: var(--teks-2); margin-right: 0.3rem; }
@@ -278,6 +281,11 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 .sl-markdown-content .bb-stepnote.is-implicit { border-left-color: var(--k-warn-edge); }
 .sl-markdown-content .bb-beda { font-size: 0.92em; }
 @media (max-width: 50em) {
+  /* Layar pertama di HP: judul, "Kamu di sini", meta, pretest, Inti, dan diagram harus muat di 375×667 (tools/layar.mjs). */
+  .content-panel { padding-block: 0.6rem; }
+  .sl-markdown-content nav.kamu { margin-bottom: 0.7em; padding: 0.4rem 0.7rem; }
+  .sl-markdown-content details.question { padding-block: 0.35rem; }
+  .sl-markdown-content details.question + h2 { margin-top: 0.6em; }
   .sl-markdown-content p.meta { font-size: 0.75em; line-height: 1.45; }
   .sl-markdown-content .bb-selesai__kata { display: none; }
   .sl-markdown-content figure.bb-fig { padding: 0.5rem 0.55rem 0.4rem; }
@@ -286,5 +294,79 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
   .sl-markdown-content figure.bb-fig ol.bb-flow > li:not(:last-child)::after { right: -0.72rem; }
   .sl-markdown-content figure.bb-fig figcaption { font-size: 0.8em; margin-top: 0.35rem; }
   .sl-markdown-content .bb-ba { grid-template-columns: 1fr; }
+}
+/* Mockup HP Rekeningo (hp.js), dipakai alur.js. Warna perangkat lewat token, bukan abu tetap. */
+.sl-markdown-content .bb-hp { width: 11.5rem; max-width: 100%; flex: none; padding: 0.45rem; border-radius: 1.6rem; background: var(--garis-2); line-height: 1.35; text-align: left; }
+.sl-markdown-content .bb-hp__screen { background: var(--bg); border-radius: 1.2rem; padding: 0.45rem 0.6rem 0.7rem; min-height: 15.5rem; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.72em; color: var(--teks); }
+.sl-markdown-content .bb-hp__screen p { margin: 0; }
+.sl-markdown-content .bb-hp__status { display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; font-weight: 600; color: var(--teks-2); }
+.sl-markdown-content .bb-hp__sig { display: inline-flex; align-items: flex-end; gap: 1px; height: 0.55rem; }
+.sl-markdown-content .bb-hp__sig i { width: 3px; background: var(--garis-2); border-radius: 1px; }
+.sl-markdown-content .bb-hp__sig i:nth-child(1) { height: 25%; } .sl-markdown-content .bb-hp__sig i:nth-child(2) { height: 50%; }
+.sl-markdown-content .bb-hp__sig i:nth-child(3) { height: 75%; } .sl-markdown-content .bb-hp__sig i:nth-child(4) { height: 100%; }
+.sl-markdown-content .bb-hp__sig i.is-on { background: var(--teks); }
+.sl-markdown-content .bb-hp__app { font-weight: 800; font-size: 1.1em; color: var(--k-system-ink); }
+.sl-markdown-content .bb-hp__saldo { background: var(--k-system-edge); color: var(--ink-di-aksen); border-radius: 0.7rem; padding: 0.45rem 0.55rem; }
+.sl-markdown-content .bb-hp__saldo small { display: block; opacity: 0.85; font-size: 0.85em; }
+.sl-markdown-content .bb-hp__saldo strong { font-size: 1.3em; letter-spacing: 0.01em; color: inherit; }
+.sl-markdown-content .bb-hp__saldo.is-warn { background: var(--k-warn-edge); }
+.sl-markdown-content .bb-hp__row { display: flex; justify-content: space-between; gap: 0.4rem; padding: 0.3rem 0; border-bottom: 1px solid var(--garis); }
+.sl-markdown-content .bb-hp__row.is-warn strong { color: var(--k-warn-ink); }
+.sl-markdown-content .bb-hp__row.is-good strong { color: var(--k-good-ink); }
+.sl-markdown-content .bb-hp__input { border: 1px solid var(--garis-2); border-radius: 0.5rem; padding: 0.3rem 0.45rem; }
+.sl-markdown-content .bb-hp__input small { display: block; color: var(--teks-2); font-size: 0.85em; }
+.sl-markdown-content .bb-hp__input span { font-weight: 700; font-size: 1.1em; }
+.sl-markdown-content .bb-hp__btn { margin-top: auto; text-align: center; font-weight: 700; color: var(--ink-di-aksen); background: var(--aksen); border-radius: 0.55rem; padding: 0.4rem; }
+.sl-markdown-content .bb-hp__btn.is-off { background: var(--k-old-edge); }
+.sl-markdown-content .bb-hp__toast { border-radius: 0.55rem; padding: 0.35rem 0.45rem; font-weight: 600; border: 1px solid; }
+.sl-markdown-content .bb-hp__toast.is-good { background: var(--k-good-fill); border-color: var(--k-good-edge); color: var(--k-good-ink); }
+.sl-markdown-content .bb-hp__toast.is-warn { background: var(--k-warn-fill); border-color: var(--k-warn-edge); color: var(--k-warn-ink); }
+.sl-markdown-content .bb-hp__proc { display: flex; align-items: center; gap: 0.35rem; color: var(--teks-2); }
+.sl-markdown-content .bb-hp__proc i { width: 0.7rem; height: 0.7rem; border-radius: 50%; border: 2px solid var(--garis-2); border-top-color: var(--k-system-edge); }
+.sl-markdown-content .bb-hp__text { margin: 0; color: var(--teks-2); }
+/* Alur satu request (alur.js) */
+.sl-markdown-content .bb-alur__varian { display: block; margin: 0.5rem 0; font-size: 0.9em; }
+.sl-markdown-content .bb-alur__lanes { display: grid; gap: 0.6rem; margin-top: 0.6rem; }
+.sl-markdown-content .bb-alur__lane { border: 1px solid var(--k-old-edge); background: var(--k-old-fill); border-radius: 10px; padding: 0.45rem 0.5rem; text-align: center; font-size: 0.85em; }
+.sl-markdown-content .bb-alur__lane.is-active { border-color: var(--k-system-edge); background: var(--k-system-fill); box-shadow: 0 0 0 2px var(--k-system-edge) inset; }
+.sl-markdown-content .bb-alur__lane.is-warn { border-color: var(--k-warn-edge); background: var(--k-warn-fill); box-shadow: 0 0 0 2px var(--k-warn-edge) inset; }
+.sl-markdown-content .bb-alur__layers { list-style: none; margin: 0.35rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.sl-markdown-content .bb-alur__layers li { margin: 0; font-size: 0.78em; padding: 0.1rem 0.3rem; border-radius: 6px; border: 1px dashed var(--k-old-edge); color: var(--k-old-ink); background: var(--bg); }
+.sl-markdown-content .bb-alur__layers li.is-on { border-style: solid; border-color: var(--k-system-edge); color: var(--k-system-ink); font-weight: 700; }
+.sl-markdown-content .bb-alur__track { position: relative; height: 1.7rem; margin: 0.2rem 0 0.4rem; }
+.sl-markdown-content .bb-alur__packet { position: absolute; top: 0.1rem; transform: translateX(-50%); min-width: 2.2rem; padding: 0.1rem 0.5rem; border-radius: 999px; text-align: center; font-weight: 800; background: var(--k-system-edge); color: var(--ink-di-aksen); font-size: 0.9em; }
+.sl-markdown-content .bb-alur__packet.is-warn { background: var(--k-warn-edge); }
+.sl-markdown-content .bb-alur__packet.is-good { background: var(--k-good-edge); }
+.sl-markdown-content .bb-alur__body { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: start; }
+.sl-markdown-content .bb-alur__phone:has(.bb-alur__device) { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.sl-markdown-content .bb-alur__device { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+.sl-markdown-content .bb-alur__device figcaption { font-size: 0.8em; color: var(--teks-2); margin: 0; }
+.sl-markdown-content .bb-alur__title { margin: 0 0 0.4rem; font-weight: 700; }
+.sl-markdown-content .bb-alur__title.is-warn { color: var(--k-warn-ink); }
+.sl-markdown-content .bb-alur__title.is-good { color: var(--k-good-ink); }
+.sl-markdown-content .bb-alur__payload[hidden] { display: none; }
+.sl-markdown-content .bb-alur__payload { margin: 0 0 0.5rem; padding: 0.5rem 0.6rem; border-radius: 8px; background: var(--k-old-fill); border: 0; font-size: 0.8em; white-space: pre-wrap; overflow-wrap: anywhere; }
+.sl-markdown-content .bb-alur__explain { margin: 0; font-size: 0.92em; line-height: 1.6; }
+.sl-markdown-content .bb-alur.is-vertikal { display: flex; flex-direction: column; }
+.sl-markdown-content .bb-alur.is-vertikal .bb-alur__body { display: contents; }
+.sl-markdown-content .bb-alur.is-vertikal .bb-alur__detail { order: 1; }
+.sl-markdown-content .bb-alur.is-vertikal .bb-alur__rail { order: 2; }
+.sl-markdown-content .bb-alur.is-vertikal .bb-alur__phone { order: 3; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin-top: 0.6rem; }
+.sl-markdown-content .bb-alur.is-vertikal > .bb-row { order: 4; }
+.sl-markdown-content .bb-alur__rail { position: relative; padding-left: 2.6rem; margin: 0.6rem 0 0; }
+.sl-markdown-content .bb-alur__rail::before { content: ""; position: absolute; left: 1.15rem; top: 0.3rem; bottom: 0.3rem; border-left: 2px dashed var(--k-old-edge); }
+.sl-markdown-content .bb-alur.is-vertikal .bb-alur__lanes { grid-template-columns: 1fr !important; gap: 0.3rem; margin: 0; }
+.sl-markdown-content .bb-alur.is-vertikal .bb-alur__lane { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; text-align: left; padding: 0.35rem 0.5rem; min-height: 2.25rem; font-size: 0.8em; }
+.sl-markdown-content .bb-alur.is-vertikal .bb-alur__layers { flex-direction: row; flex-wrap: wrap; margin: 0; gap: 0.2rem; }
+.sl-markdown-content .bb-alur.is-vertikal .bb-alur__layers li { font-size: 0.72em; padding: 0.05rem 0.25rem; }
+.sl-markdown-content .bb-alur.is-vertikal .bb-alur__track { position: absolute; left: 0; top: 0; bottom: 0; width: 2.3rem; height: auto; margin: 0; }
+.sl-markdown-content .bb-alur.is-vertikal .bb-alur__packet { left: 50% !important; transform: translate(-50%, -50%); min-width: 0; width: 1.9rem; padding: 0.1rem 0; }
+@media (max-width: 50em) {
+  .sl-markdown-content .bb-alur__body { grid-template-columns: 1fr; }
+  .sl-markdown-content .bb-alur__phone { display: flex; justify-content: center; }
+  .sl-markdown-content .bb-alur__detail { order: -1; }
+  .sl-markdown-content .bb-alur__lanes { gap: 0.3rem; }
+  .sl-markdown-content .bb-alur__lane { padding: 0.35rem 0.25rem; font-size: 0.78em; }
+  .sl-markdown-content .bb-alur__layers li { font-size: 0.7em; padding: 0.05rem 0.15rem; }
 }
 /* === akhir widget lama === */

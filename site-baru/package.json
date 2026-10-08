@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "test": "node --test tests/*.test.mjs",
     "tangkap": "node tools/tangkap.mjs",
+    "layar": "node tools/layar.mjs",
     "banding": "node tools/banding.mjs"
   },
   "dependencies": {
