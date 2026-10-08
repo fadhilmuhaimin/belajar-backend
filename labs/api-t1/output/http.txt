@@ -1,0 +1,72 @@
+# server: ./api-t1
+
+# --- A. Persiapan ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/login' -d '{"email": "dimas@lestari.example", "password": "sementara-417"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Dimas>"}
+
+# --- B. GET membaca, tidak mengubah apa pun ---
+$ curl -i -X GET '/akun/419' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":419,"jenis":"karyawan","nama":"Budi","saldo":250000}
+
+# --- C. POST membuat satu transaksi: 201 dan header Location ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 25000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/1
+
+{"id":1,"saldo":225000}
+
+# --- D. Alamat di Location bisa dibuka ---
+$ curl -i -X GET '/transfers/1' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":1,"dari":419,"ke":418,"jumlah":25000,"waktu":"<hari ini>T<jam>+07:00"}
+
+# --- E. Method yang tidak didaftarkan untuk path ini: 405 dan header Allow ---
+$ curl -i -X GET '/transfers' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 405 Method Not Allowed
+Allow: POST
+Content-Type: text/plain; charset=utf-8
+X-Content-Type-Options: nosniff
+
+Method Not Allowed
+$ curl -i -X DELETE '/transfers/1' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 405 Method Not Allowed
+Allow: GET, HEAD
+Content-Type: text/plain; charset=utf-8
+X-Content-Type-Options: nosniff
+
+Method Not Allowed
+
+# --- F. Tanpa token: 401 dan header WWW-Authenticate ---
+$ curl -i -X GET '/transfers/1'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+Www-Authenticate: Bearer error="invalid_token"
+
+{"type":"/problems/belum-login","title":"Belum login atau sesi sudah berakhir","status":401}
+
+# --- G. Dimas membuka transaksi milik Budi: 404, sama dengan transaksi yang tidak ada ---
+$ curl -i -X GET '/transfers/1' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+
+{"type":"/problems/tidak-ditemukan","title":"Transaksi tidak ditemukan","status":404}
+$ curl -i -X GET '/transfers/999' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+
+{"type":"/problems/tidak-ditemukan","title":"Transaksi tidak ditemukan","status":404}

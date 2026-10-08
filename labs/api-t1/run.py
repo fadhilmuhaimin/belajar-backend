@@ -56,6 +56,13 @@ def sql_gagal(q, harus):
     log.append(f"$ psql -c \"{q}\"\n{samarkan(r.stderr)}\n")
 
 
+def samarkan_hari_ini():
+    """Tanggal Jakarta hari ini di response diganti <hari ini>, supaya rekaman ulang besok sama."""
+    hari_ini = subprocess.run(PSQL + ["-At", "-c", "SELECT to_char((now() AT TIME ZONE 'Asia/Jakarta')::date, 'YYYY-MM-DD')"],
+                              capture_output=True, text=True).stdout.strip()
+    samaran[hari_ini] = "<hari ini>"
+
+
 def reset():
     subprocess.run(PSQL + ["-v", "ON_ERROR_STOP=1"], input=(HERE / "schema.sql").read_text(),
                    capture_output=True, text=True, check=True)
@@ -449,9 +456,7 @@ def rekam_relasi():
 
     bagian("E. Ani mengganti nama warungnya; riwayat Budi menampilkan nama baru, jumlahnya tetap")
     sql("UPDATE akun SET nama = 'Warung Bu Ani' WHERE id = 418")
-    hari_ini = subprocess.run(PSQL + ["-At", "-c", "SELECT to_char((now() AT TIME ZONE 'Asia/Jakarta')::date, 'YYYY-MM-DD')"],
-                              capture_output=True, text=True).stdout.strip()
-    samaran[hari_ini] = "<hari ini>"
+    samarkan_hari_ini()
     s, b = curl("GET", "/akun/419/riwayat", token=budi)
     r = json.loads(b)["riwayat"]
     harap((s, [(x["lawan"], x["jumlah"]) for x in r]), (200, [("Warung Bu Ani", 25000)]), "riwayat dengan nama baru")
@@ -499,8 +504,48 @@ def rekam_m1():
     tulis("m1.txt")
 
 
+def rekam_http():
+    """1.16 HTTP: method, status, header."""
+    reset()
+    mulai()
+    bagian("A. Persiapan")
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    dimas = login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+
+    bagian("B. GET membaca, tidak mengubah apa pun")
+    s, _ = curl("GET", "/akun/419", token=budi)
+    harap(s, 200, "GET akun sendiri")
+
+    bagian("C. POST membuat satu transaksi: 201 dan header Location")
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 25000}', token=budi)
+    harap(s, 201, "POST transfers")
+
+    bagian("D. Alamat di Location bisa dibuka")
+    samarkan_hari_ini()
+    s, b = curl("GET", "/transfers/1", token=budi)
+    harap((s, json.loads(b)["jumlah"]), (200, 25000), "GET transfers/1")
+
+    bagian("E. Method yang tidak didaftarkan untuk path ini: 405 dan header Allow")
+    s, _ = curl("GET", "/transfers", token=budi)
+    harap(s, 405, "GET transfers")
+    s, _ = curl("DELETE", "/transfers/1", token=budi)
+    harap(s, 405, "DELETE transfers/1")
+
+    bagian("F. Tanpa token: 401 dan header WWW-Authenticate")
+    s, _ = curl("GET", "/transfers/1")
+    harap(s, 401, "tanpa token")
+
+    bagian("G. Dimas membuka transaksi milik Budi: 404, sama dengan transaksi yang tidak ada")
+    s, _ = curl("GET", "/transfers/1", token=dimas)
+    harap(s, 404, "transaksi orang lain")
+    s, _ = curl("GET", "/transfers/999", token=budi)
+    harap(s, 404, "transaksi tidak ada")
+    tulis("http.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()
