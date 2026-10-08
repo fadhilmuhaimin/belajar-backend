@@ -1,0 +1,139 @@
+---
+title: "4.4 OAuth dan login sosial"
+---
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="B5.2" />
+
+<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[B5.1]]</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Apa beda OAuth 2.0 dan OpenID Connect?
+2. Kenapa app mobile tidak boleh menyimpan client secret?
+3. API menerima ID token yang signature-nya sah. Apa lagi yang wajib diperiksa?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+## Inti
+
+OAuth memberi izin, OIDC memberi identitas. App memakai browser sistem dan PKCE. Server memeriksa aud ID token.
+
+<WidgetLama nama="arsitektur" tahap={4} />
+
+## Lihat sendiri
+
+Server identitas di rekaman ini tiruan, ditulis dengan Go. Alurnya sama dengan penyedia login sungguhan.
+
+<WidgetLama nama="alur" src="data/skenario/b5-2-oidc.json" />
+
+## Kenapa ini ada
+
+Di Tahap 4, user baru sering berhenti di layar daftar: nomor HP, OTP, PIN. Tim app meminta tombol "Masuk dengan akun lain", seperti di app yang mereka pakai sehari-hari.
+
+Versi pertama dari AI terlihat sederhana: WebView berisi halaman login penyedia, lalu app mengambil token dari URL. Raka ragu, lalu membaca spesifikasinya. Hampir setiap baris versi itu melanggar praktik yang dianjurkan.
+
+## Cara kerjanya
+
+**OAuth 2.0** ([RFC 6749](https://www.rfc-editor.org/rfc/rfc6749.html)) adalah cara memberi izin: app mendapat access token untuk memanggil API atas nama user. **OpenID Connect (OIDC)** menambahkan ID token di atasnya: JWT yang menyatakan siapa user itu ([OIDC Core](https://openid.net/specs/openid-connect-core-1_0.html)). Login sosial butuh identitas, jadi Rekeningo memakai OIDC.
+
+Tiga aturan untuk app mobile:
+
+1. **Browser sistem, bukan WebView.** App native tidak boleh memakai embedded user-agent, karena app bisa membaca password yang diketik di dalamnya ([RFC 8252 §8.12](https://www.rfc-editor.org/rfc/rfc8252.html#section-8.12)).
+2. **Tanpa client secret.** Secret yang ikut di dalam app bisa dibaca siapa pun yang membongkarnya ([RFC 8252 §8.5](https://www.rfc-editor.org/rfc/rfc8252.html#section-8.5)). App adalah public client.
+3. **Selalu PKCE.** Karena tidak ada secret, code yang dicegat bisa ditukar oleh siapa pun. PKCE mengikat code ke `code_verifier` yang hanya dipegang app ([RFC 7636](https://www.rfc-editor.org/rfc/rfc7636.html)). RFC 9700 mewajibkan PKCE untuk public client, dan menyatakan client sebaiknya tidak memakai implicit grant, yaitu token langsung di URL ([RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html)).
+
+<Snippet file="labs/b5-2-oidc/main.go" region="pkce" lang="go" title="labs/b5-2-oidc/main.go" />
+
+<Snippet file="labs/b5-2-oidc/output/oidc.txt" lines="1:16" title="Output rekaman: labs/b5-2-oidc/output/oidc.txt (bagian A sampai C)" />
+
+**Di server Rekeningo.** API menerima ID token dari app, memeriksanya, lalu menerbitkan token Rekeningo sendiri. Signature yang sah belum cukup. OIDC Core mewajibkan `iss` sama persis dengan server identitas yang dipercaya, dan `aud` berisi client id milikmu.
+
+<Snippet file="labs/b5-2-oidc/main.go" region="verifikasi" lang="go" title="labs/b5-2-oidc/main.go" />
+
+Bayangkan app kuis milik orang lain yang memakai penyedia login yang sama. Tanpa cek `aud`, ID token Budi untuk app kuis itu bisa dipakai masuk ke Rekeningo sebagai Budi. Rekaman bagian D menunjukkan token seperti itu ditolak 401.
+
+## Di stack lain
+
+Yang sama di semua stack: browser sistem + PKCE di app, verifikasi ID token di server. Yang berbeda: library yang mengerjakannya. Jangan menulis alur OAuth sendiri di production; lab ini menulisnya hanya supaya setiap langkah terlihat.
+
+Hanya Go yang dijalankan di lab. Baris lain dicek ke dokumentasi.
+
+| Stack | Sisi | Yang dipakai | Sumber |
+|---|---|---|---|
+| Flutter | App | `flutter_appauth` (browser sistem + PKCE) | [pub.dev](https://pub.dev/packages/flutter_appauth) |
+| Android | App | AppAuth for Android | [AppAuth-Android](https://github.com/openid/AppAuth-Android) |
+| Go | Server | `go-oidc`: `Provider` + `IDTokenVerifier` | [go-oidc](https://pkg.go.dev/github.com/coreos/go-oidc/v3/oidc) |
+| Node.js | Server | `jose`: verifikasi JWT dengan JWKS | [jose](https://github.com/panva/jose) |
+| Spring | Server | Spring Security OAuth2 Resource Server (JWT) | [Spring Security](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html) |
+| Supabase | Keduanya | Supabase Auth: login sosial sudah tersedia | [Supabase: social login](https://supabase.com/docs/guides/auth/social-login) |
+| Firebase | Keduanya | Firebase Auth: penyedia federasi | [Firebase: federated auth](https://firebase.google.com/docs/auth/flutter/federated-auth) |
+
+Dengan BaaS, alur ini sudah dikerjakan untukmu. Yang tetap tugasmu: aturan akses data setelah user masuk ([[B5.3]]).
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Login sendiri (nomor HP + PIN) | Tidak bergantung pada pihak lain | Lupa PIN, OTP, dan reset jadi tanggung jawabmu |
+| Login sosial lewat OIDC | Daftar lebih cepat; password tidak pernah sampai ke Rekeningo | Bergantung pada penyedia; akun harus dihubungkan dengan data yang sudah ada |
+| Auth dari BaaS | Alur dan keamanan dasar sudah jadi | Data user ada di sistem pihak lain; pindah penyedia lebih sulit |
+| WebView + implicit grant | Tampak paling sederhana | WebView dilarang untuk app native (RFC 8252); implicit grant tidak dianjurkan (RFC 9700) |
+
+## Cek diri
+
+**1.** App Rekeningo versi baru selalu mengirim PKCE, tapi server identitas tidak mewajibkannya. Apakah serangan di widget sudah tertutup?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Belum. App versi lama yang belum mengirim PKCE masih terpasang di banyak HP ([[E1]]). Selama server menerima alur tanpa PKCE, code dari versi lama bisa dicegat dan ditukar. Serangan baru tertutup setelah server menolak setiap alur tanpa PKCE.
+
+</details>
+
+**2.** Jelaskan kenapa API harus memeriksa `aud`, walau signature ID token sudah sah.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Signature hanya membuktikan token diterbitkan server identitas. Server itu menerbitkan token untuk banyak app. Token yang diterbitkan untuk app lain tetap bersignature sah. `aud` memastikan token itu memang ditujukan untuk Rekeningo (rekaman D: aud=app-lain → 401).
+
+</details>
+
+**3.** Setelah login sosial berhasil, apakah app sebaiknya memakai ID token untuk setiap request ke API Rekeningo?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Tidak. ID token adalah bukti identitas saat login, dengan masa berlaku dari server identitas. Rekeningo menukarnya dengan token Rekeningo sendiri, yang umur, refresh, dan pencabutannya dikendalikan Rekeningo ([[B5.1]]).
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Login memakai browser sistem (Custom Tabs, ASWebAuthenticationSession), bukan WebView.
+- [ ] Tidak ada client secret di kode atau konfigurasi app.
+- [ ] Authorization code + PKCE (S256), bukan implicit grant; `state` diperiksa saat redirect kembali.
+- [ ] Server memeriksa signature, `iss`, `aud`, dan `exp` ID token, dengan library.
+- [ ] `alg` dari header token tidak dipercaya begitu saja.
+
+## Bacaan lanjut
+
+- [RFC 8252: OAuth 2.0 for Native Apps](https://www.rfc-editor.org/rfc/rfc8252.html)
+- [RFC 7636: PKCE](https://www.rfc-editor.org/rfc/rfc7636.html)
+- [RFC 9700: Best Current Practice for OAuth 2.0 Security](https://www.rfc-editor.org/rfc/rfc9700.html)
+- [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
