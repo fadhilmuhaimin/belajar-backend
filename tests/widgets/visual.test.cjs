@@ -86,6 +86,10 @@ test("a4-banding: semua simpul yang disorot ada, catatan lengkap", () => {
   assert.deepEqual(banding.cekData(json("situs/lama/widgets/data/a4-banding.json")), []);
 });
 
+test("t1-banding-database (1.13): semua simpul yang disorot ada, catatan lengkap", () => {
+  assert.deepEqual(banding.cekData(json("situs/lama/widgets/data/t1-banding-database.json")), []);
+});
+
 test("a1-hp: layar valid", () => {
   const d = json("situs/lama/widgets/data/a1-hp.json");
   const jenis = ["baris", "input", "tombol", "toast", "proses", "teks"];

@@ -1,0 +1,168 @@
+{
+  "judul": "Data Rekeningo v1 di dua jenis database",
+  "opsi": [
+    {
+      "id": "sql",
+      "nama": "Opsi A · Relasional (PostgreSQL)",
+      "baris": [
+        [
+          {
+            "id": "akun",
+            "label": "Tabel akun",
+            "sub": "saldo"
+          },
+          {
+            "id": "trx",
+            "label": "Tabel transaksi",
+            "sub": "dari, ke, jumlah"
+          },
+          {
+            "id": "topup",
+            "label": "Tabel topup",
+            "sub": "siapa, kenapa"
+          }
+        ],
+        [
+          {
+            "id": "tx",
+            "label": "transaction"
+          },
+          {
+            "id": "cons",
+            "label": "constraint + foreign key"
+          },
+          {
+            "id": "agg",
+            "label": "GROUP BY + index"
+          }
+        ]
+      ],
+      "judulBaris": [
+        "",
+        "Yang disediakan database"
+      ]
+    },
+    {
+      "id": "doc",
+      "nama": "Opsi B · Document database",
+      "baris": [
+        [
+          {
+            "id": "dakun",
+            "label": "Dokumen akun",
+            "sub": "saldo + profil"
+          },
+          {
+            "id": "dtrx",
+            "label": "Dokumen transaksi"
+          },
+          {
+            "id": "dtop",
+            "label": "Dokumen top-up"
+          }
+        ],
+        [
+          {
+            "id": "dtx",
+            "label": "transaction multi-dokumen"
+          },
+          {
+            "id": "rules",
+            "label": "validasi per dokumen"
+          },
+          {
+            "id": "idx",
+            "label": "index per pola query"
+          }
+        ]
+      ],
+      "judulBaris": [
+        "",
+        "Yang disediakan database"
+      ]
+    }
+  ],
+  "fitur": [
+    {
+      "label": "Budi bayar Rp25.000 ke Warung Ani",
+      "sorot": {
+        "sql": [
+          "akun",
+          "trx",
+          "tx",
+          "cons"
+        ],
+        "doc": [
+          "dakun",
+          "dtrx",
+          "dtx"
+        ]
+      },
+      "catatan": {
+        "sql": "Dua UPDATE + satu INSERT dalam satu transaction. CHECK (saldo >= 0) dan foreign key dijaga database.",
+        "doc": "Dua dokumen akun dan satu dokumen transaksi dalam transaction multi-dokumen. Aturan \"saldo tidak boleh negatif\" ditulis di kode atau aturan validasi."
+      },
+      "nada": {
+        "doc": "warn"
+      }
+    },
+    {
+      "label": "Laporan harian Warung Ani",
+      "sorot": {
+        "sql": [
+          "trx",
+          "agg"
+        ],
+        "doc": [
+          "dtrx",
+          "idx"
+        ]
+      },
+      "catatan": {
+        "sql": "SUM + GROUP BY per tanggal, seperti di 1.10. Laporan baru tidak butuh perubahan skema.",
+        "doc": "Bisa dengan query agregasi, tapi setiap pola query baru biasanya butuh index baru. Bentuk dokumen dirancang mengikuti query yang sudah diketahui."
+      },
+      "nada": {
+        "doc": "warn"
+      }
+    },
+    {
+      "label": "Pak Hadi: siapa mengubah saldo, kapan, kenapa",
+      "sorot": {
+        "sql": [
+          "topup",
+          "trx",
+          "cons"
+        ],
+        "doc": [
+          "dtop",
+          "dtrx",
+          "rules"
+        ]
+      },
+      "catatan": {
+        "sql": "Setiap baris top-up dan transaksi menunjuk ke akun yang ada; foreign key menolak catatan yatim.",
+        "doc": "Rujukan antar-dokumen disimpan sebagai ID, dan kode aplikasi yang menjaga ID itu tetap menunjuk ke dokumen yang ada."
+      },
+      "nada": {
+        "doc": "warn"
+      }
+    },
+    {
+      "label": "Field baru di akun: nomor HP",
+      "sorot": {
+        "sql": [
+          "akun",
+          "cons"
+        ],
+        "doc": [
+          "dakun"
+        ]
+      },
+      "catatan": {
+        "sql": "Migration ADD COLUMN. Perubahan tercatat dan direview.",
+        "doc": "Langsung tulis field baru di dokumen. Cepat, tapi dokumen lama dan baru punya bentuk berbeda, dan kode harus menangani keduanya."
+      }
+    }
+  ]
+}

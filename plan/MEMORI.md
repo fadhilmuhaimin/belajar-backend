@@ -4,6 +4,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 147: 1.13 ditulis ulang (Sinta bertanya, banding fitur v1).
 - 146: 1.12 ditulis ulang ke tabel v1; lab relasi (145).
 - 144: halaman 1.11 + widget React pertama jumlah-total (src/widgets/, data/widget/).
 - 143: lab api-t1 bagian pertukaran (SUM saldo = SUM top-up).
@@ -48,8 +49,9 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.12 selesai (1.12 keputusan 145–146). Pengaman loop: keputusan 142.
-Halaman berikutnya: **1.13 "SQL atau NoSQL (pertanyaan Sinta)"** (`B2.2`, konsep, tanpa ★, widget banding, tanpa lab; isi lama `situs/src/content/docs/b-fondasi/b2-2-sql-vs-nosql.mdx`). Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
+2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.13 selesai (1.13 keputusan 147). Pengaman loop: keputusan 142.
+Halaman berikutnya: **1.14 "M1: Nominal minus lolos"** (`t1-m1`, jenis masalah, ★, runsql, lab api-t1). Naskah M4 baris M1: minggu 1, Raka menguji sendiri, bayar nominal minus Rp5.000 berhasil dan saldonya bertambah; yang Raka kira: lupa `if nominal <= 0`; yang sebenarnya: dua lapis aturan (bentuk di app + backend; uang hanya di backend + constraint DB); konsep: validation, format error, HTTP status; ADR 2 ada di 1.15. Kerangka `situs/templat/masalah.mdx`. Lab: rekam keadaan sebelum perbaikan dengan flag eksplisit (pola keputusan 137: versi benar tetap default; mode rentan lewat flag, perubahan skema terlihat di rekaman). Cek dulu flag apa yang sudah ada di `labs/api-t1/cmd/api`.
+Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran

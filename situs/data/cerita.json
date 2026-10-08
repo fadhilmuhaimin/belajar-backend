@@ -555,7 +555,7 @@
       "judul": "SQL atau NoSQL",
       "tahap": 1,
       "topik": "Data",
-      "path": "b-fondasi/b2-2-sql-vs-nosql.md",
+      "path": "tahap-1/sql-atau-nosql.md",
       "prasyarat": [
         "B2.1"
       ],
@@ -566,7 +566,6 @@
       "peran": [
         "backend"
       ],
-      "lama": true,
       "nomor": "1.13",
       "menit": 7
     },
