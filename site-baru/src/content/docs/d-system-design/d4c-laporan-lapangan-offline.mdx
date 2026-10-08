@@ -1,0 +1,128 @@
+---
+title: "Studi desain: laporan lapangan offline"
+---
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+
+
+<p class="meta">Baca 7 menit · studi desain, di luar cerita Rekeningo · Prasyarat: [[E2]]</p>
+
+<WidgetLama nama="selesai" />
+
+## Inti
+
+App lapangan bekerja tanpa sinyal berhari-hari. Bottleneck-nya foto, bukan database. Data dan foto dikirim lewat jalur berbeda.
+
+<figure class="bb-fig bb-arch" role="img" aria-label="Arsitektur app laporan lapangan: app lapangan dengan SQLite ke Sync API ke PostgreSQL; foto dikirim terpisah ke object storage.">
+<ol class="bb-flow bb-flow--plain"><li class="is-new">App + SQLite</li><li class="is-new">Sync API</li><li class="is-old">PostgreSQL</li></ol>
+<ol class="bb-flow bb-flow--plain"><li class="is-new">Queue foto di HP</li><li class="is-old">Object storage</li></ol>
+<figcaption>Data teks lewat Sync API; foto langsung ke storage.</figcaption>
+</figure>
+
+## Lihat sendiri
+
+Setiap jenis data butuh aturan sync sendiri. Pilah dulu, lalu cek.
+
+<WidgetLama nama="pilah" src="data/d4c-pilah.json" />
+
+## Soalnya
+
+Sebuah perusahaan air bersih (fiktif) mengirim 300 surveyor ke desa-desa untuk memeriksa pipa dan meteran. Banyak lokasi tanpa sinyal sampai tiga hari. Setiap laporan berisi formulir, lokasi GPS, dan beberapa foto.
+
+Studi ini memakai kerangka dari [[D1]]: kebutuhan, estimasi, bottleneck, desain paling sederhana, lalu trade-off. Polanya sama dengan [[E2]], tapi skalanya berbeda: offline adalah keadaan normal, bukan gangguan.
+
+## 1. Kebutuhan
+
+| Jenis | Kebutuhan |
+|---|---|
+| Fungsional | Membuat laporan, menambah foto, mengedit sebelum disetujui, melihat daftar tugas |
+| Fungsional | Supervisor menyetujui atau menolak laporan |
+| Non-fungsional | Bekerja penuh tanpa sinyal sampai 3 hari; tidak ada laporan yang hilang |
+| Non-fungsional | Sync otomatis saat sinyal kembali, termasuk saat app di background |
+
+## 2. Estimasi (semua asumsi)
+
+| Besaran | Nilai | Cara hitung |
+|---|---|---|
+| Laporan per hari | 6.000 | 300 surveyor × 20 laporan (asumsi) |
+| Foto per hari | 30.000 | 6.000 × 5 foto (asumsi) |
+| Ukuran foto per hari, asli kamera | ±45 GB | 30.000 × 1,5 MB (asumsi) |
+| Ukuran foto per hari, dikompres di HP | ±9 GB | 30.000 × 300 KB (asumsi) |
+| Data teks per hari | ±12 MB | 6.000 × 2 KB (asumsi) |
+| Queue per HP setelah 3 hari offline | ±90 MB foto | 3 × 20 × 5 × 300 KB |
+
+Angka ini memberi besaran, bukan kapasitas. Data teks hampir tidak berarti dibanding foto.
+
+## 3. Bottleneck
+
+Bottleneck-nya foto. Foto membebani tiga tempat sekaligus: penyimpanan di server, bandwidth saat 300 HP kembali ke sinyal di sore hari, dan upload yang terputus di sinyal lemah. Database tidak masuk daftar: 6.000 baris per hari kecil untuk PostgreSQL.
+
+## 4. Desain paling sederhana
+
+**Id dibuat di HP.** Setiap laporan dan foto mendapat UUID saat dibuat, bukan saat sampai di server. UUIDv7 berurut menurut waktu, jadi tetap ramah index ([RFC 9562 §5.7](https://www.rfc-editor.org/rfc/rfc9562.html#section-5.7)). Laporan dikirim dengan `PUT /laporan/{id}`, yang idempotent menurut [RFC 9110 §9.2.2](https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2): kirim ulang tidak membuat laporan ganda.
+
+**Dua jalur.** Data teks lewat Sync API, dengan aturan dari widget di atas. Foto diunggah langsung ke object storage dengan signed URL berumur pendek. Upload yang putus dilanjutkan dari byte terakhir, bukan diulang dari nol: protokol tus menanyakan `Upload-Offset` lalu melanjutkan dengan `PATCH` ([tus](https://tus.io/protocols/resumable-upload)). S3 menyediakan multipart upload dengan ide serupa ([AWS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html)).
+
+**Urutan sync.** Laporan dikirim dulu, foto menyusul. Server menerima laporan dengan foto yang belum lengkap, dan menandainya. Supervisor hanya bisa menyetujui laporan yang fotonya lengkap.
+
+**Waktu.** Jam HP bisa salah. Simpan dua waktu: waktu di HP (untuk ditampilkan) dan waktu diterima server (untuk urutan dan audit).
+
+## 5. Trade-off
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Foto lewat Sync API | Satu jalur, cek akses di setiap upload | Server API menanggung ±9 GB per hari; upload yang putus diulang dari awal |
+| Foto langsung ke storage + resumable | Bandwidth tidak lewat API; lanjut dari byte terakhir | Dua jalur yang harus dicocokkan: laporan bisa tiba tanpa foto |
+| Foto sebagai base64 di JSON | Paling mudah ditulis | Base64 memakai 4 karakter untuk setiap 3 byte, jadi ukuran naik ±33% ([RFC 4648](https://www.rfc-editor.org/rfc/rfc4648.html#section-4)) |
+| Kompres di HP ke ±300 KB | Upload 5 kali lebih kecil (asumsi di atas) | Detail foto berkurang; tentukan bersama orang yang membaca laporan |
+
+ADR yang akan ditulis tim ([[D5]]): "Foto diunggah langsung ke object storage dengan upload yang bisa dilanjutkan". Alternatif yang ditolak: lewat Sync API, dan base64 di JSON.
+
+## Cek diri
+
+**1.** Surveyor offline 3 hari, lalu mendapat sinyal lemah selama 10 menit. Apa yang sebaiknya dikirim lebih dulu, dan kenapa?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Laporan teks dulu (±2 KB per laporan), baru foto. Dalam 10 menit, semua laporan hampir pasti terkirim, sehingga supervisor sudah melihat isinya. Foto bisa menyusul di sinyal berikutnya, dan upload resumable melanjutkan dari byte terakhir.
+
+</details>
+
+**2.** Jelaskan kenapa id laporan dibuat di HP, bukan oleh database dengan `bigserial`.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Laporan dibuat saat offline, dan foto perlu merujuk laporannya sebelum server pernah melihatnya. Id dari HP juga membuat kirim ulang aman: `PUT` ke id yang sama tidak membuat laporan kedua. Dengan `bigserial`, id baru diketahui setelah sampai di server, dan kiriman ulang membuat baris ganda.
+
+</details>
+
+**3.** Supervisor menolak laporan saat surveyor sedang mengeditnya offline. Apa yang terjadi saat surveyor sync?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Perubahan surveyor membawa versi lama, jadi server menjawab konflik. App menampilkan bahwa laporan sudah ditolak, beserta alasan supervisor, dan menyimpan suntingan surveyor sebagai draf. Status persetujuan tetap diputuskan di server.
+
+</details>
+
+## Saat me-review desain atau kode AI, cek ini
+
+- [ ] Semua yang dibuat offline punya id dari HP, dan endpoint-nya idempotent.
+- [ ] Foto tidak dikirim sebagai base64 di JSON.
+- [ ] Upload foto bisa dilanjutkan, bukan diulang dari nol.
+- [ ] Setiap jenis data punya aturan sync yang tertulis (tambah saja, selisih, versi, atau hanya server).
+- [ ] Urutan dan audit memakai waktu server, bukan jam HP.
+
+## Bacaan lanjut
+
+- [Android: Build an offline-first app](https://developer.android.com/topic/architecture/data-layer/offline-first)
+- [tus: Resumable upload protocol](https://tus.io/protocols/resumable-upload)
+- [RFC 9562: UUID (termasuk UUIDv7)](https://www.rfc-editor.org/rfc/rfc9562.html)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["pilah"]} />
