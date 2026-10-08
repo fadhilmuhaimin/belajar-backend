@@ -25,12 +25,12 @@ Diperbarui: 2026-10-08. Catatan singkat tentang keadaan panduan dan pekerjaan ya
 
 | Ukuran | Nilai |
 |---|---|
-| Halaman dipindah | 1 dari 60: 1.11 Transaction (plus beranda sementara dan 404) |
+| Halaman dipindah | 2 dari 60: 1.11 Transaction, 1.12 Authentication (plus beranda sementara dan 404) |
 | Build | 0 warning, 0 error; `npm test` 5/5; `contrast.py` 125/125 (gelap + terang) |
-| Teks artikel lama vs baru (`tools/banding.mjs`) | 1185 kata vs 1185 kata, 0 kata berbeda; 10 heading urutan sama; 26 link vs 26 link (18 eksternal identik, 8 internal) |
-| CSS widget ditulis ulang | 89 aturan di `tema.css` menggantikan 121 aturan `widgets.css` yang dipakai 1.11 (dari 302 aturan total); 64 aturan lain untuk Starlight, tab, breadcrumb, navigasi |
-| Widget lama | `runsql`, `stackstep`, `arsitektur`, `selesai`, `umpan-balik` jalan tanpa perubahan kode (keputusan 103); diuji Playwright: runsql menghasilkan tabel Before/After, stackstep menyorot 1 baris di tiap tab |
-| Tangkapan layar | 1366×657 dan 375×667 × gelap/terang: tanpa scroll horizontal, tanpa error konsol |
+| Teks artikel lama vs baru (`tools/banding.mjs`) | 1.11: 1185 vs 1185 kata, 0 berbeda; 10 heading sama; 26 vs 26 link. 1.12: 993 vs 992 kata, 1 beda pemenggalan ("token-nya"); 10 heading sama; 22 vs 22 link (16 eksternal identik) |
+| CSS widget ditulis ulang | 1.11: 89 aturan menggantikan 121 aturan `widgets.css`. 1.12 menambah widget `alur` + mockup HP: 70 aturan menggantikan 76 aturan lama (hp, alur, rel vertikal). Total 159 aturan widget di `tema.css` dari 302 aturan `widgets.css`; sisanya (race, pilah, banding, kartu, peta, ember, map, ilustrasi) menyusul bersama halamannya |
+| Widget lama | `runsql`, `stackstep`, `alur` (+`hp`), `arsitektur`, `selesai`, `umpan-balik` jalan tanpa perubahan kode (keputusan 103); diuji Playwright: runsql menghasilkan tabel Before/After, stackstep menyorot 1 baris di tiap tab, alur berjalan 7 langkah dengan mockup HP |
+| Tangkapan layar | 1366×657 dan 375×667 × gelap/terang: tanpa scroll horizontal, tanpa error konsol. `tools/layar.mjs` (layar pertama 4 ukuran) lolos; 1.11 di 375×667 margin 9 px (tipis) |
 | Belum | Tooltip istilah (abbr) belum diporting; sidebar menampilkan 59 halaman yang belum dipindah dengan kelas `nav-menyusul` (keputusan 104); beranda final, lima blok, Pagefind untuk glosarium = fase 3 |
 
 ## Terbuka

@@ -6,7 +6,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Fase 1 · branch `fase-1/situs-baru`. Rencana (plan/RENCANA-FASE-1-1-11.md): Astro + Starlight di `site-baru/`, tema gelap bertoken, Snippet/TabSet/WidgetLama, remark rujukan, sidebar dari cerita.json, porting 1.11, tangkapan Playwright, pembanding lama vs baru. Selesai semua untuk 1.11 (angka di STATUS). Berikutnya: PR `fase-1/situs-baru` → main, lalu halaman berikutnya di jalur inti: 1.12 Authentication (`docs/b-fondasi/b5-1-authentication.md`). Perintah: `cd site-baru && npm run build && npm test && node tools/banding.mjs <slug>`; tangkapan: `npm run preview` lalu `node tools/tangkap.mjs --path /<slug>/`.
+2026-10-08 · Fase 1 · branch `fase-1/situs-baru`. Rencana (plan/RENCANA-FASE-1-1-11.md): Astro + Starlight di `site-baru/`, tema gelap bertoken, Snippet/TabSet/WidgetLama, remark rujukan, sidebar dari cerita.json, porting 1.11, tangkapan Playwright, pembanding lama vs baru. Selesai semua untuk 1.11 (angka di STATUS). PR #2 (kerangka + 1.11) sudah di-merge. 1.12 Authentication diporting di branch `fase-1/1-12-authentication` (alur + hp CSS, `tools/layar.mjs`). Berikutnya di jalur inti: 1.13 Authorization (`docs/b-fondasi/b5-3-authorization.md`), lalu terus mengikuti `urutanBaca` yang `inti: true`. Perintah: `cd site-baru && npm run build && npm test && node tools/banding.mjs <slug>`; tangkapan: `npm run preview` lalu `node tools/tangkap.mjs --path /<slug>/`.
 
 ## Pelajaran
 
@@ -22,3 +22,5 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - Starlight memerlukan koleksi `i18n` (bisa berisi `{}`) bila `locales` diisi; tanpa itu ada WARN "collection i18n does not exist".
 - Blok kode Shiki tanpa `overflow-x: auto` membuat scroll horizontal di 375 px; `tools/tangkap.mjs` memeriksa `scrollWidth` di tiap tangkapan.
 - Widget `stackstep.js` bergantung pada DOM Material (`.tabbed-set`, `span[id^=__span]`); kontrak itu dibuat ulang oleh `Snippet.astro` + `TabSet.astro` (keputusan 103), bukan dengan mengubah widget.
+- Starlight membungkus heading jadi `div.sl-heading-wrapper > h2 + a.sl-anchor-link`; pemeriksa yang berjalan dari `h2.nextElementSibling` harus mulai dari pembungkusnya (bug pertama `tools/layar.mjs` melaporkan lolos palsu).
+- Tipe 19 px + header Starlight + bar "Di halaman ini" di HP membuat layar pertama sempit: `.content-panel` padding 0.75rem (0.6rem di HP), H1 2.2rem/1.6rem, pretest rapat ke Inti. Margin 1.11 di 375×667 tinggal 9 px; halaman dengan judul dua baris perlu dicek dulu dengan `npm run layar`.
