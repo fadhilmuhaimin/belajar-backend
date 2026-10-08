@@ -7,7 +7,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from palette import (BG, BG_BLOCK, BG_BLOCK_2, FIG_LINE, FIG_PANEL, KINDS, LINK, NAVY,  # noqa: E402
+from palette import (BG, BG_BLOCK, BG_BLOCK_2, FIG_LINE, FIG_PANEL, KINDS, LINK, MODE, NAVY,  # noqa: E402
                          PRIMARY, TEXT, TEXT_2)
 
 
@@ -54,6 +54,35 @@ for k, (fill, edge, ink) in KINDS.items():
         (f"[{k}] garis kiri admonition vs blok", edge, BG_BLOCK, BIG),
         (f"[{k}] angka putih di lingkaran ink", "#FFFFFF", ink, TXT),
     ]
+
+# Situs baru: kombinasi yang dipakai tema.css, diperiksa untuk mode gelap dan terang.
+for nama, m in MODE.items():
+    bg, bg2, bg3 = m["bg"], m["bg_2"], m["bg_3"]
+    rows += [
+        (f"[{nama}] teks isi di halaman", m["teks"], bg, TXT),
+        (f"[{nama}] teks isi di kotak/kode", m["teks"], bg2, TXT),
+        (f"[{nama}] teks isi di inline code / header tabel", m["teks"], bg3, TXT),
+        (f"[{nama}] judul di halaman", m["judul"], bg, TXT),
+        (f"[{nama}] teks sekunder di halaman", m["teks_2"], bg, TXT),
+        (f"[{nama}] teks sekunder di kotak", m["teks_2"], bg2, TXT),
+        (f"[{nama}] link (aksen) di halaman", m["aksen"], bg, TXT),
+        (f"[{nama}] link (aksen) di kotak", m["aksen"], bg2, TXT),
+        (f"[{nama}] teks di atas blok aksen (tombol, aktor)", m["ink_di_aksen"], m["aksen"], TXT),
+        (f"[{nama}] garis pembatas kedua vs halaman", m["garis_2"], bg, 1.0),
+        (f"[{nama}] sintaks: keyword (aksen) di kotak kode", m["aksen"], bg2, TXT),
+        (f"[{nama}] sintaks: string (good ink) di kotak kode", m["kinds"]["good"][2], bg2, TXT),
+        (f"[{nama}] sintaks: angka (warn ink) di kotak kode", m["kinds"]["warn"][2], bg2, TXT),
+        (f"[{nama}] sintaks: komentar (sekunder) di kotak kode", m["teks_2"], bg2, TXT),
+    ]
+    for k, (fill, edge, ink) in m["kinds"].items():
+        rows += [
+            (f"[{nama}][{k}] teks isi di fill", m["teks"], fill, TXT),
+            (f"[{nama}][{k}] ink di fill", ink, fill, TXT),
+            (f"[{nama}][{k}] ink di halaman", ink, bg, TXT),
+            (f"[{nama}][{k}] edge vs fill", edge, fill, BIG),
+            (f"[{nama}][{k}] edge vs halaman", edge, bg, BIG),
+            (f"[{nama}][{k}] edge vs kotak", edge, bg2, BIG),
+        ]
 
 md = "--md" in sys.argv
 fail = 0

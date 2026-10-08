@@ -1,0 +1,22 @@
+---
+/**
+ * "Kamu di sini" sebagai breadcrumb: Tahap › Kelompok › Halaman, plus rekap satu kalimat tahap ini
+ * (PROPOSAL "Desain visual final"). Dibuat saat build dari cerita.json, menggantikan widget kamu-di-sini.
+ */
+import { muat, byId, label } from "../../tools/registri.mjs";
+interface Props { id: string }
+const d = muat();
+const h = byId(d)[Astro.props.id];
+if (!h) throw new Error(`KamuDiSini: halaman ${Astro.props.id} tidak ada di cerita.json`);
+const t = d.tahap.find((x) => x.no === h.tahap);
+if (!t) throw new Error(`KamuDiSini: tahap ${h.tahap} tidak ada di cerita.json`);
+---
+<nav class="kamu" aria-label="Kamu di sini">
+  <ol class="kamu__jalur">
+    <li><span class="kamu__tag">Kamu di sini</span></li>
+    <li>Tahap {t.no} dari {d.tahap.length} · {t.nama}</li>
+    {h.kelompok && <li>{h.kelompok}</li>}
+    <li aria-current="page">{label(h)}</li>
+  </ol>
+  <p class="kamu__rekap"><strong>{d.app} (fiktif).</strong> {t.rekap} <span class="teks-2">Sebelumnya: {t.sebelumnya}</span></p>
+</nav>

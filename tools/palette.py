@@ -29,3 +29,28 @@ PRIMARY = "#0075EB"    # aksen, garis tepi, elemen besar (bukan teks kecil)
 LINK = "#0041C2"       # teks link
 NAVY = "#051027"       # header situs
 ACCENT_ORANGE = "#FF9010"  # dekoratif saja, TIDAK untuk teks/garis bermakna
+
+
+# ---- Situs baru (site-baru/src/styles/tema.css): dua mode, nilai harus sama dengan token di tema.css ----
+# Mode gelap adalah default (PROPOSAL "Desain visual final"). Setiap warna makna punya fill/edge/ink per mode.
+TERANG = {
+    "bg": "#FFFFFF", "bg_2": "#F8FAFC", "bg_3": "#F3F4F7",
+    "teks": "#111827", "judul": "#0B0B0C", "teks_2": "#51565E",
+    "aksen": "#0041C2", "ink_di_aksen": "#FFFFFF",
+    "garis": "#E4E4E4", "garis_2": "#CBD5E1",
+    "kinds": KINDS,
+}
+GELAP = {
+    "bg": "#0B0B0C", "bg_2": "#141416", "bg_3": "#1C1C1F",
+    "teks": "#E6E6E6", "judul": "#FFFFFF", "teks_2": "#A3A3A8",
+    "aksen": "#7AB8FF", "ink_di_aksen": "#0B0B0C",
+    "garis": "#2A2A2E", "garis_2": "#3B3B41",
+    "kinds": {
+        #          fill       edge       ink
+        "system": ("#15233A", "#7AB8FF", "#A9CDFF"),
+        "good":   ("#0F2A26", "#3DBFA8", "#7FE0CC"),
+        "warn":   ("#3A2410", "#F0A04B", "#FFC58A"),
+        "old":    ("#1C1C1F", "#7C7C84", "#B5B5BC"),
+    },
+}
+MODE = {"terang": TERANG, "gelap": GELAP}
