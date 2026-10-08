@@ -9,10 +9,19 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - 111: gerbang situs `tools/cek_situs.sh` (registry, istilah, audit, build, ID, kontras, tes; `--layar`).
 - 112–114: MkDocs, halaman Markdown lama, dan `docs/` dihapus; registry di `situs/data/cerita.json`, widget lama di `situs/lama/`.
 - 115: Cloudflare Pages Direct Upload dari CI; menunggu secret pemilik.
+- 116: React 19.3, TS 6.0.3 (bukan 7: peer @astrojs/check), Zod 4.6, Vitest 5; `astro check` strict di gerbang.
+- 117: registry v2, Tahap 1 = 42 halaman 1.1–1.42; ID lama dipakai ulang; B1.2/F2 lebur, T1 lama diganti PRD.
 
 ## Usulan perubahan cerita
 
 (kosong)
+
+## Catatan untuk penulisan ulang Tahap 1
+
+- 1.33 (E1, app versi lama): prasyarat B4.2 (Tahap 2) dibuang; isi lama memakai rekaman crash B4.2. Saat ditulis ulang, ADR 10 (expand lalu contract) harus berdiri sendiri.
+- 1.15 (B6) menyerap B1.2; 1.39 (F1) menyerap F2. Hapus halaman B1.2/F2 di PR yang sama, catat di KEPUTUSAN.
+- 1.1 PRD menggantikan T1 lama (`cerita/tahap-1`); pindahkan ilustrasi dan arsitektur tahap bila masih dipakai.
+- Audit bahasa menolak kata "kantor"; naskah menulis "email kantor", di halaman pakai "email perusahaan".
 
 ## Perlu dicek pemilik
 

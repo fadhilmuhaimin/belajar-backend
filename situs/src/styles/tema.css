@@ -146,6 +146,8 @@ body { background: var(--bg); }
 .sidebar-content a.nav-inti::after { content: " ★"; color: var(--k-warn-edge); font-size: 0.8em; }
 .sidebar-content a.nav-menyusul { color: var(--teks-2); }
 .sidebar-content a.nav-menyusul:not([aria-current]) { opacity: 0.7; }
+/* Halaman versi lama yang akan digabung atau digantikan halaman baru (keputusan 117); title menjelaskan ke mana. */
+.sidebar-content a.nav-lama { font-style: italic; color: var(--teks-2); }
 .sl-markdown-content a.rujukan-menyusul { text-decoration: underline dotted; text-underline-offset: 3px; }
 
 /* Blok kode dari komponen Snippet (div.highlight + pre.shiki) */

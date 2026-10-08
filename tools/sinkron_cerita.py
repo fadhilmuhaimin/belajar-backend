@@ -39,7 +39,7 @@ MAKS_INTI = 175
 
 TOPIK = ["Gambaran besar", "API", "Data", "Keamanan", "Struktur kode", "Operasional", "Skala dan kinerja",
          "Integrasi pihak ketiga", "Khusus app mobile", "Desain sistem", "Bekerja dengan AI"]
-BERID = re.compile(r"^[A-G]\d")
+BERID = re.compile(r"^[A-G]\d")          # ID lama (A1, B3.1, D4c): halaman konsep yang punya Cek diri
 PREFIKS = re.compile(r"^(?:[A-G]\d+(?:\.\d+)?[a-c]? · |\d\.\d+ )")
 NAMA_TAHAP = {}
 DATA = {}
@@ -138,7 +138,7 @@ def kartu(hs):
     """Soal "**N.** ..." + <details class="success"><summary>Jawaban</summary> di bagian ## Cek diri."""
     out = []
     for h in hs:
-        if not h["ada"] or not BERID.match(h["id"]):
+        if not h["ada"] or not (h.get("nomor") or h.get("lebur_ke") or BERID.match(h["id"])):
             continue
         teks = file_situs(h).read_text()
         m = re.search(r"^## Cek diri\s*$(.*?)(?=^## |\Z)", teks, re.S | re.M)
@@ -241,7 +241,7 @@ def main():
         p = file_situs(h)
         lama = tulis.get(p, p.read_text())
         baru = meta_baru(lama, h)
-        if BERID.match(h["id"]):
+        if h.get("nomor") or h.get("lebur_ke") or BERID.match(h["id"]):
             baru = judul_bernomor(baru, h)
         if baru != lama:
             tulis[p] = baru
