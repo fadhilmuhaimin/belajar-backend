@@ -308,17 +308,6 @@
       "ada": true
     },
     {
-      "id": "T1",
-      "judul": "Tahap 1 · Ceritanya",
-      "tahap": 1,
-      "path": "cerita/tahap-1.md",
-      "inti": true,
-      "ada": true,
-      "diganti_oleh": "t1-prd",
-      "bagian": 1,
-      "menit": 4
-    },
-    {
       "id": "t1-prd",
       "judul": "PRD v1: Rekeningo untuk Gedung A",
       "tahap": 1,
@@ -328,8 +317,9 @@
       "bagian": 1,
       "inti": true,
       "masalah": "Antrean kasir tiap Senin dan rekonsiliasi kuitansi 4 hari kerja",
-      "ada": false,
-      "nomor": "1.1"
+      "ada": true,
+      "nomor": "1.1",
+      "menit": 4
     },
     {
       "id": "t1-fitur-teknis",
@@ -1058,7 +1048,7 @@
       "topik": "Desain sistem",
       "path": "d-system-design/d1-kerangka-berpikir.md",
       "prasyarat": [
-        "T1"
+        "t1-prd"
       ],
       "inti": true,
       "masalah": "Tidak tahu harus mulai dari mana saat mendesain",
