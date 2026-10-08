@@ -1,0 +1,143 @@
+---
+title: "4.1 Integrasi pihak ketiga"
+---
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="B11" />
+
+<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[B10.1]] · Jalur inti</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Berapa timeout bawaan `http.Client` di Go?
+2. API timeout saat membuat tagihan di payment gateway. Apakah tagihannya pasti tidak dibuat?
+3. Apa yang dilakukan circuit breaker saat terbuka?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+## Inti
+
+Pasang timeout di setiap panggilan keluar. Retry hanya dengan key yang sama. Breaker memutus saat gangguan.
+
+<WidgetLama nama="arsitektur" tahap={4} />
+
+## Lihat sendiri
+
+Rekeningo memakai payment gateway untuk top-up. Di rekaman ini, gateway sedang lambat: setiap response butuh 10 detik.
+
+<WidgetLama nama="alur" src="data/skenario/b11-gateway.json" />
+
+## Kenapa ini ada
+
+Jumat sore, payment gateway yang dipakai Rekeningo melambat. Top-up yang biasanya selesai dalam satu detik kini menggantung belasan detik.
+
+Bukan hanya top-up yang terganggu. Request top-up yang menunggu menahan goroutine dan koneksi, sehingga request lain ikut lambat. Gangguan di sistem orang lain menjalar ke seluruh Rekeningo.
+
+Raka tidak bisa memperbaiki gateway. Yang bisa ia atur hanya cara Rekeningo memanggilnya.
+
+## Cara kerjanya
+
+Ada tiga alat, dan masing-masing menjawab pertanyaan yang berbeda.
+
+**Timeout: berapa lama boleh menunggu?** Client HTTP bawaan Go tidak punya timeout ("A Timeout of zero means no timeout", [net/http](https://pkg.go.dev/net/http#Client)). Rekaman B di bawah memakai timeout 2 detik: setiap top-up selesai dalam 2 detik walau gateway butuh 10.
+
+Timeout punya konsekuensi yang sering terlewat. Gateway tetap membuat tagihan walau API sudah berhenti menunggu. Jadi hasil timeout adalah "belum pasti", bukan "gagal". App menampilkan status pending, dan hasil akhirnya datang lewat webhook ([[B10.2]]).
+
+**Retry: boleh dicoba lagi?** Hanya kalau percobaan kedua tidak membuat tagihan kedua. Caranya sama dengan [[E3]], tapi kali ini API yang memanggil: kirim `Idempotency-Key` yang sama di setiap percobaan. Jedanya makin panjang (exponential backoff) dan sedikit acak (jitter), supaya retry dari banyak request tidak datang serempak ([AWS](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/)).
+
+<Snippet file="labs/b11-integrasi/main.go" region="retry" lang="go" title="labs/b11-integrasi/main.go" />
+
+<Snippet files={["labs/b11-integrasi/output/d-retry.txt","labs/b11-integrasi/output/e-retry-key-baru.txt"]} title="Output rekaman: retry dengan key sama (D) dan key baru (E)" />
+
+Dengan key baru di setiap percobaan, gateway membuat tiga tagihan untuk satu top-up.
+
+**Circuit breaker: perlu dicoba sama sekali?** Setelah beberapa kegagalan berturut-turut, breaker "terbuka" dan API langsung menjawab gagal tanpa memanggil gateway. Setelah jeda, satu request boleh mencoba (half-open). Berhasil berarti breaker tertutup lagi ([Martin Fowler](https://martinfowler.com/bliki/CircuitBreaker.html)).
+
+<Snippet file="labs/b11-integrasi/main.go" region="breaker" lang="go" title="labs/b11-integrasi/main.go" />
+
+<details class="note">
+<summary>Rekaman A–C: tanpa timeout, timeout, dan breaker</summary>
+
+<Snippet files={["labs/b11-integrasi/output/a-tanpa-timeout.txt","labs/b11-integrasi/output/b-timeout.txt","labs/b11-integrasi/output/c-breaker.txt"]} />
+
+</details>
+
+## Di stack lain
+
+Yang sama di semua stack: timeout eksplisit, retry dengan key yang sama, breaker untuk layanan yang sering gangguan. Yang berbeda: nilai bawaan timeout, dan apakah breaker tersedia tanpa library tambahan. Hanya Go yang dijalankan di lab. Baris lain dicek ke dokumentasi.
+
+| Stack | Timeout bawaan | Retry dan breaker | Sumber |
+|---|---|---|---|
+| Go `net/http` | Tanpa timeout | Ditulis sendiri, atau library | [net/http](https://pkg.go.dev/net/http#Client) |
+| Node.js `fetch` | Pasang `AbortSignal.timeout(ms)` | Library | [MDN: AbortSignal.timeout](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/timeout_static) |
+| Laravel HTTP client | 30 detik | `Http::retry(3, 100)` bawaan; breaker lewat library | [Laravel: HTTP client](https://laravel.com/docs/12.x/http-client) |
+| Python `requests` (Django) | Tanpa timeout | Library | [requests: Timeouts](https://requests.readthedocs.io/en/latest/user/advanced/#timeouts) |
+| Spring | Tergantung client | Resilience4j: retry dan breaker (CLOSED, OPEN, HALF_OPEN) | [Resilience4j](https://resilience4j.readme.io/docs/circuitbreaker) |
+
+Dokumentasi `requests` menulis bahwa tanpa timeout, kode bisa menggantung beberapa menit atau lebih.
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Timeout saja | Penantian berbatas, paling sederhana | Hasil "belum pasti" harus ditangani; gateway tetap dibebani saat gangguan |
+| Timeout + retry dengan key sama | Gangguan sesaat tidak terlihat oleh user | Total waktu tunggu bertambah; tanpa key yang sama, tagihan ganda |
+| Timeout + circuit breaker | Gagal cepat saat gangguan panjang; gateway tidak ditambah bebannya | Satu angka lagi untuk ditentukan (batas gagal, lama jeda) |
+| Panggilan di worker, bukan di request | User tidak menunggu sama sekali | Hasil asinkron; app butuh status pending ([[B10.1]]) |
+
+## Cek diri
+
+**1.** Timeout API 2 detik, retry 3 kali dengan jeda 200, 400 ms (ditambah jitter). Gateway mati total. Berapa lama paling cepat Budi menunggu sebelum melihat gagal?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+±6,6 detik: tiga kali 2 detik timeout, ditambah jeda 0,2 dan 0,4 detik, ditambah jitter. Rekaman E selesai setelah 6,7 detik. Retry membuat penantian lebih lama saat gangguan panjang. Itu salah satu alasan memasang circuit breaker.
+
+</details>
+
+**2.** Jelaskan kenapa timeout saat membuat tagihan tidak boleh langsung ditampilkan sebagai "Top-up gagal".
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Timeout hanya berarti API berhenti menunggu. Gateway bisa saja sudah membuat tagihan, dan Budi bisa sudah membayar. Kalau app bilang gagal, Budi mungkin top-up lagi dan membayar dua kali. Status yang jujur adalah pending, sampai webhook atau pengecekan status memberi hasil akhir.
+
+</details>
+
+**3.** Breaker terbuka selama 5 detik. Kenapa breaker tidak langsung tertutup begitu jeda habis?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Gateway belum tentu pulih. Kalau semua request langsung dilepas, gateway yang baru pulih bisa kewalahan lagi. Karena itu hanya satu request yang mencoba (half-open). Rekaman C: percobaan di detik 11 masih timeout, jadi breaker terbuka lagi.
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Setiap client HTTP ke pihak ketiga punya timeout eksplisit.
+- [ ] Retry hanya untuk operasi yang aman diulang, dengan idempotency key yang sama di setiap percobaan.
+- [ ] Retry punya batas jumlah, backoff, dan jitter.
+- [ ] Timeout ditangani sebagai "belum pasti", bukan "gagal".
+- [ ] Panggilan ke pihak ketiga tidak dilakukan di dalam transaction database ([[B2.5]]).
+
+## Bacaan lanjut
+
+- [Martin Fowler: Circuit Breaker](https://martinfowler.com/bliki/CircuitBreaker.html)
+- [AWS: Exponential Backoff and Jitter](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/)
+- [Go: net/http Client](https://pkg.go.dev/net/http#Client)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
