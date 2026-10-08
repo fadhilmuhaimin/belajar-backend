@@ -1,0 +1,165 @@
+// Mengubah halaman MkDocs (docs/**/*.md) menjadi MDX Starlight di src/content/docs/.
+// Pakai: node tools/konversi.mjs b-fondasi/b5-3-authorization.md [--tulis]
+// Tanpa --tulis hasil dicetak ke stdout. Pola yang ditangani: frontmatter + H1, data-bb -> WidgetLama,
+// kamu-di-sini -> KamuDiSini, {: .meta } / {: .bb-beda } -> <p class>, ??? -> <details>, === -> TabSet,
+// --8<-- -> Snippet, fence di dalam tab -> Snippet code. Pola lain dilaporkan sebagai PERINGATAN supaya
+// dicek tangan; hasil konversi selalu dibaca ulang sebelum di-commit.
+import fs from "node:fs";
+import path from "node:path";
+import { DOCS, SITE_DOCS, muat } from "./registri.mjs";
+
+const rel = process.argv[2];
+if (!rel) { console.error("pakai: node tools/konversi.mjs <path relatif docs/> [--tulis]"); process.exit(2); }
+const tulis = process.argv.includes("--tulis");
+const src = fs.readFileSync(path.join(DOCS, rel), "utf8");
+const d = muat();
+const halaman = d.halaman.find((h) => h.path === rel);
+if (!halaman) throw new Error(`${rel} tidak ada di cerita.json`);
+const peringatan = [];
+
+const SKRIP = { arsitektur: ["cerita"], "kamu-di-sini": ["cerita"], "peta-cerita": ["cerita"], "indeks-masalah": ["cerita"],
+  runsql: ["runsql-core", "runsql"], stackstep: ["stackstep"], alur: ["hp", "alur-core", "alur"], hp: ["hp"],
+  pilah: ["pilah"], banding: ["banding"], kartu: ["kartu"], ember: ["ember"], race: ["race"], selesai: [], "umpan-balik": [] };
+const URUTAN = ["cerita", "hp", "alur-core", "alur", "runsql-core", "runsql", "stackstep", "pilah", "banding", "kartu", "ember", "race"];
+const skrip = new Set();
+
+let lines = src.split("\n");
+// frontmatter
+let fm = [];
+if (lines[0] === "---") { const j = lines.indexOf("---", 1); fm = lines.slice(1, j); lines = lines.slice(j + 1); }
+const title = (fm.find((l) => l.startsWith("title:")) || "").replace(/^title:\s*/, "");
+
+function snippetDari(fence) {
+  // fence: { lang, title, body[] }
+  const m = fence.body.length === 1 && fence.body[0].trim().match(/^--8<-- "([^":]+)(?::([^"]+))?"$/);
+  if (m) {
+    const attrs = [`file="${m[1]}"`];
+    if (m[2]) attrs.push(`region="${m[2]}"`);
+    if (fence.lang && fence.lang !== "text") attrs.push(`lang="${fence.lang}"`);
+    if (fence.title) attrs.push(`title="${fence.title}"`);
+    return `<Snippet ${attrs.join(" ")} />`;
+  }
+  if (fence.body.some((l) => l.includes("--8<--"))) peringatan.push("fence dengan --8<-- bercampur teks lain: " + fence.body[0]);
+  return null;
+}
+function fenceInline(fence) {
+  const kode = fence.body.join("\n").replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
+  const attrs = [`lang="${fence.lang || "text"}"`];
+  if (fence.title) attrs.push(`title="${fence.title}"`);
+  return `<Snippet ${attrs.join(" ")} code={\`${kode}\`} />`;
+}
+function bacaFence(ls, i) {
+  const m = ls[i].match(/^```(\w+)?(?:\s+title="([^"]*)")?\s*$/);
+  if (!m) return null;
+  const body = [];
+  let j = i + 1;
+  while (j < ls.length && !/^```\s*$/.test(ls[j])) body.push(ls[j++]);
+  return { lang: m[1] || "", title: m[2] || "", body, akhir: j };
+}
+function dedent(ls) { return ls.map((l) => l.replace(/^ {4}/, "")); }
+
+// Konversi blok (dipakai di tingkat atas dan di dalam tab/details)
+function konversiBlok(ls, dalamTab) {
+  const out = [];
+  for (let i = 0; i < ls.length; i++) {
+    const l = ls[i];
+    // atribut paragraf
+    if (/^\{: \.(meta|bb-beda) \}$/.test(l.trim())) {
+      const kelas = l.trim().match(/\.([\w-]+)/)[1];
+      let k = out.length - 1;
+      while (k >= 0 && out[k].trim() === "") k--;
+      let awal = k;
+      while (awal > 0 && out[awal - 1].trim() !== "") awal--;
+      const para = out.splice(awal, k - awal + 1).join(" ");
+      out.push(`<p class="${kelas}">${para}</p>`);
+      continue;
+    }
+    if (/^\{: /.test(l.trim())) { peringatan.push("atribut tidak dikenal: " + l.trim()); out.push(l); continue; }
+    // fence
+    const f = bacaFence(ls, i);
+    if (f) {
+      const sn = snippetDari(f);
+      if (sn) out.push(sn);
+      else if (dalamTab) out.push(fenceInline(f));
+      else { out.push(...ls.slice(i, f.akhir + 1)); }
+      i = f.akhir; continue;
+    }
+    // details
+    const q = l.match(/^\?\?\?\s+(\w+)\s+"([^"]+)"\s*$/);
+    if (q) {
+      const isi = [];
+      let j = i + 1;
+      while (j < ls.length && (ls[j].startsWith("    ") || ls[j].trim() === "")) isi.push(ls[j++]);
+      while (isi.length && isi[isi.length - 1].trim() === "") isi.pop();
+      out.push(`<details class="${q[1]}">`, `<summary>${q[2]}</summary>`, "", ...konversiBlok(dedent(isi), dalamTab), "", "</details>");
+      i = j - 1; continue;
+    }
+    // tabs
+    if (/^=== "/.test(l)) {
+      const tabs = [];
+      let j = i;
+      while (j < ls.length && /^=== "/.test(ls[j])) {
+        const label = ls[j].match(/^=== "([^"]+)"/)[1];
+        const isi = [];
+        j++;
+        while (j < ls.length && (ls[j].startsWith("    ") || ls[j].trim() === "")) isi.push(ls[j++]);
+        while (isi.length && isi[isi.length - 1].trim() === "") isi.pop();
+        tabs.push({ label, isi: dedent(isi) });
+      }
+      const id = "stack" + (out.filter((x) => x.startsWith("<TabSet")).length || "");
+      out.push(`<TabSet id="${id}" labels={${JSON.stringify(tabs.map((t) => t.label))}}>`);
+      tabs.forEach((t, k) => { out.push(`<Fragment slot="t${k}">`, "", ...konversiBlok(t.isi, true), "", "</Fragment>"); });
+      out.push("</TabSet>");
+      i = j - 1; continue;
+    }
+    // widget
+    const w = l.match(/^<div data-bb="([\w-]+)"([^>]*)><\/div>\s*$/);
+    if (w) {
+      const nama = w[1];
+      (SKRIP[nama] || (peringatan.push("widget tidak dikenal: " + nama), [])).forEach((s) => skrip.add(s));
+      if (nama === "kamu-di-sini") { out.push(`<KamuDiSini id="${halaman.id}" />`); continue; }
+      const attrs = [`nama="${nama}"`];
+      const srcM = w[2].match(/data-src="([^"]+)"/); if (srcM) attrs.push(`src="${srcM[1]}"`);
+      const tM = w[2].match(/data-tahap="([^"]+)"/); if (tM) attrs.push(`tahap={${tM[1]}}`);
+      const sisa = w[2].replace(/data-(src|tahap)="[^"]+"/g, "").trim();
+      if (sisa) peringatan.push(`atribut widget ${nama} tidak dikonversi: ${sisa}`);
+      out.push(`<WidgetLama ${attrs.join(" ")} />`);
+      continue;
+    }
+    if (/^# /.test(l)) continue; // H1 dari frontmatter
+    if (l.includes("<!--")) peringatan.push("komentar HTML perlu jadi {/* */}: " + l.trim());
+    if (/!\[/.test(l)) peringatan.push("gambar perlu path baru: " + l.trim());
+    if (/<\w+[^>]*\bmarkdown\b/.test(l)) peringatan.push("atribut markdown pada HTML: " + l.trim());
+    out.push(l);
+  }
+  return out;
+}
+
+let body = konversiBlok(lines, false);
+// {  } di prosa (di luar backtick) merusak MDX
+for (const l of body) {
+  if (l.startsWith("<") || l.startsWith("```")) continue;
+  const tanpaKode = l.replace(/`[^`]*`/g, "");
+  if (/[{}]/.test(tanpaKode)) peringatan.push("kurung kurawal di prosa: " + l.trim().slice(0, 80));
+}
+const impor = ["Snippet", "TabSet", "WidgetLama", "SkripLama", "KamuDiSini"].filter((c) => body.some((l) => l.includes(`<${c} `) || l.includes(`<${c}>`)) || c === "SkripLama");
+const kedalaman = rel.split("/").length; // b-fondasi/x.md -> 2 -> ../../../components
+const up = "../".repeat(kedalaman + 1);
+const daftar = URUTAN.filter((s) => skrip.has(s));
+const hasil = [
+  "---", `title: ${title}`, "---",
+  ...impor.map((c) => `import ${c} from "${up}components/${c}.astro";`),
+  "",
+  ...body.join("\n").replace(/\n{3,}/g, "\n\n").split("\n"),
+  "",
+  `<SkripLama daftar={${JSON.stringify(daftar)}} />`,
+  "",
+].join("\n");
+
+if (peringatan.length) console.error("PERINGATAN:\n  " + peringatan.join("\n  "));
+if (tulis) {
+  const tujuan = path.join(SITE_DOCS, rel.replace(/\.md$/, ".mdx"));
+  fs.mkdirSync(path.dirname(tujuan), { recursive: true });
+  fs.writeFileSync(tujuan, hasil);
+  console.error("ditulis: " + path.relative(process.cwd(), tujuan));
+} else process.stdout.write(hasil);
