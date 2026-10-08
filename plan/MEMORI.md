@@ -4,6 +4,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 159: 1.19 M3 (injection); 158: widget React cari-bug; 157: lab pencarian + mode rentan m3.
 - 156: 1.18 + ADR 3; 155: kontrak b1-openapi v1, bacaJSON/wajibAda, -rentan m2.
 - 154: 1.17 M2; 153: lab m2 (field asing diabaikan, judul 400 menyesatkan).
 - 152: 1.16 HTTP dari http.txt; 151: GET /transfers/{id} supaya Location jujur.
@@ -53,8 +54,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.18 selesai (1.18 keputusan 155–156). Pengaman loop: keputusan 142.
-Halaman berikutnya: **1.19 "M3: Tanda kutip di pencarian"** (`t1-m3`, masalah, ★, widget hp mode rentan + cari-bug, lab api-t1). Naskah M3 minggu 2: Budi dapat "Error 500" saat mencari warung dengan tanda kutip; Dimas mencoba `' OR 1=1 --` dan melihat semua akun beserta saldo. Yang Raka kira: tanda kutip merusak pencarian; yang sebenarnya: SQL dibangun dari string, dan response mengembalikan terlalu banyak field. Butuh: endpoint pencarian warung di api-t1 (belum ada; `GET /warung?cari=`), versi benar (parameterized, field minimal) default, mode `-rentan m3` (string concat + `SELECT *` semua akun). Rekam: tanda kutip → 500 (rentan) / 200 (benar); `' OR 1=1 --` → semua akun + saldo (rentan) / 0 hasil (benar). Widget cari-bug (React baru; naskah: widget pertama yang menandai baris kode) dipakai di 1.19 dan 1.20: mulai di 1.19. Ilustrasi M3 (naskah) menyusul atau dibuat di halaman ini; cek `tools/ilustrasi_cerita.py`. Keamanan: target hanya lab lokal.
+2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.19 selesai (1.19 keputusan 157-159). Pengaman loop: keputusan 142. Catatan: ilustrasi M3-M6 belum dibuat.
+Halaman berikutnya: **1.20 "Keamanan 1: SQL injection + ADR 4"** (`t1-sql-injection`, konsep + ADR, ★, peran security+backend, widget cari-bug, lab api-t1). Isi: lanjutan 1.19 — kenapa jangan sambung string, parameter query menutup seluruh kelas serangan, linter, dan response hanya field yang dibutuhkan. ADR 4 (parameterized query, linter, field minimal). Pakai widget cari-bug (sudah ada) dengan data kedua bila perlu, atau data m3 yang sama. Rekaman `m3.txt` sudah cukup; bisa tambah snippet region rentan di repo/handler. Cek apakah ada linter Go yang mendeteksi string-concat SQL (mis. `go vet`? sebenarnya `gosec` G201) — kalau mau tunjukkan linter, perlu lab kecil; kalau tidak, sebut gosec G201 sebagai [perlu verifikasi] atau rekam. Ilustrasi M3 (adegan Dimas) bisa dibuat di sini via `tools/ilustrasi_cerita.py` (naskah: M3-M6 satu ilustrasi masing-masing), token gelap/terang.
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
