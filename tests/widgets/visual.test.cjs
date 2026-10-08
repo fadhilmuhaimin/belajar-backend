@@ -70,14 +70,17 @@ test("a2-alur: saldo konsisten (Rp100.000 - Rp70.000 = Rp30.000)", () => {
   assert.equal(d.hpAwal.saldo - 70000, d.langkah[d.langkah.length - 1].hp.saldo);
 });
 
-test("a1-pilah: jawaban menunjuk kelompok yang ada, alasan terisi", () => {
-  const d = json("situs/lama/widgets/data/a1-pilah.json");
-  for (const it of d.item) {
-    assert.ok(it.jawab >= 0 && it.jawab < d.kelompok.length, it.teks);
-    assert.ok(it.kenapa.length > 20, it.teks);
-  }
-  assert.deepEqual(pilah.nilai(d, d.item.map((it) => it.jawab)).salah, []);
-});
+// Semua data widget pilah (bukan hanya a1): jawaban menunjuk kelompok yang ada, alasan terisi.
+for (const f of fs.readdirSync(path.join(ROOT, "situs/lama/widgets/data")).filter((n) => n.endsWith("-pilah.json"))) {
+  test(`${f}: jawaban menunjuk kelompok yang ada, alasan terisi`, () => {
+    const d = json(`situs/lama/widgets/data/${f}`);
+    for (const it of d.item) {
+      assert.ok(it.jawab >= 0 && it.jawab < d.kelompok.length, it.teks);
+      assert.ok(it.kenapa.length > 20, it.teks);
+    }
+    assert.deepEqual(pilah.nilai(d, d.item.map((it) => it.jawab)).salah, []);
+  });
+}
 
 test("a4-banding: semua simpul yang disorot ada, catatan lengkap", () => {
   assert.deepEqual(banding.cekData(json("situs/lama/widgets/data/a4-banding.json")), []);
