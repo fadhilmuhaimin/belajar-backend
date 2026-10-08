@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 159,
-        "halaman": 19
+        "menit": 165,
+        "halaman": 20
       },
       "bagian": [
         {
@@ -419,8 +419,12 @@
         "devops"
       ],
       "masalah": "Aturan uang tercecer di banyak file saat fitur bertambah",
-      "ada": false,
-      "nomor": "1.6"
+      "ada": true,
+      "prasyarat": [
+        "A2"
+      ],
+      "nomor": "1.6",
+      "menit": 6
     },
     {
       "id": "t1-fitur-login",

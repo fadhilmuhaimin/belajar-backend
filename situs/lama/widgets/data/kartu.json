@@ -72,6 +72,30 @@
   "jawab": "Timeout tidak berarti gagal. Database mungkin sudah COMMIT, dan hanya response yang hilang. Mengulang request berarti meminta pembayaran kedua. Tanpa idempotency key, backend akan memprosesnya, dan Budi membayar dua kali."
  },
  {
+  "id": "t1-struktur-folder-1",
+  "halaman": "t1-struktur-folder",
+  "judul": "1.6 Struktur folder pertama: handler, service, repo",
+  "url": "tahap-1/struktur-folder/",
+  "tanya": "Raka menulis `if saldo < jumlah` di handler bayar. Apa yang terjadi saat PRD v2 menambah transfer antar karyawan?",
+  "jawab": "Aturan yang sama harus disalin ke handler transfer. Sekarang ada dua salinan aturan uang. Kalau satu diubah dan yang lain lupa, bayar dan transfer memakai aturan berbeda."
+ },
+ {
+  "id": "t1-struktur-folder-2",
+  "halaman": "t1-struktur-folder",
+  "judul": "1.6 Struktur folder pertama: handler, service, repo",
+  "url": "tahap-1/struktur-folder/",
+  "tanya": "Di folder mana kode yang memetakan \"saldo kurang\" ke status `422`?",
+  "jawab": "Di `handler/`. Status code adalah urusan HTTP. Service hanya mengembalikan error \"saldo kurang\", dan handler yang menerjemahkannya."
+ },
+ {
+  "id": "t1-struktur-folder-3",
+  "halaman": "t1-struktur-folder",
+  "judul": "1.6 Struktur folder pertama: handler, service, repo",
+  "url": "tahap-1/struktur-folder/",
+  "tanya": "Kenapa paket di `internal/` membantu proyek Go yang tumbuh?",
+  "jawab": "Go tidak mengizinkan proyek lain mengimpor paket di `internal/`. Jadi isi folder itu bisa diubah tanpa takut merusak kode di luar proyek."
+ },
+ {
   "id": "B2.1-1",
   "halaman": "B2.1",
   "judul": "1.12 Data modeling dan relasi",

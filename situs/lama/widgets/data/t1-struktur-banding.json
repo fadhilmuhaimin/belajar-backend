@@ -1,0 +1,71 @@
+{
+  "judul": "Ubah satu hal: di mana kode Rekeningo harus diubah?",
+  "opsi": [
+    {
+      "id": "satu",
+      "nama": "Opsi A · Semua di handler",
+      "baris": [
+        [ { "id": "main", "label": "main.go", "sub": "route, aturan, SQL" } ],
+        [
+          { "id": "bayar", "label": "bayar()", "sub": "cek saldo, UPDATE, catat" },
+          { "id": "topup", "label": "topup()", "sub": "cek CSV, UPDATE, catat" },
+          { "id": "laporan", "label": "laporan()", "sub": "SUM, format JSON" }
+        ]
+      ],
+      "judulBaris": ["", "Isi tiap fungsi handler"]
+    },
+    {
+      "id": "tiga",
+      "nama": "Opsi B · handler, service, repo",
+      "baris": [
+        [
+          { "id": "handler", "label": "handler/", "sub": "HTTP" },
+          { "id": "service", "label": "service/", "sub": "aturan uang" },
+          { "id": "repo", "label": "repo/", "sub": "SQL" }
+        ],
+        [
+          { "id": "aturan", "label": "service.Bayar()", "sub": "saldo cukup, nominal > 0" },
+          { "id": "catat", "label": "repo.Catat()", "sub": "siapa, kapan, kenapa" }
+        ]
+      ],
+      "judulBaris": ["", "Satu tempat per aturan"]
+    }
+  ],
+  "fitur": [
+    {
+      "label": "PRD v2: transfer antar karyawan",
+      "sorot": { "satu": ["main", "bayar"], "tiga": ["handler", "service", "aturan"] },
+      "nada": { "satu": "warn" },
+      "catatan": {
+        "satu": "Aturan saldo cukup disalin dari bayar() ke fungsi transfer baru. Sekarang ada dua salinan aturan uang, dan keduanya harus selalu diubah bersama.",
+        "tiga": "Handler baru memanggil service yang sama. Aturan saldo cukup tetap satu."
+      }
+    },
+    {
+      "label": "Aturan Pak Hadi: setiap perubahan dicatat",
+      "sorot": { "satu": ["bayar", "topup"], "tiga": ["service", "catat"] },
+      "nada": { "satu": "warn" },
+      "catatan": {
+        "satu": "Catatan ditambahkan di setiap fungsi yang mengubah saldo. Lupa satu fungsi, dan ada selisih yang tidak bisa dijelaskan.",
+        "tiga": "Satu fungsi repo mencatat, dipanggil dari service. Tidak ada jalan lain untuk mengubah saldo."
+      }
+    },
+    {
+      "label": "Kolom saldo diganti nama",
+      "sorot": { "satu": ["bayar", "topup", "laporan"], "tiga": ["repo"] },
+      "catatan": {
+        "satu": "SQL tersebar di tiga fungsi handler. Ketiganya harus dicari dan diubah.",
+        "tiga": "Hanya folder repo yang menulis SQL. Handler dan service tidak tahu nama kolom."
+      }
+    },
+    {
+      "label": "Tahap 3: pembayaran juga dipanggil worker",
+      "sorot": { "satu": ["main"], "tiga": ["service", "repo"] },
+      "nada": { "satu": "warn" },
+      "catatan": {
+        "satu": "Aturan menempel di handler HTTP. Worker tidak bisa memakainya tanpa menyalin kode.",
+        "tiga": "Worker memanggil service langsung. Handler tidak ikut, karena worker tidak menerima HTTP."
+      }
+    }
+  ]
+}
