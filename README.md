@@ -82,6 +82,7 @@ Hampir semua lab memakai satu PostgreSQL bersama di port `54333`. Setiap lab pun
 
 | Schema | Lab |
 |---|---|
+| `tahap1` | `api-t1` (versi naskah Tahap 1, keputusan 132) |
 | `t1` | `api-t1-lama` (versi sebelum naskah Tahap 1) |
 | `b2`, `b2q` | `b2-model`, `b2-query` (`e5-payload` membaca `b2q`, jadi jalankan `b2-query` dulu) |
 | `b3r`, `b3s`, `b33` | `b3-race`, `b3-stack`, `b3-isolasi` |
@@ -131,6 +132,7 @@ Lab yang punya `Makefile` dijalankan dengan `make -C labs/<nama> run`. Sisanya d
 
 | Lab | Halaman | Cara menjalankan |
 |---|---|---|
+| `api-t1` | Halaman Tahap 1 versi naskah, mulai 1.7 | `make -C labs/api-t1 run` (satu bagian: `make -C labs/api-t1 run BAGIAN=login`) |
 | `api-t1-lama` | Halaman Tahap 1 versi lama (keputusan 132) | `make -C labs/api-t1-lama run`; deploy: `labs/.venv/bin/python labs/api-t1-lama/deploy.py` |
 | `b1-openapi` | 1.7 | `make -C labs/b1-openapi run` |
 | `b2-model` | 1.8 | `make -C labs/b2-model run` |

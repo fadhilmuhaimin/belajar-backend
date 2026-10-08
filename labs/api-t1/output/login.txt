@@ -1,0 +1,58 @@
+# server: ./api-t1
+
+# --- A. Budi login dengan email perusahaan dan password sementara ---
+$ curl -i -X POST /login -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+
+# --- B. Password salah, dan email yang tidak terdaftar: jawabannya sama ---
+$ curl -i -X POST /login -d '{"email": "budi@lestari.example", "password": "tebakan"}'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+
+{"type":"/problems/login-gagal","title":"Email atau password salah","status":401}
+$ curl -i -X POST /login -d '{"email": "tidak.ada@lestari.example", "password": "tebakan"}'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+
+{"type":"/problems/login-gagal","title":"Email atau password salah","status":401}
+
+# --- C. Database hanya menyimpan SHA-256 dari token, bukan token yang dipegang HP Budi ---
+$ psql -c "SELECT akun_id, left(token_hash, 16) AS token_hash, kedaluwarsa - now() > interval '7 hours 59 minutes' AS masih_8_jam FROM sesi"
+ akun_id |    token_hash    | masih_8_jam 
+---------+------------------+-------------
+     419 | <16 karakter awal SHA-256 token Budi> | t
+(1 row)
+
+
+# --- D. Request dengan sesi Budi, dan tanpa sesi ---
+$ curl -i -X GET /akun/419 -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":419,"jenis":"karyawan","nama":"Budi","saldo":0}
+$ curl -i -X GET /akun/419
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+Www-Authenticate: Bearer error="invalid_token"
+
+{"type":"/problems/belum-login","title":"Belum login atau sesi sudah berakhir","status":401}
+
+# --- E. Logout mematikan sesi di server; token yang sama ditolak ---
+$ curl -i -X POST /logout -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 204 No Content
+
+$ curl -i -X GET /akun/419 -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+Www-Authenticate: Bearer error="invalid_token"
+
+{"type":"/problems/belum-login","title":"Belum login atau sesi sudah berakhir","status":401}
+$ psql -c "SELECT count(*) AS sesi_tersisa FROM sesi"
+ sesi_tersisa 
+--------------
+            0
+(1 row)
+
