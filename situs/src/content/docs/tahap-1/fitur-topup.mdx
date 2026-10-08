@@ -1,0 +1,77 @@
+---
+title: "1.8 Fitur: top-up oleh admin"
+description: Setiap Senin, admin mengisi saldo 100 karyawan dari satu file CSV. Satu baris salah menolak seluruh file, dan setiap perubahan saldo punya catatan siapa, kapan, kenapa.
+---
+import Blok from "../../../components/Blok.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import Snippet from "../../../components/Snippet.astro";
+
+<p class="meta">Baca 4 menit · coba 2 menit · Prasyarat: [[t1-fitur-login]]</p>
+
+Senin pagi, admin tunjangan dari Keuangan mengisi Rp250.000 ke 100 akun karyawan. Di v1 belum ada layar admin. Admin mengunggah CSV dari sistem HR lewat skrip, dan backend yang memutuskan apakah file itu diterima.
+
+<Blok nama="Yang diminta PRD" buka>
+
+| Prioritas | Fitur | Keterangan |
+|---|---|---|
+| P0 | Top-up tunjangan oleh admin | Admin mengunggah daftar nama dan nominal; saldo masuk ke 100 akun |
+
+PRD juga menulis kebutuhan admin: "isi saldo 100 orang sekali klik tiap Senin". Aturan Pak Hadi berlaku di sini juga: tidak ada angka yang berubah tanpa catatan siapa, kapan, kenapa.
+
+| Di app | Di backend | Di database |
+|---|---|---|
+| Tidak ada di v1; admin memakai skrip dan CSV | `POST /topup`: hanya admin, periksa setiap baris, isi semua akun dalam satu operasi | Kolom `akun.saldo`, tabel catatan `topup` |
+
+</Blok>
+
+<Blok nama="Coba: satu baris salah ketik" buka aman="Kalau berhenti di sini, kamu sudah tahu: 100 perubahan saldo harus terjadi semua, atau tidak sama sekali.">
+
+CSV minggu 2 punya satu baris salah ketik: `-250000`. Jalankan kedua panel. Keduanya memakai SQLite sungguhan di browser.
+
+<WidgetLama nama="runsql" src="data/t1-topup.json" />
+
+</Blok>
+
+<Blok nama="Endpoint dan rekaman">
+
+Service memeriksa semua baris lebih dulu. Satu baris salah menolak seluruh file, dan tidak ada saldo yang berubah.
+
+<Snippet file="labs/api-t1/internal/service/topup.go" region="topup" lang="go" title="labs/api-t1/internal/service/topup.go" />
+
+Setelah semua baris lolos, repo menjalankan 100 perubahan saldo dan 100 catatan dalam satu transaction.
+
+<Snippet file="labs/api-t1/internal/repo/topup.go" region="topup" lang="go" title="labs/api-t1/internal/repo/topup.go" />
+
+Rekaman lab dari database bersih. Unggahan minggu 1 mengisi 100 akun:
+
+<Snippet file="labs/api-t1/output/topup.txt" lines="18:22" title="Rekaman lab: labs/api-t1/output/topup.txt" />
+
+Log PostgreSQL menunjukkan semuanya berada di antara satu `begin` dan satu `commit`:
+
+<Snippet file="labs/api-t1/output/topup.txt" lines="40:47" title="Rekaman lab: labs/api-t1/output/topup.txt" />
+
+CSV minggu 2 punya dua baris salah. Server menolak seluruh file dan menyebut barisnya, sehingga total saldo tetap Rp25.000.000:
+
+<Snippet file="labs/api-t1/output/topup.txt" lines="48:63" title="Rekaman lab: labs/api-t1/output/topup.txt" />
+
+Format error ini memakai `application/problem+json` (RFC 9457), dengan daftar baris di field tambahan `errors`. Format itu dibahas di [[B6]].
+
+</Blok>
+
+<Blok nama="Konsep yang akan dibutuhkan">
+
+- [[B3.1]]: kenapa 100 perubahan harus dibungkus satu unit.
+- [[B6]]: memeriksa input sebelum menyentuh uang, dan format error yang bisa dibaca admin.
+- [[B5.3]]: hanya admin yang boleh top-up; Budi mendapat `403`.
+- [[t1-adr-transaction]]: catatan "siapa, kapan, kenapa" sebagai keputusan, bukan kebiasaan.
+
+**Sengaja belum dilakukan:** mencegah unggahan ganda. Rekaman lab menunjukkan risikonya. Kalau admin mengunggah file minggu 1 dua kali, server menerimanya, dan total saldo jadi Rp50.000.000:
+
+<Snippet file="labs/api-t1/output/topup.txt" lines="83:94" title="Rekaman lab: labs/api-t1/output/topup.txt" />
+
+Uji coba menerima risiko ini karena unggahan dilakukan satu orang, seminggu sekali, dan catatannya bisa ditelusuri. Pengamannya, idempotency key, dibahas di Tahap 2.
+
+</Blok>
+
+<SkripLama daftar={["runsql-core","runsql"]} />
