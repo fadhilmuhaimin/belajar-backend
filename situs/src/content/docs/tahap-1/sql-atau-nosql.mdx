@@ -1,0 +1,170 @@
+---
+title: "1.13 SQL atau NoSQL"
+description: Sinta bertanya kenapa Rekeningo tidak memakai NoSQL yang katanya lebih cepat. Jawabannya ada di bentuk data dan aturan uang, bukan di kecepatan.
+---
+import Blok from "../../../components/Blok.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 5 menit · coba 2 menit · Prasyarat: [[B2.1]]</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Pilih database dari bentuk data dan aturan yang harus dijaga, bukan dari reputasi "lebih cepat". Data uang Rekeningo saling terkait, jadi butuh transaction, constraint, dan foreign key dari database.
+
+<figure class="bb-fig">
+<ol class="bb-flow is-rujuk">
+<li>Saldo, pembayaran, top-up → relasional</li>
+<li>Laporan harian → <code>GROUP BY</code></li>
+<li>Data berbentuk bebas → kolom <code>jsonb</code></li>
+</ol>
+<figcaption>Keputusan Rekeningo v1: satu PostgreSQL. Alasannya di blok Paham.</figcaption>
+</figure>
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Apakah document database selalu lebih cepat dari PostgreSQL?
+2. Data Rekeningo mana yang cocok disimpan sebagai dokumen?
+3. Apa yang hilang kalau aturan "saldo tidak boleh negatif" hanya ditulis di kode?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: setiap jenis database kuat untuk pola akses tertentu, dan data uang Rekeningo cocok dengan relasional.">
+
+Minggu pertama, Sinta membaca bahwa NoSQL lebih cepat dan lebih mudah di-scale. Ia bertanya ke Raka: "Kenapa kita pakai SQL?" Raka menjawab dengan fitur PRD v1, satu per satu.
+
+<details class="question">
+<summary>Tebak dulu: di fitur mana document database lebih sederhana?</summary>
+
+Jawabannya "Field baru di akun". Document database menerima field baru tanpa migration. Di tiga fitur lain, aturan yang dijaga PostgreSQL pindah ke kodemu. Pilih fiturnya di widget untuk melihat kenapa.
+
+</details>
+
+Pilih satu fitur. Bagian database yang mengerjakannya tersorot di kedua opsi. Oranye menandai kerja yang pindah ke kodemu. Setelah itu, ubah satu hal: pilih fitur lain dan lihat sorotannya pindah.
+
+<WidgetLama nama="banding" src="data/t1-banding-database.json" />
+
+Widget ini ilustrasi dari dokumentasi masing-masing jenis database. Lab repo ini hanya menjalankan PostgreSQL.
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Pertanyaan Sinta wajar. "NoSQL lebih cepat" sering terdengar, dan ia bertanggung jawab atas mandat yang mungkin membesar. Raka perlu jawaban yang bisa dipakai Sinta di depan direksi, bukan selera engineer.
+
+Raka menjawab dengan tiga kebutuhan PRD v1. Pembayaran mengubah dua saldo sekaligus. Saldo tidak boleh negatif. Ani dan Pak Hadi butuh laporan yang belum semuanya diketahui hari ini. Ketiganya soal **hubungan antar-data dan aturan**, bukan kecepatan.
+
+### Cara kerjanya
+
+"NoSQL" bukan satu jenis. Yang paling sering dibandingkan dengan SQL adalah **document database**, misalnya Firestore dan MongoDB. Bedanya ada di apa yang dijaga database untukmu:
+
+| Pertanyaan | Relasional (PostgreSQL) | Document database |
+|---|---|---|
+| Bentuk data | Tabel dengan skema tetap; perubahan lewat migration | Dokumen JSON; bentuk bisa berbeda antar-dokumen |
+| Hubungan antar-data | Foreign key dijaga database ([[B2.1]]) | Rujukan antar-dokumen dijaga kode aplikasi [perlu verifikasi per produk] |
+| Aturan data | `CHECK`, `UNIQUE`, `NOT NULL` di database | Validasi skema per dokumen (MongoDB) atau aturan keamanan (Firestore) |
+| Banyak perubahan sekaligus | Transaction, bagian inti sejak awal | Tersedia ([MongoDB](https://www.mongodb.com/docs/manual/core/transactions/), [Firestore](https://firebase.google.com/docs/firestore/manage-data/transactions)), dengan batasan masing-masing |
+| Query baru yang tidak direncanakan | `JOIN`, `GROUP BY` bebas | Biasanya butuh index baru atau bentuk dokumen baru |
+
+**"Lebih cepat" tergantung pola akses.** Membaca satu dokumen akun beserta profilnya memang sekali baca. Tapi laporan harian yang menjumlahkan banyak transaksi adalah kekuatan SQL. Dengan asumsi Tahap 1, puncaknya ±0,14 request per detik (dihitung di [[D1]]), jadi kecepatan mesin bukan faktor penentu.
+
+**Dokumentasi MongoDB sendiri** menyebut bahwa data yang disimpan dalam satu dokumen sering tidak butuh transaction multi-dokumen ([MongoDB: Transactions](https://www.mongodb.com/docs/manual/core/transactions/)). Artinya, model dokumen paling kuat saat satu aksi menyentuh satu dokumen. Pembayaran ke warung menyentuh dua saldo dan satu catatan.
+
+Keputusan Rekeningo v1: PostgreSQL untuk saldo, pembayaran, dan top-up. Kalau nanti ada data berbentuk bebas, kolom `jsonb` di PostgreSQL tersedia ([PostgreSQL: JSON types](https://www.postgresql.org/docs/current/datatype-json.html)). Keputusan backend sendiri dengan PostgreSQL sudah ditulis di [[A4]]; halaman ini menjawab bagian database-nya.
+
+### Di stack lain
+
+Halaman ini membandingkan jenis database, bukan kode framework. Yang perlu kamu tahu per stack: database yang biasanya dipakai.
+
+| Stack | Pilihan umum | Catatan |
+|---|---|---|
+| Go | PostgreSQL atau MySQL lewat `database/sql` | Tidak ada bawaan |
+| Node.js | PostgreSQL, MySQL, atau MongoDB lewat driver atau ORM | Tidak ada bawaan |
+| Laravel | Database relasional lewat Eloquent | ORM dirancang untuk SQL |
+| Django | Database relasional lewat ORM bawaan | ORM dirancang untuk SQL |
+| Supabase | PostgreSQL | Relasional, plus API otomatis |
+| Firebase | Firestore (document database) | Transaction tersedia; aturan data lewat Security Rules |
+| Flutter (di HP) | sqflite (SQLite) | Relasional juga; foreign key perlu dinyalakan ([[B2.1]]) |
+
+Baris di atas adalah ringkasan dari dokumentasi masing-masing, tidak dijalankan.
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### Trade-off: kapan pakai apa
+
+| Data | Pilihan | Alasan |
+|---|---|---|
+| Saldo, pembayaran, top-up | Relasional | Transaction, constraint, foreign key, dan catatan siapa/kapan/kenapa |
+| Laporan harian dan rekap Keuangan | Relasional | `GROUP BY` untuk pertanyaan yang belum diketahui hari ini |
+| Pengaturan per akun yang bentuknya sering berubah | `jsonb` di PostgreSQL | Bentuk bebas, tanpa database kedua |
+| Data dengan volume sangat besar dan pola akses sempit | Pertimbangkan database khusus | Diukur dulu saat angkanya ada, bukan ditebak di Tahap 1 |
+
+Keputusan ini salah kalau Rekeningo menyimpan data dengan volume besar yang hanya dibaca per kunci, misalnya notifikasi untuk jutaan user. Itu baru mungkin muncul di Tahap 5, dan diukur dulu di sana.
+
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| Database kedua untuk cache atau antrean | Tidak ada beban yang membutuhkannya di 100 penguji | Tahap 3 |
+| Read replica untuk laporan | Laporan v1 kecil dan jarang | Tahap 5 |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Benar atau salah: "Document database tidak punya transaction, jadi tidak bisa dipakai untuk uang."
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Salah. Firestore dan MongoDB punya transaction multi-dokumen. Alasan memilih SQL untuk uang di Rekeningo adalah constraint dan relasi yang dijaga database, ditambah kebutuhan laporan, bukan ketiadaan transaction.
+
+</details>
+
+**2.** Sinta bertanya: "Kalau NoSQL lebih cepat, kenapa tidak dipakai saja?" Jawab dalam dua kalimat.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Kecepatan bergantung pada pola akses, dan setiap jenis database cepat untuk pola yang berbeda. Di Tahap 1 puncaknya ±0,14 request per detik, jadi yang menentukan adalah kebenaran data uang, bukan kecepatan mesin.
+
+</details>
+
+**3.** Pengaturan notifikasi tiap akun bentuknya sering berubah. Perlu database kedua?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Tidak. Kolom `jsonb` di PostgreSQL cukup. Satu database lebih sedikit untuk di-backup, dimonitor, dan dijaga konsistensinya.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Pilihan database disertai alasan dari pola akses dan aturan data, bukan "lebih cepat".
+- [ ] Aturan uang (saldo tidak negatif, relasi ke akun) dijaga database, bukan hanya di kode.
+- [ ] Kalau memakai document database, aturan integritas antar-dokumen ditulis eksplisit dan dites.
+- [ ] Tidak ada database kedua tanpa angka beban yang membutuhkannya.
+
+### Bacaan lanjut
+
+- [MongoDB: Transactions](https://www.mongodb.com/docs/manual/core/transactions/)
+- [Firestore: Transactions and batched writes](https://firebase.google.com/docs/firestore/manage-data/transactions)
+- [PostgreSQL: JSON types](https://www.postgresql.org/docs/current/datatype-json.html)
+
+</Blok>
+
+<SkripLama daftar={["cerita","banding"]} />

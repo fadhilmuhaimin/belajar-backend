@@ -147,7 +147,7 @@
   "id": "B2.2-1",
   "halaman": "B2.2",
   "judul": "1.13 SQL atau NoSQL",
-  "url": "b-fondasi/b2-2-sql-vs-nosql/",
+  "url": "tahap-1/sql-atau-nosql/",
   "tanya": "Benar atau salah: \"Document database tidak punya transaction, jadi tidak bisa dipakai untuk uang.\"",
   "jawab": "Salah. Firestore dan MongoDB punya transaction multi-dokumen. Alasan memilih SQL untuk uang di Rekeningo adalah constraint dan relasi yang dijaga database, ditambah kebutuhan laporan, bukan ketiadaan transaction."
  },
@@ -155,16 +155,16 @@
   "id": "B2.2-2",
   "halaman": "B2.2",
   "judul": "1.13 SQL atau NoSQL",
-  "url": "b-fondasi/b2-2-sql-vs-nosql/",
-  "tanya": "Jelaskan kenapa \"lebih cepat\" bukan alasan yang cukup untuk memilih database di Tahap 1.",
-  "jawab": "Kecepatan bergantung pada pola akses, dan setiap jenis cepat untuk pola yang berbeda. Di Tahap 1, puncaknya ±0,14 request per detik, jadi mesin apa pun cukup. Yang menentukan adalah kebenaran data: transaction, constraint, dan kemudahan query yang belum terpikir hari ini."
+  "url": "tahap-1/sql-atau-nosql/",
+  "tanya": "Sinta bertanya: \"Kalau NoSQL lebih cepat, kenapa tidak dipakai saja?\" Jawab dalam dua kalimat.",
+  "jawab": "Kecepatan bergantung pada pola akses, dan setiap jenis database cepat untuk pola yang berbeda. Di Tahap 1 puncaknya ±0,14 request per detik, jadi yang menentukan adalah kebenaran data uang, bukan kecepatan mesin."
  },
  {
   "id": "B2.2-3",
   "halaman": "B2.2",
   "judul": "1.13 SQL atau NoSQL",
-  "url": "b-fondasi/b2-2-sql-vs-nosql/",
-  "tanya": "Pengaturan notifikasi tiap user bentuknya sering berubah. Perlu database kedua?",
+  "url": "tahap-1/sql-atau-nosql/",
+  "tanya": "Pengaturan notifikasi tiap akun bentuknya sering berubah. Perlu database kedua?",
   "jawab": "Tidak. Kolom `jsonb` di PostgreSQL cukup. Satu database lebih sedikit untuk di-backup, dimonitor, dan dijaga konsistensinya."
  },
  {
