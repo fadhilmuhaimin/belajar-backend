@@ -28,7 +28,8 @@ test("cerita.json sama dengan STORY.md (rentang user per tahap)", () => {
   }
 });
 
-// Ambil teks sumber: bagian bertanda --8<-- [start:x] di file lab, atau isi tab di halaman.
+// Ambil teks sumber: bagian bertanda --8<-- [start:x] di file lab, atau isi tab di halaman MDX
+// (<TabSet labels={[...]}> lalu <Fragment slot="tN">, keputusan 103).
 function source(spec, label) {
   if (spec.src && spec.md) return source({ src: spec.src }, label) + source({ md: spec.md }, label);
   if (spec.src) {
@@ -39,11 +40,16 @@ function source(spec, label) {
     return m[1];
   }
   const md = read(spec.md);
-  const start = md.indexOf(`=== "${label}"`);
-  assert.ok(start >= 0, `tab "${label}" di ${spec.md}`);
-  const rest = md.slice(start + 1);
-  const end = rest.search(/\n(=== "|## )/);
-  return rest.slice(0, end < 0 ? undefined : end);
+  for (const m of md.matchAll(/<TabSet [^>]*labels=\{\[([^\]]*)\]\}>/g)) {
+    const labels = [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
+    const i = labels.indexOf(label);
+    if (i < 0) continue;
+    const buka = md.indexOf(`<Fragment slot="t${i}">`, m.index);
+    assert.ok(buka >= 0, `slot t${i} untuk tab "${label}" di ${spec.md}`);
+    const tutup = md.indexOf("</Fragment>", buka);
+    return md.slice(buka, tutup);
+  }
+  assert.fail(`tab "${label}" di ${spec.md}`);
 }
 
 for (const file of ["b3-1-stackstep.json", "b3-2-stackstep.json"]) {

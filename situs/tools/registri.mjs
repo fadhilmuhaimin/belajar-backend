@@ -25,9 +25,9 @@ export function muat() {
   const d = JSON.parse(fs.readFileSync(path.join(DOCS, "widgets/data/cerita.json"), "utf8"));
   const hitung = {};
   for (const h of d.halaman) {
-    h.ada = fs.existsSync(path.join(DOCS, h.path)); // ada di situs lama (dasar urutan baca dan nomor)
     const mdx = path.join(SITE_DOCS, h.path.replace(/\.md$/, ".mdx"));
-    h.diporting = fs.existsSync(mdx) || fs.existsSync(path.join(SITE_DOCS, h.path)); // sudah ada di situs baru
+    h.ada = fs.existsSync(mdx) || fs.existsSync(path.join(SITE_DOCS, h.path)); // ada di situs (dasar urutan baca)
+    h.diporting = h.ada; // nama lama yang dipakai komponen; halaman yang belum ditulis tetap tampil sebagai "menyusul"
     delete h.nomor;
     const t = h.tahap;
     if (Number.isInteger(t) && !/^T\d$/.test(h.id)) {

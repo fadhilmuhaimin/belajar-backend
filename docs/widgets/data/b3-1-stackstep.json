@@ -102,7 +102,7 @@
       }
     },
     "Spring": {
-      "md": "docs/b-fondasi/b3-1-transaction.md",
+      "md": "situs/src/content/docs/b-fondasi/b3-1-transaction.mdx",
       "pola": {
         "begin": [
           "@Transactional"
@@ -139,7 +139,7 @@
         "begin": "Tidak ada BEGIN dari app: satu panggilan rpc = satu transaction implisit",
         "rb": "Tidak ada ROLLBACK dari app maupun dari fungsi: error membatalkan seluruh panggilan (lihat output rekaman)"
       },
-      "md": "docs/b-fondasi/b3-1-transaction.md"
+      "md": "situs/src/content/docs/b-fondasi/b3-1-transaction.mdx"
     }
   }
 }

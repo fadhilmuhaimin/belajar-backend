@@ -117,7 +117,7 @@
       }
     },
     "Spring · @Lock": {
-      "md": "docs/b-fondasi/b3-2-race-condition-lock.md",
+      "md": "situs/src/content/docs/b-fondasi/b3-2-race-condition-lock.mdx",
       "pola": {
         "mulai": [
           "@Transactional"
@@ -162,7 +162,7 @@
       }
     },
     "Firebase · transaction": {
-      "md": "docs/b-fondasi/b3-2-race-condition-lock.md",
+      "md": "situs/src/content/docs/b-fondasi/b3-2-race-condition-lock.mdx",
       "pola": {
         "mulai": [
           "runTransaction("
