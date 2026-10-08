@@ -43,8 +43,9 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.9 Fitur: bayar ke warung | Halaman baru (keputusan 137, 138) |
 | 1.10 Fitur: saldo, riwayat, laporan warung | Halaman baru (keputusan 139, 141) |
 | 1.11 Pertukaran saldo | Halaman baru, lab `pertukaran.txt`, widget React pertama `jumlah-total` (keputusan 143, 144) |
+| 1.12 Data modeling dan relasi | Ditulis ulang dari B2.1 ke tabel v1, lab `relasi.txt` (keputusan 145, 146) |
 
-Diperbarui 2026-10-08. 11 dari 42 halaman selesai; berikutnya 1.12. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
+Diperbarui 2026-10-08. 12 dari 42 halaman selesai; berikutnya 1.13. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 

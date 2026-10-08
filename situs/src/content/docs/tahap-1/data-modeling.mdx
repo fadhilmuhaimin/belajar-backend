@@ -1,0 +1,214 @@
+---
+title: "1.12 Data modeling dan relasi"
+description: Tabel apa yang ada, kolom apa yang disimpan, dan tabel mana menunjuk ke mana. Di Rekeningo v1, empat tabel menunjuk ke akun lewat lima foreign key.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import TabSet from "../../../components/TabSet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 7 menit · coba 2 menit · Prasyarat: [[t1-pertukaran-saldo]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Data modeling adalah memutuskan tabel apa yang ada dan tabel mana menunjuk ke mana. Di Rekeningo v1, setiap catatan menunjuk ke `akun`:
+
+<figure class="bb-fig">
+<ol class="bb-flow is-rujuk">
+<li><code>sesi.akun_id</code> → <code>akun</code></li>
+<li><code>topup.akun_id</code>, <code>admin_id</code> → <code>akun</code></li>
+<li><code>transaksi.dari</code>, <code>ke</code> → <code>akun</code></li>
+</ol>
+<figcaption>Rekaman lab api-t1: lima foreign key, semuanya ke akun(id).</figcaption>
+</figure>
+
+Foreign key membuat database menolak catatan yang menunjuk ke akun yang tidak ada.
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Baris `transaksi` menunjuk ke akun penerima lewat kolom `ke`. Apa yang menjamin akun itu benar-benar ada?
+2. Ani mengganti nama warungnya. Riwayat Budi sebaiknya menampilkan nama lama atau nama baru?
+3. Kapan `ON DELETE CASCADE` berbahaya untuk data uang?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: foreign key yang tidak ditegakkan sama saja dengan tidak ada, dan menghapus akun bisa memutus catatan uang.">
+
+Uji coba enam minggu selesai, dan Raka ingin membersihkan akun Warung Ani. Pembayaran Budi ke Ani masih tersimpan di tabel `transaksi`. Jalankan kedua panel. SQL-nya dijalankan sungguhan di browser dengan SQLite.
+
+<WidgetLama nama="runsql" src="data/t1-relasi.json" />
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Riwayat Budi di [[t1-fitur-saldo]] menampilkan nama warung, bukan nomor akun. Nama itu diambil dari tabel `akun` lewat kolom `transaksi.ke`. Kalau `ke` menunjuk ke akun yang sudah tidak ada, riwayat kehilangan penerimanya.
+
+Aturan Pak Hadi membuat ini lebih dari soal tampilan. Setiap rupiah harus bisa ditelusuri dari Keuangan sampai warung. Catatan yang menunjuk ke akun hilang adalah rupiah yang tidak bisa ditelusuri.
+
+### Cara kerjanya
+
+**1. Satu tabel `akun` untuk karyawan, warung, dan admin.** Kolom `jenis` membedakannya. Dengan satu tabel, `transaksi.dari` dan `transaksi.ke` cukup menunjuk ke satu tempat.
+
+<Snippet file="labs/api-t1/schema.sql" region="akun" lang="sql" title="labs/api-t1/schema.sql" />
+
+**2. Primary key dan foreign key.** `akun.id` adalah primary key: satu nilai, satu baris. `transaksi.ke REFERENCES akun(id)` adalah foreign key: nilainya harus ada di `akun.id`.
+
+<Snippet file="labs/api-t1/schema.sql" region="transaksi" lang="sql" title="labs/api-t1/schema.sql" />
+
+**3. Database yang menegakkan, bukan kode.** Rekaman lab dari database bersih: transaksi ke akun 999 ditolak, dan akun Warung Ani tidak bisa dihapus selama masih punya transaksi.
+
+<Snippet file="labs/api-t1/output/relasi.txt" lines="29:36" title="Rekaman lab: labs/api-t1/output/relasi.txt" />
+
+**4. Salin yang harus tetap, rujuk yang harus terkini.** Nama warung dirujuk lewat `transaksi.ke`, jadi riwayat menampilkan nama terbaru. Jumlah pembayaran disalin ke baris transaksi, karena Rp25.000 yang sudah dibayar tidak boleh berubah.
+
+<Snippet file="labs/api-t1/output/relasi.txt" lines="39:45" title="Rekaman lab: labs/api-t1/output/relasi.txt" />
+
+**5. Kolom `saldo` adalah angka turunan.** Nilainya seharusnya sama dengan semua top-up dikurangi pembayaran keluar ditambah pembayaran masuk. Di v1 angka itu disimpan langsung, bukan dihitung dari catatan. Ini akar pertanyaan Pak Hadi di [[t1-pertukaran-saldo]]: kalau saldo salah, dari baris mana kita tahu kenapa?
+
+### Di stack lain
+
+Yang sama di semua stack: relasinya jadi foreign key di database. Yang berbeda: **siapa yang menjalankan aturan saat baris induk dihapus**, database atau framework.
+
+<TabSet id="stack" labels={["SQL (Go)","Laravel","Django","Supabase","sqflite"]}>
+<Fragment slot="t0">
+
+*Dijalankan: PostgreSQL 17 di lab `api-t1`.*
+
+<Snippet lang="sql" code={`CREATE TABLE transaksi (
+  id bigserial PRIMARY KEY,
+  ke bigint NOT NULL REFERENCES akun(id)  -- bawaan: NO ACTION, hapus akun ditolak
+);`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** Go menulis skema sebagai SQL apa adanya. Aturannya terlihat langsung di file skema atau migration.</p>
+
+</Fragment>
+<Fragment slot="t1">
+
+*Tidak dijalankan. Dicek ke [Laravel: Foreign key constraints](https://laravel.com/docs/12.x/migrations#foreign-key-constraints).*
+
+<Snippet lang="php" code={`Schema::create('transaksi', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('ke')->constrained('akun')->restrictOnDelete();
+});`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** `constrained()` membuat foreign key di database, dan `restrictOnDelete()` menolak penghapusan akun.</p>
+
+</Fragment>
+<Fragment slot="t2">
+
+*Tidak dijalankan. Dicek ke [Django: ForeignKey.on_delete](https://docs.djangoproject.com/en/dev/ref/models/fields/#django.db.models.ForeignKey.on_delete).*
+
+<Snippet lang="python" code={`class Transaksi(models.Model):
+    ke = models.ForeignKey(Akun, on_delete=models.PROTECT, related_name="masuk")`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** `PROTECT` dijalankan Django di Python, bukan oleh database. Query SQL langsung tidak melewati aturan itu. Sejak Django 6.1 ada varian `DB_*` yang dikerjakan database.</p>
+
+</Fragment>
+<Fragment slot="t3">
+
+*Tidak dijalankan. Dicek ke [Supabase: Tables](https://supabase.com/docs/guides/database/tables).*
+
+<Snippet lang="sql" code={`-- supabase/migrations/..._transaksi.sql
+CREATE TABLE transaksi (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  ke bigint NOT NULL REFERENCES akun(id)
+);`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** ini PostgreSQL biasa, jadi perilakunya sama dengan tab SQL.</p>
+
+</Fragment>
+<Fragment slot="t4">
+
+*Tidak dijalankan. Dicek ke [SQLite: Foreign key support](https://www.sqlite.org/foreignkeys.html), bagian 2.*
+
+<Snippet lang="dart" code={`// sqflite memakai SQLite: foreign key mati sampai dinyalakan di tiap koneksi
+await db.execute('PRAGMA foreign_keys = ON');`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** SQLite tidak menegakkan foreign key secara bawaan. Dokumentasi SQLite menulis aturan ini harus dinyalakan terpisah untuk setiap koneksi. Panel Before di widget menunjukkan akibatnya.</p>
+
+</Fragment>
+</TabSet>
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### Trade-off: kapan pakai apa
+
+| Saat baris induk dihapus | Kelebihan | Kekurangan |
+|---|---|---|
+| `NO ACTION` / `RESTRICT` (tolak) | Riwayat aman, tidak ada baris yatim | Harus menghapus atau memindahkan anaknya dulu |
+| `CASCADE` (ikut hapus) | Praktis untuk data turunan, misalnya sesi login | Satu `DELETE` bisa menghapus catatan uang. Lihat toggle di widget |
+| `SET NULL` | Anak tetap ada | Kolom harus boleh kosong, dan kode harus siap dengan `NULL` |
+| Soft delete (kolom `nonaktif_pada`) | Tidak ada yang benar-benar hilang | Setiap query harus ingat menyaring akun yang nonaktif |
+
+Untuk akun dan transaksi, Rekeningo v1 memakai tolak. Akun warung yang selesai uji coba tidak dihapus.
+
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| Menonaktifkan akun tanpa menghapusnya | Uji coba 6 minggu tidak menutup akun mana pun | Tahap 2, saat karyawan keluar dan warung berganti |
+| Saldo dihitung dari catatan, bukan disimpan | Kolom saldo cukup untuk 100 akun; lihat trade-off di [[t1-pertukaran-saldo]] | Tahap 2: ledger |
+| Index untuk riwayat yang panjang | Riwayat v1 dibatasi 20 baris | Tahap 2: [[B2.3]] |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Ani mengganti nama warungnya. Riwayat Budi bulan lalu sebaiknya menampilkan nama lama atau nama baru, dan apa akibatnya ke desain tabel?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Untuk riwayat di app, nama terbaru lebih mudah dikenali, jadi nama cukup dirujuk lewat `transaksi.ke`. Kalau suatu saat butuh nama persis saat pembayaran, misalnya untuk kuitansi, nama itu harus disalin ke baris transaksi. Rekaman lab menunjukkan versi rujuk: "Warung Bu Ani" dengan jumlah tetap Rp25.000.
+
+</details>
+
+**2.** Kenapa jumlah pembayaran disalin ke baris `transaksi`, bukan dihitung ulang dari saldo?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Pembayaran adalah kejadian di masa lalu. Saldo terus berubah setelahnya, jadi tidak bisa dipakai untuk mengetahui berapa yang dibayar kemarin. Jumlah yang disalin adalah bukti yang tidak ikut berubah.
+
+</details>
+
+**3.** Raka menulis `ON DELETE CASCADE` di `transaksi.ke` supaya menghapus akun warung lebih mudah. Apa risikonya?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Menghapus satu akun warung ikut menghapus semua pembayaran ke warung itu. Saldo Budi sudah berkurang, tapi catatan ke mana uangnya pergi hilang. Untuk data uang, pakai tolak atau soft delete.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Setiap kolom yang menunjuk ke tabel lain punya foreign key di database, bukan hanya di kode.
+- [ ] Tidak ada `ON DELETE CASCADE` dari akun ke transaksi, top-up, atau catatan uang lain.
+- [ ] Data yang harus tetap seperti saat kejadian (jumlah, dan nanti harga atau kurs) disalin ke baris transaksinya.
+- [ ] Di app dengan sqflite, `PRAGMA foreign_keys = ON` dijalankan setiap kali database dibuka.
+
+### Bacaan lanjut
+
+- [PostgreSQL: Foreign keys](https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK)
+- [SQLite: Foreign key support](https://www.sqlite.org/foreignkeys.html)
+- Kleppmann & Riccomini, *Designing Data-Intensive Applications*, edisi 2 (2026), bab tentang model data
+
+</Blok>
+
+<SkripLama daftar={["runsql-core","runsql"]} />

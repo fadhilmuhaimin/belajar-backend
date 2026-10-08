@@ -4,6 +4,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 146: 1.12 ditulis ulang ke tabel v1; lab relasi (145).
 - 144: halaman 1.11 + widget React pertama jumlah-total (src/widgets/, data/widget/).
 - 143: lab api-t1 bagian pertukaran (SUM saldo = SUM top-up).
 - 142: pengaman loop (tree bersih + main), log stream-json.
@@ -47,8 +48,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.11 selesai (1.11 keputusan 143–144). Pengaman loop: keputusan 142.
-Halaman berikutnya: **1.12 "Data modeling dan relasi"** (`B2.1`, konsep lima blok, ★, isi lama ada di `situs/src/content/docs/b-fondasi/b2-1-data-modeling.mdx`; naskah: runsql, lab `b2-model`). Tulis ulang pembuka supaya menyambung dari 1.11 (tabel `akun`, `transaksi`, `topup` di lab api-t1 dan relasinya; pertanyaan Pak Hadi "dari baris mana"), lipat ke lima blok, pindahkan file ke `tahap-1/` bila pola 1.3/1.5 melakukannya (cek keputusan 126/130). Widget React baru di `situs/src/widgets/<nama>/` mengikuti pola jumlah-total (keputusan 144).
+2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.12 selesai (1.12 keputusan 145–146). Pengaman loop: keputusan 142.
+Halaman berikutnya: **1.13 "SQL atau NoSQL (pertanyaan Sinta)"** (`B2.2`, konsep, tanpa ★, widget banding, tanpa lab; isi lama `situs/src/content/docs/b-fondasi/b2-2-sql-vs-nosql.mdx`). Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran

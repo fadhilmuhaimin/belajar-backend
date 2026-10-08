@@ -11,18 +11,6 @@ let SQL;
 test.before(async () => { SQL = await initSqlJs({ locateFile: (f) => path.join(VENDOR, f) }); });
 const baris = (out) => out.table.values.map((r) => r.join("|"));
 
-test("B2.1: tanpa FK pesanan yatim, dengan FK DELETE ditolak, CASCADE menghapus riwayat", () => {
-  const s = load("b2-1-relasi");
-  const before = core.runPanel(SQL, s, "before", []);
-  assert.deepEqual(baris(before), ["1|budi|35000|(toko hilang)", "2|budi|18000|Apotek Sehat"]);
-  const after = core.runPanel(SQL, s, "after", []);
-  assert.equal(after.log[1].ok, false);
-  assert.match(after.log[1].result, /FOREIGN KEY/);
-  assert.deepEqual(baris(after), ["1|budi|35000|Warung Ani", "2|budi|18000|Apotek Sehat"]);
-  const cascade = core.runPanel(SQL, s, "after", s.toggles);
-  assert.deepEqual(baris(cascade), ["2|budi|18000|Apotek Sehat"]);
-});
-
 test("B2.3: tanpa index SCAN + TEMP B-TREE, index komposit SEARCH, index dibuat saja SCAN USING INDEX", () => {
   const s = load("b2-3-index");
   const plan = (out) => out.log[out.log.length - 1].result;
@@ -66,4 +54,15 @@ test("1.10 laporan: tanggal UTC memindahkan sarapan ke hari lain; WIB sama denga
   assert.deepEqual(baris(core.runPanel(SQL, s, "after", [])), wib);
   assert.equal(s.predict.options[s.predict.answer], "Rp67.000");
   for (const p of ["before", "after"]) assert.deepEqual(baris(core.runPanel(SQL, s, p, s.toggles)), wib);
+});
+
+test("1.12 relasi: tanpa FK pembayaran yatim, dengan FK DELETE ditolak, CASCADE menghapus catatan Budi", () => {
+  const s = load("t1-relasi");
+  assert.deepEqual(baris(core.runPanel(SQL, s, "before", [])), ["1|25000|(akun hilang)", "3|15000|Warung Sari"]);
+  const after = core.runPanel(SQL, s, "after", []);
+  assert.equal(after.log[1].ok, false);
+  assert.match(after.log[1].result, /FOREIGN KEY/);
+  assert.deepEqual(baris(after), ["1|25000|Warung Ani", "3|15000|Warung Sari"]);
+  assert.deepEqual(baris(core.runPanel(SQL, s, "after", s.toggles)), ["3|15000|Warung Sari"]);
+  assert.equal(s.predict.options[s.predict.answer], "Tetap ada, tapi penerimanya hilang");
 });
