@@ -454,7 +454,7 @@ window.ISTILAH = {
   "n": "1.21 Lapisan dasar",
   "s": "istilah-middleware",
   "t": "Middleware",
-  "u": "b-fondasi/b7-1-lapisan-dasar/"
+  "u": "tahap-1/lapisan-dasar/"
  },
  "Migration": {
   "b": "B4.1",
@@ -1302,7 +1302,7 @@ window.ISTILAH = {
   "n": "1.21 Lapisan dasar",
   "s": "istilah-middleware",
   "t": "Middleware",
-  "u": "b-fondasi/b7-1-lapisan-dasar/"
+  "u": "tahap-1/lapisan-dasar/"
  },
  "migration": {
   "b": "B4.1",

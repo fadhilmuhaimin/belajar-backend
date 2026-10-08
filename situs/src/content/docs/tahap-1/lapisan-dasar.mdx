@@ -1,0 +1,199 @@
+---
+title: "1.21 Lapisan dasar: handler tidak tahu SQL"
+description: Handler tahu HTTP, service tahu aturan uang, repo tahu SQL. Setelah M3, aturan arah ini diperiksa mesin lewat daftar import, karena compiler Go tidak memeriksanya.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import TabSet from "../../../components/TabSet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[t1-sql-injection]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Setiap lapisan hanya tahu satu hal: handler tahu HTTP, service tahu aturan uang, repo tahu SQL. Di lab, arah ini diperiksa mesin, bukan diingat.
+
+<figure class="bb-fig" role="img" aria-label="Request masuk ke handler, turun ke service, lalu ke repo. Handler tidak boleh mengimpor repo atau database/sql.">
+<ol class="bb-flow">
+<li><code>handler/</code> HTTP</li>
+<li><code>service/</code> aturan uang</li>
+<li><code>repo/</code> SQL</li>
+</ol>
+<figcaption>Panah hanya ke kanan. Handler yang mengimpor <code>database/sql</code> ditolak pemeriksa arah.</figcaption>
+</figure>
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Di lapisan mana "saldo kurang" diubah menjadi status `422`?
+2. Apakah compiler Go menolak handler yang menjalankan SQL sendiri?
+3. Handler tidak mengimpor repo, tapi saldo semua akun tetap sampai ke HP Dimas di M3. Kenapa?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: rumah setiap baris ditentukan oleh apa yang perlu ia ketahui.">
+
+Baris-baris di bawah diambil dari lab `api-t1`, dari fitur bayar dan pencarian warung. Pilih lapisan untuk tiap baris, lalu cek.
+
+<WidgetLama nama="pilah" src="data/t1-lapisan-pilah.json" />
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Setelah [[t1-m3]], Raka bertanya: di mana saja input dari app bisa berubah menjadi SQL? Kalau jawabannya "di mana saja", setiap review harus membaca setiap file. Kalau jawabannya "hanya di `repo/`", review injection dan gosec hanya perlu melihat satu folder.
+
+Kesalahan kedua M3 juga melewati lapisan. Repo mengembalikan struct `Akun` lengkap dengan saldo, service meneruskannya, dan handler mengirimnya apa adanya ke app. Di [[t1-struktur-folder]], Raka menulis aturan arah sebagai rencana. Setelah M3, aturan itu perlu diperiksa, bukan hanya ditulis.
+
+### Cara kerjanya
+
+| Lapisan | Tahu tentang | Tidak boleh tahu | Folder lab |
+|---|---|---|---|
+| Handler | HTTP: path, query, JSON, sesi, status code | SQL, tabel | `internal/handler` |
+| Service | Aturan uang: batas bayar, saldo cukup, hanya ke warung | HTTP, JSON, SQL | `internal/service` |
+| Repo | SQL, transaction, nama tabel | HTTP, aturan uang | `internal/repo` |
+
+Satu pencarian warung melewati ketiganya:
+
+<TabSet id="lapisan" labels={["handler","service","repo"]}>
+<Fragment slot="t0">
+
+<Snippet file="labs/api-t1/internal/handler/handler.go" region="cari-warung" lang="go" />
+
+</Fragment>
+<Fragment slot="t1">
+
+<Snippet file="labs/api-t1/internal/service/akun.go" region="cari-warung" lang="go" />
+
+</Fragment>
+<Fragment slot="t2">
+
+<Snippet file="labs/api-t1/internal/repo/repo.go" region="cari-warung" lang="go" />
+
+</Fragment>
+</TabSet>
+
+Handler membaca `cari` dari URL dan menulis JSON. Ia tidak pernah melihat teks SQL. Service di Tahap 1 masih tipis untuk pencarian, karena belum ada aturan uang di sana. Repo memegang satu-satunya query, dengan parameter `$1` dari ADR 4.
+
+**Arah import, menurut mesin.** Di Go, sebuah paket hanya bisa menyebut paket lain yang ia impor. Daftar import setiap lapisan bisa dibaca dengan `go list`:
+
+<Snippet file="labs/api-t1/output/lapisan.txt" lines="3:6" title="Rekaman lab: labs/api-t1/output/lapisan.txt" />
+
+Handler mengimpor `service` tapi tidak `repo` atau `database/sql`. Service mengimpor `repo` tapi tidak `net/http`. Repo mengimpor `database/sql` dan tidak mengimpor lapisan lain. Aturan itu ditulis sebagai daftar larangan di skrip pemeriksa lab:
+
+<Snippet file="labs/api-t1/cek_arah.py" region="aturan" lang="python" title="labs/api-t1/cek_arah.py" />
+
+<Snippet file="labs/api-t1/output/lapisan.txt" lines="10:14" title="Rekaman lab: labs/api-t1/output/lapisan.txt" />
+
+**Ubah satu hal: pintas buatan AI.** Lab menambah file sementara: handler yang menjalankan query pencarian sendiri. Query-nya bahkan memakai `$1`, jadi aman dari injection. Masalahnya ada di tempatnya:
+
+<Snippet file="labs/api-t1/output/lapisan.txt" lines="25:40" title="Rekaman lab: labs/api-t1/output/lapisan.txt" />
+
+Compiler menerima kode itu. Pemeriksa arah menolaknya, karena sekarang ada dua folder yang bisa menyusun SQL dari input. Pintas seperti ini sering muncul saat AI diminta "tambahkan endpoint secepatnya".
+
+**Yang tidak tertangkap daftar import.** Handler tidak mengimpor `repo`, tapi tetap menerima nilai bertipe `repo.WarungRingkas` dari service. Go mengizinkannya selama nama paketnya tidak ditulis. Akibatnya, tag JSON di struct milik repo menentukan apa yang sampai ke app:
+
+<Snippet file="labs/api-t1/internal/repo/repo.go" lines="11:16" lang="go" title="labs/api-t1/internal/repo/repo.go" />
+
+Di M3, struct inilah yang membawa saldo ke layar Dimas. Di Tahap 1, Raka memilih jalan sederhana dari ADR 4: repo punya struct khusus per layar, seperti `WarungRingkas`. Pemisahan tipe antar lapisan baru dibutuhkan saat tim bertambah.
+
+**Kapan berlebihan.** Untuk satu orang, lapisan berikut biasanya menambah file tanpa menjawab masalah:
+
+- Interface untuk setiap struct, padahal implementasinya hanya satu dan tidak pernah diganti di tes.
+- DTO, entity, dan model terpisah untuk data yang bentuknya sama.
+- Framework dependency injection, padahal `main.go` menyusun tiga objek.
+
+### Di stack lain
+
+Pemisahan lapisannya sama; yang berbeda adalah alat pemeriksa arahnya.
+
+| Stack | Alat pemeriksa arah | Sumber |
+|---|---|---|
+| Go | depguard: daftar paket yang dilarang per kelompok file; bisa dijalankan lewat golangci-lint | [depguard](https://github.com/OpenPeeDeeP/depguard) |
+| Express, NestJS | eslint-plugin-boundaries: aturan siapa boleh bergantung pada siapa | [eslint-plugin-boundaries](https://github.com/javierbrea/eslint-plugin-boundaries) |
+| Laravel | Deptrac: analisis statis yang memeriksa ketergantungan antar lapisan | [Deptrac](https://deptrac.github.io/deptrac/) |
+| Django | import-linter, contract `layers`: lapisan atas boleh mengimpor bawah, tidak sebaliknya | [import-linter: layers](https://import-linter.readthedocs.io/en/latest/contract_types/layers/) |
+
+Lab memakai skrip pendek karena aturannya hanya tiga baris. Logikanya sama dengan depguard: baca daftar import, bandingkan dengan larangan.
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### Trade-off: berapa lapisan untuk satu orang
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Semua di handler | Tercepat ditulis, satu file | SQL dan aturan uang tersebar; review injection harus membaca semua file |
+| **Tiga lapisan, arah diperiksa mesin** | SQL di satu folder; aturan uang di satu folder; pelanggaran tertangkap sebelum review | Satu fitur tersebar di tiga folder; pemeriksa harus dijalankan |
+| Banyak lapisan: port dan adapter, DI, DTO per lapisan | Berguna untuk tim besar dengan banyak sumber data | Lebih banyak kode perantara daripada fitur untuk satu orang |
+
+**Kapan pilihan ini salah.** Saat tiga tim bekerja di satu codebase, satu folder `service/` berisi aturan semua tim dan mulai bentrok. Di Tahap 4, lapisan dipecah lagi per modul ([[B7.2]]).
+
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| Interface untuk repo, supaya service bisa dites tanpa database | Belum ada tes otomatis sama sekali | [[C1]] |
+| Pemeriksa arah di CI | CI belum ada; skrip dijalankan sebelum commit | [[t1-tim-infra]] |
+| Tipe response terpisah dari struct repo | Satu orang, delapan operasi; struct per layar dari ADR 4 menutup kebocoran M3 | Tahap 4 |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Raka menambah fitur: admin menjalankan bayar dari skrip CSV, tanpa HTTP. Lapisan mana yang dipakai skrip itu?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Service dan repo. Skrip tidak menerima request, jadi handler tidak terlibat. Karena batas bayar dan cek saldo ada di service, keduanya otomatis berlaku untuk skrip.
+
+</details>
+
+**2.** `go build` lolos, tapi `cek_arah.py` gagal dengan "handler: mengimpor database/sql". Apa artinya, dan apa perbaikannya?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Ada handler yang menjalankan SQL sendiri. Kodenya sah bagi Go, tapi melanggar aturan arah. Pindahkan query ke repo, tambahkan fungsi service yang memanggilnya, lalu handler memanggil service.
+
+</details>
+
+**3.** Kenapa saldo bisa sampai ke app di M3 walaupun handler tidak mengimpor repo?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Handler menerima struct `repo.Akun` dari service dan mengirimnya apa adanya. Tag JSON di struct milik repo, termasuk `saldo`, ikut sampai ke app. Daftar import tidak menangkap tipe yang lewat, hanya paket yang diimpor.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Handler tidak berisi SQL, tidak mengimpor `database/sql`, dan tidak memutuskan aturan uang.
+- [ ] Service tidak membaca request, header, atau menulis status code.
+- [ ] Response tidak mengirim struct tabel apa adanya; field-nya hanya yang dibutuhkan layar.
+- [ ] Pemeriksa arah dijalankan dan lolos.
+- [ ] Setiap interface baru punya alasan: implementasi kedua, atau dipakai di tes.
+
+### Bacaan lanjut
+
+- [Martin Fowler: Presentation Domain Data Layering](https://martinfowler.com/bliki/PresentationDomainDataLayering.html)
+- [Martin Fowler: Service Layer](https://martinfowler.com/eaaCatalog/serviceLayer.html)
+- [Go: Organizing a Go module](https://go.dev/doc/modules/layout)
+
+</Blok>
+
+<SkripLama daftar={["cerita","pilah"]} />
