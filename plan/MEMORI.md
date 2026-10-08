@@ -4,6 +4,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 150: 1.15 + ADR 2; B1.2 dihapus, rujukan ke B6; penamaan resource pindah ke 1.18.
 - 149: 1.14 M1 (masalah pertama); 148: mode rentan -rentan m1, runsql setup per panel.
 - 147: 1.13 ditulis ulang (Sinta bertanya, banding fitur v1).
 - 146: 1.12 ditulis ulang ke tabel v1; lab relasi (145).
@@ -33,8 +34,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - Lab baru `labs/api-t1` (keputusan 132) dibangun per halaman; halaman lama memakai `labs/api-t1-lama`. Saat 1.6 sudah punya lab berfolder, ganti tiga Snippet komentar file di 1.6 dengan folder nyata. Pemilik menyetujui (2026-10-08) menghapus `labs/api-t1-lama`, tapi hanya setelah `grep -rn api-t1-lama situs/ labs/ tools/` kosong (tidak ada halaman atau Snippet yang merujuknya); bukti grep ditulis di PR hapus.
 - Kolom "Halaman" di tabel lab README memakai nomor lama sebelum registry v2; perbarui saat lab dipakai halaman baru.
 - 1.33 (E1, app versi lama): prasyarat B4.2 (Tahap 2) dibuang; isi lama memakai rekaman crash B4.2. Saat ditulis ulang, ADR 10 (expand lalu contract) harus berdiri sendiri.
-- 1.15 (B6) memuat ADR 2: tabel status saldo kurang 400/409/422 dengan kutipan RFC 9110 (isi lama A2, dihapus dari 1.5 di keputusan 130), plus problem+json.
-- 1.15 (B6) menyerap B1.2; 1.39 (F1) menyerap F2. Hapus halaman B1.2/F2 di PR yang sama, catat di KEPUTUSAN.
+- 1.39 (F1) menyerap F2: hapus halaman F2 dan entrinya di PR yang sama (pola keputusan 150), tes registri lalu butuh contoh entri lebur lain atau dihapus.
+- 1.18 (B1.4 kontrak OpenAPI) memuat penamaan resource (`POST /transfers` lawan `/doTransfer`, Google AIP-121) yang dulu di B1.2; isi lama ada di riwayat git (`git show 6d368b5:situs/src/content/docs/b-fondasi/b1-2-resource-error.mdx`).
 - Ilustrasi `situs/lama/assets/cerita/tahap-1.svg` (adegan cerita lama) tidak dipakai lagi sejak T1 dihapus; ganti dengan ilustrasi latar perusahaan Grup Lestari (naskah: 1 latar + M3–M6).
 - Tabel "Angka di tahap ini" Tahap 1 ikut hilang bersama T1; tulis ulang di 1.37/1.38 (estimasi), angka dari `tahap[0].asumsi`.
 - `/cara-pakai/` (A0) masih menjelaskan susunan 5 bagian lama; tulis ulang untuk lima blok dan tiga pintu setelah halaman Tahap 1 pertama jadi.
@@ -50,8 +51,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.14 selesai (1.14 keputusan 148–149). Pengaman loop: keputusan 142.
-Halaman berikutnya: **1.15 "Validation dua lapis + format error + ADR 2"** (`B6`, konsep + ADR, ★, peran mobile+backend, widget alur + hp, lab api-t1). Isi lama: `situs/src/content/docs/b-fondasi/b6-validation-error.mdx`; serap B1.2 (`b-fondasi/b1-2-resource-error.mdx`) dan hapus halamannya di PR yang sama (catat di KEPUTUSAN). ADR 2: `problem+json`, 400 vs 422, constraint `saldo >= 0`; tabel status saldo kurang 400/409/422 dengan kutipan RFC 9110 (isi lama A2, dihapus dari 1.5 di keputusan 130). Rekaman yang bisa dipakai: `m1.txt` (500 vs 422), `bayar.txt` (422 saldo kurang, 422 field ke), `pertukaran.txt` G (constraint). Halaman ini panjang: pertimbangkan widget alur dari rekaman 422 (pola `skenario/t1-bayar.json`).
+2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.15 selesai (1.15 keputusan 150). Pengaman loop: keputusan 142.
+Halaman berikutnya: **1.16 "HTTP: method, status, header"** (`B1.1`, konsep, ★, widget pilah + stackstep, lab api-t1). Isi lama `situs/src/content/docs/b-fondasi/b1-1-http.mdx` (masih merujuk `api-t1-lama`?): pindah ke `tahap-1/http.mdx`, contoh dari rekaman `api-t1` (201 + Location di `bayar.txt`, 401 di `login.txt`, 404 di `riwayat.txt`, 405 dari router Go bila ada rekaman, 422, 500 di `m1.txt`). Cek apakah widget stackstep lama butuh `api-t1-lama`; kalau ya, ganti atau buang.
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 

@@ -1,0 +1,201 @@
+---
+title: "1.15 Validation dua lapis dan format error"
+description: App boleh memeriksa bentuk; hanya backend memutuskan uang; database menjaga pagar terakhir. Error dijawab dengan status yang tepat dan satu format, problem+json. Memuat ADR 2.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import TabSet from "../../../components/TabSet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 8 menit · coba 2 menit · Prasyarat: [[t1-m1]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Validation memeriksa input sebelum ia mengubah data, di empat tempat:
+
+<figure class="bb-fig">
+<ol class="bb-flow">
+<li>App: bentuk</li>
+<li>Handler: <code>400</code></li>
+<li>Service: <code>422</code></li>
+<li class="is-good">DB: constraint</li>
+</ol>
+<figcaption>Lapisan pertama yang menolak menentukan jawaban untuk app.</figcaption>
+</figure>
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. App sudah mematikan tombol Bayar untuk nominal minus. Kenapa backend tetap harus memeriksa?
+2. Kapan request dijawab `400`, dan kapan `422`?
+3. App ingin menampilkan pesan di kolom yang salah. Field mana di body error yang dipakai?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: aturan uang diperiksa di service sebelum uang disentuh, dan constraint menjaga uang tapi tidak memberi pesan yang berguna untuk app.">
+
+Ikuti pembayaran -5000 dari HP Budi sampai jawaban server. Status, body, dan pesan database di widget ini diambil dari rekaman lab.
+
+<WidgetLama nama="alur" src="data/skenario/t1-validasi.json" />
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Di [[t1-m1]], Raka mengira masalahnya satu `if` yang lupa di app. Request yang sama bisa dikirim tanpa app: dengan `curl`, dengan app versi lama, atau oleh karyawan yang penasaran. Pemeriksaan di app membantu Budi, tapi tidak melindungi uang.
+
+### Cara kerjanya
+
+Setiap lapisan memeriksa hal yang berbeda, dan gagal dengan cara yang berbeda:
+
+| Lapisan | Memeriksa | Kalau gagal | Contoh di rekaman |
+|---|---|---|---|
+| App | Bentuk, supaya Budi langsung tahu salahnya | Pesan di bawah input | Tidak direkam; lab tidak punya app |
+| Handler | JSON valid, tipe data benar | `400` | Body yang bukan JSON |
+| Service | Aturan Rekeningo: 0 < jumlah ≤ Rp200.000, penerima warung, saldo cukup | `422` dengan field yang salah | `m1.txt` bagian D, `bayar.txt` |
+| Database | Constraint: `CHECK (saldo >= 0)`, `CHECK (jumlah > 0)`, foreign key | `500`, lalu bugnya diperbaiki | `m1.txt` bagian C |
+
+Service memeriksa semua aturan sebelum uang disentuh:
+
+<Snippet file="labs/api-t1/internal/service/bayar.go" region="bayar" lang="go" title="labs/api-t1/internal/service/bayar.go" />
+
+Rekaman lab dari database bersih, versi benar. Nominal minus dijawab `422`, dan saldo tidak berubah:
+
+<Snippet file="labs/api-t1/output/m1.txt" lines="66:76" title="Rekaman lab: labs/api-t1/output/m1.txt" />
+
+**Format error: RFC 9457 (Problem Details).** Semua error Rekeningo memakai satu bentuk JSON dengan `Content-Type: application/problem+json` ([RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)):
+
+| Field | Isi | Siapa yang membaca |
+|---|---|---|
+| `type` | URI yang mengenali jenis masalah, misalnya `/problems/saldo-kurang` | **App.** RFC menyebutnya pengenal utama |
+| `title` | Ringkasan untuk manusia, tetap sama untuk jenis masalah yang sama | Developer, log |
+| `status` | Salinan status code | Log, alat debug |
+| `detail` | Penjelasan kejadian ini | Manusia saja. RFC melarang client mem-parse field ini |
+
+RFC 9457 mengizinkan **extension member**, yaitu field tambahan milikmu sendiri ([§3.2](https://www.rfc-editor.org/rfc/rfc9457.html#name-extension-members)). Rekeningo memakai `errors` untuk daftar field yang salah, supaya app tidak perlu mengambil nama field dari kalimat.
+
+<Snippet file="labs/api-t1/internal/handler/handler.go" region="problem" lang="go" title="labs/api-t1/internal/handler/handler.go" />
+
+Dua jenis `422` dari rekaman pembayaran: saldo kurang, dan penerima yang bukan warung.
+
+<Snippet file="labs/api-t1/output/bayar.txt" lines="51:69" title="Rekaman lab: labs/api-t1/output/bayar.txt" />
+
+**Error handling.** Tiga kebiasaan yang membuat error bisa dilacak:
+
+- **Petakan sekali, di handler.** Service mengembalikan error bertipe (`ErrValidasi`, `ErrSaldoKurang`). Hanya handler yang mengubahnya jadi status code.
+- **Jangan buang error.** Error yang ditangkap lalu diabaikan membuat bug tidak terlihat. Kalau sengaja diabaikan, tulis alasannya.
+- **Detail ke log, pesan umum ke client.** Pesan database bisa membocorkan nama tabel dan kolom. Rekaman M1 bagian C menunjukkan pesan constraint hanya di log server.
+
+### Di stack lain
+
+Yang sama di semua stack: aturan uang ditulis di server, dan database punya constraint sendiri. Yang berbeda: format error bawaan saat validasi gagal.
+
+| Stack | Format error bawaan | Untuk RFC 9457 |
+|---|---|---|
+| Go (`net/http`) | Tidak ada; `http.Error` menulis teks biasa | Tulis sendiri, seperti di lab |
+| Express | Error handler bawaan menulis HTML di production, stack trace di development ([dokumentasi](https://expressjs.com/en/guide/error-handling.html)) | Tulis error handler sendiri |
+| Laravel | Validasi gagal: `422` dengan `{"message": ..., "errors": {...}}` ([dokumentasi](https://laravel.com/docs/12.x/validation)) | Ubah lewat exception handler |
+| Django | Tidak ada format JSON bawaan untuk error API | Tulis sendiri atau lewat library |
+| Spring | `ProblemDetail` bawaan, mengikuti RFC 9457 ([dokumentasi](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html)) | Sudah tersedia |
+| Supabase (PostgREST) | `{"code", "details", "hint", "message"}` dengan kode error PostgreSQL ([dokumentasi](https://docs.postgrest.org/en/stable/references/errors.html)) | Bentuknya tetap; app memetakan `code` |
+
+Hanya baris Go yang dijalankan di lab. Baris lain dicek ke dokumentasi dan tidak dijalankan.
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### ADR 2: status dan format error, constraint uang
+
+**Kebutuhan.** M1 menunjukkan tiga hal: aturan uang belum punya tempat, database belum punya pagar, dan app tidak bisa membedakan "input salah" dari "server rusak". App Budi harus bisa menampilkan pesan yang tepat di kolom yang tepat.
+
+**Opsi status untuk aturan uang yang dilanggar**, misalnya saldo kurang. HTTP tidak punya status khusus untuk itu:
+
+| Status | Definisi di RFC 9110 | Cocok? |
+|---|---|---|
+| [`400`](https://www.rfc-editor.org/rfc/rfc9110.html#status.400) Bad Request | Server menganggap ada kesalahan di sisi client, misalnya sintaks request rusak | Kurang tepat. Request Budi tidak rusak |
+| [`409`](https://www.rfc-editor.org/rfc/rfc9110.html#status.409) Conflict | Request bentrok dengan keadaan resource saat ini, dan user mungkin bisa menyelesaikannya lalu mengirim ulang | Masuk akal. Saldo memang keadaan saat ini |
+| [`422`](https://www.rfc-editor.org/rfc/rfc9110.html#status.422) Unprocessable Content | Format dan sintaks benar, tapi instruksi di dalamnya tidak bisa diproses | **Dipilih** |
+
+**Opsi format error:** format bawaan framework, RFC 9457, atau format buatan sendiri. Format bawaan berbeda antar stack (tabel di blok Paham). Format buatan sendiri harus didokumentasikan sendiri. RFC 9457 sudah dikenal library di banyak bahasa.
+
+**Opsi tempat aturan:** hanya di app (rekaman M1: saldo berubah), hanya constraint (rekaman M1: `500` tanpa pesan yang berguna), atau service ditambah constraint.
+
+**Yang dipilih.**
+
+1. `400` untuk bentuk yang salah, `422` untuk aturan Rekeningo yang dilanggar. `409` disimpan untuk bentrok versi data.
+2. Semua error memakai `application/problem+json`; app membaca `type`, dan `errors` untuk field yang salah.
+3. Aturan uang di service; constraint `saldo_tidak_negatif` dan `jumlah_positif` di skema sebagai pagar terakhir.
+
+**Kapan keputusan ini salah.** Kalau tim lain atau client pihak ketiga sudah memakai `409` untuk saldo kurang, konsistensi lebih penting daripada pilihan ini. Kalau `500` dari constraint sering muncul di log, artinya ada aturan yang belum dipindah ke service.
+
+**Yang merevisinya nanti.** Request yang diulang karena sinyal putus butuh jawaban yang sama untuk request yang sama. Itu dibahas di Tahap 2 bersama idempotency key ([[E3]]).
+
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| Daftar `type` error yang didokumentasikan untuk app | Satu engineer memegang app dan backend; daftarnya masih lima | [[B1.4]] (kontrak OpenAPI) |
+| Pesan error dalam beberapa bahasa | Semua penguji berbahasa Indonesia | Tahap 6 |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Pembayaran ke akun Dimas (karyawan, bukan warung) ditolak di app. Di server tidak ada pemeriksaan penerima, tapi tabel punya foreign key. Apa yang diterima `curl` yang mengirim pembayaran ke Dimas?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+`201`, karena akun Dimas ada, jadi foreign key tidak menolak. Constraint hanya menjaga hal yang ditulis di skema. Aturan "penerima harus warung" adalah aturan Rekeningo, jadi tempatnya di service. Rekaman `bayar.txt` versi benar menjawabnya `422` dengan `field: "ke"`.
+
+</details>
+
+**2.** App menampilkan pesan dengan `if (body['detail'].contains('Saldo'))`. Apa yang salah?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+`detail` ditulis untuk manusia dan bisa berubah kapan saja, misalnya dirapikan atau diterjemahkan. RFC 9457 melarang client mem-parse-nya. App harus memilih pesan dari `type`, misalnya `/problems/saldo-kurang`.
+
+</details>
+
+**3.** Error dari database ditangkap dengan `catch (e) { return null; }`. Apa risikonya?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Error dibuang: tidak tercatat di log, dan pemanggil mengira tidak ada data. Bug jadi tidak terlihat, dan Budi mungkin melihat layar kosong tanpa penjelasan. Minimal catat errornya, lalu kembalikan error yang dipetakan ke `500`.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Setiap aturan yang ada di app juga ada di server, terutama yang menyangkut uang dan izin.
+- [ ] Bentuk salah dijawab `400`, aturan Rekeningo dijawab `422`.
+- [ ] Semua error memakai `application/problem+json`, dan app membaca `type`, bukan `detail`.
+- [ ] Tabel punya constraint untuk invarian uang: `CHECK`, `NOT NULL`, foreign key.
+- [ ] Tidak ada `catch` atau `if err != nil` yang mengabaikan error tanpa mencatatnya.
+- [ ] Response `500` tidak berisi pesan database atau stack trace.
+
+### Bacaan lanjut
+
+- [OWASP: Input Validation Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)
+- [RFC 9457: Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457.html)
+- [RFC 9110: status 400, 409, 422](https://www.rfc-editor.org/rfc/rfc9110.html#status.4xx)
+- [PostgreSQL: Constraints](https://www.postgresql.org/docs/current/ddl-constraints.html)
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />

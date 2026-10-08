@@ -170,26 +170,26 @@
  {
   "id": "B6-1",
   "halaman": "B6",
-  "judul": "1.15 Validation dan error handling",
-  "url": "b-fondasi/b6-validation-error/",
-  "tanya": "Transfer ke akun sendiri ditolak di app. Di server tidak ada pemeriksaan, tapi tabel punya `CHECK (dari <> ke)`. Apa yang diterima `curl` yang mengirim transfer ke diri sendiri?",
-  "jawab": "`500` dengan pesan umum. PostgreSQL menolak baris itu, jadi data tetap benar. Tapi user tidak mendapat pesan yang jelas, dan error ini seharusnya memicu perbaikan: pindahkan aturannya ke logika bisnis, supaya dijawab `422` dengan `field: \"ke\"`."
+  "judul": "1.15 Validation dua lapis dan format error",
+  "url": "tahap-1/validation-error/",
+  "tanya": "Pembayaran ke akun Dimas (karyawan, bukan warung) ditolak di app. Di server tidak ada pemeriksaan penerima, tapi tabel punya foreign key. Apa yang diterima `curl` yang mengirim pembayaran ke Dimas?",
+  "jawab": "`201`, karena akun Dimas ada, jadi foreign key tidak menolak. Constraint hanya menjaga hal yang ditulis di skema. Aturan \"penerima harus warung\" adalah aturan Rekeningo, jadi tempatnya di service. Rekaman `bayar.txt` versi benar menjawabnya `422` dengan `field: \"ke\"`."
  },
  {
   "id": "B6-2",
   "halaman": "B6",
-  "judul": "1.15 Validation dan error handling",
-  "url": "b-fondasi/b6-validation-error/",
-  "tanya": "Jelaskan kenapa `UPDATE ... WHERE saldo >= jumlah` tidak cukup melindungi dari jumlah negatif.",
-  "jawab": "Dengan jumlah −70.000, syaratnya jadi `saldo >= -70000`, yang selalu benar untuk saldo positif. Lalu `saldo - (-70000)` menambah saldo. Syarat itu melindungi dari saldo kurang, bukan dari input yang tidak masuk akal. Rekaman lab menunjukkan saldo Budi naik ke Rp170.000."
+  "judul": "1.15 Validation dua lapis dan format error",
+  "url": "tahap-1/validation-error/",
+  "tanya": "App menampilkan pesan dengan `if (body['detail'].contains('Saldo'))`. Apa yang salah?",
+  "jawab": "`detail` ditulis untuk manusia dan bisa berubah kapan saja, misalnya dirapikan atau diterjemahkan. RFC 9457 melarang client mem-parse-nya. App harus memilih pesan dari `type`, misalnya `/problems/saldo-kurang`."
  },
  {
   "id": "B6-3",
   "halaman": "B6",
-  "judul": "1.15 Validation dan error handling",
-  "url": "b-fondasi/b6-validation-error/",
+  "judul": "1.15 Validation dua lapis dan format error",
+  "url": "tahap-1/validation-error/",
   "tanya": "Error dari database ditangkap dengan `catch (e) { return null; }`. Apa risikonya?",
-  "jawab": "Error di-swallow: tidak tercatat di log, dan pemanggil mengira tidak ada data. Bug jadi tidak terlihat, dan user mungkin melihat layar kosong tanpa penjelasan. Minimal catat errornya, lalu kembalikan error yang bisa dipetakan ke `500`."
+  "jawab": "Error dibuang: tidak tercatat di log, dan pemanggil mengira tidak ada data. Bug jadi tidak terlihat, dan Budi mungkin melihat layar kosong tanpa penjelasan. Minimal catat errornya, lalu kembalikan error yang dipetakan ke `500`."
  },
  {
   "id": "B1.1-1",
@@ -214,30 +214,6 @@
   "url": "b-fondasi/b1-1-http/",
   "tanya": "Response `201` membawa header `Location: /transfers/1`. Apa gunanya bagi app?",
   "jawab": "App tahu alamat transfer yang baru dibuat. App bisa membukanya lagi, mis. untuk layar detail atau bukti transfer, tanpa menyusun URL sendiri."
- },
- {
-  "id": "B1.2-1",
-  "halaman": "B1.2",
-  "judul": "Resource dan format error",
-  "url": "b-fondasi/b1-2-resource-error/",
-  "tanya": "App menampilkan pesan dengan `if (body['detail'].contains('Saldo'))`. Apa yang salah?",
-  "jawab": "`detail` ditulis untuk manusia dan bisa berubah kapan saja, mis. diterjemahkan atau dirapikan. RFC 9457 melarang client mem-parse-nya. App harus memilih pesan dari `type`, lalu mengambil angka dari extension member seperti `saldo`."
- },
- {
-  "id": "B1.2-2",
-  "halaman": "B1.2",
-  "judul": "Resource dan format error",
-  "url": "b-fondasi/b1-2-resource-error/",
-  "tanya": "Jelaskan kenapa `POST /transfers` lebih baik daripada `POST /doTransfer`, padahal keduanya bekerja.",
-  "jawab": "Method sudah menyatakan aksinya. Dengan nama benda, satu path bisa melayani beberapa aksi: `POST /transfers` membuat, `GET /transfers/7` membaca. Pola URL jadi bisa ditebak, dan log serta metric per resource lebih mudah dikelompokkan."
- },
- {
-  "id": "B1.2-3",
-  "halaman": "B1.2",
-  "judul": "Resource dan format error",
-  "url": "b-fondasi/b1-2-resource-error/",
-  "tanya": "Transfer ke `cici` (akun tidak ada) dijawab `422` dengan `errors: [{\"field\": \"ke\", ...}]`. Bagaimana app memakainya?",
-  "jawab": "App menampilkan pesan di bawah input \"Kirim ke\", bukan toast umum. Field `field` memberi tahu input mana yang salah. Lihat layar ketiga di widget."
  },
  {
   "id": "B1.4-1",

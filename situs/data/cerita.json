@@ -592,11 +592,13 @@
     },
     {
       "id": "B6",
-      "judul": "Validation dan error handling",
+      "judul": "Validation dua lapis dan format error",
       "tahap": 1,
       "topik": "API",
-      "path": "b-fondasi/b6-validation-error.md",
-      "prasyarat": [],
+      "path": "tahap-1/validation-error.md",
+      "prasyarat": [
+        "t1-m1"
+      ],
       "inti": true,
       "masalah": "Nominal transfer negatif lolos ke database",
       "ada": true,
@@ -609,7 +611,6 @@
       "adr": [
         2
       ],
-      "lama": true,
       "nomor": "1.15",
       "menit": 10
     },
@@ -635,24 +636,6 @@
       "menit": 10
     },
     {
-      "id": "B1.2",
-      "judul": "Resource dan format error",
-      "tahap": 1,
-      "topik": "API",
-      "path": "b-fondasi/b1-2-resource-error.md",
-      "prasyarat": [
-        "B1.1"
-      ],
-      "masalah": "App menampilkan pesan error yang tidak jelas",
-      "ada": true,
-      "bagian": 4,
-      "peran": [
-        "backend"
-      ],
-      "lebur_ke": "B6",
-      "menit": 8
-    },
-    {
       "id": "t1-m2",
       "judul": "amount atau nominal",
       "tahap": 1,
@@ -675,7 +658,7 @@
       "topik": "API",
       "path": "b-fondasi/b1-4-openapi.md",
       "prasyarat": [
-        "B1.2"
+        "B6"
       ],
       "masalah": "App dan backend beda paham soal bentuk JSON",
       "ada": true,

@@ -1,0 +1,202 @@
+{
+  "versi": 2,
+  "judul": "Budi membayar -5000: siapa yang menolak, dan apa yang dilihat HP-nya",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/api-t1/output/m1.txt",
+    "fileVarian": "labs/api-t1/output/m1.txt",
+    "catatan": "Server Go (labs/api-t1) + PostgreSQL 17, direkam dengan curl -i dari database bersih. Jalur utama: versi benar (bagian D). Ubah satu hal: flag -rentan m1 dengan constraint di skema (bagian C)."
+  },
+  "pengantar": "Jalankan jalur versi benar sampai HP Budi menampilkan pesan. Setelah itu centang 'Ubah satu hal' dan lihat apa yang terjadi kalau service lupa memeriksa jumlah.",
+  "komponen": [
+    {
+      "id": "app",
+      "label": "App Budi"
+    },
+    {
+      "id": "api",
+      "label": "Monolith API",
+      "lapisan": [
+        "handler",
+        "service",
+        "repo"
+      ]
+    },
+    {
+      "id": "db",
+      "label": "PostgreSQL"
+    }
+  ],
+  "perangkat": [
+    {
+      "id": "budi",
+      "label": "HP Budi"
+    }
+  ],
+  "layarAwal": {
+    "budi": {
+      "judul": "Bayar",
+      "waktu": "16.05",
+      "saldo": 250000,
+      "isi": [
+        {
+          "jenis": "input",
+          "label": "Warung",
+          "nilai": "Warung Ani"
+        },
+        {
+          "jenis": "input",
+          "label": "Nominal",
+          "nilai": "-5000"
+        },
+        {
+          "jenis": "tombol",
+          "teks": "Bayar"
+        }
+      ]
+    }
+  },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: service versi minggu 1 belum memeriksa jumlah, tapi constraint saldo sudah ada di database. Apa yang diterima HP Budi?",
+    "options": [
+      "201, pembayaran berhasil",
+      "422 dengan pesan di kolom nominal",
+      "500, terjadi kesalahan di server"
+    ],
+    "answer": 2,
+    "varian": true,
+    "explain": "Constraint menolak UPDATE yang membuat saldo Ani negatif, jadi uangnya aman. Tapi handler hanya tahu ada error dari database, dan menjawab 500. Budi tidak tahu bahwa nominalnya yang salah. Rekaman lab bagian C."
+  },
+  "langkah": [
+    {
+      "dari": "app",
+      "ke": "api",
+      "lapisan": "handler",
+      "judul": "Budi menekan Bayar",
+      "kirim": "POST /transfers\nAuthorization: Bearer <token sesi Budi>\n{\"ke\": 418, \"jumlah\": -5000}",
+      "jelas": "App uji minggu 1 belum memeriksa nominal. Pemeriksaan di app membantu Budi, tapi request yang sama bisa dikirim tanpa app.",
+      "layar": {
+        "budi": {
+          "judul": "Bayar",
+          "waktu": "16.05",
+          "saldo": 250000,
+          "isi": [
+            {
+              "jenis": "proses",
+              "teks": "Membayar..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "api",
+      "lapisan": "handler",
+      "judul": "Handler memeriksa bentuk",
+      "kirim": "JSON valid             ✓\n\"jumlah\" bertipe angka  ✓",
+      "jelas": "Handler hanya memeriksa bentuk request. Body yang bukan JSON dijawab 400 di sini, sebelum service dipanggil."
+    },
+    {
+      "dari": "api",
+      "lapisan": "service",
+      "judul": "Service menolak jumlah",
+      "kirim": "0 < -5000 ≤ 200000   ✗  → ErrValidasi{jumlah}",
+      "jelas": "Aturan uang diperiksa sebelum uang disentuh. Tidak ada begin, tidak ada UPDATE.",
+      "nada": "warn"
+    },
+    {
+      "dari": "api",
+      "ke": "app",
+      "lapisan": "handler",
+      "judul": "422 dengan nama field yang salah",
+      "kirim": "422 Unprocessable Entity\nContent-Type: application/problem+json\n{\"type\":\"/problems/validasi\",\"title\":\"Input tidak memenuhi aturan\",\"status\":422,\n \"errors\":[{\"field\":\"jumlah\",\"pesan\":\"harus lebih dari 0 dan paling banyak 200000\"}]}",
+      "jelas": "Rekaman lab bagian D: 422, saldo Budi tetap Rp250.000. App memakai field \"jumlah\" untuk menandai kolom yang salah.",
+      "nada": "good",
+      "layar": {
+        "budi": {
+          "judul": "Bayar",
+          "waktu": "16.05",
+          "saldo": 250000,
+          "isi": [
+            {
+              "jenis": "input",
+              "label": "Nominal",
+              "nilai": "-5000"
+            },
+            {
+              "jenis": "toast",
+              "teks": "Nominal harus lebih dari 0",
+              "nada": "warn"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "varian": {
+    "label": "service versi minggu 1 tanpa pemeriksaan jumlah, constraint sudah ada",
+    "mulai": 0,
+    "langkah": [
+      {
+        "dari": "app",
+        "ke": "api",
+        "lapisan": "handler",
+        "judul": "Budi menekan Bayar",
+        "kirim": "POST /transfers\n{\"ke\": 418, \"jumlah\": -5000}",
+        "jelas": "Server dijalankan dengan flag -rentan m1.",
+        "layar": {
+          "budi": {
+            "judul": "Bayar",
+            "waktu": "16.05",
+            "saldo": 250000,
+            "isi": [
+              {
+                "jenis": "proses",
+                "teks": "Membayar..."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "dari": "api",
+        "lapisan": "service",
+        "judul": "Service tidak memeriksa jumlah",
+        "kirim": "saldo Budi 250000 ≥ -5000   ✓",
+        "jelas": "Pemeriksaan saldo lolos, karena 250000 tidak lebih kecil dari -5000.",
+        "nada": "warn"
+      },
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "repo",
+        "judul": "Constraint menolak saldo Ani yang negatif",
+        "kirim": "ERROR: new row for relation \"akun\" violates check constraint \"saldo_tidak_negatif\" (SQLSTATE 23514)",
+        "jelas": "Baris ini ada di log server pada rekaman. Transaction dibatalkan, saldo Budi dan Ani tidak berubah. Database menjaga pagar terakhir."
+      },
+      {
+        "dari": "api",
+        "ke": "app",
+        "lapisan": "handler",
+        "judul": "500: terjadi kesalahan di server",
+        "kirim": "500 Internal Server Error\nContent-Type: application/problem+json\n{\"type\":\"/problems/internal\",\"title\":\"Terjadi kesalahan di server\",\"status\":500}",
+        "jelas": "Uangnya aman, tapi jawabannya salah alamat: 500 berarti server yang rusak, padahal nominal Budi yang salah.",
+        "nada": "warn",
+        "layar": {
+          "budi": {
+            "judul": "Bayar",
+            "waktu": "16.05",
+            "saldo": 250000,
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Terjadi kesalahan di server",
+                "nada": "warn"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
