@@ -1,0 +1,132 @@
+---
+title: "3.6 Caching dan invalidation"
+---
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="B9" />
+
+<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[B2.3]] · Jalur inti</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Apakah membaca dari Redis selalu lebih cepat dari PostgreSQL?
+2. Harga berubah di database. Kapan cache yang hanya memakai TTL ikut berubah?
+3. Data Rekeningo mana yang tidak boleh dilayani dari cache?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+## Inti
+
+Cache menyimpan salinan hasil yang sering dibaca. Salinan bisa tertinggal dari aslinya, jadi hapus cache saat data berubah.
+
+<WidgetLama nama="arsitektur" tahap={3} />
+
+## Lihat sendiri
+
+Ani menaikkan harga, Budi membuka katalog. Perintah Redis dan hasilnya di widget ini direkam dari lab.
+
+<WidgetLama nama="alur" src="data/skenario/b9-cache.json" />
+
+## Kenapa ini ada
+
+Di Tahap 3, katalog Warung Ani dibuka ribuan kali per jam makan siang. Isinya hampir tidak pernah berubah: menu dan harga yang sama.
+
+Setelah pool dan worker dibenahi ([[B2.5]], [[B10.1]]), Raka melihat metric berikutnya. Query katalog dan ringkasan penjualan per toko termasuk yang paling sering jalan. Redis sudah ada di arsitektur Tahap 3, jadi Raka memasang cache.
+
+Dua hari kemudian, Ani protes: pembeli membayar dengan harga lama setelah ia menaikkan harga.
+
+## Cara kerjanya
+
+**Cache-aside**, pola yang paling umum: aplikasi memeriksa cache, lalu database kalau kosong, lalu mengisi cache.
+
+<Snippet file="labs/b9-cache/run.py" region="cacheaside" lang="python" />
+
+<Snippet file="labs/b9-cache/output/cache.txt" title="Output rekaman: labs/b9-cache/output/cache.txt" />
+
+Tiga hal dari rekaman:
+
+1. **TTL saja berarti data boleh stale selama TTL.** Bagian A: database sudah Rp28.000, cache masih Rp25.000 dengan sisa 299 detik.
+2. **Hapus saat menulis.** Bagian B: `DEL` setelah `UPDATE` membuat baca berikutnya mengambil harga baru. TTL tetap dipasang sebagai pengaman kalau ada jalur tulis yang lupa menghapus.
+3. **Cache tidak selalu lebih cepat.** Bagian C: untuk satu baris dengan primary key, PostgreSQL di localhost sama cepatnya dengan Redis. Cache baru berarti untuk hasil yang berat dihitung: ringkasan 200.000 pesanan turun dari ±9 ms ke ±0,2 ms. Ini angka satu mesin lab, ukur di sistemmu.
+
+**Yang tidak masuk cache di Rekeningo:** saldo, status pembayaran, dan apa pun yang dipakai untuk memutuskan uang. Keputusan uang dibaca dari database, di dalam transaction ([[B3.1]], [[B3.2]]).
+
+**Kesalahan urutan.** `DEL` sebelum `UPDATE` bisa membuat request lain mengisi cache dengan nilai lama di sela-sela keduanya. Urutan yang dipakai di lab: tulis database dulu, lalu hapus cache.
+
+## Di stack lain
+
+Yang sama di semua stack: baca cache, isi kalau kosong, hapus saat data berubah. Yang berbeda: API-nya. Hanya Python (redis-py) yang dijalankan di lab, karena Python tidak termasuk stack yang dibandingkan di sini. Baris lain dicek ke dokumentasi.
+
+| Stack | Baca atau isi | Hapus saat berubah | Sumber |
+|---|---|---|---|
+| Go | `rdb.Get` lalu `rdb.Set(ctx, k, v, 5*time.Minute)` (go-redis) | `rdb.Del` | [go-redis](https://redis.io/docs/latest/develop/clients/go/) |
+| Express | `client.get` / `client.set(k, v, { EX: 300 })` (node-redis) | `client.del` | [node-redis](https://redis.io/docs/latest/develop/clients/nodejs/) |
+| Laravel | `Cache::remember('k', 300, fn () => ...)` | `Cache::forget('k')` | [Laravel: Cache](https://laravel.com/docs/12.x/cache) |
+| Django | `cache.get_or_set('k', fungsi, 300)` | `cache.delete('k')` | [Django: Cache](https://docs.djangoproject.com/en/stable/topics/cache/) |
+| Spring | `@Cacheable("harga")` | `@CacheEvict("harga")` | [Spring: Cache annotations](https://docs.spring.io/spring-framework/reference/integration/cache/annotations.html) |
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Tanpa cache | Selalu benar | Query berat dijalankan berulang |
+| Cache dengan TTL saja | Sederhana | Stale selama TTL; TTL pendek mengurangi manfaat cache |
+| Cache + hapus saat menulis | Hampir selalu segar | Setiap jalur tulis harus ingat menghapus; satu jalur lupa = stale sampai TTL |
+| Cache di app (HP) | Tanpa request sama sekali | Paling sulit dibatalkan dari server |
+
+## Cek diri
+
+**1.** Rekaman menunjukkan Redis tidak lebih cepat dari PostgreSQL untuk satu baris. Kenapa cache tetap berguna di Tahap 3?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Manfaat cache ada pada query yang berat dan sering, mis. ringkasan 200.000 pesanan (±9 ms menjadi ±0,2 ms). Cache juga mengurangi beban database saat ribuan request membaca hasil yang sama. Untuk satu baris dengan index, cache sering tidak sepadan dengan risiko stale.
+
+</details>
+
+**2.** Jelaskan kenapa saldo tidak dibaca dari cache, walau sering dibuka.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Saldo dipakai untuk memutuskan transfer dan pembayaran. Saldo stale bisa membuat penarikan lolos padahal uangnya sudah dipakai. Keputusan uang harus dibaca dari database, di dalam transaction, dengan update atomik ([[B3.2]]).
+
+</details>
+
+**3.** Ada tiga endpoint yang bisa mengubah harga produk, dan hanya dua yang menghapus cache. Apa akibatnya, dan apa pengamannya?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Perubahan lewat endpoint ketiga tidak terlihat sampai TTL habis. Pengamannya: TTL yang tetap dipasang, dan menaruh logika "ubah harga" di satu fungsi di logika bisnis ([[B7.1]]) yang selalu menghapus cache.
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Ada alasan terukur untuk cache: query berat atau sering, dibuktikan metric ([[C2]]).
+- [ ] Setiap cache punya TTL, dan jalur tulis menghapus atau memperbarui key-nya.
+- [ ] Urutan: tulis database dulu, baru hapus cache.
+- [ ] Tidak ada data uang, izin, atau status pembayaran yang diputuskan dari cache.
+- [ ] Nama key memuat semua yang memengaruhi hasil (mis. id toko, bahasa).
+
+## Bacaan lanjut
+
+- [Redis: Client guides](https://redis.io/docs/latest/develop/clients/)
+- [AWS: Caching best practices](https://aws.amazon.com/caching/best-practices/)
+- [RFC 9111: HTTP Caching](https://www.rfc-editor.org/rfc/rfc9111.html)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
