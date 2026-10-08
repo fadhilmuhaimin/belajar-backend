@@ -64,6 +64,33 @@ jobs:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
         run: bash tools/cek_batch.sh
 
+  pesan_commit:
+    name: pesan commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # butuh seluruh commit PR, bukan hanya HEAD
+      # CLAUDE.md "commit": tanpa trailer Co-Authored-By dan tanpa tanda alat AI (keputusan 110).
+      # "Claude" dicari peka huruf besar supaya nama file CLAUDE.md di pesan tetap boleh.
+      - name: Tolak trailer dan tanda AI di pesan commit
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          gagal=0
+          for sha in $(git rev-list "$BASE..$HEAD"); do
+            pesan=$(git log -1 --format=%B "$sha")
+            if printf '%s' "$pesan" | grep -qiE 'co-authored-by' || printf '%s' "$pesan" | grep -qE 'Claude'; then
+              echo "::error::Pesan commit $sha mengandung Co-Authored-By atau Claude"
+              printf '%s\n' "$pesan"
+              gagal=1
+            fi
+          done
+          exit $gagal
+
   gitleaks:
     name: gitleaks
     runs-on: ubuntu-latest

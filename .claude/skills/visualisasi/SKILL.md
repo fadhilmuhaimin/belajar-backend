@@ -1,0 +1,90 @@
+---
+name: visualisasi
+description: Cara memecah konsep backend yang rumit (race condition, transaction, pool, replica, outbox, circuit breaker, enkripsi) menjadi potongan visual dan interaksi yang bisa dicerna, lalu memilih bentuknya: diagram statis, stepper, widget hands-on, simulasi, atau scrollytelling. Gunakan skill ini SETIAP KALI membuat atau mengubah widget, diagram, ilustrasi, layout halaman, atau saat halaman punya bagian "Lihat sendiri" / "Coba". Juga saat memutuskan apakah suatu konsep butuh visual sama sekali.
+---
+
+# Visualisasi Rekeningo Tech Journey
+
+Tujuan: pembaca melihat mekanisme, bukan membaca deskripsi mekanisme. Setiap visual menjawab satu pertanyaan yang bisa ditulis sebagai judulnya.
+
+## Dasar yang dipakai
+
+Mayer: kata + gambar; potongan yang diatur pembaca; sinyal; teks dekat gambar; buang dekorasi. Explorable explanations: ubah satu hal, lihat akibatnya. Riset scrollytelling 2026: interaktif menang dalam keterlibatan dan kepatuhan, setara dalam pemahaman; jadi interaksi dipakai untuk mengunci, bukan menggantikan penjelasan.
+
+## Langkah 1: pecah konsepnya dulu, sebelum memilih bentuk
+
+Tulis di komentar sementara:
+1. Pertanyaan yang dijawab visual ini (satu kalimat).
+2. Aktor (≤ 4): mis. App Budi, API, PostgreSQL.
+3. Langkah (≤ 10) dalam urutan waktu.
+4. Satu "ubah satu hal" yang mengubah hasil.
+5. Hasil yang bisa ditebak pembaca (≤ 4 pilihan).
+Kalau salah satu tidak bisa ditulis, konsepnya belum siap divisualkan; kembali ke teks.
+
+## Langkah 2: pilih bentuk dari tabel ini
+
+| Kalau konsepnya... | Bentuk | Widget yang ada / dibuat |
+| --- | --- | --- |
+| Siapa mengerjakan apa (tanggung jawab) | Pilah kartu ke kelompok, lalu cek | pilah |
+| Urutan kejadian antar komponen, dengan apa yang dilihat user | Stepper dengan kolom komponen dan mockup HP | alur |
+| Dua cara dibandingkan untuk fitur yang sama | Dua arsitektur berdampingan, pilih fitur, simpul tersorot | banding |
+| Perilaku SQL (constraint, transaction, index, plan) | Before/After yang benar-benar dijalankan di browser | runsql (PGlite) |
+| Dua request bersamaan (race) | Replay rekaman dua client, tebak saldo akhir | race |
+| Satu langkah netral → baris kode per stack | Stepper lintas stack | stackstep |
+| Mekanisme berparameter (rate limit, pool, Little's Law, replica lag) | Simulasi dengan slider dan jam simulasi; pembaca mengubah satu parameter | ember; baru: pool, lag |
+| Rumus dengan angka cerita | Kalkulator: geser input, lihat output dan kalimat kesimpulan | kalkulator |
+| Menemukan kesalahan di kode | Tandai baris; umpan balik per baris | cari-bug |
+| Invarian uang | Hitung total sebelum/sesudah | jumlah-total |
+| Alur panjang (webhook, OAuth, outbox) yang butuh cerita | Scrollytelling: teks di kiri, diagram berubah saat scroll, maks 8 langkah | baru: scrolly |
+| Struktur statis (arsitektur tahap, folder) | Diagram kotak-panah bertoken, ≤ 6 elemen | arsitektur, bb-flow |
+| Adegan cerita | Ilustrasi SVG datar dari tools/ilustrasi_cerita.py | ilustrasi |
+
+Animasi yang berjalan sendiri tidak dipakai. Semua gerak dipicu klik, scroll, atau slider; `prefers-reduced-motion` dihormati.
+
+## Langkah 3: aturan yang dipaksakan
+
+- Satu visual per blok "Coba". Halaman dengan empat widget dipecah jadi dua halaman.
+- Visual pertama sesudah "Inti" utuh tanpa scroll di 375×667 (diperiksa `tools/layar.mjs`).
+- Teks penjelas berada di samping atau di bawah elemen yang dijelaskan, bukan di paragraf jauh di atas.
+- Warna lewat token (system/good/warn/old) dan lolos `contrast.py` di gelap dan terang. Tidak ada heksadesimal di komponen.
+- Label widget adalah elemen DOM (bisa diterjemahkan browser), bukan teks dalam SVG, kecuali ilustrasi.
+- Setiap widget punya chip sumber: Rekaman lab / Ilustrasi / Asumsi.
+- Setiap widget punya "tebak dulu" sebelum hasil dan "ubah satu hal" sesudahnya.
+- Keyboard: semua kontrol bisa dioperasikan Tab/Enter; status hasil memakai role="status".
+- Data widget: JSON divalidasi Zod; logika murni di `.ts` tanpa DOM, dites Vitest.
+
+## Tech stack visual (dicek ke registry saat dipakai)
+
+| Kebutuhan | Pilihan | Alasan |
+| --- | --- | --- |
+| Komponen interaktif | React 19 + TypeScript sebagai Astro island | Keputusan PROPOSAL; hydrate hanya di halaman yang perlu |
+| SQL live | PGlite (PostgreSQL WASM, < 3 MB gzip) | Planner dan constraint asli PostgreSQL; dimuat saat tombol pertama ditekan |
+| Diagram statis | SVG/HTML bertoken yang ditulis sendiri atau dibuat skrip | Palet dan kontras terjaga; Mermaid tidak dipakai di halaman |
+| Scrollytelling | IntersectionObserver + state React; tanpa library | Cukup untuk ≤ 8 langkah; hindari dependency besar |
+| Animasi transisi kecil | CSS transition; Motion (motion.dev) hanya bila CSS tidak cukup [perlu verifikasi: versi] | Ringan |
+| Grafik data (p95, RPS) | Observable Plot atau D3 untuk kasus khusus [perlu verifikasi: versi] | Standar, bertoken |
+| Mockup HP | Komponen hp yang ada, dipindah ke React | Sudah terbukti |
+| Tangkapan dan uji visual | Playwright, screenshot diff | Sudah di CI |
+
+## Prosedur membuat widget baru
+
+1. Tulis pemecahan konsep (Langkah 1) di plan/MEMORI.md.
+2. Buat data JSON dan skema Zod dulu, lalu logika murni `.ts` + tes.
+3. Baru komponen React. Tanpa teks hard-coded; semua dari JSON.
+4. Tangkap layar 375 dan 1366, gelap dan terang. Lihat sendiri: apakah dalam 3 detik jelas apa yang harus diklik?
+5. Uji "ubah satu hal": hasilnya harus berbeda dan perbedaannya terlihat tanpa membaca teks.
+
+<examples>
+<example>
+Buruk: satu halaman race condition dengan animasi otomatis dua bola bergerak, tanpa tebakan, hasil akhir hanya di teks.
+Baik: replay rekaman langkah demi langkah dengan tombol Berikutnya; tebakan saldo akhir sebelum mulai; empat cara (tanpa lock, FOR UPDATE, UPDATE atomik, optimistic) sebagai tab; chip "Rekaman lab b3-race".
+</example>
+<example>
+Buruk: diagram arsitektur Tahap 5 dengan 14 kotak dan 20 panah.
+Baik: lima zona (client, edge, service, data, operasi), ≤ 6 kotak per zona, komponen baru berwarna, komponen lama abu; detail per zona di halaman ADR-nya.
+</example>
+<example>
+Buruk: kalimat "pool habis karena koneksi ditahan lama" tanpa visual.
+Baik: simulasi pool 10 koneksi dengan slider "lama panggilan notifikasi" 0–2.000 ms; pembaca melihat antrean tumbuh saat W naik walau RPS tetap 17; kalimat kesimpulan berubah mengikuti angka.
+</example>
+</examples>

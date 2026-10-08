@@ -1,6 +1,6 @@
 # Status
 
-Diperbarui: 2026-10-08 (akhir sesi fase 1). Catatan singkat tentang keadaan panduan dan pekerjaan yang masih terbuka. Keputusan dan alasannya ada di [KEPUTUSAN.md](KEPUTUSAN.md).
+Diperbarui: 2026-10-08 (setelah fase 1; arahan baru keputusan 109 terpasang, menunggu "mulai"). Catatan singkat tentang keadaan panduan dan pekerjaan yang masih terbuka. Keputusan dan alasannya ada di [KEPUTUSAN.md](KEPUTUSAN.md).
 
 ## Keadaan sekarang
 
@@ -10,6 +10,10 @@ Diperbarui: 2026-10-08 (akhir sesi fase 1). Catatan singkat tentang keadaan pand
 - Istilah teknis ditulis dalam bahasa Inggris, idiom terjemahan literal sudah diganti, dan fragmen kalimat di prosa diberi predikat (keputusan 86, 87, 93). Tabel angka di kelima halaman tahap berlabel asumsi per baris (keputusan 88).
 - Halaman Tahap 1 yang memakai materi Tahap 2 punya penjelasan singkat di tempat (keputusan 92).
 - Link yang menolak bot sudah diverifikasi lewat API metadata (keputusan 98).
+
+## Arahan baru (keputusan 109)
+
+Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAHAP-1.md` (42 halaman, enam template). `CLAUDE.md` baru dan tiga skill (`gaya-bahasa`, `visualisasi`, `analisis-kritis`) terpasang 2026-10-08. Tugas 0 dan 1 dimulai saat pemilik mengetik "mulai". Tabel fase di bawah adalah keadaan yang sudah dicapai, bukan rencana ke depan.
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 
