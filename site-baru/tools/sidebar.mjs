@@ -17,7 +17,8 @@ function grupTahap(d, t) {
   const items = [];
   for (const h of hs) {
     if (/^T\d$/.test(h.id)) { items.push(item(h)); continue; }
-    const kel = h.kelompok || "Lainnya";
+    if (!h.kelompok) { items.push(item(h)); continue; } // tahap tanpa kelompok: daftar langsung, tanpa sub-grup
+    const kel = h.kelompok;
     let g = items.find((x) => x.items && x.label === kel);
     if (!g) { g = { label: kel, collapsed: false, items: [] }; items.push(g); }
     g.items.push(item(h));
