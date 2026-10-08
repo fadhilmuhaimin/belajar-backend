@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import react from "@astrojs/react";
 import { sidebar } from "./tools/sidebar.mjs";
 import remarkRujukan from "./src/plugins/remark-rujukan.mjs";
 import remarkAbbr from "./src/plugins/remark-abbr.mjs";
@@ -29,6 +30,8 @@ export default defineConfig({
       tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 2 },
       credits: false,
     }),
+    // Widget baru: island React + TypeScript, di-hydrate hanya di halaman yang memakainya (keputusan 116).
+    react(),
   ],
   markdown: {
     // Astro 7 memakai Sätteri sebagai pemroses Markdown bawaan; plugin remark butuh pemroses unified.

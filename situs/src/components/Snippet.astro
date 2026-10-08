@@ -26,6 +26,7 @@ if (code != null) {
   // Setiap entri boleh membawa rentang baris: "path:awal:akhir"
   src = files.map((f) => {
     const m = f.match(/^(.*?)(?::(\d*):(\d*))?$/);
+    if (!m) throw new Error(`Snippet: entri file tidak terbaca: ${f}`);
     const abs = path.join(ROOT, m[1]);
     if (!fs.existsSync(abs)) throw new Error(`Snippet: file ${m[1]} tidak ada`);
     let isi = fs.readFileSync(abs, "utf8").replace(/\n+$/, "");
