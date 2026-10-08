@@ -4,11 +4,11 @@ Gaya datar, palet sama dengan situs/src/styles/tema.css. Teks di dalam gambar di
 (>= 20 unit viewBox) supaya terbaca di layar 375 px. Setiap gambar membawa informasi
 cerita (siapa, di mana, apa yang terlihat di layar), bukan dekorasi.
 
-Jalankan: python3 tools/ilustrasi_cerita.py   → docs/assets/cerita/*.svg
+Jalankan: python3 tools/ilustrasi_cerita.py   → situs/lama/assets/cerita/*.svg
 """
 import pathlib
 
-OUT = pathlib.Path(__file__).resolve().parent.parent / "docs/assets/cerita"
+OUT = pathlib.Path(__file__).resolve().parent.parent / "situs/lama/assets/cerita"
 NAVY, BLUE, BLUE_L, MINT, MINT_L, ORANGE, ORANGE_L = "#051027", "#0075EB", "#E4F0FF", "#0F766E", "#DEFFF8", "#D26B00", "#FFF4E6"
 GRAY, GRAY_L, INK, WHITE = "#6B7280", "#F3F4F7", "#1F2937", "#FFFFFF"
 FONT = "font-family=\"Figtree, 'Segoe UI', system-ui, sans-serif\""

@@ -6,12 +6,12 @@ const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "../..");
 const json = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), "utf8"));
-const core = require(path.join(ROOT, "docs/widgets/alur-core.js"));
-const pilah = require(path.join(ROOT, "docs/widgets/pilah.js"));
-const banding = require(path.join(ROOT, "docs/widgets/banding.js"));
+const core = require(path.join(ROOT, "situs/lama/widgets/alur-core.js"));
+const pilah = require(path.join(ROOT, "situs/lama/widgets/pilah.js"));
+const banding = require(path.join(ROOT, "situs/lama/widgets/banding.js"));
 
 test("a2-alur (v1 lewat adapter): valid, varian mengganti ekor, predict terjawab di varian", () => {
-  const raw = json("docs/widgets/data/a2-alur.json");
+  const raw = json("situs/lama/widgets/data/a2-alur.json");
   const d = core.normalize(raw);
   assert.deepEqual(core.validate(d), []);
   assert.deepEqual(d.komponen.map((k) => k.label), raw.jalur);
@@ -23,7 +23,7 @@ test("a2-alur (v1 lewat adapter): valid, varian mengganti ekor, predict terjawab
 });
 
 test("a2-alur: layar HP terakhir berlaku sampai ada layar baru, paket di tengah komponen", () => {
-  const d = core.normalize(json("docs/widgets/data/a2-alur.json"));
+  const d = core.normalize(json("situs/lama/widgets/data/a2-alur.json"));
   const list = core.steps(d, false);
   assert.equal(core.layarAt(d, list, -1, "hp"), d.layarAwal.hp);
   assert.equal(core.layarAt(d, list, 3, "hp"), list[0].layar.hp);
@@ -47,7 +47,7 @@ test("alur v2: validasi menolak id tidak dikenal, narasi kosong, lapisan salah, 
   assert.match(rusak((d) => { delete d.sumber; }), /sumber wajib/);
   assert.match(rusak((d) => { d.komponen.push({ id: "app", label: "lagi" }); }), /id ganda app/);
   // v1: indeks jalur di luar jangkauan tidak boleh hilang diam-diam lewat adapter
-  const v1 = json("docs/widgets/data/a2-alur.json");
+  const v1 = json("situs/lama/widgets/data/a2-alur.json");
   v1.langkah[2].ke = 7;
   assert.match(core.validate(core.normalize(v1)).join(" | "), /langkah 3: ke tidak dikenal '#7'/);
 });
@@ -66,12 +66,12 @@ test("alur v2: banyak perangkat, masing-masing dengan layar terakhirnya sendiri"
 });
 
 test("a2-alur: saldo konsisten (Rp100.000 - Rp70.000 = Rp30.000)", () => {
-  const d = json("docs/widgets/data/a2-alur.json");
+  const d = json("situs/lama/widgets/data/a2-alur.json");
   assert.equal(d.hpAwal.saldo - 70000, d.langkah[d.langkah.length - 1].hp.saldo);
 });
 
 test("a1-pilah: jawaban menunjuk kelompok yang ada, alasan terisi", () => {
-  const d = json("docs/widgets/data/a1-pilah.json");
+  const d = json("situs/lama/widgets/data/a1-pilah.json");
   for (const it of d.item) {
     assert.ok(it.jawab >= 0 && it.jawab < d.kelompok.length, it.teks);
     assert.ok(it.kenapa.length > 20, it.teks);
@@ -80,18 +80,18 @@ test("a1-pilah: jawaban menunjuk kelompok yang ada, alasan terisi", () => {
 });
 
 test("a4-banding: semua simpul yang disorot ada, catatan lengkap", () => {
-  assert.deepEqual(banding.cekData(json("docs/widgets/data/a4-banding.json")), []);
+  assert.deepEqual(banding.cekData(json("situs/lama/widgets/data/a4-banding.json")), []);
 });
 
 test("a1-hp: layar valid", () => {
-  const d = json("docs/widgets/data/a1-hp.json");
+  const d = json("situs/lama/widgets/data/a1-hp.json");
   const jenis = ["baris", "input", "tombol", "toast", "proses", "teks"];
   for (const l of d.layar) for (const it of l.isi) assert.ok(jenis.includes(it.jenis), it.jenis);
 });
 
 test("A2 'Kenapa ini ada': rujukan (langkah N) menunjuk langkah yang benar", () => {
   const md = fs.readFileSync(path.join(ROOT, "situs/src/content/docs/a-gambaran/a2-perjalanan-request.mdx"), "utf8");
-  const d = json("docs/widgets/data/a2-alur.json");
+  const d = json("situs/lama/widgets/data/a2-alur.json");
   const teks = (n) => { const s = d.langkah[n - 1]; return [s.judul, s.kirim || "", s.jelas].join(" "); };
   const refs = [...md.matchAll(/\(langkah (\d+)\)/g)].map((m) => Number(m[1]));
   assert.ok(refs.length >= 6, "rujukan langkah ada");
@@ -107,6 +107,6 @@ test("A2 'Kenapa ini ada': rujukan (langkah N) menunjuk langkah yang benar", () 
 });
 
 test("a2-alur: setiap langkah punya data atau sengaja tanpa data (tidak ada bar kosong)", () => {
-  const d = json("docs/widgets/data/a2-alur.json");
+  const d = json("situs/lama/widgets/data/a2-alur.json");
   for (const st of d.langkah.concat(d.varian.langkah)) assert.ok(st.kirim && st.kirim.trim(), st.judul);
 });

@@ -1,4 +1,4 @@
-// Singkatan/istilah dari includes/istilah.md (`*[istilah]: definisi`, dibuat tools/build_istilah.py) dibungkus
+// Singkatan/istilah dari situs/data/istilah.md (`*[istilah]: definisi`, dibuat tools/build_istilah.py) dibungkus
 // <abbr title="definisi">, padanan ekstensi `abbr` Python-Markdown. Setiap kemunculan dibungkus; skrip lama
 // javascripts/istilah.js lalu menandai kemunculan pertama per bagian sebagai tooltip. Kunci terpanjang dicocokkan
 // lebih dulu (keputusan 84). Teks di heading, link, dan kode tidak disentuh.
@@ -9,7 +9,7 @@ import { ROOT } from "../../tools/registri.mjs";
 const LEWATI = new Set(["code", "inlineCode", "link", "linkReference", "heading", "mdxJsxTextElement"]);
 
 function muatIstilah() {
-  const teks = fs.readFileSync(path.join(ROOT, "includes/istilah.md"), "utf8");
+  const teks = fs.readFileSync(path.join(ROOT, "situs/data/istilah.md"), "utf8");
   const def = {};
   for (const m of teks.matchAll(/^\*\[([^\]]+)\]:\s*(.+)$/gm)) def[m[1]] = m[2].trim();
   const kunci = Object.keys(def).sort((a, b) => b.length - a.length);

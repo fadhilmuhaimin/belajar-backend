@@ -1,4 +1,4 @@
-// Registry halaman dari docs/widgets/data/cerita.json, padanan tools/registri.py untuk situs Astro.
+// Registry halaman dari situs/data/cerita.json, padanan tools/registri.py untuk situs Astro.
 // ID halaman (A1, B3.1) hanya kunci internal; yang tampil: nomor "T.N" (urutan baca di tahap T, dihitung dari
 // semua halaman di registry supaya nomor tidak bergeser) dan judul.
 import fs from "node:fs";
@@ -9,20 +9,21 @@ import path from "node:path";
 function cariRoot() {
   let d = process.cwd();
   for (let i = 0; i < 6; i++) {
-    if (fs.existsSync(path.join(d, "situs/package.json")) && fs.existsSync(path.join(d, "docs/widgets/data/cerita.json"))) return d + path.sep;
+    if (fs.existsSync(path.join(d, "situs/package.json")) && fs.existsSync(path.join(d, "situs/data/cerita.json"))) return d + path.sep;
     const up = path.dirname(d);
     if (up === d) break;
     d = up;
   }
-  throw new Error("root repo (situs/package.json + docs/widgets/data/cerita.json) tidak ditemukan dari " + process.cwd());
+  throw new Error("root repo (situs/package.json + situs/data/cerita.json) tidak ditemukan dari " + process.cwd());
 }
 export const ROOT = cariRoot();
-export const DOCS = path.join(ROOT, "docs");
+export const LAMA = path.join(ROOT, "situs/lama"); // widget lama, data widget, vendor, ilustrasi
+export const CERITA = path.join(ROOT, "situs/data/cerita.json");
 export const SITE_DOCS = path.join(ROOT, "situs/src/content/docs");
 const URUT_BACA = ["pembuka", 1, 2, 3, 4, 5, "sampingan"]; // "alat" di luar urutan baca
 
 export function muat() {
-  const d = JSON.parse(fs.readFileSync(path.join(DOCS, "widgets/data/cerita.json"), "utf8"));
+  const d = JSON.parse(fs.readFileSync(CERITA, "utf8"));
   const hitung = {};
   for (const h of d.halaman) {
     const mdx = path.join(SITE_DOCS, h.path.replace(/\.md$/, ".mdx"));

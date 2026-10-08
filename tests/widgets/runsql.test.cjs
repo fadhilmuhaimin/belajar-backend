@@ -5,10 +5,10 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "../..");
-const VENDOR = path.join(ROOT, "docs/vendor/sql.js-1.14.2");
-const core = require(path.join(ROOT, "docs/widgets/runsql-core.js"));
+const VENDOR = path.join(ROOT, "situs/lama/vendor/sql.js-1.14.2");
+const core = require(path.join(ROOT, "situs/lama/widgets/runsql-core.js"));
 const initSqlJs = require(path.join(VENDOR, "sql-wasm.js"));
-const load = (id) => require(path.join(ROOT, "docs/widgets/data", id + ".json"));
+const load = (id) => require(path.join(ROOT, "situs/lama/widgets/data", id + ".json"));
 
 let SQL;
 test.before(async () => {

@@ -1,4 +1,4 @@
-"""Sinkronkan semua turunan dari docs/widgets/data/cerita.json (satu sumber cerita Rekeningo).
+"""Sinkronkan semua turunan dari situs/data/cerita.json (satu sumber cerita Rekeningo).
 
 ID halaman (A1, B3.1, ...) hanya kunci internal. Pembaca melihat nomor tampilan "T.N" (urutan baca di
 dalam Tahap T) dan judul. Rujukan antar halaman ditulis [[ID]] dan dirender plugin remark situs. Lihat tools/registri.py.
@@ -30,11 +30,11 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from registri import (ROOT, DOCS, SITUS, CERITA, TOKEN, URUT_BACA, lengkapi, label, url_halaman,  # noqa: E402
+from registri import (ROOT, LAMA, SITUS, CERITA, TOKEN, URUT_BACA, lengkapi, label, url_halaman,  # noqa: E402
                       url_mutlak, ganti_token, file_situs, file_konten)
 
 INDEKS = SITUS / "alat/indeks-topik.mdx"
-KARTU = DOCS / "widgets/data/kartu.json"
+KARTU = LAMA / "widgets/data/kartu.json"
 MAKS_INTI = 175
 
 TOPIK = ["Gambaran besar", "API", "Data", "Keamanan", "Struktur kode", "Operasional", "Skala dan kinerja",
@@ -206,7 +206,7 @@ def cek_prasyarat(hs):
 
 def cek_token(ids):
     salah = []
-    for p in file_konten() + sorted((DOCS / "widgets/data").rglob("*.json")):
+    for p in file_konten() + sorted((LAMA / "widgets/data").rglob("*.json")):
         if p == CERITA:
             continue
         for m in TOKEN.finditer(p.read_text()):

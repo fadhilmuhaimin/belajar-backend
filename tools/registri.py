@@ -1,4 +1,4 @@
-"""Registry halaman dari docs/widgets/data/cerita.json, dipakai sinkron_cerita.py dan build_istilah.py.
+"""Registry halaman dari situs/data/cerita.json, dipakai sinkron_cerita.py dan build_istilah.py.
 
 ID halaman (A1, B3.1, ...) hanya kunci internal. Yang tampil ke pembaca:
   - nomor tampilan "T.N" = urutan baca di dalam Tahap T (dihitung dari urutan registry, termasuk halaman yang belum ada,
@@ -13,9 +13,9 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-DOCS = ROOT / "docs"
+LAMA = ROOT / "situs/lama"                       # widget lama, data widget, vendor, ilustrasi (dimuat apa adanya)
 SITUS = ROOT / "situs/src/content/docs"
-CERITA = DOCS / "widgets/data/cerita.json"
+CERITA = ROOT / "situs/data/cerita.json"
 TOKEN = re.compile(r"\[\[([A-Za-z0-9.\-]+)(?:\|([^\]]+))?\]\]")
 URUT_BACA = ("pembuka", 1, 2, 3, 4, 5, "sampingan")   # "alat" di luar urutan baca
 

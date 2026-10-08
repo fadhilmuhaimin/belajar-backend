@@ -1,13 +1,13 @@
 """Bangun data tooltip istilah dari situs/src/content/docs/alat/glosarium.mdx (satu-satunya sumber).
 
 Kolom "Halaman" berisi rujukan [[ID]] (mis. [[B3.1]]); plugin remark situs merendernya jadi link berjudul.
-Path dan label (nomor tampilan + judul) diambil dari registry docs/widgets/data/cerita.json (tools/registri.py);
+Path dan label (nomor tampilan + judul) diambil dari registry situs/data/cerita.json (tools/registri.py);
 link popover hanya dibuat untuk halaman yang sudah ada.
 
 Menghasilkan dua file:
-  includes/istilah.md               definisi abbr (*[RLS]: ...), dibaca plugin
+  situs/data/istilah.md               definisi abbr (*[RLS]: ...), dibaca plugin
                                     situs/src/plugins/remark-abbr.mjs (keputusan 107)
-  docs/javascripts/istilah-data.js  ringkasan + bab rujukan untuk popover
+  situs/lama/javascripts/istilah-data.js  ringkasan + bab rujukan untuk popover
 
     python tools/build_istilah.py           # tulis ulang kedua file
     python tools/build_istilah.py --check   # gagal bila file belum sinkron dengan glosarium
@@ -19,9 +19,9 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 GLOS = ROOT / "situs/src/content/docs/alat/glosarium.mdx"
-CERITA = ROOT / "docs/widgets/data/cerita.json"
-OUT_MD = ROOT / "includes/istilah.md"
-OUT_JS = ROOT / "docs/javascripts/istilah-data.js"
+CERITA = ROOT / "situs/data/cerita.json"
+OUT_MD = ROOT / "situs/data/istilah.md"
+OUT_JS = ROOT / "situs/lama/javascripts/istilah-data.js"
 
 # Sebutan lain yang sering dipakai di teks tapi tidak tertulis di kolom istilah.
 EXTRA = {

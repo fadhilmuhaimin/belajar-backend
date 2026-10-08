@@ -3,7 +3,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const path = require("node:path");
 
-const dir = path.resolve(__dirname, "../../docs/widgets/data/b3-race");
+const dir = path.resolve(__dirname, "../../situs/lama/widgets/data/b3-race");
 const load = (id) => require(path.join(dir, id + ".json"));
 
 const EXPECT = { "tx-tanpa-lock": 50000, "for-update": 30000, atomic: 30000, optimistic: 30000 };

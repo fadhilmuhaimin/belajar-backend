@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const fs = require("node:fs");
 const ROOT = path.resolve(__dirname, "../..");
-const k = require(path.join(ROOT, "docs/widgets/kartu.js"));
+const k = require(path.join(ROOT, "situs/lama/widgets/kartu.js"));
 
 test("ingat menaikkan kotak dan menjauhkan jadwal; belum ingat kembali ke kotak 1", () => {
   assert.deepEqual(k.jawab(null, true, "2026-10-06"), { k: 2, due: "2026-10-08" });
@@ -20,7 +20,7 @@ test("antrean: jatuh tempo paling lama dulu, lalu kartu baru, dibatasi", () => {
 });
 
 test("kartu.json: setiap kartu punya soal dan jawaban, id unik", () => {
-  const d = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/widgets/data/kartu.json"), "utf8"));
+  const d = JSON.parse(fs.readFileSync(path.join(ROOT, "situs/lama/widgets/data/kartu.json"), "utf8"));
   assert.ok(d.length > 0);
   assert.equal(new Set(d.map((c) => c.id)).size, d.length);
   for (const c of d) assert.ok(c.tanya.length > 10 && c.jawab.length > 10, c.id);
