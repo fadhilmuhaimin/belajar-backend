@@ -1,0 +1,135 @@
+---
+title: "3.8 Offline-first dan sync"
+---
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="E2" />
+
+<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[E3]], [[B3.2]]</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. App menerima `200` dari sync, lalu mati sebelum menghapus queue. Apa yang mencegah perubahan diterapkan dua kali?
+2. Kenapa queue stok sebaiknya berisi "+10", bukan "stok = 35"?
+3. Perubahan apa yang tidak bisa digabung dan harus dideteksi sebagai konflik?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+## Inti
+
+Simpan perubahan di HP dulu, kirim saat sinyal kembali. Kirim selisih dengan id, bukan nilai akhir. Nilai akhir butuh cek versi.
+
+<WidgetLama nama="arsitektur" tahap={3} />
+
+## Lihat sendiri
+
+Dapur Warung Ani ada di bagian belakang, dan sinyalnya sering hilang. Data di widget ini direkam dari app Dart, server Go, dan PostgreSQL 17.
+
+<WidgetLama nama="alur" src="data/skenario/e2-sync.json" />
+
+## Kenapa ini ada
+
+Ani memasak 10 porsi nasi goreng tambahan, lalu menambah stok di app dari dapur. Layar menampilkan 35. Satu jam kemudian, ia membuka app lagi dan stoknya 22.
+
+Versi lama Rekeningo mengirim perubahan langsung ke server. Saat sinyal hilang, request gagal, muncul pesan "Gagal, coba lagi", dan perubahannya dibuang. Ani sedang melayani pembeli, jadi pesannya terlewat.
+
+Raka menambah queue di HP. Versi pertamanya menyimpan angka di layar (35). Hasilnya stok 35 padahal sisa porsi 32: tiga pembeli memesan porsi yang tidak ada.
+
+## Cara kerjanya
+
+Panduan Android menyebut pola ini **lazy writes**: tulis ke penyimpanan lokal dulu, lalu antre untuk dikirim ke server secepatnya ([Android: offline-first](https://developer.android.com/topic/architecture/data-layer/offline-first#lazy_writes)). Panduan yang sama mencatat bahwa pola ini memunculkan konflik, dan penyelesaiannya biasanya butuh versi.
+
+Ada dua jenis perubahan, dan keduanya diperlakukan berbeda:
+
+1. **Selisih** ("tambah 10"). Bisa digabung dengan perubahan lain, urutannya tidak penting. Server menghitung `stok = stok + 10`.
+2. **Nilai akhir** ("harga jadi 27.000"). Tidak bisa digabung. Server hanya menerimanya kalau belum ada yang mengubah sejak app terakhir melihat, dengan membandingkan versi.
+
+<Snippet file="labs/e2-sync/server/main.go" region="jenis" lang="go" title="labs/e2-sync/server/main.go" />
+
+Setiap operasi di queue membawa `op_id` yang dibuat saat Ani mengubah data. Fungsinya sama dengan idempotency key ([[E3]]): kiriman ulang dengan `op_id` yang sama tidak diterapkan lagi. Kiriman ulang akan terjadi cepat atau lambat, karena app bisa mati di antara menerima response dan menghapus queue (langkah 6 di widget).
+
+**Saat terjadi konflik.** Ani mengubah harga dari HP yang offline, sementara tablet kasir mengubahnya lebih dulu:
+
+<Snippet file="labs/e2-sync/output/harga.txt" lines="1:11" title="Output rekaman: labs/e2-sync/output/harga.txt" />
+
+Server tidak memilih pemenang. Ia menolak dengan status `konflik` dan mengirim nilai terbarunya. App menyimpan perubahan Ani di queue dan menampilkan dua harga untuk dipilih. Untuk stok dan uang, server tetap menjadi source of truth: `CHECK (stok >= 0)` di database menolak penjualan yang melebihi stok.
+
+## Di stack lain
+
+Yang sama di semua stack: queue disimpan di penyimpanan yang bertahan saat app ditutup, dan server memeriksa id serta versi. Yang berbeda: alatnya. Hanya Dart dan Go yang dijalankan di lab. Baris lain dicek ke dokumentasi.
+
+| Stack | Yang dipakai | Sumber |
+|---|---|---|
+| Flutter | Tabel queue di `drift` atau `sqflite`; sync di background dengan package `workmanager` | [Flutter: offline-first](https://docs.flutter.dev/app-architecture/design-patterns/offline-first), [drift](https://pub.dev/packages/drift), [workmanager](https://pub.dev/packages/workmanager) |
+| Android | Queue di Room, dikosongkan oleh WorkManager dengan exponential backoff | [Android: offline-first](https://developer.android.com/topic/architecture/data-layer/offline-first#queued_writes) |
+| Firestore (BaaS) | Persistence offline aktif bawaan di Android dan Apple; sync otomatis saat online | [Firestore: offline data](https://firebase.google.com/docs/firestore/manage-data/enable-offline) |
+| Spring (JPA) | Kolom versi dengan `@Version` untuk cek versi (optimistic locking) | [Jakarta Persistence: @Version](https://jakarta.ee/specifications/persistence/3.1/apidocs/jakarta.persistence/jakarta/persistence/version) |
+| Go (lab) | `UPDATE ... WHERE versi = $3`, lalu periksa jumlah baris yang berubah | Rekaman di atas |
+
+Dengan Firestore, sync dikerjakan untukmu. Pilihan selisih atau nilai akhir tetap tanggung jawabmu: untuk stok, pakai operasi `increment` ([Firestore: increment](https://firebase.google.com/docs/firestore/manage-data/add-data#increment_a_numeric_value)), bukan menulis angka akhir.
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Online saja, tanpa queue | Paling sederhana; data selalu dari server | Perubahan hilang saat sinyal putus (rekaman: 22) |
+| Queue nilai akhir (last write wins) | Mudah dibuat | Menimpa perubahan lain (rekaman: 35, seharusnya 32) |
+| Queue selisih + `op_id` | Bisa digabung, aman dikirim ulang | Hanya untuk data yang bisa dijumlahkan |
+| Nilai akhir + cek versi | Konflik terlihat, tidak ada yang tertimpa diam-diam | Butuh layar untuk memilih, dan user harus memutuskan |
+
+## Cek diri
+
+**1.** Ani offline. Ia menambah 10 porsi, lalu mengurangi 2 karena tumpah. Queue berisi dua operasi selisih. Selama itu, 3 porsi terjual online dari stok 25. Berapa stok setelah sync?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+30. Server menerapkan +10 dan −2 ke stok yang sudah berkurang karena penjualan: 25 − 3 + 10 − 2 = 30. Urutan operasi tidak mengubah hasil, itulah kelebihan selisih.
+
+</details>
+
+**2.** Jelaskan kenapa `op_id` dibuat saat Ani mengubah data, bukan saat app mengirim sync.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Kiriman ulang harus membawa id yang sama dengan kiriman pertama. Kalau id dibuat saat mengirim, app yang mati lalu mengirim ulang akan membuat id baru, dan server menerapkan +10 dua kali. Ini masalah yang sama dengan idempotency key yang dibuat ulang setiap retry ([[E3]]).
+
+</details>
+
+**3.** Dua HP mengubah harga dari versi 1. Apa yang terjadi pada kiriman kedua, dan siapa yang memutuskan harga akhirnya?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Kiriman pertama diterapkan dan versi naik jadi 2. Kiriman kedua masih membawa versi 1, jadi `UPDATE ... WHERE versi = 1` tidak mengubah baris apa pun dan server menjawab konflik. Yang memutuskan adalah user di HP kedua, setelah app menampilkan kedua harga.
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Queue disimpan di database lokal, bukan di memori atau state widget.
+- [ ] Setiap operasi punya id yang dibuat saat perubahan terjadi, dan server menyimpannya dengan constraint unik.
+- [ ] Data yang bisa dijumlahkan dikirim sebagai selisih, bukan nilai akhir.
+- [ ] Nilai akhir dikirim bersama versi, dan server memeriksa jumlah baris yang berubah.
+- [ ] Queue dihapus hanya setelah response sukses diterima, dan konflik tidak dihapus diam-diam.
+
+## Bacaan lanjut
+
+- [Android: Build an offline-first app](https://developer.android.com/topic/architecture/data-layer/offline-first)
+- [Flutter: Offline-first support](https://docs.flutter.dev/app-architecture/design-patterns/offline-first)
+- [Firestore: Access data offline](https://firebase.google.com/docs/firestore/manage-data/enable-offline)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
