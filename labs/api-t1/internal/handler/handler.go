@@ -66,6 +66,7 @@ func tulisJSON(w http.ResponseWriter, status int, v any) {
 	json.NewEncoder(w).Encode(v)
 }
 
+// --8<-- [start:baca-json]
 // bacaJSON membaca body sesuai kontrak (ADR 3). Tipe yang salah dijawab 400 dengan nama field-nya;
 // field yang tidak dikenal dibiarkan, supaya app versi baru tidak ditolak server lama.
 func bacaJSON(body io.Reader, v any) *Problem {
@@ -95,6 +96,8 @@ func wajibAda(nama []string, ada ...bool) *Problem {
 	}
 	return &Problem{Type: "/problems/field-wajib", Title: "Field wajib tidak dikirim", Status: 400, Errors: hilang}
 }
+
+// --8<-- [end:baca-json]
 
 func (s Server) errorInternal(w http.ResponseWriter, err error) {
 	log.Printf("error internal: %v", err)

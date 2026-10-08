@@ -1,0 +1,93 @@
+{
+  "versi": 2,
+  "judul": "Raka merapikan nama field. Pemeriksa kontrak membandingkan versi lama dan baru",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/b1-openapi/output/kontrak.txt",
+    "catatan": "Lint: Redocly CLI 2.58.2. Deteksi breaking change: oasdiff (image di-pin per digest). Kontrak: labs/b1-openapi/openapi.yaml, sama dengan API labs/api-t1."
+  },
+  "pengantar": "Jalankan jalur utama: nama field saldo diganti. Setelah itu centang 'Ubah satu hal' dan lihat perubahan yang tidak merusak app.",
+  "komponen": [
+    {
+      "id": "laptop",
+      "label": "Laptop Raka"
+    },
+    {
+      "id": "cek",
+      "label": "Pemeriksa kontrak"
+    },
+    {
+      "id": "main",
+      "label": "Branch main"
+    }
+  ],
+  "predict": {
+    "q": "Setelah M2, Raka ingin semua nama field berbahasa Inggris seperti model Dart. Ia mengganti saldo menjadi balance di response GET /akun/{id}. Apa kata pemeriksa kontrak?",
+    "options": [
+      "Lolos, hanya ganti nama",
+      "Ditahan: satu breaking change",
+      "Lint gagal: YAML rusak"
+    ],
+    "answer": 1,
+    "varian": false,
+    "explain": "Lint lolos karena YAML-nya valid. oasdiff membandingkan kontrak lama dan baru, dan menemukan field wajib saldo hilang dari response. App yang sudah terpasang di HP penguji masih membaca saldo. Rekaman lab: exit code 1."
+  },
+  "langkah": [
+    {
+      "dari": "laptop",
+      "judul": "Raka mengganti nama field di kontrak",
+      "kirim": "openapi.yaml (Akun):\n-  required: [id, jenis, nama, saldo]\n+  required: [id, jenis, nama, balance]\n-  saldo:   { $ref: Rupiah }\n+  balance: { $ref: Rupiah }",
+      "jelas": "Kontrak diubah dulu, sebelum kode. Itu inti ADR 3."
+    },
+    {
+      "dari": "laptop",
+      "ke": "cek",
+      "judul": "Lint memeriksa format kontrak",
+      "kirim": "$ redocly lint openapi.yaml\nopenapi.yaml: validated in …ms",
+      "jelas": "Lint hanya memeriksa bahwa file kontrak valid. Ia tidak tahu app mana yang membaca field apa.",
+      "nada": "good"
+    },
+    {
+      "dari": "cek",
+      "judul": "oasdiff membandingkan kontrak lama dan baru",
+      "kirim": "$ oasdiff breaking openapi.yaml v1-ganti-nama.yaml --fail-on ERR\n1 changes: 1 error, 0 warning, 0 info\nerror [response-required-property-removed]\n  in API GET /akun/{id}\n  removed the required property `saldo` from the response\n(exit code 1)",
+      "jelas": "Rekaman lab. Field wajib yang hilang dari response merusak client yang membacanya.",
+      "nada": "warn"
+    },
+    {
+      "dari": "cek",
+      "ke": "main",
+      "judul": "Perubahan ditahan sebelum masuk main",
+      "kirim": "exit code 1 → perubahan tidak di-merge\nCara aman: tambah balance, pertahankan saldo\nsampai semua app berhenti membacanya",
+      "jelas": "Cara aman ini disebut expand lalu contract, dan jadi ADR 10 setelah M6.",
+      "nada": "good"
+    }
+  ],
+  "varian": {
+    "label": "Raka menambah field opsional no_hp, tanpa mengganti nama apa pun",
+    "mulai": 0,
+    "langkah": [
+      {
+        "dari": "laptop",
+        "judul": "Raka menambah field opsional",
+        "kirim": "openapi.yaml (Akun):\n+  no_hp: { type: string }   # tidak masuk required",
+        "jelas": "Field baru, tidak wajib. App lama tidak tahu field ini ada."
+      },
+      {
+        "dari": "cek",
+        "judul": "oasdiff membandingkan kontrak lama dan baru",
+        "kirim": "$ oasdiff breaking openapi.yaml v1-tambah-field.yaml\nNo breaking changes to report, but the specs are different.\n(exit code 0)",
+        "jelas": "Rekaman lab. App lama mengabaikan field yang tidak dikenalnya, jadi menambah field opsional aman.",
+        "nada": "good"
+      },
+      {
+        "dari": "cek",
+        "ke": "main",
+        "judul": "Perubahan boleh masuk main",
+        "kirim": "exit code 0 → boleh di-merge",
+        "jelas": "Bedanya dengan jalur utama: menambah tidak merusak, mengganti nama merusak.",
+        "nada": "good"
+      }
+    ]
+  }
+}

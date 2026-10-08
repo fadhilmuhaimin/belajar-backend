@@ -131,10 +131,10 @@ window.ISTILAH = {
  "CI": {
   "b": "B1.4",
   "d": "Pemeriksaan otomatis (build, test, lint) yang berjalan di server setiap kali kode dikirim, sebelum perubahan boleh digabung.",
-  "n": "1.18 Kontrak API dengan OpenAPI",
+  "n": "1.18 Kontrak OpenAPI dan ADR 3",
   "s": "istilah-ci",
   "t": "CI (Continuous Integration)",
-  "u": "b-fondasi/b1-4-openapi/"
+  "u": "tahap-1/kontrak-openapi/"
  },
  "COMMIT": {
   "b": "B3.1",
@@ -187,10 +187,10 @@ window.ISTILAH = {
  "Continuous Integration": {
   "b": "B1.4",
   "d": "Pemeriksaan otomatis (build, test, lint) yang berjalan di server setiap kali kode dikirim, sebelum perubahan boleh digabung.",
-  "n": "1.18 Kontrak API dengan OpenAPI",
+  "n": "1.18 Kontrak OpenAPI dan ADR 3",
   "s": "istilah-ci",
   "t": "CI (Continuous Integration)",
-  "u": "b-fondasi/b1-4-openapi/"
+  "u": "tahap-1/kontrak-openapi/"
  },
  "Cursor pagination": {
   "b": "B1.3",
@@ -547,10 +547,10 @@ window.ISTILAH = {
  "OpenAPI": {
   "b": "B1.4",
   "d": "Format standar untuk menulis kontrak API (endpoint, request, response) yang bisa dibaca manusia dan mesin.",
-  "n": "1.18 Kontrak API dengan OpenAPI",
+  "n": "1.18 Kontrak OpenAPI dan ADR 3",
   "s": "istilah-openapi",
   "t": "OpenAPI",
-  "u": "b-fondasi/b1-4-openapi/"
+  "u": "tahap-1/kontrak-openapi/"
  },
  "OpenID Connect": {
   "b": "B5.2",

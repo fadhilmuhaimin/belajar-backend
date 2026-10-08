@@ -218,26 +218,26 @@
  {
   "id": "B1.4-1",
   "halaman": "B1.4",
-  "judul": "1.18 Kontrak API dengan OpenAPI",
-  "url": "b-fondasi/b1-4-openapi/",
-  "tanya": "App v1.4 masih banyak dipakai. Endpoint transfer ingin menambah field `catatan` yang wajib di request. Aman?",
-  "jawab": "Tidak. App v1.4 tidak mengirim `catatan`, jadi semua transfernya akan ditolak. Jadikan opsional dulu, dengan nilai bawaan di server. Baru wajibkan setelah versi minimum app dinaikkan (1.33 App versi lama yang tidak bisa dipaksa update)."
+  "judul": "1.18 Kontrak OpenAPI dan ADR 3",
+  "url": "tahap-1/kontrak-openapi/",
+  "tanya": "Endpoint bayar ingin menambah field `catatan` yang wajib di request. App di HP penguji belum mengirimnya. Aman?",
+  "jawab": "Tidak. App lama tidak mengirim `catatan`, jadi semua pembayarannya akan ditolak `400`. Jadikan opsional dulu, dengan nilai bawaan di server. Baru wajibkan setelah semua app sudah diperbarui (1.33 App versi lama yang tidak bisa dipaksa update)."
  },
  {
   "id": "B1.4-2",
   "halaman": "B1.4",
-  "judul": "1.18 Kontrak API dengan OpenAPI",
-  "url": "b-fondasi/b1-4-openapi/",
+  "judul": "1.18 Kontrak OpenAPI dan ADR 3",
+  "url": "tahap-1/kontrak-openapi/",
   "tanya": "Jelaskan kenapa lint OpenAPI saja tidak cukup untuk melindungi app lama.",
   "jawab": "Lint memeriksa apakah file valid dan rapi. Kontrak yang menghapus field `saldo` tetap valid. Yang menangkapnya adalah perbandingan dengan kontrak sebelumnya, seperti `oasdiff breaking` di rekaman."
  },
  {
   "id": "B1.4-3",
   "halaman": "B1.4",
-  "judul": "1.18 Kontrak API dengan OpenAPI",
-  "url": "b-fondasi/b1-4-openapi/",
-  "tanya": "Kenapa kontrak OpenAPI berguna saat meminta AI menulis endpoint?",
-  "jawab": "AI mendapat bentuk request, response, dan error yang tepat, bukan tebakan dari deskripsi. Hasilnya juga bisa dicek: response kode AI harus cocok dengan kontrak."
+  "judul": "1.18 Kontrak OpenAPI dan ADR 3",
+  "url": "tahap-1/kontrak-openapi/",
+  "tanya": "Kenapa server Rekeningo tidak menolak field yang tidak dikenal, padahal itu akan menangkap `amount` di M2?",
+  "jawab": "Karena app versi baru mungkin mengirim field tambahan ke server yang belum di-deploy. Menolak field asing membuat app itu gagal. Kasus `amount` tetap tertangkap dengan cara lain: `jumlah` wajib, jadi tidak adanya `jumlah` dijawab `400` dengan namanya."
  },
  {
   "id": "B7.1-1",

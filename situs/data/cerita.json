@@ -37,7 +37,7 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 194,
+        "menit": 196,
         "halaman": 24
       },
       "bagian": [
@@ -656,12 +656,12 @@
     },
     {
       "id": "B1.4",
-      "judul": "Kontrak API dengan OpenAPI",
+      "judul": "Kontrak OpenAPI dan ADR 3",
       "tahap": 1,
       "topik": "API",
-      "path": "b-fondasi/b1-4-openapi.md",
+      "path": "tahap-1/kontrak-openapi.md",
       "prasyarat": [
-        "B6"
+        "t1-m2"
       ],
       "masalah": "App dan backend beda paham soal bentuk JSON",
       "ada": true,
@@ -675,9 +675,8 @@
       "adr": [
         3
       ],
-      "lama": true,
       "nomor": "1.18",
-      "menit": 8
+      "menit": 10
     },
     {
       "id": "t1-m3",
