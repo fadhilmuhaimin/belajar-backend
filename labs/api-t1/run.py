@@ -544,8 +544,33 @@ def rekam_http():
     tulis("http.txt")
 
 
+def rekam_m2():
+    """1.17 M2: amount lawan jumlah (kontrak yang belum tertulis)."""
+    reset()
+    mulai()
+    bagian("A. Persiapan")
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+
+    bagian("B. App mengirim field amount; server membaca jumlah")
+    s, b = curl("POST", "/transfers", '{"ke": 418, "amount": 25000}', token=budi)
+    harap((s, json.loads(b)["errors"][0]["field"]), (422, "jumlah"), "amount diabaikan, jumlah 0")
+    harap(sql("SELECT saldo FROM akun WHERE id = 419").split()[2], "250000", "saldo Budi tetap")
+
+    bagian("C. App mengirim ke sebagai teks; server mengharapkan angka")
+    s, _ = curl("POST", "/transfers", '{"ke": "418", "jumlah": 25000}', token=budi)
+    harap(s, 400, "tipe ke salah")
+    harap(sql("SELECT saldo FROM akun WHERE id = 419").split()[2], "250000", "saldo Budi tetap")
+
+    bagian("D. Bentuk yang dibaca server")
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 25000}', token=budi)
+    harap(s, 201, "bentuk benar")
+    sql("SELECT count(*) AS transaksi FROM transaksi")
+    tulis("m2.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()

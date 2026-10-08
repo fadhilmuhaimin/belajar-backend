@@ -1,0 +1,49 @@
+# server: ./api-t1
+
+# --- A. Persiapan ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+
+# --- B. App mengirim field amount; server membaca jumlah ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "amount": 25000}'
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+
+{"type":"/problems/validasi","title":"Input tidak memenuhi aturan","status":422,"errors":[{"field":"jumlah","pesan":"harus lebih dari 0 dan paling banyak 200000"}]}
+$ psql -c "SELECT saldo FROM akun WHERE id = 419"
+ saldo  
+--------
+ 250000
+(1 row)
+
+
+# --- C. App mengirim ke sebagai teks; server mengharapkan angka ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": "418", "jumlah": 25000}'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+
+{"type":"/problems/json-rusak","title":"Body bukan JSON yang valid","status":400}
+$ psql -c "SELECT saldo FROM akun WHERE id = 419"
+ saldo  
+--------
+ 250000
+(1 row)
+
+
+# --- D. Bentuk yang dibaca server ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 25000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/1
+
+{"id":1,"saldo":225000}
+$ psql -c "SELECT count(*) AS transaksi FROM transaksi"
+ transaksi 
+-----------
+         1
+(1 row)
+
