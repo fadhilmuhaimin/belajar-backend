@@ -1,0 +1,47 @@
+{
+  "id": "t1-pertukaran",
+  "judul": "Budi membayar Rp25.000: tiga perintah, satu total",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Saldo awal dan total dari rekaman lab api-t1 (pertukaran.txt). Langkah satu per satu adalah ilustrasi: lab menjalankan ketiganya dalam satu transaction."
+  },
+  "akun": [
+    { "id": "budi", "nama": "Budi (419)", "saldo": 250000 },
+    { "id": "ani", "nama": "Warung Ani (418)", "saldo": 0 },
+    { "id": "lain", "nama": "99 karyawan lain", "saldo": 24750000 }
+  ],
+  "langkah": [
+    { "sql": "UPDATE akun SET saldo = saldo - 25000 WHERE id = 419", "ubah": [{ "akun": "budi", "delta": -25000 }] },
+    { "sql": "UPDATE akun SET saldo = saldo + 25000 WHERE id = 418", "ubah": [{ "akun": "ani", "delta": 25000 }] },
+    { "sql": "INSERT INTO transaksi (dari, ke, jumlah) VALUES (419, 418, 25000)", "catat": true }
+  ],
+  "tebak": {
+    "q": "Sebelum bayar, semua saldo dijumlah Rp25.000.000. Setelah ketiga perintah jalan, berapa jumlahnya?",
+    "pilihan": ["Rp25.000.000", "Rp24.975.000", "Rp25.025.000"],
+    "jawaban": 0,
+    "alasan": "Yang berkurang dari Budi sama persis dengan yang bertambah di Ani, jadi totalnya tetap Rp25.000.000. Baris transaksi tidak mengubah saldo; ia mencatat kenapa dua saldo itu berubah."
+  },
+  "ubah": {
+    "label": "Ubah satu hal: server mati tepat setelah perintah pertama",
+    "berhentiSetelah": 1,
+    "alasan": "Saldo Budi sudah berkurang, saldo Ani belum bertambah, dan tidak ada catatan. Total turun Rp25.000 tanpa satu baris pun yang menjelaskan ke mana uangnya."
+  },
+  "label": {
+    "sumber": "Rekaman lab + ilustrasi",
+    "tebakDulu": "Tebak dulu:",
+    "berikutnya": "Jalankan perintah berikutnya",
+    "ulang": "Ulang dari awal",
+    "akun": "Akun",
+    "saldo": "Saldo",
+    "total": "Jumlah semua saldo",
+    "transaksi": "Baris di tabel transaksi",
+    "cekJudul": "Tiga hal yang harus selalu benar",
+    "cek": {
+      "lengkap": "1. Ketiga perubahan terjadi semua, atau tidak sama sekali",
+      "tidakNegatif": "2. Tidak ada saldo di bawah nol",
+      "totalTetap": "3. Jumlah semua saldo tidak berubah"
+    },
+    "status": { "ok": "benar", "proses": "di tengah jalan", "gagal": "dilanggar" },
+    "mati": "Server mati. Tidak ada perintah lagi yang jalan."
+  }
+}
