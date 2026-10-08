@@ -1,6 +1,6 @@
 ---
 /** Titik pasang widget lama (docs/widgets/*.js, dimuat apa adanya lewat SkripLama). */
-interface Props { nama: string; src?: string; tahap?: number | string }
-const { nama, src, tahap } = Astro.props;
+interface Props { nama: string; src?: string; tahap?: number | string; [k: `data-${string}`]: string }
+const { nama, src, tahap, ...lain } = Astro.props; // atribut data-* lain (mis. data-modes untuk race) diteruskan apa adanya
 ---
-<div data-bb={nama} data-src={src} data-tahap={tahap}></div>
+<div data-bb={nama} data-src={src} data-tahap={tahap} {...lain}></div>
