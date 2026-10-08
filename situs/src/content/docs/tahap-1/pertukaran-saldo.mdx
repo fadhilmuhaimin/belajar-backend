@@ -1,0 +1,174 @@
+---
+title: "1.11 Pertukaran saldo: tiga hal yang harus selalu benar"
+description: Setiap kali uang berpindah, tiga hal harus benar - semua perubahan terjadi bersama, tidak ada saldo negatif, dan jumlah semua saldo tidak berubah.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import JumlahTotal from "../../../widgets/jumlah-total/JumlahTotal.tsx";
+import dataPertukaran from "../../../../data/widget/t1-pertukaran.json";
+
+<p class="meta">Baca 6 menit · coba 3 menit · Prasyarat: [[t1-fitur-bayar]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Pertukaran saldo adalah satu pembayaran yang mengubah dua saldo sekaligus dan menulis satu catatan. Contohnya Budi membayar Rp25.000 ke Warung Ani:
+
+<figure class="bb-fig">
+<ol class="bb-flow">
+<li>Budi −Rp25.000</li>
+<li>Warung Ani +Rp25.000</li>
+<li class="is-good">Catat: 419 → 418, Rp25.000</li>
+</ol>
+<figcaption>Rekaman lab api-t1: jumlah semua saldo Rp25.000.000, sebelum dan sesudah.</figcaption>
+</figure>
+
+Tiga hal harus selalu benar: ketiga perubahan terjadi semua atau tidak sama sekali, tidak ada saldo di bawah nol, dan jumlah semua saldo tidak berubah.
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Kenapa "kurangi saldo Budi" dan "tambah saldo Ani" tidak boleh dikirim sebagai dua request terpisah dari app?
+2. Kalau semua saldo dijumlah sebelum dan sesudah pembayaran, angkanya harus berapa?
+3. Siapa yang menjaga "saldo tidak negatif" kalau service lupa memeriksanya?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: satu pembayaran adalah tiga perubahan, dan jumlah semua saldo adalah cara cepat memeriksa apakah ada uang yang hilang.">
+
+Jalankan ketiga perintah pembayaran satu per satu. Setelah tiap perintah, lihat tabel saldo dan tiga pemeriksaan di bawahnya.
+
+<JumlahTotal client:visible data={dataPertukaran} />
+
+Perhatikan keadaan setelah perintah pertama. Total sementara turun Rp25.000, dan itu wajar selama ketiga perintah belum selesai. Yang tidak boleh terjadi adalah berhenti di keadaan itu.
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+PRD v1 memuat aturan Pak Hadi: tidak ada angka yang berubah tanpa catatan siapa, kapan, kenapa. Ani mencocokkan setiap pembayaran dengan buku tulisnya. Kalau satu pembayaran hanya separuh terjadi, keduanya melihat angka yang tidak bisa dijelaskan.
+
+Jumlah semua saldo jadi ukuran yang dipakai di semua masalah Tahap 1 berikutnya. Di Rekeningo v1, uang hanya masuk lewat top-up admin. Jadi jumlah semua saldo harus selalu sama dengan jumlah semua top-up.
+
+### Cara kerjanya
+
+Setiap hal yang harus benar punya penjaga sendiri di backend v1:
+
+| Yang harus benar | Penjaganya di v1 | Bukti |
+|---|---|---|
+| 1. Semua atau tidak sama sekali | Satu transaction di `repo/` membungkus dua `UPDATE` dan satu `INSERT` | Log PostgreSQL di [[t1-fitur-bayar]]; mekanismenya di [[B3.1]] |
+| 2. Tidak ada saldo di bawah nol | Service memeriksa saldo sebelum uang disentuh; constraint `saldo_tidak_negatif` menolak sisanya | Rekaman F dan G di bawah |
+| 3. Jumlah semua saldo tetap | Setiap pengurangan punya pasangan penambahan dengan jumlah yang sama | Query `SUM` di rekaman B, D, dan F |
+
+Kode repo di lab sudah menjalankan ketiga perubahan dalam satu transaction:
+
+<Snippet file="labs/api-t1/internal/repo/transaksi.go" region="pindahkan" lang="go" title="labs/api-t1/internal/repo/transaksi.go" />
+
+Rekaman lab dari database bersih, setelah admin mengisi 100 karyawan dengan Rp250.000. Jumlah semua saldo sama dengan jumlah semua top-up:
+
+<Snippet file="labs/api-t1/output/pertukaran.txt" lines="11:16" title="Rekaman lab: labs/api-t1/output/pertukaran.txt" />
+
+Sesudah Budi membayar Rp25.000, dua saldo berubah, tapi jumlahnya tidak:
+
+<Snippet file="labs/api-t1/output/pertukaran.txt" lines="34:46" title="Rekaman lab: labs/api-t1/output/pertukaran.txt" />
+
+Pembayaran yang ditolak tidak meninggalkan bekas. Budi mencoba membayar Rp30.000 dengan sisa saldo Rp25.000, dan service menolaknya dengan `422`:
+
+<Snippet file="labs/api-t1/output/pertukaran.txt" lines="57:67" title="Rekaman lab: labs/api-t1/output/pertukaran.txt" />
+
+Kalau service lupa memeriksa, database tetap menolak saldo negatif. Ini pagar terakhir untuk hal kedua:
+
+<Snippet file="labs/api-t1/output/pertukaran.txt" lines="70:79" title="Rekaman lab: labs/api-t1/output/pertukaran.txt" />
+
+Satu pertanyaan Pak Hadi belum terjawab di v1: "kalau angka saldo salah, dari baris mana saya tahu kenapa?" Kolom `saldo` hanya menyimpan angka terakhir. Tabel `transaksi` mencatat perpindahan, tapi tidak ada yang memaksa keduanya selalu cocok. Pertanyaan ini muncul lagi di Tahap 2.
+
+### Di stack lain
+
+Hal pertama dijaga dengan cara yang sama di semua stack: satu transaction database. Kodenya ada di lab `labs/b3-stack`.
+
+| Stack | Cara membungkus perubahan jadi satu unit | File di lab |
+|---|---|---|
+| Go | `db.BeginTx(ctx, nil)` lalu `tx.Commit()` | `labs/b3-stack/go/main.go` |
+| Node | `client.query('BEGIN')` lalu `COMMIT` atau `ROLLBACK` | `labs/b3-stack/node/main.js` |
+| Laravel | `$db->transaction(function () { ... })` | `labs/b3-stack/laravel/main.php` |
+| Django | `with transaction.atomic():` | `labs/b3-stack/django/main.py` |
+| Supabase | Fungsi SQL; seluruh isi fungsi berjalan dalam satu transaction | `labs/b3-stack/supabase/fungsi.sql` |
+
+Kalau kamu pernah memakai `database.transaction((txn) async { ... })` di sqflite, konsepnya sama: [dokumentasi sqflite](https://pub.dev/packages/sqflite) menulis bahwa transaction di-commit bila callback tidak melempar error.
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### Trade-off: kapan pakai apa
+
+Saldo bisa disimpan dengan dua cara. Rekeningo v1 memilih yang pertama.
+
+| Cara | Kelebihan | Kekurangan | Cocok saat |
+|---|---|---|---|
+| Kolom `saldo` yang di-`UPDATE`, plus tabel `transaksi` | Membaca saldo cukup satu baris; mudah dipahami satu engineer | Saldo dan catatan bisa tidak cocok, dan tidak ada yang memaksanya cocok | Uji coba kecil, satu engineer, 100 akun |
+| Saldo dihitung dari catatan (ledger) | Setiap angka saldo bisa ditelusuri ke baris catatannya | Lebih banyak tabel dan aturan; membaca saldo perlu menjumlah atau snapshot | Keuangan harus membuktikan tutup buku dari data |
+
+Keputusan v1 salah saat Keuangan meminta bukti per rupiah dari data, bukan dari rekap. Itu syarat Pak Hadi di PRD v2.
+
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| Dua pembayaran dari akun yang sama di detik yang sama | Hal kedua bisa dilanggar saat dua request membaca saldo bersamaan; satu orang jarang menekan Bayar di dua HP sekaligus | Tahap 2: [[B3.2]] |
+| Ledger: saldo dihitung dari catatan | Satu engineer, 6 minggu; kolom saldo cukup untuk uji coba | Tahap 2 |
+| Pemeriksaan jumlah semua saldo otomatis tiap malam | Rekonsiliasi uji coba masih dikerjakan manual oleh Keuangan | Tahap 2 |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Budi membayar Rp25.000. Sesudahnya, jumlah semua saldo turun Rp25.000. Apa yang paling mungkin terjadi?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Saldo Budi berkurang, tapi penambahan ke saldo Ani tidak terjadi. Hal pertama dilanggar: perubahan yang harus bersama tidak dibungkus satu unit, atau unit itu tidak dibatalkan saat langkah kedua gagal.
+
+</details>
+
+**2.** Kenapa service tetap memeriksa saldo kalau database sudah punya constraint `saldo_tidak_negatif`?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Service bisa menolak dengan jawaban yang jelas untuk app (`422` dengan pesan "Saldo tidak cukup") sebelum uang disentuh. Constraint adalah pagar terakhir untuk kode yang lupa memeriksa, dan error-nya bukan pesan untuk Budi.
+
+</details>
+
+**3.** Admin menambah top-up Rp250.000 untuk Budi. Apakah jumlah semua saldo boleh berubah?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Boleh, karena uang baru masuk ke sistem. Yang harus tetap sama adalah jumlah semua saldo dibanding jumlah semua top-up yang tercatat.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- Setiap fungsi yang mengubah lebih dari satu saldo memakai satu transaction, dan error di langkah mana pun membatalkan semuanya.
+- Pengurangan dan penambahan memakai variabel jumlah yang sama, bukan dua angka yang dihitung terpisah.
+- Pemeriksaan saldo ada di service, dan constraint `CHECK (saldo >= 0)` tetap ada di skema.
+- App tidak pernah mengirim dua request terpisah untuk "kurangi" dan "tambah".
+
+### Bacaan lanjut
+
+- [PostgreSQL: Transactions (tutorial 3.4)](https://www.postgresql.org/docs/current/tutorial-transactions.html), dengan contoh transfer antar rekening yang sama polanya.
+- [sqflite: transaction](https://pub.dev/packages/sqflite), untuk membandingkan dengan yang sudah kamu pakai di app.
+
+</Blok>

@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 178,
-        "halaman": 22
+        "menit": 187,
+        "halaman": 23
       },
       "bagian": [
         {
@@ -523,8 +523,12 @@
         "backend"
       ],
       "masalah": "Uang berpindah, tapi total di sistem harus tetap sama",
-      "ada": false,
-      "nomor": "1.11"
+      "ada": true,
+      "prasyarat": [
+        "t1-fitur-bayar"
+      ],
+      "nomor": "1.11",
+      "menit": 9
     },
     {
       "id": "B2.1",
