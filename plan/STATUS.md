@@ -51,8 +51,9 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.17 M2: amount atau nominal | Halaman masalah, lab `m2.txt` (keputusan 153, 154) |
 | 1.18 Kontrak OpenAPI + ADR 3 | Ditulis ulang dari B1.4, kontrak `b1-openapi` v1, 400 dengan nama field (keputusan 155, 156) |
 | 1.19 M3: Tanda kutip di pencarian | Halaman masalah, lab `m3.txt` + mode rentan m3, widget React cari-bug (keputusan 157, 158, 159) |
+| 1.20 Keamanan 1: SQL injection + ADR 4 | Halaman baru, lab `injection.txt` + modul `latihan/` + gosec v2.29.0, widget cari-bug data kedua dengan baris aman (keputusan 160, 161, 162) |
 
-Diperbarui 2026-10-08. 19 dari 42 halaman selesai; berikutnya 1.20. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
+Diperbarui 2026-10-08. 20 dari 42 halaman selesai; berikutnya 1.21. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 

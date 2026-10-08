@@ -240,6 +240,30 @@
   "jawab": "Karena app versi baru mungkin mengirim field tambahan ke server yang belum di-deploy. Menolak field asing membuat app itu gagal. Kasus `amount` tetap tertangkap dengan cara lain: `jumlah` wajib, jadi tidak adanya `jumlah` dijawab `400` dengan namanya."
  },
  {
+  "id": "t1-sql-injection-1",
+  "halaman": "t1-sql-injection",
+  "judul": "1.20 SQL injection",
+  "url": "tahap-1/sql-injection/",
+  "tanya": "Raka membuang semua tanda kutip dari isi pencarian sebelum query dijalankan. Apakah draf laporan warung di blok Coba jadi aman?",
+  "jawab": "Tidak. Serangan di rekaman lab, `(SELECT 1/0)`, tidak memakai tanda kutip. `urut` masuk ke bagian `ORDER BY`, tempat SQL tidak butuh tanda kutip untuk menyisipkan perintah. Yang menutupnya adalah allowlist."
+ },
+ {
+  "id": "t1-sql-injection-2",
+  "halaman": "t1-sql-injection",
+  "judul": "1.20 SQL injection",
+  "url": "tahap-1/sql-injection/",
+  "tanya": "Jelaskan kenapa `' OR 1=1 --` tidak berbahaya di versi benar, padahal teksnya sampai ke PostgreSQL.",
+  "jawab": "Teks itu sampai sebagai nilai untuk `$1`, terpisah dari teks perintah. PostgreSQL sudah tahu bentuk perintahnya sebelum membaca nilai, jadi nilai hanya dibandingkan dengan kolom `nama`. Rekaman: hasilnya `{\"warung\":[]}`."
+ },
+ {
+  "id": "t1-sql-injection-3",
+  "halaman": "t1-sql-injection",
+  "judul": "1.20 SQL injection",
+  "url": "tahap-1/sql-injection/",
+  "tanya": "gosec lolos tanpa temuan di sebuah PR. Apa yang masih perlu kamu cek sebelum merge?",
+  "jawab": "Linter hanya menangkap bentuk kode yang ia kenal. Cek manual setiap query: tidak ada input yang disambung ke teks, nama kolom dari allowlist, dan response hanya berisi field layar. Lalu jalankan tes dengan input jahat ke endpoint yang menerima teks."
+ },
+ {
   "id": "B7.1-1",
   "halaman": "B7.1",
   "judul": "1.21 Lapisan dasar",

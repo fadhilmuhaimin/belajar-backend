@@ -4,6 +4,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 162: 1.20 SQL injection + ADR 4; 161: cari-bug field `aman` + CSS baris; 160: rekaman injection (log PG, gosec, latihan/).
 - 159: 1.19 M3 (injection); 158: widget React cari-bug; 157: lab pencarian + mode rentan m3.
 - 156: 1.18 + ADR 3; 155: kontrak b1-openapi v1, bacaJSON/wajibAda, -rentan m2.
 - 154: 1.17 M2; 153: lab m2 (field asing diabaikan, judul 400 menyesatkan).
@@ -54,13 +55,17 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.19 selesai (1.19 keputusan 157-159). Pengaman loop: keputusan 142. Catatan: ilustrasi M3-M6 belum dibuat.
-Halaman berikutnya: **1.20 "Keamanan 1: SQL injection + ADR 4"** (`t1-sql-injection`, konsep + ADR, ★, peran security+backend, widget cari-bug, lab api-t1). Isi: lanjutan 1.19 — kenapa jangan sambung string, parameter query menutup seluruh kelas serangan, linter, dan response hanya field yang dibutuhkan. ADR 4 (parameterized query, linter, field minimal). Pakai widget cari-bug (sudah ada) dengan data kedua bila perlu, atau data m3 yang sama. Rekaman `m3.txt` sudah cukup; bisa tambah snippet region rentan di repo/handler. Cek apakah ada linter Go yang mendeteksi string-concat SQL (mis. `go vet`? sebenarnya `gosec` G201) — kalau mau tunjukkan linter, perlu lab kecil; kalau tidak, sebut gosec G201 sebagai [perlu verifikasi] atau rekam. Ilustrasi M3 (adegan Dimas) bisa dibuat di sini via `tools/ilustrasi_cerita.py` (naskah: M3-M6 satu ilustrasi masing-masing), token gelap/terang.
+2026-10-09 · Halaman 1.20 selesai di worktree `../rekeningo-wt-1-20` (branch `tahap-1/sql-injection`), gerbang lolos; PR lab #115 hijau dan PR halaman dibuka, keduanya menunggu merge oleh pemilik (merge lewat `gh pr merge` ditolak pengaman mode otomatis sesi ini). Working tree utama dipakai sesi lain (branch `tahap-1/lebar-layout`), jangan ganti branch di sana.
+Halaman berikutnya: **1.21 "Lapisan dasar: handler tidak tahu SQL"** (`B7.1`, konsep, ★, backend, widget pilah, lab api-t1; isi lama `b-fondasi/b7-1-lapisan-dasar.md`). Ambil dari `main` setelah #115 dan PR 1.20 di-merge. Ilustrasi M3-M6 belum dibuat.
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran
 
+- gosec v2.29.0 G201/G202 hanya memeriksa query di assignment dan expression statement; query yang langsung di `return` tidak diperiksa (rekaman injection.txt E).
+- Aturan Starlight `:is(ol,ul):has(> li > :not(...)) > li > :last-child` memberi margin-bottom 1.25rem; list berisi tombol (cari-bug) perlu override.
+- Astro 7 `astro preview` berjalan di latar dan singleton; setelah build ulang, `astro preview stop` lalu jalankan lagi, kalau tidak halaman lama tersaji. Port bisa pindah ke 4322 (cek `astro preview status`).
+- Beberapa sesi Claude bisa memakai working tree yang sama; cek `git branch --show-current` sebelum commit, dan pakai `git worktree add` untuk pekerjaan panjang. Worktree butuh `situs/node_modules`, `labs/.venv` (symlink) dan `situs/public/fonts` (salin, diabaikan git).
 - `node tools/tangkap.mjs` menulis ke `tangkapan/` relatif cwd; jalankan dari `situs/` (di-.gitignore di sana), bukan dari root.
 - Hook PreCompact: stdout dan stderr dengan exit 0 hanya masuk debug log, tidak terlihat model; exit 2 memblokir compaction. Stdout SessionStart masuk konteks (docs hooks resmi).
 - Di dalam blok, Cek diri ditulis `### Cek diri`; sinkron membacanya sejak keputusan 127 dan menolak halaman konsep baru dengan kurang dari 3 kartu.
