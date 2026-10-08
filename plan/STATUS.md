@@ -25,11 +25,11 @@ Diperbarui: 2026-10-08. Catatan singkat tentang keadaan panduan dan pekerjaan ya
 
 | Ukuran | Nilai |
 |---|---|
-| Halaman dipindah | 3 dari 60: 1.11 Transaction, 1.12 Authentication, 1.13 Authorization (plus beranda sementara dan 404). Mulai 1.13 halaman dikonversi `site-baru/tools/konversi.mjs` lalu dibaca ulang (keputusan 106) |
+| Halaman dipindah | 4 dari 60: 1.11 Transaction, 1.12 Authentication, 1.13 Authorization, 1.14 Lapisan dasar (plus beranda sementara dan 404). Mulai 1.13 halaman dikonversi `site-baru/tools/konversi.mjs` lalu dibaca ulang (keputusan 106) |
 | Build | 0 warning, 0 error; `npm test` 5/5; `contrast.py` 125/125 (gelap + terang) |
-| Teks artikel lama vs baru (`tools/banding.mjs`) | 1.11: 1185 vs 1185 kata, 0 berbeda; 10 heading sama; 26 vs 26 link. 1.12: 993 vs 992 kata, 1 beda pemenggalan ("token-nya"); 10 heading sama; 22 vs 22 link (16 eksternal identik). 1.13: 958 vs 957 kata, 1 beda pemenggalan; 10 heading sama; 13 vs 13 link |
+| Teks artikel lama vs baru (`tools/banding.mjs`) | 1.11: 1185 vs 1185 kata, 0 berbeda; 10 heading sama; 26 vs 26 link. 1.12: 993 vs 992 kata, 1 beda pemenggalan ("token-nya"); 10 heading sama; 22 vs 22 link (16 eksternal identik). 1.13: 958 vs 957 kata, 1 beda pemenggalan; 10 heading sama; 13 vs 13 link. 1.14: 794 vs 794 kata, 0 beda; 7 vs 7 link |
 | CSS widget ditulis ulang | 1.11: 89 aturan menggantikan 121 aturan `widgets.css`. 1.12 menambah widget `alur` + mockup HP: 70 aturan menggantikan 76 aturan lama (hp, alur, rel vertikal). Total 159 aturan widget di `tema.css` dari 302 aturan `widgets.css`; sisanya (race, pilah, banding, kartu, peta, ember, map, ilustrasi) menyusul bersama halamannya |
-| Widget lama | `runsql`, `stackstep`, `alur` (+`hp`), `arsitektur`, `selesai`, `umpan-balik` jalan tanpa perubahan kode (keputusan 103); diuji Playwright: runsql menghasilkan tabel Before/After, stackstep menyorot 1 baris di tiap tab, alur berjalan 7 langkah dengan mockup HP |
+| Widget lama | `runsql`, `stackstep`, `alur` (+`hp`), `pilah`, `arsitektur`, `selesai`, `umpan-balik` jalan tanpa perubahan kode (keputusan 103); diuji Playwright: runsql menghasilkan tabel Before/After, stackstep menyorot 1 baris di tiap tab, alur berjalan 7 langkah dengan mockup HP |
 | Tangkapan layar | 1366×657 dan 375×667 × gelap/terang: tanpa scroll horizontal, tanpa error konsol. `tools/layar.mjs` (layar pertama 4 ukuran) lolos; 1.11 di 375×667 margin 9 px (tipis) |
 | Belum | Tooltip istilah (abbr) belum diporting; sidebar menampilkan 59 halaman yang belum dipindah dengan kelas `nav-menyusul` (keputusan 104); beranda final, lima blok, Pagefind untuk glosarium = fase 3 |
 
