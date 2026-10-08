@@ -1,0 +1,50 @@
+---
+/**
+ * Sisip kode lab ke halaman, pengganti `--8<-- "labs/x/main.go:transfer"` (pymdownx.snippets).
+ *   <Snippet file="labs/b3-stack/go/main.go" region="transfer" lang="go" />
+ *   <Snippet file="labs/b3-stack/output/go-transfer.txt" title="Output rekaman" />
+ *   <Snippet lang="java" code={`...`} />      kode yang tidak dijalankan di lab (label ditulis di prosa)
+ * Penanda region sama dengan lab: `// --8<-- [start:transfer]` ... `// --8<-- [end:transfer]`.
+ * File atau region yang tidak ada menggagalkan build. Setiap baris mendapat id `__span-<kunci>-<n>`,
+ * kontrak DOM yang dibaca widget stackstep lama (keputusan 103).
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { createHash } from "node:crypto";
+import { codeToHtml } from "shiki";
+import { ROOT } from "../../tools/registri.mjs";
+import { temaShiki } from "../lib/shiki-tema.mjs";
+
+interface Props { file?: string; region?: string; lang?: string; title?: string; code?: string }
+const { file, region, lang = "text", title, code } = Astro.props;
+
+let src: string;
+if (code != null) {
+  src = code;
+} else {
+  if (!file) throw new Error("Snippet: butuh prop file atau code");
+  const abs = path.join(ROOT, file);
+  if (!fs.existsSync(abs)) throw new Error(`Snippet: file ${file} tidak ada`);
+  src = fs.readFileSync(abs, "utf8");
+  if (region) {
+    const lines = src.split("\n");
+    const mulai = lines.findIndex((l) => l.includes(`--8<-- [start:${region}]`));
+    const akhir = lines.findIndex((l) => l.includes(`--8<-- [end:${region}]`));
+    if (mulai < 0 || akhir < 0 || akhir <= mulai) throw new Error(`Snippet: region ${region} tidak ada di ${file}`);
+    src = lines.slice(mulai + 1, akhir).join("\n");
+  }
+}
+// Baris penanda region lain di dalam potongan tidak ikut tampil (perilaku pymdownx.snippets).
+src = src.split("\n").filter((l) => !l.includes("--8<-- [")).join("\n").replace(/\n+$/, "");
+
+const kunci = createHash("md5").update(file ?? code ?? "").update(region ?? "").digest("hex").slice(0, 6);
+const html = await codeToHtml(src, {
+  lang,
+  theme: temaShiki,
+  transformers: [{ line(node, i) { node.properties.id = `__span-${kunci}-${i}`; } }],
+});
+---
+<div class:list={["highlight", "bb-snippet", { "has-title": !!title }]} data-file={file} data-region={region}>
+  {title && <span class="filename">{title}</span>}
+  <Fragment set:html={html} />
+</div>

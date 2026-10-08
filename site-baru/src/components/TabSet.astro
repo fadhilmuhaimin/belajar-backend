@@ -1,0 +1,23 @@
+---
+/**
+ * Tab konten dengan struktur DOM yang sama dengan content tabs Material (pymdownx.tabbed alternate style),
+ * supaya widget stackstep lama (`.tabbed-set`, `.tabbed-labels > label`, `.tabbed-content > .tabbed-block`,
+ * `:scope > input`) bekerja tanpa diubah (keputusan 103). Tanpa JavaScript: radio + CSS.
+ *   <TabSet id="stack" labels={["Go", "Node.js"]}>
+ *     <Fragment slot="t0">...</Fragment>
+ *     <Fragment slot="t1">...</Fragment>
+ *   </TabSet>
+ */
+interface Props { id: string; labels: string[] }
+const { id, labels } = Astro.props;
+const blok = await Promise.all(labels.map((_, i) => Astro.slots.render(`t${i}`)));
+---
+<div class="tabbed-set" data-tabs={`${id}:${labels.length}`}>
+  {labels.map((_, i) => <input type="radio" name={`__tabbed_${id}`} id={`__tabbed_${id}_${i + 1}`} checked={i === 0} />)}
+  <div class="tabbed-labels">
+    {labels.map((l, i) => <label for={`__tabbed_${id}_${i + 1}`}>{l}</label>)}
+  </div>
+  <div class="tabbed-content">
+    {blok.map((html) => <div class="tabbed-block" set:html={html} />)}
+  </div>
+</div>

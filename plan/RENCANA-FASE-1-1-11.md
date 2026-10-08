@@ -1,6 +1,6 @@
 # Rencana fase 1 · satu halaman: 1.11 Transaction di `site-baru/`
 
-Status: **menunggu persetujuan pemilik** (Tugas pertama langkah 4, CLAUDE.md). Belum ada file di `site-baru/` yang dibuat.
+Status: **disetujui 2026-10-08, dikerjakan di branch `fase-1/situs-baru`**. Revisi dari persetujuan: tanpa React (React masuk fase 2 bersama widget React pertama), lima blok lipat ditunda ke fase 3. Hasil dan angka ukur ada di `plan/STATUS.md` bagian Fase 1.
 
 ## Tujuan
 
@@ -12,7 +12,8 @@ Mengukur biaya porting sebelum 59 halaman lain dipindah: satu halaman yang punya
 |---|---|---|
 | astro | 7.3.7 | Starlight 0.42 butuh astro ^7.2.10 |
 | @astrojs/starlight | 0.42.5 | sidebar, Pagefind, mode gelap/terang bawaan |
-| @astrojs/react, react, react-dom | 7.0.1, 19.3.0 | island React; di fase 1 belum ada widget React, hanya dipasang supaya fondasi fase 2 siap |
+| @astrojs/markdown-remark | 7.3.2 | pemroses `unified` supaya plugin remark jalan (Astro 7 memakai Sätteri sebagai bawaan) |
+| shiki | 4.5.0 | dipin eksplisit, dipakai langsung komponen Snippet |
 | typescript | 7.0.2 | |
 | @playwright/test | 1.64.0 | tangkapan layar 1366×657 dan 375×667, gelap dan terang |
 

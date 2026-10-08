@@ -1,0 +1,11 @@
+---
+/**
+ * Memuat widget lama apa adanya dari public/widgets/ (salinan docs/widgets, dibuat tools/siapkan-aset.mjs).
+ * Urutan sama dengan extra_javascript di mkdocs.yml: core dulu, lalu widget. Setiap file memanggil
+ * BB.mountAll() di akhir, jadi tidak perlu inisialisasi tambahan. Dipasang sekali di akhir halaman.
+ */
+interface Props { daftar?: string[] }
+const { daftar = ["cerita", "runsql-core", "runsql", "stackstep"] } = Astro.props;
+---
+<script is:inline src="/widgets/core.js"></script>
+{daftar.map((n) => <script is:inline src={`/widgets/${n}.js`}></script>)}
