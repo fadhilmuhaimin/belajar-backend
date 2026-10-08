@@ -22,3 +22,15 @@ CREATE TABLE sesi (
   kedaluwarsa timestamptz NOT NULL
 );
 -- --8<-- [end:sesi]
+
+-- --8<-- [start:topup]
+-- Aturan Pak Hadi: tidak ada angka yang berubah tanpa catatan siapa, kapan, kenapa.
+CREATE TABLE topup (
+  id         bigserial   PRIMARY KEY,
+  akun_id    bigint      NOT NULL REFERENCES akun(id),
+  nominal    bigint      NOT NULL CHECK (nominal > 0),
+  admin_id   bigint      NOT NULL REFERENCES akun(id),   -- siapa
+  dibuat     timestamptz NOT NULL DEFAULT now(),         -- kapan
+  keterangan text        NOT NULL                        -- kenapa
+);
+-- --8<-- [end:topup]

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -24,6 +25,7 @@ func (s Server) Rute() *http.ServeMux {
 	mux.HandleFunc("POST /login", s.login)
 	mux.HandleFunc("POST /logout", s.wajibLogin(s.logout))
 	mux.HandleFunc("GET /akun/{id}", s.wajibLogin(s.lihatAkun))
+	mux.HandleFunc("POST /topup", s.wajibLogin(s.topup))
 	return mux
 }
 
@@ -35,6 +37,8 @@ type Problem struct {
 	Title  string `json:"title"`
 	Status int    `json:"status"`
 	Detail string `json:"detail,omitempty"`
+	// Errors adalah extension member (RFC 9457 bagian 3.2): daftar baris atau field yang salah.
+	Errors any `json:"errors,omitempty"`
 }
 
 func tulisProblem(w http.ResponseWriter, p Problem) {
@@ -127,3 +131,28 @@ func (s Server) lihatAkun(w http.ResponseWriter, r *http.Request) {
 	}
 	tulisJSON(w, 200, a)
 }
+
+// --8<-- [start:topup]
+// POST /topup?keterangan=...  body text/csv: email,nominal
+func (s Server) topup(w http.ResponseWriter, r *http.Request) {
+	isi, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+	if err != nil {
+		tulisProblem(w, Problem{Type: "/problems/body-rusak", Title: "Body tidak terbaca", Status: 400})
+		return
+	}
+	akun, total, err := s.svc.Topup(r.Context(), peminta(r), r.URL.Query().Get("keterangan"), string(isi))
+	var errCSV service.ErrCSV
+	switch {
+	case errors.Is(err, service.ErrDilarang):
+		tulisProblem(w, Problem{Type: "/problems/dilarang", Title: "Hanya admin tunjangan yang boleh top-up", Status: 403})
+	case errors.As(err, &errCSV):
+		tulisProblem(w, Problem{Type: "/problems/csv-ditolak", Title: "CSV ditolak; tidak ada saldo yang berubah",
+			Status: 422, Errors: errCSV.Kesalahan})
+	case err != nil:
+		s.errorInternal(w, err)
+	default:
+		tulisJSON(w, 200, map[string]any{"akun": akun, "total": total})
+	}
+}
+
+// --8<-- [end:topup]

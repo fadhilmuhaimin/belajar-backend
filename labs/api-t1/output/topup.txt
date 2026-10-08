@@ -1,0 +1,81 @@
+# server: ./api-t1
+
+# --- A. Admin tunjangan login ---
+$ curl -i -X POST '/login' -d '{"email": "admin.tunjangan@lestari.example", "password": "sementara-400"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi admin>"}
+
+# --- B. Senin minggu 1: admin mengunggah CSV 100 karyawan, Rp250.000 per orang ---
+$ head -4 minggu-1.csv
+email,nominal
+karyawan401@lestari.example,250000
+karyawan402@lestari.example,250000
+karyawan403@lestari.example,250000
+... (100 baris + header)
+
+$ curl -i -X POST '/topup?keterangan=Tunjangan%20makan%20minggu%201' -H 'Authorization: Bearer <token sesi admin>' -H 'Content-Type: text/csv' --data-binary @minggu-1.csv
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"akun":100,"total":25000000}
+
+# --- C. Isi database sesudahnya: 100 saldo terisi, setiap perubahan punya catatan ---
+$ psql -c "SELECT count(*) AS karyawan, sum(saldo) AS total_saldo FROM akun WHERE jenis = 'karyawan'"
+ karyawan | total_saldo 
+----------+-------------
+      100 |    25000000
+(1 row)
+
+$ psql -c "SELECT t.id, a.nama, t.nominal, t.admin_id, t.keterangan FROM topup t JOIN akun a ON a.id = t.akun_id ORDER BY t.id LIMIT 3"
+ id |     nama     | nominal | admin_id |        keterangan        
+----+--------------+---------+----------+--------------------------
+  1 | Karyawan 401 |  250000 |      400 | Tunjangan makan minggu 1
+  2 | Karyawan 402 |  250000 |      400 | Tunjangan makan minggu 1
+  3 | Karyawan 403 |  250000 |      400 | Tunjangan makan minggu 1
+(3 rows)
+
+
+# --- D. Yang diterima PostgreSQL dari api-t1 selama upload: satu transaction ---
+$ docker compose logs db | grep 'api-t1|'   (diringkas)
+begin                      : 1
+UPDATE akun SET saldo ... : 100
+INSERT INTO topup ...     : 100
+commit                     : 1
+
+
+# --- E. Minggu 2: CSV dengan dua baris salah ditolak utuh ---
+$ sed -n '58p;81p' minggu-2.csv
+karyawan458@lestari.exmaple,250000
+karyawan481@lestari.example,250rb
+
+$ curl -i -X POST '/topup?keterangan=Tunjangan%20makan%20minggu%202' -H 'Authorization: Bearer <token sesi admin>' -H 'Content-Type: text/csv' --data-binary @minggu-2.csv
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+
+{"type":"/problems/csv-ditolak","title":"CSV ditolak; tidak ada saldo yang berubah","status":422,"errors":[{"baris":58,"field":"email","pesan":"tidak terdaftar"},{"baris":81,"field":"nominal","pesan":"harus angka rupiah tanpa titik"}]}
+$ psql -c "SELECT sum(saldo) AS total_saldo, (SELECT count(*) FROM topup) AS catatan FROM akun WHERE jenis = 'karyawan'"
+ total_saldo | catatan 
+-------------+---------
+    25000000 |     100
+(1 row)
+
+
+# --- F. Budi mencoba top-up untuk dirinya sendiri ---
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/topup?keterangan=coba' -H 'Authorization: Bearer <token sesi Budi>' -H 'Content-Type: text/csv' --data-binary 'email,nominal\nbudi@lestari.example,1000000'
+HTTP/1.1 403 Forbidden
+Content-Type: application/problem+json
+
+{"type":"/problems/dilarang","title":"Hanya admin tunjangan yang boleh top-up","status":403}
+$ psql -c "SELECT saldo FROM akun WHERE id = 419"
+ saldo  
+--------
+ 250000
+(1 row)
+
