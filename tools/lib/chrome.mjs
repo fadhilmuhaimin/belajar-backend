@@ -77,7 +77,12 @@ export async function launchChrome() {
     const exited = new Promise((r) => proc.once("exit", r));
     proc.kill();
     await exited;
-    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5 });
+    // Profil sementara. Proses anak Chrome kadang masih menulis sesaat setelah proses utama keluar
+    // (ENOTEMPTY di runner Linux), jadi dicoba lagi, dan kegagalan membersihkan tidak menggagalkan pemeriksaan.
+    for (let i = 0; i < 10; i++) {
+      try { fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5 }); break; }
+      catch (e) { if (i === 9) console.warn(`peringatan: profil Chrome sementara tidak terhapus: ${dir} (${e.code})`); else await new Promise((r) => setTimeout(r, 300)); }
+    }
   };
   return { send, once, close };
 }
