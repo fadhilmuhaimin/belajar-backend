@@ -1,9 +1,10 @@
 ---
 /**
- * Mengganti PageTitle Starlight: kicker kecil di atas judul dari registry (keputusan 118), mis. "Masalah 1 · minggu 1",
- * "ADR 5 dan 6", "Keamanan 1 · ADR 4". Judul tetap dari front matter.
+ * Mengganti PageTitle Starlight: jalur "Kamu di sini" (keputusan 120), lalu kicker kecil dari registry
+ * (keputusan 118), mis. "Masalah 1 · minggu 1", "ADR 5 dan 6", "Keamanan 1 · ADR 4". Judul tetap dari front matter.
  */
 import Default from "@astrojs/starlight/components/PageTitle.astro";
+import KamuDiSini from "./KamuDiSini.astro";
 import { muat, urlDariId, dariUrl } from "../../tools/registri.mjs";
 
 const NAMA: Record<string, string> = { prd: "PRD", fitur: "Fitur ke teknis", konsep: "Konsep", adr: "Keputusan", "tim-infra": "Tim dan infra" };
@@ -18,5 +19,6 @@ if (!lama) {
   if (h?.adr?.length) bagian.push(`ADR ${h.adr.join(" dan ")}`);
 }
 ---
+<KamuDiSini />
 {bagian.length > 0 && <p class="kicker">{bagian.join(" · ")}</p>}
 <Default />

@@ -1,0 +1,23 @@
+---
+/**
+ * Mengganti SocialIcons Starlight (situs ini tidak memakai tautan sosial) dengan tombol mode fokus (keputusan 120):
+ * sidebar dan daftar isi disembunyikan, kolom baca tetap. Pilihan disimpan di localStorage `rtj-fokus`.
+ */
+---
+<button type="button" class="fokus" data-fokus-tombol aria-pressed="false">Mode fokus</button>
+
+<script is:inline>
+  try { if (localStorage.getItem("rtj-fokus") === "ya") document.documentElement.dataset.fokus = "ya"; } catch {}
+</script>
+<script>
+  const tombol = () => document.querySelectorAll<HTMLButtonElement>("[data-fokus-tombol]");
+  const sinkron = () => tombol().forEach((b) => b.setAttribute("aria-pressed", String(document.documentElement.dataset.fokus === "ya")));
+  document.addEventListener("click", (e) => {
+    if (!(e.target as Element).closest("[data-fokus-tombol]")) return;
+    const ya = document.documentElement.dataset.fokus !== "ya";
+    if (ya) document.documentElement.dataset.fokus = "ya"; else delete document.documentElement.dataset.fokus;
+    try { localStorage.setItem("rtj-fokus", ya ? "ya" : ""); } catch { /* mode privat */ }
+    sinkron();
+  });
+  sinkron();
+</script>

@@ -1,0 +1,36 @@
+---
+/**
+ * Mengganti Sidebar Starlight (keputusan 120): pemilih peran di atas daftar halaman. Memilih peran menyorot halaman
+ * yang ditonjolkan untuk peran itu (field `peran` di registry, dibawa sidebar.mjs sebagai data-peran); Generalis
+ * menyorot jalur inti ★. Tidak ada halaman yang disembunyikan. Pilihan disimpan di localStorage `rtj-peran`.
+ */
+import Default from "@astrojs/starlight/components/Sidebar.astro";
+const PERAN = [["generalis", "Generalis"], ["mobile", "Mobile"], ["web", "Web"], ["backend", "Backend"], ["devops", "DevOps"], ["security", "Security"]];
+---
+<div class="peran" role="group" aria-labelledby="peran-judul">
+  <p id="peran-judul" class="peran__judul">Jalurmu</p>
+  <div class="peran__pilihan">
+    {PERAN.map(([v, l]) => <button type="button" class="peran__chip" data-peran-pilih={v} aria-pressed={v === "generalis" ? "true" : "false"}>{l}</button>)}
+  </div>
+  <p class="peran__kosong" hidden>Belum ada halaman yang ditonjolkan untuk peran ini di tahap yang sudah ditulis.</p>
+</div>
+<Default />
+
+<script>
+  const KUNCI = "rtj-peran";
+  const baca = () => { try { return localStorage.getItem(KUNCI) || "generalis"; } catch { return "generalis"; } };
+  function pakai(p: string) {
+    document.documentElement.dataset.peran = p;
+    document.querySelectorAll<HTMLButtonElement>("[data-peran-pilih]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.peranPilih === p)));
+    const ada = p === "generalis" ? document.querySelector(".sidebar-content a.nav-inti") : document.querySelector(`.sidebar-content a[data-peran~="${p}"]`);
+    document.querySelectorAll<HTMLElement>(".peran__kosong").forEach((el) => { el.hidden = !!ada; });
+  }
+  document.addEventListener("click", (e) => {
+    const b = (e.target as Element).closest<HTMLButtonElement>("[data-peran-pilih]");
+    if (!b) return;
+    const p = b.dataset.peranPilih!;
+    try { localStorage.setItem(KUNCI, p); } catch { /* mode privat */ }
+    pakai(p);
+  });
+  pakai(baca());
+</script>
