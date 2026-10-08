@@ -1,0 +1,8 @@
+---
+/**
+ * Mengganti MarkdownContent Starlight: isi halaman dibungkus <article class="md-content__inner">, elemen yang
+ * dicari skrip tooltip istilah lama (javascripts/istilah.js) tanpa mengubah skrip itu. Kelas Starlight tetap.
+ */
+import "@astrojs/starlight/style/markdown.css";
+---
+<article class="sl-markdown-content md-content__inner"><slot /></article>

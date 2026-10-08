@@ -508,4 +508,19 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 .sl-markdown-content .bb-kartu__boxes span { border: 1px solid var(--garis); border-radius: 6px; padding: 0.1rem 0.4rem; }
 /* Halaman umpan balik (core.js: umpan-balik-data) */
 .sl-markdown-content .bb-fb-sum { color: var(--teks-2); }
+/* Tooltip istilah (javascripts/istilah.js): abbr dari remark-abbr, popover dari skrip lama */
+.sl-markdown-content abbr { text-decoration: none; border: 0; cursor: inherit; }
+.sl-markdown-content abbr.istilah { cursor: help; text-decoration: underline dotted var(--k-system-edge); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.sl-markdown-content abbr.istilah:hover, .sl-markdown-content abbr.istilah:focus-visible { background: var(--k-system-fill); border-radius: 3px; outline: none; }
+.istilah-pop { position: absolute; z-index: 10; max-width: 20rem; padding: 0.75rem 0.9rem 0.7rem; background: var(--bg); border: 1px solid var(--garis-2); border-left: 3px solid var(--k-system-edge); border-radius: 8px; color: var(--teks); font-size: 0.85rem; line-height: 1.5; font-family: var(--sl-font); }
+.istilah-pop[hidden] { display: none; }
+.istilah-pop__term { font-weight: 700; margin-bottom: 0.25rem; color: var(--judul); }
+.istilah-pop__def { margin: 0 0 0.55rem; color: var(--teks); }
+.istilah-pop__links { display: flex; gap: 0.9rem; flex-wrap: wrap; }
+.istilah-pop__links a { color: var(--aksen); font-weight: 600; text-decoration: none; }
+.istilah-pop__links a:hover { text-decoration: underline; }
+.istilah-pop__links a::after { content: " \2197"; }
+.istilah-pop__glos { color: var(--teks-2) !important; font-weight: 500 !important; }
+.sl-markdown-content tr.istilah-target td { background: var(--k-system-fill); }
+.sl-markdown-content abbr.istilah-demo { text-decoration: underline dotted var(--k-system-edge); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
 /* === akhir widget lama === */
