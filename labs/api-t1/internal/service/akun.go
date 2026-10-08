@@ -19,3 +19,12 @@ func (s Service) LihatAkun(ctx context.Context, peminta, id int64) (repo.Akun, e
 	}
 	return a, err
 }
+
+// LihatTransaksi: hanya pembayar atau penerimanya. Selain itu dijawab tidak ditemukan (sama dengan LihatAkun).
+func (s Service) LihatTransaksi(ctx context.Context, peminta, id int64) (repo.Transaksi, error) {
+	t, err := s.repo.Transaksi(ctx, id)
+	if errors.Is(err, repo.ErrTidakAda) || (err == nil && peminta != t.Dari && peminta != t.Ke) {
+		return repo.Transaksi{}, ErrTidakDitemukan
+	}
+	return t, err
+}

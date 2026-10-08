@@ -34,6 +34,7 @@ func (s Server) Rute() *http.ServeMux {
 	mux.HandleFunc("GET /akun/{id}", s.wajibLogin(s.lihatAkun))
 	mux.HandleFunc("POST /topup", s.wajibLogin(s.topup))
 	mux.HandleFunc("POST /transfers", s.wajibLogin(s.bayar))
+	mux.HandleFunc("GET /transfers/{id}", s.wajibLogin(s.lihatTransaksi))
 	mux.HandleFunc("GET /akun/{id}/riwayat", s.wajibLogin(s.riwayat))
 	mux.HandleFunc("GET /warung/{id}/laporan", s.wajibLogin(s.laporan))
 	return mux
@@ -144,6 +145,25 @@ func (s Server) lihatAkun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tulisJSON(w, 200, a)
+}
+
+// GET /transfers/{id}: alamat yang dikirim di header Location setelah 201.
+func (s Server) lihatTransaksi(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		tulisProblem(w, Problem{Type: "/problems/tidak-ditemukan", Title: "Transaksi tidak ditemukan", Status: 404})
+		return
+	}
+	t, err := s.svc.LihatTransaksi(r.Context(), peminta(r), id)
+	if errors.Is(err, service.ErrTidakDitemukan) {
+		tulisProblem(w, Problem{Type: "/problems/tidak-ditemukan", Title: "Transaksi tidak ditemukan", Status: 404})
+		return
+	}
+	if err != nil {
+		s.errorInternal(w, err)
+		return
+	}
+	tulisJSON(w, 200, t)
 }
 
 // --8<-- [start:topup]
