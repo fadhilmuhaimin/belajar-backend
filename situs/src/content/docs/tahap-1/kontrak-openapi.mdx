@@ -1,0 +1,203 @@
+---
+title: "1.18 Kontrak OpenAPI dan ADR 3"
+description: Satu file yang menulis nama, tipe, dan batas setiap field, dibaca app dan backend, dan diperiksa mesin. Memuat ADR 3, kontrak sebelum kode.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 8 menit · coba 2 menit · Prasyarat: [[t1-m2]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Kontrak API menulis bentuk request dan response dalam format yang dibaca mesin. Satu file, tiga pembaca:
+
+<figure class="bb-fig">
+<ol class="bb-flow is-rujuk">
+<li>app Dart</li>
+<li>server Go</li>
+<li>pemeriksa kontrak</li>
+</ol>
+<figcaption>Ketiganya membaca <code>openapi.yaml</code>. Satu orang pun butuh perjanjian dengan dirinya sendiri.</figcaption>
+</figure>
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Apa yang ditulis di file OpenAPI, dan siapa yang membacanya?
+2. Menambah field opsional di response: breaking change atau bukan?
+3. Bedanya "spec-first" dan "code-first"?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: lint memeriksa file kontrak, sedangkan perbandingan kontrak lama dan baru yang melindungi app yang sudah terpasang.">
+
+Setelah [[t1-m2]], Raka ingin semua nama field berbahasa Inggris seperti model Dart-nya. Output lint dan pemeriksaan kontrak di widget ini direkam dari alat sungguhan.
+
+<WidgetLama nama="alur" src="data/skenario/t1-kontrak.json" />
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Di [[t1-m2]], satu angka punya tiga nama: Nominal di layar, `amount` di Dart, `jumlah` di server. Raka menulis app dan backend sendirian, di hari yang berbeda, dengan kebiasaan penamaan yang berbeda. Jawaban "field ini namanya apa, tipenya apa" ada di kepalanya, dan kepala itu lupa.
+
+Raka juga memakai AI untuk menulis endpoint dan model Dart. Setiap kali, ia harus menjelaskan ulang bentuk JSON-nya. Satu dokumen yang menjawab semuanya, dan bisa diperiksa mesin, menghemat waktu untuk ketiga pembacanya.
+
+### Cara kerjanya
+
+**OpenAPI** adalah format standar (YAML atau JSON) untuk menulis endpoint, parameter, request body, response, dan cara autentikasi ([OpenAPI 3.1](https://spec.openapis.org/oas/v3.1.0.html)). Potongan kontrak Rekeningo v1 untuk bayar ke warung:
+
+<Snippet file="labs/b1-openapi/openapi.yaml" region="transfer" lang="yaml" title="labs/b1-openapi/openapi.yaml" />
+
+<Snippet file="labs/b1-openapi/openapi.yaml" region="skema-bayar" lang="yaml" title="labs/b1-openapi/openapi.yaml" />
+
+<details class="note">
+<summary>Kontrak lengkap: delapan operasi API v1</summary>
+
+<Snippet file="labs/b1-openapi/openapi.yaml" lang="yaml" />
+
+</details>
+
+Yang membaca file ini:
+
+| Pembaca | Memakainya untuk |
+|---|---|
+| Raka di app | Nama, tipe, dan error, tanpa membuka kode server |
+| Raka di server | Bentuk yang harus diterima dan dijawab |
+| Pemeriksa kontrak | Lint, dan menolak perubahan yang merusak app yang sudah terpasang |
+| AI | Spesifikasi yang tepat saat diminta menulis endpoint atau model ([[F1]]) |
+
+**Resource dan URL.** Path menamai benda, method menyatakan aksi. Ini konvensi, bukan aturan HTTP; panduan yang banyak dirujuk, misalnya [Google AIP-121](https://google.aip.dev/121), memakai pola yang sama.
+
+| Hindari | Pakai di v1 | Alasan |
+|---|---|---|
+| `POST /doBayar` | `POST /transfers` | Aksi sudah dinyatakan oleh method |
+| `GET /getSaldo?akun=419` | `GET /akun/419` | Satu resource, satu alamat |
+| `GET /riwayatTerbaru?akun=419` | `GET /akun/419/riwayat` | Riwayat milik akun, jadi path-nya di bawah akun |
+
+**Breaking change** adalah perubahan yang membuat client lama gagal. Rule of thumb dari sisi app:
+
+| Perubahan | Breaking? |
+|---|---|
+| Tambah field opsional di response | Tidak. App lama mengabaikannya |
+| Hapus atau ganti nama field di response | Ya |
+| Tambah field **wajib** di request | Ya. App lama tidak mengirimnya |
+| Ubah tipe field, misalnya integer jadi string | Ya |
+| Tambah endpoint baru | Tidak |
+
+Rekaman lab, untuk lint dan dua perubahan:
+
+<Snippet file="labs/b1-openapi/output/kontrak.txt" title="Rekaman lab: labs/b1-openapi/output/kontrak.txt" />
+
+**Server membaca body sesuai kontrak.** Setelah ADR 3, field wajib yang tidak dikirim dijawab `400` dengan namanya, bukan dianggap 0. Tipe yang salah dijawab `400` dengan nama field-nya. Field yang tidak dikenal tetap diabaikan:
+
+<Snippet file="labs/api-t1/internal/handler/handler.go" region="baca-json" lang="go" title="labs/api-t1/internal/handler/handler.go" />
+
+Request yang sama dengan [[t1-m2]], sesudah perbaikan:
+
+<Snippet file="labs/api-t1/output/m2.txt" lines="59:68" title="Rekaman lab: labs/api-t1/output/m2.txt" />
+
+### Di stack lain
+
+| Stack | Cara umum mendapatkan kontrak | Sumber |
+|---|---|---|
+| Go | Spec-first: tulis YAML, generate kerangka server dan tipe | [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen) |
+| Express | Tidak ada bawaan; ditulis tangan atau lewat library | – |
+| Laravel | Code-first lewat library pihak ketiga | [Scramble](https://scramble.dedoc.co/) |
+| Django (DRF) | Code-first lewat library pihak ketiga | [drf-spectacular](https://drf-spectacular.readthedocs.io/) |
+| Supabase | Otomatis: PostgREST menyajikan OpenAPI di path root | [PostgREST: OpenAPI](https://docs.postgrest.org/en/stable/references/api/openapi.html) |
+| Semua | Lint dan cek breaking change di CI (dijalankan di lab) | [Redocly CLI](https://redocly.com/docs/cli/commands/lint), [oasdiff](https://www.oasdiff.com/) |
+
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### ADR 3: kontrak OpenAPI sebelum kode
+
+**Kebutuhan.** M2 menunjukkan app dan server bisa beda paham soal nama dan tipe, dan server menjawab dengan pesan yang tidak menyebut field. PRD v1 punya lima fitur dan satu engineer, jadi kontrak harus bisa dirawat satu orang dengan dua perintah pemeriksa.
+
+| Opsi | Kelebihan | Kekurangan |
+|---|---|---|
+| Tanpa kontrak tertulis | Tercepat untuk satu orang | Pengetahuan ada di kepala; perubahan yang merusak baru ketahuan di app |
+| Code-first: kontrak dihasilkan dari anotasi kode | Kontrak selalu sama dengan kode | Desain API terbentuk dari kebetulan implementasi; Go `net/http` tidak punya generator bawaan |
+| **Spec-first: tulis `openapi.yaml` dulu** | API didesain sebelum kode; app dan AI membaca file yang sama | File kontrak dan kode bisa tidak sinkron tanpa tes kontrak |
+
+**Yang dipilih.**
+
+1. `labs/b1-openapi/openapi.yaml` adalah kontrak v1, diubah sebelum kode di perubahan yang sama.
+2. Setiap perubahan kontrak diperiksa `redocly lint` dan `oasdiff breaking` terhadap versi sebelumnya.
+3. Server toleran terhadap field yang tidak dikenal, tapi tegas terhadap field wajib dan tipe: `400` dengan nama field.
+
+**Kapan keputusan ini salah.** Catatan jujur: untuk satu orang, menulis kontrak terasa berlebihan sampai minggu 5. Di minggu 5, penggantian nama kolom mematikan app di HP penguji ([[t1-m6]]); pemeriksaan kontrak menangkap jenis perubahan itu sebelum deploy. Keputusan ini juga salah kalau kontrak dan kode dibiarkan berbeda: kontrak yang tidak dipercaya lebih buruk daripada tidak ada kontrak.
+
+**Yang merevisinya nanti.** Saat engineer kedua masuk di Tahap 2, client Dart dibuat otomatis dari kontrak, dan tes kontrak memastikan server menjawab sesuai file ini.
+
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| Client Dart dibuat otomatis dari kontrak | Satu engineer; model Dart masih lima | Tahap 2 |
+| Tes yang mencocokkan response server dengan kontrak | Rekaman lab dibaca manusia; belum ada CI backend | [[t1-tim-infra]] |
+| Menolak field yang tidak dikenal | Memutus app versi baru yang bicara dengan server lama | Tidak direncanakan |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Endpoint bayar ingin menambah field `catatan` yang **wajib** di request. App di HP penguji belum mengirimnya. Aman?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Tidak. App lama tidak mengirim `catatan`, jadi semua pembayarannya akan ditolak `400`. Jadikan opsional dulu, dengan nilai bawaan di server. Baru wajibkan setelah semua app sudah diperbarui ([[E1]]).
+
+</details>
+
+**2.** Jelaskan kenapa lint OpenAPI saja tidak cukup untuk melindungi app lama.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Lint memeriksa apakah file valid dan rapi. Kontrak yang menghapus field `saldo` tetap valid. Yang menangkapnya adalah perbandingan dengan kontrak sebelumnya, seperti `oasdiff breaking` di rekaman.
+
+</details>
+
+**3.** Kenapa server Rekeningo tidak menolak field yang tidak dikenal, padahal itu akan menangkap `amount` di M2?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Karena app versi baru mungkin mengirim field tambahan ke server yang belum di-deploy. Menolak field asing membuat app itu gagal. Kasus `amount` tetap tertangkap dengan cara lain: `jumlah` wajib, jadi tidak adanya `jumlah` dijawab `400` dengan namanya.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Perubahan endpoint disertai perubahan `openapi.yaml` di perubahan yang sama.
+- [ ] Tidak ada field response yang dihapus, diganti nama, atau diganti tipe tanpa rencana expand lalu contract.
+- [ ] Field baru di request bersifat opsional, atau semua app sudah mengirimnya.
+- [ ] Field wajib yang tidak dikirim dijawab `400` dengan namanya, bukan dianggap nol.
+- [ ] Error didokumentasikan dengan skema yang sama (RFC 9457).
+
+### Bacaan lanjut
+
+- [OpenAPI Specification 3.1](https://spec.openapis.org/oas/v3.1.0.html)
+- [Redocly CLI: lint](https://redocly.com/docs/cli/commands/lint) · [oasdiff](https://www.oasdiff.com/)
+- [Zalando RESTful API Guidelines: compatibility](https://opensource.zalando.com/restful-api-guidelines/#compatibility)
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />

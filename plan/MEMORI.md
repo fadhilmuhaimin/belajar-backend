@@ -4,6 +4,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 156: 1.18 + ADR 3; 155: kontrak b1-openapi v1, bacaJSON/wajibAda, -rentan m2.
 - 154: 1.17 M2; 153: lab m2 (field asing diabaikan, judul 400 menyesatkan).
 - 152: 1.16 HTTP dari http.txt; 151: GET /transfers/{id} supaya Location jujur.
 - 150: 1.15 + ADR 2; B1.2 dihapus, rujukan ke B6; penamaan resource pindah ke 1.18.
@@ -37,7 +38,6 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - Kolom "Halaman" di tabel lab README memakai nomor lama sebelum registry v2; perbarui saat lab dipakai halaman baru.
 - 1.33 (E1, app versi lama): prasyarat B4.2 (Tahap 2) dibuang; isi lama memakai rekaman crash B4.2. Saat ditulis ulang, ADR 10 (expand lalu contract) harus berdiri sendiri.
 - 1.39 (F1) menyerap F2: hapus halaman F2 dan entrinya di PR yang sama (pola keputusan 150), tes registri lalu butuh contoh entri lebur lain atau dihapus.
-- 1.18 (B1.4 kontrak OpenAPI) memuat penamaan resource (`POST /transfers` lawan `/doTransfer`, Google AIP-121) yang dulu di B1.2; isi lama ada di riwayat git (`git show 6d368b5:situs/src/content/docs/b-fondasi/b1-2-resource-error.mdx`).
 - Ilustrasi `situs/lama/assets/cerita/tahap-1.svg` (adegan cerita lama) tidak dipakai lagi sejak T1 dihapus; ganti dengan ilustrasi latar perusahaan Grup Lestari (naskah: 1 latar + M3–M6).
 - Tabel "Angka di tahap ini" Tahap 1 ikut hilang bersama T1; tulis ulang di 1.37/1.38 (estimasi), angka dari `tahap[0].asumsi`.
 - `/cara-pakai/` (A0) masih menjelaskan susunan 5 bagian lama; tulis ulang untuk lima blok dan tiga pintu setelah halaman Tahap 1 pertama jadi.
@@ -53,8 +53,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.17 selesai (1.17 keputusan 153–154). Pengaman loop: keputusan 142.
-Halaman berikutnya: **1.18 "Kontrak OpenAPI + ADR 3"** (`B1.4`, konsep + ADR, ★, peran mobile+backend, widget alur, lab `b1-openapi`). Pekerjaan: (1) lab dulu: tulis ulang `labs/b1-openapi/openapi.yaml` ke API v1 `api-t1` (`ke` integer, jumlah 1..200000, `/login`, `/topup`, `/transfers`, `/transfers/{id}`, `/akun/{id}`, `/akun/{id}/riwayat`, `/warung/{id}/laporan`, problem+json), perbarui dua file v15 dan `run.sh` (redocly + oasdiff), rekam ulang `kontrak.txt`; (2) perbaiki handler `api-t1`: 400 menyebut field dari `UnmarshalTypeError.Field`, pertimbangkan `DisallowUnknownFields` (ADR 3 memutuskan), rekam ulang `m2.txt` hanya bila perilakunya berubah dan halaman 1.17 masih benar (1.17 adalah keadaan sebelum perbaikan: pakai mode `-rentan m2` bila perlu supaya rekaman 1.17 tetap bisa diulang); (3) halaman: isi lama `b-fondasi/b1-4-openapi.mdx` + penamaan resource dari B1.2 (`git show 6d368b5:situs/src/content/docs/b-fondasi/b1-2-resource-error.mdx`), ADR 3 "OpenAPI sebelum kode" dengan catatan jujur "untuk satu orang terasa berlebihan sampai minggu 5".
+2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.18 selesai (1.18 keputusan 155–156). Pengaman loop: keputusan 142.
+Halaman berikutnya: **1.19 "M3: Tanda kutip di pencarian"** (`t1-m3`, masalah, ★, widget hp mode rentan + cari-bug, lab api-t1). Naskah M3 minggu 2: Budi dapat "Error 500" saat mencari warung dengan tanda kutip; Dimas mencoba `' OR 1=1 --` dan melihat semua akun beserta saldo. Yang Raka kira: tanda kutip merusak pencarian; yang sebenarnya: SQL dibangun dari string, dan response mengembalikan terlalu banyak field. Butuh: endpoint pencarian warung di api-t1 (belum ada; `GET /warung?cari=`), versi benar (parameterized, field minimal) default, mode `-rentan m3` (string concat + `SELECT *` semua akun). Rekam: tanda kutip → 500 (rentan) / 200 (benar); `' OR 1=1 --` → semua akun + saldo (rentan) / 0 hasil (benar). Widget cari-bug (React baru; naskah: widget pertama yang menandai baris kode) dipakai di 1.19 dan 1.20: mulai di 1.19. Ilustrasi M3 (naskah) menyusul atau dibuat di halaman ini; cek `tools/ilustrasi_cerita.py`. Keamanan: target hanya lab lokal.
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
