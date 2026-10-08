@@ -70,7 +70,7 @@ Masalahnya bukan di app. Server membuang informasi yang paling dasar: berhasil a
 
 Rekaman lengkap dari server lab:
 
-<Snippet file="labs/api-t1/output/b1-1-http.txt" title="Output rekaman: labs/api-t1/output/b1-1-http.txt" />
+<Snippet file="labs/api-t1-lama/output/b1-1-http.txt" title="Output rekaman: labs/api-t1-lama/output/b1-1-http.txt" />
 
 Dua detail dari rekaman di atas:
 
@@ -90,7 +90,7 @@ Yang sama di semua stack: router mencocokkan method dan path, middleware membaca
 
 *Dijalankan: Go 1.27.1 `net/http`, PostgreSQL 17.11.*
 
-<Snippet file="labs/api-t1/main.go" region="rute" lang="go" />
+<Snippet file="labs/api-t1-lama/main.go" region="rute" lang="go" />
 
 <p class="bb-beda">**Yang berbeda di stack ini:** sejak Go 1.22, method dan path ditulis dalam satu pola, `"POST /transfers"`. Method lain otomatis dijawab `405` dengan header `Allow` ([net/http ServeMux](https://pkg.go.dev/net/http#ServeMux)).</p>
 

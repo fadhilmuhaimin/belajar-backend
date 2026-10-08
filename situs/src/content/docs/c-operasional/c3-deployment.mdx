@@ -44,15 +44,15 @@ Masalahnya bukan di kode, tapi di cara mengirim kode. Raka butuh deploy yang sam
 
 **Build sekali, jalankan di mana saja.** Image container berisi binary dan semua dependensinya. Image yang sama dijalankan di staging dan production. Build dua tahap membuat image akhir kecil: di lab, 28,9 MB.
 
-<Snippet file="labs/api-t1/Dockerfile" region="docker" lang="dockerfile" />
+<Snippet file="labs/api-t1-lama/Dockerfile" region="docker" lang="dockerfile" />
 
 **Konfigurasi dari environment, bukan di image.** Alamat database, secret, dan nama environment diberikan saat container dijalankan. Prinsip ini dari [The Twelve-Factor App: Config](https://12factor.net/config): konfigurasi berubah antar-deploy, kode tidak. Secret yang tertanam di image ikut tersebar ke semua orang yang bisa menarik image itu.
 
 **Fail-fast dan health check.** Aplikasi memeriksa konfigurasi wajib saat start, dan menolak jalan kalau salah. Endpoint `/sehat` memberi tahu deploy bahwa versi baru siap:
 
-<Snippet file="labs/api-t1/main.go" region="failfast" lang="go" />
+<Snippet file="labs/api-t1-lama/main.go" region="failfast" lang="go" />
 
-<Snippet file="labs/api-t1/main.go" region="sehat" lang="go" />
+<Snippet file="labs/api-t1-lama/main.go" region="sehat" lang="go" />
 
 **Rollback = jalankan image lama.** Rollback cepat karena tidak ada yang dibangun ulang. Syaratnya dua: image lama masih disimpan, dan skema database masih cocok dengan kode lama.
 
@@ -60,7 +60,7 @@ Syarat kedua inilah yang sering terlupa. Migration yang menghapus kolom membuat 
 
 Rekaman lengkap:
 
-<Snippet file="labs/api-t1/output/c3-deploy.txt" title="Output rekaman: labs/api-t1/output/c3-deploy.txt" />
+<Snippet file="labs/api-t1-lama/output/c3-deploy.txt" title="Output rekaman: labs/api-t1-lama/output/c3-deploy.txt" />
 
 **Urutan pipeline Rekeningo Tahap 1:** test → build image → migration → jalankan image baru → health check → selesai, atau rollback. Di Tahap 3, satu instance diganti dua instance dengan rolling deploy, supaya downtime 0,2 detik di atas menjadi nol.
 

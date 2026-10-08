@@ -53,9 +53,9 @@ Sebagai mobile engineer, Raka sudah mengenal masalah ini dari sisi app. Dari sis
 
 Rekaman lab:
 
-<Snippet file="labs/api-t1/output/e1-versi.txt" title="Output rekaman: labs/api-t1/output/e1-versi.txt" />
+<Snippet file="labs/api-t1-lama/output/e1-versi.txt" title="Output rekaman: labs/api-t1-lama/output/e1-versi.txt" />
 
-<Snippet file="labs/api-t1/versi.go" region="config" lang="go" />
+<Snippet file="labs/api-t1-lama/versi.go" region="config" lang="go" />
 
 **Keputusan desain: kenapa bukan `426`.** RFC 9110 mendefinisikan `426 Upgrade Required` untuk **protokol**: server meminta client pindah protokol, dan wajib mengirim header `Upgrade` ([RFC 9110 §15.5.22](https://www.rfc-editor.org/rfc/rfc9110.html#status.426)). "Versi app terlalu lama" bukan soal protokol. Rekeningo memakai `/config` yang dibaca saat app dibuka. Kalau suatu endpoint tetap harus menolak app lama, jawabannya `400` dengan `type` khusus, mis. `/problems/versi-app-kedaluwarsa`, supaya app bisa menampilkan layar update. Banyak tim memakai `426` untuk ini. Itu tetap berjalan, asal konsisten, tapi tidak sesuai definisinya.
 

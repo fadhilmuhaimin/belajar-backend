@@ -54,17 +54,17 @@ Satu transfer melewati ketiganya:
 <TabSet id="stack" labels={["Handler","Logika bisnis","Akses data"]}>
 <Fragment slot="t0">
 
-<Snippet file="labs/api-t1/handler.go" region="transfer" lang="go" />
+<Snippet file="labs/api-t1-lama/handler.go" region="transfer" lang="go" />
 
 </Fragment>
 <Fragment slot="t1">
 
-<Snippet file="labs/api-t1/layanan.go" region="aturan" lang="go" />
+<Snippet file="labs/api-t1-lama/layanan.go" region="aturan" lang="go" />
 
 </Fragment>
 <Fragment slot="t2">
 
-<Snippet file="labs/api-t1/data.go" region="transfer" lang="go" />
+<Snippet file="labs/api-t1-lama/data.go" region="transfer" lang="go" />
 
 </Fragment>
 </TabSet>
@@ -73,7 +73,7 @@ Perhatikan arah ketergantungannya. Logika bisnis tidak memanggil `DataPG` langsu
 
 Rekaman `go test` di lab menunjukkan unit test aturan berjalan bersama integration test yang memakai PostgreSQL sungguhan:
 
-<Snippet file="labs/api-t1/output/c1-test.txt" title="Output rekaman: labs/api-t1/output/c1-test.txt" />
+<Snippet file="labs/api-t1-lama/output/c1-test.txt" title="Output rekaman: labs/api-t1-lama/output/c1-test.txt" />
 
 **Kapan berlebihan.** Untuk satu developer, lapisan berikut biasanya menambah file tanpa menjawab masalah:
 

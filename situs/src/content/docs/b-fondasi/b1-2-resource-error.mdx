@@ -69,13 +69,13 @@ RFC 9457 juga mengizinkan **extension member**, yaitu field tambahan milikmu sen
 
 Rekaman dari server lab:
 
-<Snippet file="labs/api-t1/output/b1-2-error.txt" title="Output rekaman: labs/api-t1/output/b1-2-error.txt" />
+<Snippet file="labs/api-t1-lama/output/b1-2-error.txt" title="Output rekaman: labs/api-t1-lama/output/b1-2-error.txt" />
 
 Satu catatan jujur tentang lab: `type` di sana memakai URI relatif (`/problems/...`) supaya ringkas. RFC 9457 mengingatkan URI relatif bisa membingungkan dan tidak selalu ditangani benar. Di production, pakai URI absolut di domainmu sendiri.
 
 Kode Go yang menulis error ini:
 
-<Snippet file="labs/api-t1/handler.go" region="problem" lang="go" />
+<Snippet file="labs/api-t1-lama/handler.go" region="problem" lang="go" />
 
 ## Di stack lain
 

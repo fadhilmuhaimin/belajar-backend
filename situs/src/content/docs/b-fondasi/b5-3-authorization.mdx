@@ -54,9 +54,9 @@ OWASP menempatkan kegagalan cek kepemilikan, disebut **BOLA** (Broken Object Lev
 
 Kode cek kepemilikan di lab:
 
-<Snippet file="labs/api-t1/layanan.go" region="pemilik" lang="go" />
+<Snippet file="labs/api-t1-lama/layanan.go" region="pemilik" lang="go" />
 
-<Snippet file="labs/api-t1/output/b5-3-pemilik.txt" title="Output rekaman: labs/api-t1/output/b5-3-pemilik.txt" />
+<Snippet file="labs/api-t1-lama/output/b5-3-pemilik.txt" title="Output rekaman: labs/api-t1-lama/output/b5-3-pemilik.txt" />
 
 **Keputusan desain: `404` atau `403`.** `403` jujur: "kamu dikenal, tapi tidak boleh". Tapi `403` untuk ID yang ada dan `404` untuk yang tidak ada membuka jalan menebak akun mana yang terdaftar. Rekeningo memilih `404` untuk keduanya. Tim lain boleh memilih `403`, asal konsisten dan sadar risikonya.
 
