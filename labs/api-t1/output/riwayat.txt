@@ -1,0 +1,88 @@
+# server: ./api-t1
+
+# --- A. Persiapan ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/login' -d '{"email": "dimas@lestari.example", "password": "sementara-417"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Dimas>"}
+$ curl -i -X POST '/login' -d '{"email": "karyawan420@lestari.example", "password": "sementara-420"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Karyawan 420>"}
+$ curl -i -X POST '/login' -d '{"email": "warung.ani@lestari.example", "password": "sementara-418"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Warung Ani>"}
+
+# --- B. Empat pembayaran ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 25000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/1
+
+{"id":1,"saldo":225000}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Dimas>' -d '{"ke": 418, "jumlah": 30000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/2
+
+{"id":2,"saldo":220000}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Karyawan 420>' -d '{"ke": 418, "jumlah": 40000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/3
+
+{"id":3,"saldo":210000}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 502, "jumlah": 15000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/4
+
+{"id":4,"saldo":210000}
+
+# --- C. Lab menggeser waktu dua transaksi, supaya laporan berisi tiga hari ---
+$ psql -c "UPDATE transaksi SET dibuat = dibuat - interval '2 days' WHERE id = 1"
+$ psql -c "UPDATE transaksi SET dibuat = dibuat - interval '1 day' WHERE id = 2"
+
+# --- D. Budi membuka riwayatnya: terbaru dulu ---
+$ curl -i -X GET '/akun/419/riwayat' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"riwayat":[{"id":4,"arah":"keluar","lawan":"Warung Sari","jumlah":15000,"waktu":"<hari ini>T<jam>+07:00"},{"id":1,"arah":"keluar","lawan":"Warung Ani","jumlah":25000,"waktu":"<2 hari lalu>T<jam>+07:00"}]}
+
+# --- E. Budi mencoba membuka riwayat Warung Ani ---
+$ curl -i -X GET '/akun/418/riwayat' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+
+{"type":"/problems/tidak-ditemukan","title":"Akun tidak ditemukan","status":404}
+
+# --- F. Ani membuka laporan tiga hari terakhir ---
+$ curl -i -X GET '/warung/418/laporan?dari=<2 hari lalu>&sampai=<hari ini>' -H 'Authorization: Bearer <token sesi Warung Ani>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"per_hari":[{"tanggal":"<2 hari lalu>","transaksi":1,"total":25000},{"tanggal":"<kemarin>","transaksi":1,"total":30000},{"tanggal":"<hari ini>","transaksi":1,"total":40000}],"warung":418}
+$ psql -c "SELECT count(*) AS transaksi, sum(jumlah) AS total FROM transaksi WHERE ke = 418"
+ transaksi | total 
+-----------+-------
+         3 | 95000
+(1 row)
+
+
+# --- G. Dimas mencoba membuka laporan Warung Ani ---
+$ curl -i -X GET '/warung/418/laporan?dari=<2 hari lalu>&sampai=<hari ini>' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+
+{"type":"/problems/tidak-ditemukan","title":"Warung tidak ditemukan","status":404}

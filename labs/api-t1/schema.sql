@@ -45,4 +45,7 @@ CREATE TABLE transaksi (
   dibuat timestamptz NOT NULL DEFAULT now(),
   CHECK (dari <> ke)
 );
+-- Riwayat dan laporan selalu mencari per akun lalu mengurutkan menurut waktu.
+CREATE INDEX transaksi_dari_dibuat ON transaksi (dari, dibuat DESC);
+CREATE INDEX transaksi_ke_dibuat   ON transaksi (ke, dibuat DESC);
 -- --8<-- [end:transaksi]
