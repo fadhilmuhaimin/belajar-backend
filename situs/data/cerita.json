@@ -619,9 +619,9 @@
       "judul": "HTTP: method, status, header",
       "tahap": 1,
       "topik": "API",
-      "path": "b-fondasi/b1-1-http.md",
+      "path": "tahap-1/http.md",
       "prasyarat": [
-        "A2"
+        "B6"
       ],
       "inti": true,
       "masalah": "Bingung memilih method dan status code",
@@ -631,7 +631,6 @@
       "peran": [
         "backend"
       ],
-      "lama": true,
       "nomor": "1.16",
       "menit": 10
     },

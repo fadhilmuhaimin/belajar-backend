@@ -1,0 +1,49 @@
+{
+  "judul": "Status code apa untuk tiap kejadian di Rekeningo v1?",
+  "kelompok": [
+    "2xx",
+    "400",
+    "401",
+    "404",
+    "422",
+    "500"
+  ],
+  "item": [
+    {
+      "teks": "Budi membayar Rp25.000 ke Warung Ani",
+      "jawab": 0,
+      "kenapa": "201 Created: satu transaksi baru dibuat. Header Location menunjuk alamatnya. Rekaman lab: Location: /transfers/1, dan alamat itu bisa dibuka."
+    },
+    {
+      "teks": "Body berisi \"jumlah\": \"dua puluh lima ribu\" (teks, bukan angka)",
+      "jawab": 1,
+      "kenapa": "Tipe data salah: request tidak bisa dibaca sebagaimana mestinya. Handler menolaknya sebelum service jalan."
+    },
+    {
+      "teks": "Header Authorization tidak dikirim",
+      "jawab": 2,
+      "kenapa": "401 berarti server belum tahu siapa pengirimnya. RFC 9110 mewajibkan header WWW-Authenticate di response 401. Rekaman lab menunjukkannya."
+    },
+    {
+      "teks": "Dimas membuka GET /transfers/1 milik Budi",
+      "jawab": 3,
+      "kenapa": "Rekeningo menjawab 404, sama dengan transaksi yang tidak ada, supaya penanya tidak tahu transaksi itu ada. Keputusan ini dibahas di [[B5.3]]."
+    },
+    {
+      "teks": "Saldo Budi Rp25.000, ia membayar Rp30.000",
+      "jawab": 4,
+      "kenapa": "Request-nya benar secara format, tapi aturan Rekeningo menolaknya. Pilihan 422 ini adalah ADR 2 di [[B6]]."
+    },
+    {
+      "teks": "Database tidak bisa dihubungi",
+      "jawab": 5,
+      "kenapa": "Kesalahan di sisi server. Detail error hanya masuk log server; app menerima pesan umum."
+    },
+    {
+      "teks": "GET /akun/419 dengan token Budi yang valid",
+      "jawab": 0,
+      "kenapa": "200 OK dengan data akun di body."
+    }
+  ],
+  "penutup": "Pola umumnya: 2xx berhasil, 4xx kesalahan yang bisa diperbaiki pengirim, 5xx kesalahan server. App bisa memutuskan apa yang ditampilkan hanya dari angka pertamanya."
+}
