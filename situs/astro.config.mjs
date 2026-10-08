@@ -22,7 +22,10 @@ export default defineConfig({
         ThemeProvider: "./src/components/ThemeProvider.astro",
         Pagination: "./src/components/Lanjut.astro",
         MarkdownContent: "./src/components/MarkdownContent.astro",
+        PageTitle: "./src/components/JudulHalaman.astro",
       },
+      // Halaman berblok: daftar isi kanan hanya memuat blok (keputusan 118).
+      routeMiddleware: "./src/rute-blok.ts",
       // Semua blok kode lewat Shiki Astro dengan tema token CSS (lihat src/lib/shiki-tema.mjs), bukan Expressive Code.
       expressiveCode: false,
       // Halaman 404 ditulis sebagai konten biasa (src/content/docs/404.md); route 404 bawaan Starlight bentrok dengannya di Astro 7.

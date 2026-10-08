@@ -10,6 +10,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - 112–114: MkDocs, halaman Markdown lama, dan `docs/` dihapus; registry di `situs/data/cerita.json`, widget lama di `situs/lama/`.
 - 115: Cloudflare Pages Direct Upload dari CI; menunggu secret pemilik.
 - 116: React 19.3, TS 6.0.3 (bukan 7: peer @astrojs/check), Zod 4.6, Vitest 5; `astro check` strict di gerbang.
+- 118: `Blok.astro` + `data/templat.json`; kerangka di `situs/templat/`; daftar isi = blok (route middleware).
 - 117: registry v2, Tahap 1 = 42 halaman 1.1–1.42; ID lama dipakai ulang; B1.2/F2 lebur, T1 lama diganti PRD.
 
 ## Usulan perubahan cerita
@@ -42,6 +43,8 @@ Lalu Tugas 1 halaman 1–42.
 
 ## Pelajaran
 
+- BUG (fase 1): ThemeSelect bawaan Starlight menjalankan mode "auto" bila belum ada pilihan, jadi pembaca dengan sistem terang melihat situs terang; keputusan 105 tidak benar-benar berlaku. Diperbaiki di PR tema sesudah templat. `tangkap.mjs` tidak menangkapnya karena selalu menyetel tema.
+- Komponen di dalam MDX bisa membaca `Astro.locals.starlightRoute.entry.body` (teks MDX halaman) untuk tahu posisinya.
 - File `.js` di bawah `situs/` dibaca sebagai ES module (`situs/package.json` type module); widget UMD lama butuh `situs/lama/package.json` type commonjs.
 - Di zsh, `for f in $VAR` tidak memecah kata; pakai `xargs` atau `${=VAR}`.
 - Gerbang situs sekarang: `bash tools/cek_situs.sh --layar` (±3 menit lokal). Python di alat cukup `python3` sistem (pustaka standar).

@@ -1,0 +1,39 @@
+{
+  "catatan": "Urutan blok per jenis halaman (keputusan 118). 'blok' = urutan wajib; 'minimal' = jumlah blok minimum dengan nama bebas; 'buka' = jumlah blok pertama yang terbuka saat dimuat; 'menit' = target waktu baca. Diperiksa situs/src/lib/templat.test.ts.",
+  "jenis": {
+    "konsep": {
+      "blok": [
+        { "nama": "Mulai", "menit": 1 },
+        { "nama": "Coba", "menit": 3 },
+        { "nama": "Paham", "menit": 5 },
+        { "nama": "Putuskan", "menit": 2 },
+        { "nama": "Kunci", "menit": 2 }
+      ],
+      "buka": 2
+    },
+    "masalah": {
+      "blok": [
+        { "nama": "Gejala", "menit": 1 },
+        { "nama": "Yang Raka kira", "menit": 1 },
+        { "nama": "Yang sebenarnya", "menit": 2 },
+        { "nama": "Coba sendiri", "menit": 3 },
+        { "nama": "Konsep yang lahir", "menit": 1 }
+      ],
+      "buka": 2
+    },
+    "adr": {
+      "blok": [
+        { "nama": "Kebutuhan", "menit": 1 },
+        { "nama": "Opsi", "menit": 3 },
+        { "nama": "Yang dipilih dan kenapa", "menit": 2 },
+        { "nama": "Wujud di kode", "menit": 2 },
+        { "nama": "Coba keduanya", "menit": 3 },
+        { "nama": "Kapan keputusan ini salah", "menit": 1 }
+      ],
+      "buka": 2
+    },
+    "prd": { "minimal": 3, "buka": 1 },
+    "fitur": { "minimal": 3, "buka": 2 },
+    "tim-infra": { "minimal": 3, "buka": 2 }
+  }
+}

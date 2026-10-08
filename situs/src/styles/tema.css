@@ -526,3 +526,23 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 .sl-markdown-content tr.istilah-target td { background: var(--k-system-fill); }
 .sl-markdown-content abbr.istilah-demo { text-decoration: underline dotted var(--k-system-edge); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
 /* === akhir widget lama === */
+
+/* === Blok lipat halaman (keputusan 118): Mulai, Coba, Paham, Putuskan, Kunci, atau blok templat lain === */
+.content-panel p.kicker { margin: 0 0 -0.6rem; color: var(--aksen); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.sl-markdown-content details.blok { border: 1px solid var(--garis); border-radius: 10px; background: var(--bg); margin: 1.2rem 0; padding: 0; }
+.sl-markdown-content details.blok[open] { border-color: var(--garis-2); }
+.sl-markdown-content details.blok > summary.blok__kepala { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.2rem 1rem; padding: 0.9rem 1.1rem; cursor: pointer; list-style: none; }
+.sl-markdown-content details.blok > summary.blok__kepala::-webkit-details-marker { display: none; }
+.sl-markdown-content details.blok > summary.blok__kepala::before { content: "›"; color: var(--teks-2); margin-right: 0.5rem; display: inline-block; }
+.sl-markdown-content details.blok[open] > summary.blok__kepala::before { transform: rotate(90deg); }
+.sl-markdown-content details.blok h2.blok__judul { display: inline; margin: 0; font-size: 1.35em; color: var(--judul); flex: 1 1 auto; }
+.sl-markdown-content .blok__meta { color: var(--teks-2); font-size: 0.78em; white-space: nowrap; }
+.sl-markdown-content .blok--selesai .blok__status { color: var(--k-good-ink); }
+.sl-markdown-content .blok__isi { padding: 0 1.1rem 1.1rem; }
+.sl-markdown-content .blok__isi > :first-child { margin-top: 0; }
+.sl-markdown-content p.blok__aman { border-left: 3px solid var(--k-good-edge); padding: 0.4rem 0.8rem; color: var(--teks); background: var(--k-good-fill); border-radius: 0 6px 6px 0; }
+.sl-markdown-content .blok__lanjut { display: block; width: 100%; margin-top: 1.4rem; padding: 0.9rem 1.1rem; text-align: left; font: inherit; font-weight: 600; color: var(--ink-di-aksen); background: var(--aksen); border: 0; border-radius: 8px; cursor: pointer; text-decoration: none; }
+.sl-markdown-content .blok__lanjut span { display: block; font-size: 0.75em; font-weight: 400; }
+.sl-markdown-content .blok__lanjut:focus-visible { outline: 3px solid var(--judul); outline-offset: 2px; }
+.sl-markdown-content details.blok > summary:focus-visible { outline: 2px solid var(--aksen); outline-offset: -2px; border-radius: 10px; }
+starlight-toc a.toc-selesai::after, mobile-starlight-toc a.toc-selesai::after { content: " ✓"; color: var(--k-good-ink); }
