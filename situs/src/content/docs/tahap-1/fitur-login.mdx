@@ -1,0 +1,86 @@
+---
+title: "1.7 Fitur: login karyawan"
+description: Karyawan masuk dengan email perusahaan dan password sementara. Backend membuat sesi acak yang berlaku 8 jam dan bisa dicabut saat logout.
+---
+import Blok from "../../../components/Blok.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import Snippet from "../../../components/Snippet.astro";
+
+<p class="meta">Baca 4 menit · coba 2 menit · Prasyarat: [[t1-struktur-folder]] · Jalur inti</p>
+
+Senin pagi, sebelum tunjangan diisi, setiap penguji harus bisa masuk ke Rekeningo. Ini fitur pertama yang Raka bangun, karena semua fitur lain bergantung pada pertanyaan "siapa yang mengirim request ini?".
+
+<Blok nama="Yang diminta PRD" buka>
+
+PRD v1 menulisnya dalam satu baris:
+
+| Prioritas | Fitur | Keterangan |
+|---|---|---|
+| P0 | Login karyawan | Memakai email perusahaan dan password sementara dari admin |
+
+Raka menurunkannya jadi pekerjaan di tiga tempat:
+
+| Di app | Di backend | Di database |
+|---|---|---|
+| Layar login; simpan token di penyimpanan aman HP | `POST /login`, `POST /logout`; periksa sesi di setiap request | Tabel `akun` dengan hash password; tabel `sesi` |
+
+Di lab, ketiga warung juga diberi email agar bisa masuk dengan cara yang sama. Ini asumsi lab, karena PRD hanya menyebut karyawan.
+
+</Blok>
+
+<Blok nama="Coba: masuk, lalu keluar" buka aman="Kalau berhenti di sini, kamu sudah tahu: password dikirim sekali, setelah itu token yang membuktikan siapa kamu.">
+
+Ikuti Budi dari layar login sampai saldonya tampil. Semua status dan body di widget ini diambil dari rekaman lab.
+
+<WidgetLama nama="alur" src="data/skenario/t1-login.json" />
+
+</Blok>
+
+<Blok nama="Tabel dan rekaman">
+
+Dua tabel menopang fitur ini. Tabel `sesi` menyimpan hash token, bukan tokennya.
+
+<Snippet file="labs/api-t1/schema.sql" region="akun" lang="sql" title="labs/api-t1/schema.sql" />
+<Snippet file="labs/api-t1/schema.sql" region="sesi" lang="sql" title="labs/api-t1/schema.sql" />
+
+Rekaman lab menunjukkan tiga hal yang tidak terlihat dari layar HP. Pertama, password salah dan email yang tidak terdaftar mendapat jawaban yang persis sama:
+
+<Snippet file="labs/api-t1/output/login.txt" lines="10:20" title="Rekaman lab: labs/api-t1/output/login.txt" />
+
+Kedua, yang tersimpan di database adalah SHA-256 dari token. Perekam lab menghitung hash itu sendiri dan memastikan nilainya cocok:
+
+<Snippet file="labs/api-t1/output/login.txt" lines="22:27" title="Rekaman lab: labs/api-t1/output/login.txt" />
+
+Ketiga, logout menghapus sesi di server, jadi token yang sama tidak berlaku lagi:
+
+<Snippet file="labs/api-t1/output/login.txt" lines="43:58" title="Rekaman lab: labs/api-t1/output/login.txt" />
+
+Token sendiri dibuat di service, dari 32 byte acak:
+
+<Snippet file="labs/api-t1/internal/service/sesi.go" region="login" lang="go" title="labs/api-t1/internal/service/sesi.go" />
+
+OWASP meminta ID sesi minimal 64 bit entropi dari generator acak kriptografis. Sesi juga harus punya batas waktu absolut dan dimatikan di server saat logout ([OWASP: Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)). Lab memakai 256 bit, batas 8 jam, dan logout yang menghapus baris sesi.
+
+</Blok>
+
+<Blok nama="Konsep yang akan dibutuhkan">
+
+Fitur ini membuka tiga konsep yang dibahas di halaman sendiri:
+
+- [[B5.1]]: cara backend tahu siapa pengirim request.
+- [[B5.3]]: tahu siapa kamu belum berarti tahu kamu boleh apa.
+- [[t1-idor]]: di mana token disimpan di app, dan kenapa Rekeningo memilih sesi acak, bukan JWT (ADR 8).
+
+**Sengaja belum dilakukan** di minggu pertama, dengan alasannya:
+
+| Yang ditunda | Kenapa ditunda | Risiko yang diterima |
+|---|---|---|
+| Batas waktu idle | Uji coba 6 minggu, 100 orang; batas absolut 8 jam sudah ada | OWASP menyarankan keduanya; sesi yang ditinggal tetap aktif sampai 8 jam |
+| Wajib ganti password sementara | Admin membagikan password langsung ke penguji | Password sementara berpola sama untuk semua orang di lab |
+| Batas percobaan login | Dibahas bersama brute force di Tahap 2 | Penebak bisa mencoba berkali-kali |
+| Lupa password | Admin bisa membuat ulang password secara manual | Admin jadi titik tunggu |
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
