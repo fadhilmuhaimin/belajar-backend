@@ -4,6 +4,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 142: pengaman loop (tree bersih + main), log stream-json.
+- 141: halaman 1.10 (laporan per tanggal WIB vs UTC).
 - 140: hooks PreCompact/SessionStart, `tools/jalankan-tahap.sh` (loop headless + crosscheck akhir), CLAUDE.md butir 7.
 - 109: konten dulu, satu tahap sampai tuntas; CERITA jadi sumber tertinggi; tiga skill wajib.
 - 110: job CI `pesan_commit` menolak Co-Authored-By/Claude di pesan commit PR.
@@ -43,7 +45,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.10 selesai (1.10 keputusan 141). PR kecil pengaman loop (`tools/jalankan-tahap.sh`: tolak working tree kotor / bukan `main`; log `stream-json` langsung) menyusul 1.10.
+2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.10 selesai (1.10 keputusan 141). Pengaman loop: keputusan 142.
 Halaman berikutnya: **1.11 "Pertukaran saldo: tiga hal yang harus selalu benar"** (`t1-pertukaran-saldo`, konsep lima blok, ★, runsql + widget jumlah-total = widget React pertama, lab b3-stack). Naskah bagian 3: Budi bayar Rp25.000 ke Ani = dua UPDATE + satu INSERT; tiga invarian (semua atau tidak sama sekali; saldo ≥ 0; total uang tetap). Tanam pertanyaan Pak Hadi: "kalau angka saldo salah, dari baris mana saya tahu kenapa?" (jawaban Tahap 2). ADR dependency PGlite hanya bila dipakai (jumlah-total bisa memakai runsql-core sql.js yang ada).
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
