@@ -27,7 +27,11 @@ let lines = src.split("\n");
 // frontmatter
 let fm = [];
 if (lines[0] === "---") { const j = lines.indexOf("---", 1); fm = lines.slice(1, j); lines = lines.slice(j + 1); }
-const title = (fm.find((l) => l.startsWith("title:")) || "").replace(/^title:\s*/, "");
+// Judul tampilan = H1 di badan halaman (bisa lebih pendek dari title frontmatter, keputusan 68/74);
+// Starlight memakai satu `title` untuk H1 dan <title>.
+const titleFm = (fm.find((l) => l.startsWith("title:")) || "").replace(/^title:\s*/, "").replace(/^"(.*)"$/, "$1");
+const h1 = (lines.find((l) => /^# /.test(l)) || "").replace(/^# /, "").trim();
+const title = JSON.stringify(h1 || titleFm);
 
 function snippetDari(fence) {
   // fence: { lang, title, body[] }
