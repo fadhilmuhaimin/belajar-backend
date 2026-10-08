@@ -1,0 +1,187 @@
+---
+title: "2.3 Retry dan idempotency key"
+---
+import Snippet from "../../../components/Snippet.astro";
+import TabSet from "../../../components/TabSet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="E3" />
+
+<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[A2]] · Jalur inti</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. App timeout saat membayar. Apakah pembayarannya gagal?
+2. Kapan idempotency key dibuat: saat tap Bayar, atau saat request dikirim?
+3. Error mana yang boleh di-retry otomatis: `422`, `503`, atau timeout?
+
+Yakin dengan ketiganya? [Lompat ke Tahap 2](/cerita/tahap-2/).
+
+</details>
+
+## Inti
+
+Timeout tidak berarti gagal, jadi retry bisa membuat pembayaran ganda. Idempotency key membuat server mengenali retry dari aksi yang sama. Key dibuat sekali per tap dan dipakai ulang di setiap retry.
+
+<WidgetLama nama="arsitektur" tahap={2} />
+
+## Lihat sendiri
+
+Ini rekaman sungguhan: client Dart mengirim pembayaran ke server Go, dan server menyimpan data di PostgreSQL. Response pertama sengaja ditahan sampai app menyerah, meniru sinyal yang putus.
+
+<WidgetLama nama="alur" src="data/skenario/e3-idempotency.json" />
+
+## Kenapa ini ada
+
+Jam makan siang di kantin kompleks. Sinyal di sana sering hilang di dekat lift.
+
+Budi memesan nasi goreng di Warung Ani seharga Rp25.000 dan menekan Bayar. Loading berputar, lalu muncul "Koneksi lambat, mencoba lagi". Satu detik kemudian muncul "Pembayaran berhasil". Malamnya Budi melihat riwayat: dua pembayaran Rp25.000 ke Warung Ani.
+
+Raka memeriksa log. Request pertama sampai di server dan sudah COMMIT. Response-nya yang hilang.
+
+App memakai retry otomatis dari library HTTP, jadi request yang sama dikirim ulang. Server tidak punya cara membedakan "retry" dari "pesanan kedua".
+
+Di [[A2]], varian "sinyal putus" sudah menunjukkan masalah ini. Sekarang Raka harus memperbaikinya di dua sisi: app dan server.
+
+## Cara kerjanya
+
+**Kenapa `POST` tidak aman diulang.** Method idempotent adalah method yang hasilnya sama walau dikirim sekali atau berkali-kali. RFC 9110 menyebut `PUT`, `DELETE`, dan method yang safe seperti `GET` sebagai idempotent. `POST` tidak termasuk ([RFC 9110 §9.2.2](https://www.rfc-editor.org/rfc/rfc9110.html#name-idempotent-methods)). Jadi `POST /pembayaran` yang diulang berarti pembayaran baru, kecuali server diberi cara mengenali ulangan.
+
+**Idempotency key** adalah string acak dari client, dikirim di header. Server menyimpan key itu bersama hasil request pertama. Request lain dengan key yang sama menerima hasil yang tersimpan, bukan diproses ulang.
+
+Tiga aturan di sisi server, semuanya terlihat di rekaman:
+
+1. **Key dicatat dengan constraint unik**, di transaction yang sama dengan pembayaran. Lihat `INSERT ... ON CONFLICT DO NOTHING` di langkah 3.
+2. **Response ikut disimpan** sebelum `COMMIT` (langkah 4). Kalau tidak, retry tidak bisa dijawab.
+3. **Key yang sedang diproses** dijawab `409` dan app mencoba lagi nanti. Ini terjadi kalau retry datang saat percobaan pertama belum selesai.
+
+Tiga aturan di sisi app:
+
+1. **Key dibuat saat tap Bayar**, bukan di fungsi kirim. Simpan bersama pesanan di penyimpanan lokal, supaya tetap sama setelah app ditutup.
+2. **Retry hanya untuk kegagalan sementara:** timeout, koneksi putus, `503`, dan `429`. Jangan retry `400` atau `422`. Request yang sama akan ditolak dengan alasan yang sama.
+3. **Beri jeda yang membesar dan diacak** (exponential backoff + jitter). Tanpa jitter, ribuan app yang gagal di detik yang sama akan mengulang di detik yang sama juga ([AWS Builders' Library](https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/)).
+
+Satu detail yang sering terlewat: `timeout` di app hanya berhenti **menunggu**. Request yang sudah sampai di server tetap diproses sampai selesai. Rekaman di bawah membuktikannya: server mencatat `201` untuk request #1 walau app sudah menyerah.
+
+<Snippet file="labs/e3-idempotency/output/kunci-sama.txt" title="Output rekaman: labs/e3-idempotency, mode kunci-sama" />
+
+Header `Idempotency-Key` pernah diajukan sebagai standar IETF. Draft-nya kini berstatus kedaluwarsa dan tidak aktif ([datatracker](https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/)). Polanya tetap umum dipakai di API pembayaran.
+
+## Di stack lain
+
+**Skenario:** Budi membayar Rp25.000, response pertama hilang, app mengulang.
+
+Yang sama di semua stack: key dibuat sekali, dikirim di header, dan dipakai ulang di setiap retry. Yang berbeda: cara memasang batas waktu dan jeda. Klik satu langkah, dan baris yang mengerjakannya tersorot di setiap tab.
+
+<WidgetLama nama="stackstep" src="data/e3-stackstep.json" />
+
+<TabSet id="stack" labels={["Flutter (Dart)","Android (Kotlin)","Server (Go)"]}>
+<Fragment slot="t0">
+
+*Dijalankan: Dart 3.11.4 (`dart:io`, tanpa package), ke server Go 1.27.1 dan PostgreSQL 17.11.*
+
+<Snippet file="labs/e3-idempotency/client/bayar.dart" region="retry" lang="dart" />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** `Future.timeout()` hanya berhenti menunggu, request di server tetap jalan ([Dart API](https://api.dart.dev/dart-async/Future/timeout.html)). Kalau memakai `dio`, pastikan interceptor retry tidak membuat key baru.</p>
+
+</Fragment>
+<Fragment slot="t1">
+
+*Kode ini tidak dijalankan di lab. Perilakunya dicek ke dokumentasi [kotlinx.coroutines `withTimeout`](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/with-timeout.html) dan [Retrofit](https://github.com/square/retrofit).*
+
+<Snippet lang="kotlin" code={`// @POST("pembayaran") suspend fun bayar(@Header("Idempotency-Key") key: String, @Body b: Bayar): Hasil
+suspend fun bayar(api: PembayaranApi): Hasil {
+    val key = UUID.randomUUID().toString()          // satu key untuk satu tap "Bayar"
+    var jeda = 200L
+    repeat(3) {
+        try {
+            return withTimeout(1_000) { api.bayar(key, Bayar("warung_ani", 25_000)) }
+        } catch (e: TimeoutCancellationException) {
+            delay(jeda + Random.nextLong(100))      // backoff + jitter
+            jeda *= 2
+        }
+    }
+    error("gagal setelah 3 percobaan")
+}`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** `withTimeout` membatalkan coroutine di sisi app. Seperti di Dart, pembatalan itu tidak membatalkan pekerjaan yang sudah sampai di server.</p>
+
+</Fragment>
+<Fragment slot="t2">
+
+*Dijalankan: Go 1.27.1, `database/sql` + pgx v5.11.0, PostgreSQL 17.11.*
+
+<Snippet file="labs/e3-idempotency/server/main.go" region="handler" lang="go" />
+
+<p class="bb-beda">**Yang berbeda di sisi server:** polanya sama di stack mana pun, karena yang bekerja adalah constraint unik PostgreSQL. Framework hanya menentukan di mana kode ini diletakkan, biasanya sebagai middleware.</p>
+
+</Fragment>
+</TabSet>
+
+<Snippet file="labs/e3-idempotency/output/kunci-baru.txt" title="Output rekaman: mode kunci-baru (key dibuat ulang setiap retry)" />
+
+## Trade-off: kapan pakai apa
+
+| Opsi | Kelebihan | Kekurangan |
+|---|---|---|
+| Tanpa retry otomatis, tampilkan "Cek riwayat" | Paling sederhana, tidak ada risiko dobel | Budi harus memeriksa sendiri, dan banyak yang tetap menekan Bayar lagi |
+| Retry + idempotency key | Aman diulang, pengalaman Budi mulus | Butuh tabel key, masa simpan, dan disiplin di app |
+| Idempotency dari data bisnis (mis. satu pesanan hanya boleh dibayar sekali, constraint unik `pesanan_id`) | Tidak butuh header tambahan | Hanya bisa kalau aksinya punya identitas alami, mis. top-up bebas tidak punya |
+
+Masa simpan key adalah keputusan lain. Terlalu pendek, retry yang datang terlambat diproses ulang. Terlalu panjang, tabel membesar. Contoh di dunia nyata: Stripe membolehkan key dihapus setelah berumur minimal 24 jam ([dokumentasi](https://docs.stripe.com/api/idempotent_requests)).
+
+## Cek diri
+
+**1.** App menerima `422 saldo_kurang`. Apakah app boleh retry otomatis?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Tidak. `422` berarti request dipahami tapi aturan bisnisnya dilanggar. Mengulang request yang sama akan ditolak dengan alasan yang sama. Retry otomatis hanya untuk kegagalan sementara: timeout, koneksi putus, `503`, dan `429`.
+
+</details>
+
+**2.** Jelaskan kenapa response juga harus disimpan di tabel key, bukan hanya key-nya.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Retry harus menerima jawaban yang sama dengan percobaan pertama, mis. `201` dengan id pembayaran dan saldo terbaru. Kalau server hanya tahu "key ini pernah dipakai", ia bisa menolak retry, tapi app tidak tahu apakah pembayarannya sukses dan berapa saldonya.
+
+</details>
+
+**3.** Budi menekan Bayar, app crash, lalu Budi membuka app lagi dan menekan Bayar di pesanan yang sama. Key mana yang harus dipakai?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Key yang sama dengan sebelum crash, karena ini aksi bayar yang sama untuk pesanan yang sama. Karena itu key disimpan bersama pesanan di penyimpanan lokal, bukan hanya di memori.
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Key dibuat sekali per aksi user, di luar loop retry dan di luar fungsi kirim.
+- [ ] Key disimpan di penyimpanan lokal bersama aksi yang belum selesai.
+- [ ] Retry hanya untuk timeout, koneksi putus, `503`, `429`. Ada batas jumlah percobaan.
+- [ ] Jeda retry membesar dan diacak, bukan jeda tetap.
+- [ ] Di server: key punya constraint unik, dicatat di transaction yang sama dengan pembayaran, dan response ikut disimpan.
+
+## Bacaan lanjut
+
+- [RFC 9110 §9.2.2: Idempotent methods](https://www.rfc-editor.org/rfc/rfc9110.html#name-idempotent-methods)
+- [AWS Builders' Library: Timeouts, retries, and backoff with jitter](https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/)
+- [AWS Builders' Library: Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)
+- [Stripe: Idempotent requests](https://docs.stripe.com/api/idempotent_requests) (contoh API pembayaran yang mendokumentasikan polanya)
+- [PostgreSQL: INSERT ... ON CONFLICT](https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","hp","alur-core","alur","stackstep"]} />
