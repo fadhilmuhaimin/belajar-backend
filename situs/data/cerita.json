@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 153,
-        "halaman": 18
+        "menit": 159,
+        "halaman": 19
       },
       "bagian": [
         {
@@ -334,8 +334,12 @@
         "backend"
       ],
       "masalah": "Dari PRD sebesar ini, apa saja yang harus dibuat?",
-      "ada": false,
-      "nomor": "1.2"
+      "ada": true,
+      "prasyarat": [
+        "t1-prd"
+      ],
+      "nomor": "1.2",
+      "menit": 6
     },
     {
       "id": "A1",

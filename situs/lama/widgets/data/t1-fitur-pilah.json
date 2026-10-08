@@ -1,0 +1,17 @@
+{
+  "judul": "PRD v1: pekerjaan ini milik siapa?",
+  "kelompok": ["App", "Backend", "Database"],
+  "item": [
+    { "teks": "Menampilkan layar login dan menyimpan sesi di HP", "jawab": 0, "kenapa": "Layar dan penyimpanan sesi ada di HP karyawan. Backend hanya memeriksa sesi itu di setiap request." },
+    { "teks": "Memeriksa password dan membuat sesi baru", "jawab": 1, "kenapa": "Kalau app yang memeriksa, app yang dimodifikasi bisa selalu menjawab 'benar'. Hanya backend yang boleh memutuskan." },
+    { "teks": "Menyimpan hash password 100 karyawan", "jawab": 2, "kenapa": "Hash disimpan di tabel akun. Password aslinya tidak pernah disimpan di mana pun." },
+    { "teks": "Membaca CSV dari admin dan mengisi saldo 100 akun dalam satu operasi", "jawab": 1, "kenapa": "Backend memeriksa setiap baris CSV, lalu mengisi semuanya sekaligus. Kalau satu baris salah, tidak ada saldo yang berubah." },
+    { "teks": "Menolak saldo yang turun di bawah Rp0", "jawab": 2, "kenapa": "Backend juga memeriksa. Constraint di database adalah pagar terakhir saat kode backend salah." },
+    { "teks": "Memilih warung, mengisi nominal, lalu konfirmasi", "jawab": 0, "kenapa": "Ini urutan layar di HP Budi. Uang belum berpindah sebelum backend menerima request-nya." },
+    { "teks": "Mengurangi saldo Budi dan menambah saldo Ani sebagai satu operasi", "jawab": 1, "kenapa": "Aturan uang ada di backend. Kedua perubahan harus terjadi bersama, atau tidak sama sekali." },
+    { "teks": "Menghitung total penjualan per warung per hari", "jawab": 2, "kenapa": "Backend mengirim satu query SUM dan GROUP BY. Database yang menjumlahkan barisnya, bukan HP warung." },
+    { "teks": "Hanya mengirim riwayat milik akun yang login", "jawab": 1, "kenapa": "Menyembunyikan tombol di app tidak cukup. Backend harus menolak request riwayat milik orang lain." },
+    { "teks": "Menampilkan pesan error yang bisa dibaca Budi", "jawab": 0, "kenapa": "App yang menampilkan. Supaya bisa, backend harus mengirim error dalam satu format yang sama untuk semua fitur." }
+  ],
+  "penutup": "Pola umumnya: layar ada di app, keputusan tentang uang dan izin ada di backend, dan aturan yang tidak boleh dilanggar dijaga lagi oleh database."
+}

@@ -1,0 +1,65 @@
+---
+title: "1.2 Dari fitur ke pekerjaan teknis"
+description: Raka menurunkan PRD v1 menjadi pekerjaan di app, backend, dan database, lalu menandai konsep yang akan ia butuhkan.
+---
+import Blok from "../../../components/Blok.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 4 menit · coba 2 menit · Prasyarat: [[t1-prd]] · Jalur inti</p>
+
+Raka membaca PRD v1 dan menurunkannya jadi daftar pekerjaan. Pertanyaannya sama dengan yang mungkin kamu punya: dari fitur sebesar ini, apa saja yang harus dibuat, dan di mana?
+
+<Blok nama="Coba dulu: di mana pekerjaannya?" buka>
+
+Sepuluh pekerjaan dari PRD v1. Pilah masing-masing ke tempat yang mengerjakannya, lalu periksa jawabanmu.
+
+<WidgetLama nama="pilah" src="data/t1-fitur-pilah.json" />
+
+</Blok>
+
+<Blok nama="Dari fitur ke pekerjaan" buka>
+
+Ini tabel yang Raka tulis sebelum satu baris kode pun ada.
+
+| Fitur | Di app | Di backend | Di database |
+|---|---|---|---|
+| Login karyawan | Layar login, simpan sesi | Periksa password, buat sesi, periksa sesi di tiap request | Tabel `akun` dengan hash password, tabel `sesi` |
+| Top-up oleh admin | Tidak ada; admin memakai CSV | Terima CSV, validasi nama dan nominal, isi 100 akun dalam satu operasi | Kolom `akun.saldo`, catatan top-up |
+| Bayar ke warung | Pilih warung, nominal, konfirmasi, hasil | Periksa saldo, kurangi, tambah ke warung, catat | Tabel `transaksi`, constraint saldo ≥ 0 |
+| Saldo dan riwayat | Dua layar | Baca saldo dan transaksi milik akun yang login | Index pada `transaksi(akun, waktu)` |
+| Laporan harian warung | Layar total dan daftar | Jumlahkan per warung per hari | Query `SUM` dan `GROUP BY` |
+| Pencairan warung | Tidak ada | Rekap mingguan yang diekspor admin | Query jumlah per warung |
+| Semua fitur | Satu format error yang bisa ditampilkan | Satu format error, satu kontrak API | Skema yang sama di laptop dan server |
+
+Satu baris di tabel ini lebih penting dari yang terlihat. "Bayar ke warung" berarti dua angka berubah dan satu catatan ditulis. Halaman [[t1-pertukaran-saldo]] membahasnya sendiri.
+
+</Blok>
+
+<Blok nama="Dua keputusan sebelum kode">
+
+Tabel itu memaksa dua keputusan, bahkan sebelum Raka membuka editor.
+
+1. **Backend sendiri atau BaaS.** Raka membandingkan tiga jalan untuk satu fitur saja: bayar ke warung. Pertanyaan penentunya adalah siapa yang boleh mengubah angka saldo. Jawabannya dibahas di [[A4]].
+2. **Struktur folder pertama.** Kode dibagi jadi `handler/` untuk HTTP, `service/` untuk aturan uang, dan `repo/` untuk SQL. Alasannya sederhana: supaya aturan uang tidak tercecer saat PRD v2 datang. Lihat [[t1-struktur-folder]].
+
+</Blok>
+
+<Blok nama="Konsep yang akan dibutuhkan">
+
+Setiap baris tabel menyebut konsep yang belum Raka kuasai. Tahap 1 membahas semuanya, satu per satu, saat masalahnya muncul.
+
+| Fitur | Konsep |
+|---|---|
+| Login karyawan | [[B5.1]], cara menyimpan token di app ([[t1-idor]]) |
+| Top-up oleh admin | [[B3.1]] untuk 100 baris sekaligus, [[B6]], catatan "siapa, kapan, kenapa" ([[t1-adr-transaction]]) |
+| Bayar ke warung | [[t1-pertukaran-saldo]], [[B3.1]], [[B6]] |
+| Saldo dan riwayat | [[B5.3]]; pagination menyusul di Tahap 2 |
+| Laporan harian warung | [[B2.1]] |
+| Semua fitur | [[B1.4]], [[B4.1]], [[C3]] |
+
+Halaman fitur berikutnya membahas tiap fitur: layar app, endpoint, dan tabelnya.
+
+</Blok>
+
+<SkripLama daftar={["pilah"]} />
