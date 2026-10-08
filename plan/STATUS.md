@@ -1,6 +1,6 @@
 # Status
 
-Diperbarui: 2026-10-08 (setelah fase 1; arahan baru keputusan 109 terpasang, menunggu "mulai"). Catatan singkat tentang keadaan panduan dan pekerjaan yang masih terbuka. Keputusan dan alasannya ada di [KEPUTUSAN.md](KEPUTUSAN.md).
+Diperbarui: 2026-10-09 (sesi redesain tampilan berhenti; PR draft #120). Catatan singkat tentang keadaan panduan dan pekerjaan yang masih terbuka. Keputusan dan alasannya ada di [KEPUTUSAN.md](KEPUTUSAN.md).
 
 ## Keadaan sekarang
 
@@ -53,6 +53,21 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.19 M3: Tanda kutip di pencarian | Halaman masalah, lab `m3.txt` + mode rentan m3, widget React cari-bug (keputusan 157, 158, 159) |
 
 Diperbarui 2026-10-08. 19 dari 42 halaman selesai; berikutnya 1.20. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
+
+## Redesain tampilan (sesi 2026-10-09, menunggu keputusan pemilik)
+
+Masalah pemilik (pembaca ADHD): kaku, padat, teks kecil, kontras kurang, beranda tanpa aktivitas. Branch `redesain/tampilan`, PR draft #120 (jangan merge). Rincian dan langkah berikutnya di MEMORI "Sedang dikerjakan"; ukuran di `plan/AUDIT-TAMPILAN.md`.
+
+| Langkah | Keadaan |
+|---|---|
+| Ukur sebelum (keputusan 200) | Selesai: teks isi 16/14,7 px (spesifikasi 19 px tidak pernah berlaku), 9 jenis teks UI < 14 px, sekunder 7,83:1, axe `color-contrast` 13 elemen dan `link-in-text-block` |
+| Riset bersumber | Selesai (laporan subagen), belum ditulis ke AUDIT-TAMPILAN.md bagian 2 |
+| Tipografi (201) | Di stash `redesain-tipografi`; axe 0 pelanggaran, tapi layar pertama gagal di 9 halaman lama (diukur sebelum 202) |
+| Satu kolom, TOC tersembunyi, sidebar terlipat, menu peran (202) | Commit 227014f, gerbang hijau |
+| Blok tanpa kotak, Berikutnya, meta PRD, progres baca, ilustrasi blok (203–207) | Belum |
+| Beranda baru (208+) | Belum |
+| Tangkapan sebelum/sesudah, ukur ulang | Belum |
+| PR #117 (konten 1024 px, keputusan 163) | Terbuka, bertentangan dengan kolom 680 px; menunggu pemilik |
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 
