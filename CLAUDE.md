@@ -41,6 +41,7 @@ MEMORI maksimal 200 baris; hapus yang tidak relevan.
 4. Verifikasi sendiri: jalankan gerbang kualitas dan baca hasilnya sebelum melapor. Untuk tampilan: Playwright 375×667 dan 1366×657, gelap dan terang; lihat tangkapan layarnya sendiri dan jawab: dalam 3 detik, tahu di mana saya, apa yang dibaca dulu, ke mana selanjutnya?
 5. Riset nyata: setiap versi, API, klaim riset, angka industri dicek dengan WebSearch/WebFetch ke sumber primer saat dipakai. Yang tidak bisa dicek diberi [perlu verifikasi] dan dicatat di MEMORI "Perlu dicek pemilik".
 6. Laporkan pendek: apa yang berubah, apa yang dicek (dengan output), apa yang belum, skill mana yang dipakai. Lalu lanjut.
+7. Hemat konteks: output perintah panjang dipotong (`| tail -30`) atau ditulis ke file lalu dibaca seperlunya; jangan cetak diff atau log penuh. Ganti sesi setiap ±10 halaman, setelah MEMORI diperbarui. Di akhir setiap PR tulis kalimat "Siap dilanjutkan dari <halaman>" (mis. "Siap dilanjutkan dari 1.12"): itu tanda berhenti untuk `tools/jalankan-tahap.sh`.
 </cara_kerja>
 
 <commit>
