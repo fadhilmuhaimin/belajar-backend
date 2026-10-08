@@ -688,6 +688,23 @@ def rekam_injection():
     b = sql("SELECT id, nama FROM akun WHERE jenis = 'warung' ORDER BY nama DESC;")
     harap((a.split().index("418") < a.split().index("502"), b.split().index("502") < b.split().index("418")),
           (True, True), "ORDER BY $1 tidak mengurutkan; ORDER BY nama DESC mengurutkan")
+
+    bagian("E. Latihan: draf AI laporan warung (latihan/laporan.go), dites ke database lalu di-lint")
+    reset()
+    t = subprocess.run(["go", "test", "-v", "-count=1", "./..."], cwd=HERE / "latihan", env=ENV,
+                       capture_output=True, text=True)
+    keluaran = re.sub(r" \(\d+\.\d+s\)", "", t.stdout)
+    keluaran = re.sub(r"(ok\s+lab/latihan)\s+\d+\.\d+s", r"\1", keluaran).strip()
+    harap((t.returncode, "division by zero" in keluaran, "urut tidak dikenal" in keluaran), (0, True, True),
+          "latihan: draf menjalankan urut sebagai SQL, versi benar menolaknya")
+    log.append(f"$ cd latihan && go test -v ./...\n{keluaran}\n")
+    r = subprocess.run(["go", "run", GOSEC, "-fmt=text", "-include=G201,G202", "./..."], cwd=HERE / "latihan",
+                       capture_output=True, text=True)
+    ringkas = "\n".join(l.rstrip() for l in r.stdout.splitlines() if l.strip() and not l.startswith("Results"))
+    harap(("Issues : 0" in ringkas, r.returncode), (True, 0), "gosec tidak menandai draf (query di return)")
+    log.append(f"$ cd latihan && go run {GOSEC} -include=G201,G202 ./...\n{ringkas}\n")
+    log.append("# Draf menjalankan urut sebagai SQL (tes pertama), tapi gosec tidak menandainya:\n"
+               "# aturan G202 memeriksa query di assignment (rows, err := ...), bukan yang langsung di return.\n")
     tulis("injection.txt")
 
 

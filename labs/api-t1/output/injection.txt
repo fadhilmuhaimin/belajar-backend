@@ -71,3 +71,24 @@ $ psql -c "SELECT id, nama FROM akun WHERE jenis = 'warung' ORDER BY nama DESC;"
  418 | Warung Ani
 (3 rows)
 
+
+# --- E. Latihan: draf AI laporan warung (latihan/laporan.go), dites ke database lalu di-lint ---
+$ cd latihan && go test -v ./...
+=== RUN   TestDrafMenjalankanUrutSebagaiSQL
+    laporan_test.go:26: draf, urut=(SELECT 1/0): ERROR: division by zero (SQLSTATE 22012)
+--- PASS: TestDrafMenjalankanUrutSebagaiSQL
+=== RUN   TestBenarMenolakUrutAsing
+    laporan_test.go:35: benar, urut=(SELECT 1/0): urut tidak dikenal: "(SELECT 1/0)"
+    laporan_test.go:44: benar, urut=waktu: tanpa error
+--- PASS: TestBenarMenolakUrutAsing
+PASS
+ok  	lab/latihan
+$ cd latihan && go run github.com/securego/gosec/v2/cmd/gosec@v2.29.0 -include=G201,G202 ./...
+Summary:
+  Gosec  : dev
+  Files  : 1
+  Lines  : 41
+  Nosec  : 0
+  Issues : 0
+# Draf menjalankan urut sebagai SQL (tes pertama), tapi gosec tidak menandainya:
+# aturan G202 memeriksa query di assignment (rows, err := ...), bukan yang langsung di return.
