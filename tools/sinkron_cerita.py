@@ -135,13 +135,15 @@ def polos(md):
 
 
 def kartu(hs):
-    """Soal "**N.** ..." + <details class="success"><summary>Jawaban</summary> di bagian ## Cek diri."""
+    """Soal "**N.** ..." + <details class="success"><summary>Jawaban</summary> di bagian Cek diri.
+    Heading boleh ## (halaman lama) atau ### (di dalam blok Kunci, keputusan 127); bagian berakhir di heading
+    berikutnya atau di akhir blok."""
     out = []
     for h in hs:
         if not h["ada"] or not (h.get("nomor") or h.get("lebur_ke") or BERID.match(h["id"])):
             continue
         teks = file_situs(h).read_text()
-        m = re.search(r"^## Cek diri\s*$(.*?)(?=^## |\Z)", teks, re.S | re.M)
+        m = re.search(r"^#{2,3} Cek diri\s*$(.*?)(?=^#{1,3} |^</Blok>|\Z)", teks, re.S | re.M)
         if not m:
             continue
         rx = (r"^\*\*(\d+)\.\*\*\s+(.+?)\n\n"                          # soal satu baris
@@ -286,6 +288,14 @@ def main():
         # Link tooltip istilah bergantung pada halaman yang ada: bangun ulang sekalian.
         import subprocess
         subprocess.run([sys.executable, str(ROOT / "tools/build_istilah.py")], check=True)
+    # Halaman konsep versi baru wajib punya Cek diri dengan minimal 3 soal yang terbaca sebagai kartu (CLAUDE.md).
+    per_hal = {}
+    for c in kartu(hs):
+        per_hal[c["halaman"]] = per_hal.get(c["halaman"], 0) + 1
+    for h in hs:
+        if h.get("ada") and h.get("jenis") == "konsep" and not h.get("lama"):
+            if per_hal.get(h["id"], 0) < 3:
+                beda.append(f"{label(h)}: Cek diri {per_hal.get(h['id'], 0)} soal terbaca sebagai kartu, minimal 3")
     beda += cek_angka(d["tahap"])
     # Aturan layar pertama: Inti pendek supaya diagram di bawahnya muat di 375×667.
     for p in file_konten():
