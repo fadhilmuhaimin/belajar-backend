@@ -43,16 +43,13 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Halaman 1.1–1.9 dan lab riwayat (PR #93, keputusan 139) sudah di `main`. PR hooks memori (keputusan 140) memasang `.claude/settings.json`, `tools/jalankan-tahap.sh`, dan `plan/PROMPT-CROSSCHECK.md`. Pemilik akan menjalankan `bash tools/jalankan-tahap.sh`.
-Halaman berikutnya: **1.10 "Fitur: saldo, riwayat, laporan warung"**.
-1. Branch `tahap-1/halaman-fitur-saldo` dari `main`; file `situs/src/content/docs/tahap-1/fitur-saldo.mdx` (jenis fitur, kerangka `situs/templat/fitur.mdx`, contoh tetangga `fitur-bayar.mdx`), prasyarat `t1-fitur-bayar`.
-2. Bahan lab sudah ada: rekaman `labs/api-t1/output/riwayat.txt` (D riwayat Budi baris 56–61, E 404 akun orang lain 63–68, F laporan Ani + psql cocok 70–80, G 404 Dimas 83–88); region Snippet `repo/riwayat.go` `riwayat` dan `laporan`, `service/riwayat.go` `laporan`; index di `schema.sql` baris 48–50.
-3. Widget runsql baru `situs/lama/widgets/data/t1-laporan.json` (format sama dengan `t1-topup.json`, sql.js): laporan dihitung `GROUP BY` di database vs semua baris dikirim ke app; kunci hasilnya di tes runsql seperti 1.8.
-4. Lalu 1.11 Pertukaran saldo (`t1-pertukaran-saldo`, konsep lima blok, runsql + widget jumlah-total = widget React pertama; ADR dependency PGlite bila dipakai).
-Pola per halaman: lab dulu bila perlu (PR sendiri, `make -C labs/api-t1 run BAGIAN=<nama>`), lalu halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar | tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/`; merge sendiri bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42 merge dan tangkapan seluruh Tahap 1 dilihat: tulis "Tahap 1: selesai" di STATUS.
+2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.10 selesai (1.10 keputusan 141). PR kecil pengaman loop (`tools/jalankan-tahap.sh`: tolak working tree kotor / bukan `main`; log `stream-json` langsung) menyusul 1.10.
+Halaman berikutnya: **1.11 "Pertukaran saldo: tiga hal yang harus selalu benar"** (`t1-pertukaran-saldo`, konsep lima blok, ★, runsql + widget jumlah-total = widget React pertama, lab b3-stack). Naskah bagian 3: Budi bayar Rp25.000 ke Ani = dua UPDATE + satu INSERT; tiga invarian (semua atau tidak sama sekali; saldo ≥ 0; total uang tetap). Tanam pertanyaan Pak Hadi: "kalau angka saldo salah, dari baris mana saya tahu kenapa?" (jawaban Tahap 2). ADR dependency PGlite hanya bila dipakai (jumlah-total bisa memakai runsql-core sql.js yang ada).
+Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran
 
+- `node tools/tangkap.mjs` menulis ke `tangkapan/` relatif cwd; jalankan dari `situs/` (di-.gitignore di sana), bukan dari root.
 - Hook PreCompact: stdout dan stderr dengan exit 0 hanya masuk debug log, tidak terlihat model; exit 2 memblokir compaction. Stdout SessionStart masuk konteks (docs hooks resmi).
 - Di dalam blok, Cek diri ditulis `### Cek diri`; sinkron membacanya sejak keputusan 127 dan menolak halaman konsep baru dengan kurang dari 3 kartu.
 - Widget lama dengan baris horizontal (flex) kena margin saudara Starlight; tambahkan kontainernya ke aturan `:is(...) > * + *` di tema.css (keputusan 124, 128).

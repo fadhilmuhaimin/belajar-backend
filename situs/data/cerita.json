@@ -502,9 +502,13 @@
         "backend"
       ],
       "masalah": "Warung ingin tahu total hari ini",
-      "ada": false,
+      "ada": true,
       "pendek": "Fitur saldo dan laporan",
-      "nomor": "1.10"
+      "prasyarat": [
+        "t1-fitur-bayar"
+      ],
+      "nomor": "1.10",
+      "menit": 7
     },
     {
       "id": "t1-pertukaran-saldo",
