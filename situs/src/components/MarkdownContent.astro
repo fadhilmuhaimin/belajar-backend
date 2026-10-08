@@ -6,3 +6,6 @@
 import "@astrojs/starlight/style/markdown.css";
 ---
 <article class="sl-markdown-content md-content__inner"><slot /></article>
+{/* Tooltip istilah dimuat di setiap halaman berartikel (keputusan 123), bukan lewat SkripLama per halaman. */}
+<script is:inline src="/javascripts/istilah-data.js"></script>
+<script is:inline src="/javascripts/istilah.js"></script>
