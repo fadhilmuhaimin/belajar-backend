@@ -401,6 +401,33 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 .sl-markdown-content .bb-banding__note { margin: 0.3rem 0 0; font-size: 0.85em; padding-left: 0.5rem; border-left: 3px solid var(--k-system-edge); }
 .sl-markdown-content .bb-banding__note.is-warn { border-left-color: var(--k-warn-edge); }
 @media (max-width: 50em) { .sl-markdown-content .bb-banding__cols { grid-template-columns: 1fr; } }
+/* Dua client, satu saldo (race.js): replay rekaman PostgreSQL */
+.sl-markdown-content .bb-tabs { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.5rem; }
+.sl-markdown-content .bb-tab { font: inherit; font-size: 0.85em; font-weight: 600; cursor: pointer; padding: 0.35rem 0.7rem; border-radius: 999px; border: 1px solid var(--garis-2); background: var(--bg); color: var(--teks-2); }
+.sl-markdown-content .bb-tab[aria-selected="true"] { background: var(--aksen); border-color: var(--aksen); color: var(--ink-di-aksen); }
+.sl-markdown-content .bb-tab:focus-visible { outline: 2px solid var(--aksen); outline-offset: 1px; }
+.sl-markdown-content .bb-stage { display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 0.6rem; margin: 0.6rem 0; }
+.sl-markdown-content .bb-client, .sl-markdown-content .bb-db { border: 1px solid var(--garis); border-radius: 8px; padding: 0.5rem 0.6rem; min-width: 0; }
+.sl-markdown-content .bb-client.is-waiting { background: var(--k-warn-fill); border-color: var(--k-warn-edge); }
+.sl-markdown-content .bb-db { background: var(--bg-2); }
+.sl-markdown-content .bb-client__head { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.sl-markdown-content .bb-client__sql.is-now { font-weight: 700; }
+.sl-markdown-content .bb-client__sql { display: block; margin-top: 0.3rem; font-size: 0.8em; white-space: pre-wrap; word-break: break-word; background: transparent; padding: 0; }
+.sl-markdown-content .bb-vars { margin: 0.3rem 0 0; display: grid; grid-template-columns: auto auto; gap: 0 0.5rem; justify-content: start; }
+.sl-markdown-content .bb-vars dt { color: var(--teks-2); font-weight: 400; margin: 0; }
+.sl-markdown-content .bb-vars dd { margin: 0; font-weight: 700; }
+.sl-markdown-content .bb-db__row { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; margin-top: 0.3rem; }
+.sl-markdown-content .bb-db__row p { margin: 0; }
+.sl-markdown-content .bb-db__saldo { font-size: 1.3em; font-weight: 700; color: var(--judul); }
+.sl-markdown-content .bb-now { min-height: 2.6em; margin: 0.4rem 0; font-weight: 500; }
+.sl-markdown-content .bb-timeline { max-height: 18rem; overflow-y: auto; border-top: 1px solid var(--garis); padding-top: 0.3rem; }
+.sl-markdown-content .bb-summary { margin: 0.6rem 0 0; padding-left: 0.6rem; border-left: 3px solid var(--k-old-edge); }
+.sl-markdown-content .bb-summary:empty { display: none; }
+.sl-markdown-content .bb-step.is-current { outline: 2px solid var(--k-system-edge); }
+@media (max-width: 50em) {
+  .sl-markdown-content .bb-stage { grid-template-columns: 1fr 1fr; }
+  .sl-markdown-content .bb-db { grid-column: 1 / -1; order: -1; }
+}
 /* Ilustrasi cerita (SVG per tahap) */
 .sl-markdown-content figure.bb-ilus { margin: 1.2em 0; }
 .sl-markdown-content figure.bb-ilus img { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--garis); }
