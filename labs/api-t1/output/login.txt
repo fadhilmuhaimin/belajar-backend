@@ -1,19 +1,19 @@
 # server: ./api-t1
 
 # --- A. Budi login dengan email perusahaan dan password sementara ---
-$ curl -i -X POST /login -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
 HTTP/1.1 200 OK
 Content-Type: application/json
 
 {"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
 
 # --- B. Password salah, dan email yang tidak terdaftar: jawabannya sama ---
-$ curl -i -X POST /login -d '{"email": "budi@lestari.example", "password": "tebakan"}'
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "tebakan"}'
 HTTP/1.1 401 Unauthorized
 Content-Type: application/problem+json
 
 {"type":"/problems/login-gagal","title":"Email atau password salah","status":401}
-$ curl -i -X POST /login -d '{"email": "tidak.ada@lestari.example", "password": "tebakan"}'
+$ curl -i -X POST '/login' -d '{"email": "tidak.ada@lestari.example", "password": "tebakan"}'
 HTTP/1.1 401 Unauthorized
 Content-Type: application/problem+json
 
@@ -28,12 +28,12 @@ $ psql -c "SELECT akun_id, left(token_hash, 16) AS token_hash, kedaluwarsa - now
 
 
 # --- D. Request dengan sesi Budi, dan tanpa sesi ---
-$ curl -i -X GET /akun/419 -H 'Authorization: Bearer <token sesi Budi>'
+$ curl -i -X GET '/akun/419' -H 'Authorization: Bearer <token sesi Budi>'
 HTTP/1.1 200 OK
 Content-Type: application/json
 
 {"id":419,"jenis":"karyawan","nama":"Budi","saldo":0}
-$ curl -i -X GET /akun/419
+$ curl -i -X GET '/akun/419'
 HTTP/1.1 401 Unauthorized
 Content-Type: application/problem+json
 Www-Authenticate: Bearer error="invalid_token"
@@ -41,10 +41,10 @@ Www-Authenticate: Bearer error="invalid_token"
 {"type":"/problems/belum-login","title":"Belum login atau sesi sudah berakhir","status":401}
 
 # --- E. Logout mematikan sesi di server; token yang sama ditolak ---
-$ curl -i -X POST /logout -H 'Authorization: Bearer <token sesi Budi>'
+$ curl -i -X POST '/logout' -H 'Authorization: Bearer <token sesi Budi>'
 HTTP/1.1 204 No Content
 
-$ curl -i -X GET /akun/419 -H 'Authorization: Bearer <token sesi Budi>'
+$ curl -i -X GET '/akun/419' -H 'Authorization: Bearer <token sesi Budi>'
 HTTP/1.1 401 Unauthorized
 Content-Type: application/problem+json
 Www-Authenticate: Bearer error="invalid_token"
