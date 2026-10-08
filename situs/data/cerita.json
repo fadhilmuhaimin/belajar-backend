@@ -646,9 +646,13 @@
         "backend"
       ],
       "label": "Masalah 2 · minggu 1",
-      "masalah": "App mengirim amount, server membaca nominal",
-      "ada": false,
-      "nomor": "1.17"
+      "masalah": "App mengirim amount, server membaca jumlah",
+      "ada": true,
+      "prasyarat": [
+        "B1.1"
+      ],
+      "nomor": "1.17",
+      "menit": 6
     },
     {
       "id": "B1.4",

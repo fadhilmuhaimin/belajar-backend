@@ -4,6 +4,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 154: 1.17 M2; 153: lab m2 (field asing diabaikan, judul 400 menyesatkan).
 - 152: 1.16 HTTP dari http.txt; 151: GET /transfers/{id} supaya Location jujur.
 - 150: 1.15 + ADR 2; B1.2 dihapus, rujukan ke B6; penamaan resource pindah ke 1.18.
 - 149: 1.14 M1 (masalah pertama); 148: mode rentan -rentan m1, runsql setup per panel.
@@ -28,7 +29,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Usulan perubahan cerita
 
-(kosong)
+- M2 (naskah bagian 4): naskah menulis server membaca `nominal`; lab dan halaman sejak 1.9 memakai field `jumlah` (label layar tetap "Nominal"). Halaman 1.17 menulis tiga nama: Nominal di layar, `amount` di Dart, `jumlah` di server. Usul: naskah menyebut `jumlah`, atau dibiarkan (konsepnya sama).
 
 ## Catatan untuk penulisan ulang Tahap 1
 
@@ -52,8 +53,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.16 selesai (1.16 keputusan 151–152). Pengaman loop: keputusan 142.
-Halaman berikutnya: **1.17 "M2: amount vs nominal"** (`t1-m2`, masalah, tanpa ★, widget alur, lab `b1-openapi`). Naskah M2: minggu 1, Raka-mobile dan Raka-backend beda paham nama field; app mengirim `amount`, server membaca `nominal` (di lab api-t1 field-nya `jumlah`); yang Raka kira: salah ketik; yang sebenarnya: tidak ada kontrak tertulis; konsep: kontrak OpenAPI, resource; ADR 3 di 1.18. Cek `labs/b1-openapi` (isi, apakah memakai tabel/field v1) dan perilaku `api-t1` bila field tidak dikenal: Go `json.Decoder` mengabaikan field asing, jadi `{"ke":418,"amount":25000}` → jumlah 0 → 422 "harus lebih dari 0". Itu gejala yang bisa direkam (bagian baru `m2` di api-t1) dan alur widget dari rekamannya. `DisallowUnknownFields` adalah salah satu perbaikan.
+2026-10-08 · Pemilik tidur; sesi ini satu-satunya pekerja (loop headless tidak dijalankan malam ini). Halaman 1.1–1.17 selesai (1.17 keputusan 153–154). Pengaman loop: keputusan 142.
+Halaman berikutnya: **1.18 "Kontrak OpenAPI + ADR 3"** (`B1.4`, konsep + ADR, ★, peran mobile+backend, widget alur, lab `b1-openapi`). Pekerjaan: (1) lab dulu: tulis ulang `labs/b1-openapi/openapi.yaml` ke API v1 `api-t1` (`ke` integer, jumlah 1..200000, `/login`, `/topup`, `/transfers`, `/transfers/{id}`, `/akun/{id}`, `/akun/{id}/riwayat`, `/warung/{id}/laporan`, problem+json), perbarui dua file v15 dan `run.sh` (redocly + oasdiff), rekam ulang `kontrak.txt`; (2) perbaiki handler `api-t1`: 400 menyebut field dari `UnmarshalTypeError.Field`, pertimbangkan `DisallowUnknownFields` (ADR 3 memutuskan), rekam ulang `m2.txt` hanya bila perilakunya berubah dan halaman 1.17 masih benar (1.17 adalah keadaan sebelum perbaikan: pakai mode `-rentan m2` bila perlu supaya rekaman 1.17 tetap bisa diulang); (3) halaman: isi lama `b-fondasi/b1-4-openapi.mdx` + penamaan resource dari B1.2 (`git show 6d368b5:situs/src/content/docs/b-fondasi/b1-2-resource-error.mdx`), ADR 3 "OpenAPI sebelum kode" dengan catatan jujur "untuk satu orang terasa berlebihan sampai minggu 5".
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
