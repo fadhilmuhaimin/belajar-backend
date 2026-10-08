@@ -649,3 +649,6 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
 .sl-markdown-content .jt-cek { list-style: none; padding: 0; margin: 0 0 0.6rem; }
 .sl-markdown-content .jt-cek li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.2rem 0.6rem; align-items: baseline; padding: 0.3rem 0; border-bottom: 1px solid var(--garis); }
 .sl-markdown-content .jt-tabel tbody th { background: transparent; font-style: normal; font-weight: 600; }
+/* Diagram rujukan (1.12): beberapa tabel menunjuk ke satu tabel; bukan urutan, jadi tanpa nomor dan panah antar kotak. */
+.sl-markdown-content figure.bb-fig ol.bb-flow.is-rujuk > li::before,
+.sl-markdown-content figure.bb-fig ol.bb-flow.is-rujuk > li:not(:last-child)::after { content: none; }

@@ -123,25 +123,25 @@
   "id": "B2.1-1",
   "halaman": "B2.1",
   "judul": "1.12 Data modeling dan relasi",
-  "url": "b-fondasi/b2-1-data-modeling/",
-  "tanya": "Ani mengganti nama warungnya. Pesanan bulan lalu sebaiknya menampilkan nama lama atau nama baru, dan apa akibatnya ke desain tabel?",
-  "jawab": "Untuk Rekeningo, nama baru, supaya Budi tetap mengenali tokonya. Jadi nama tidak disalin ke pesanan, cukup `toko_id`. Kalau suatu saat butuh nama persis seperti di struk, simpan salinannya di kolom terpisah, sama seperti harga."
+  "url": "tahap-1/data-modeling/",
+  "tanya": "Ani mengganti nama warungnya. Riwayat Budi bulan lalu sebaiknya menampilkan nama lama atau nama baru, dan apa akibatnya ke desain tabel?",
+  "jawab": "Untuk riwayat di app, nama terbaru lebih mudah dikenali, jadi nama cukup dirujuk lewat `transaksi.ke`. Kalau suatu saat butuh nama persis saat pembayaran, misalnya untuk kuitansi, nama itu harus disalin ke baris transaksi. Rekaman lab menunjukkan versi rujuk: \"Warung Bu Ani\" dengan jumlah tetap Rp25.000."
  },
  {
   "id": "B2.1-2",
   "halaman": "B2.1",
   "judul": "1.12 Data modeling dan relasi",
-  "url": "b-fondasi/b2-1-data-modeling/",
-  "tanya": "Jelaskan kenapa `harga` di `item_pesanan` disalin, padahal sudah ada di `produk`.",
-  "jawab": "`produk.harga` adalah harga sekarang dan bisa berubah. Pesanan mencatat kejadian di masa lalu, dan totalnya sudah dibayar. Kalau harga hanya dirujuk, total pesanan lama ikut berubah setiap harga naik. Rekaman lab: harga nasi goreng Rp28.000, total pesanan 1 tetap Rp35.000."
+  "url": "tahap-1/data-modeling/",
+  "tanya": "Kenapa jumlah pembayaran disalin ke baris `transaksi`, bukan dihitung ulang dari saldo?",
+  "jawab": "Pembayaran adalah kejadian di masa lalu. Saldo terus berubah setelahnya, jadi tidak bisa dipakai untuk mengetahui berapa yang dibayar kemarin. Jumlah yang disalin adalah bukti yang tidak ikut berubah."
  },
  {
   "id": "B2.1-3",
   "halaman": "B2.1",
   "judul": "1.12 Data modeling dan relasi",
-  "url": "b-fondasi/b2-1-data-modeling/",
-  "tanya": "Di app Flutter dengan sqflite, kamu mendeklarasikan `REFERENCES` tapi data yatim tetap bisa masuk. Kenapa?",
-  "jawab": "SQLite tidak menegakkan foreign key kecuali koneksi menjalankan `PRAGMA foreign_keys = ON`. Tanpa itu, `REFERENCES` hanya tulisan di skema. Panel Before di widget menunjukkan efeknya."
+  "url": "tahap-1/data-modeling/",
+  "tanya": "Raka menulis `ON DELETE CASCADE` di `transaksi.ke` supaya menghapus akun warung lebih mudah. Apa risikonya?",
+  "jawab": "Menghapus satu akun warung ikut menghapus semua pembayaran ke warung itu. Saldo Budi sudah berkurang, tapi catatan ke mana uangnya pergi hilang. Untuk data uang, pakai tolak atau soft delete."
  },
  {
   "id": "B2.2-1",

@@ -1,0 +1,35 @@
+{
+  "id": "t1-relasi",
+  "title": "Uji coba Warung Ani selesai: akunnya dihapus",
+  "setup": "CREATE TABLE akun (id INTEGER PRIMARY KEY, jenis TEXT NOT NULL, nama TEXT NOT NULL);\nCREATE TABLE transaksi (id INTEGER PRIMARY KEY, dari INTEGER NOT NULL REFERENCES akun(id), ke INTEGER NOT NULL REFERENCES akun(id), jumlah INTEGER NOT NULL CHECK (jumlah > 0));\nINSERT INTO akun VALUES (417, 'karyawan', 'Dimas'), (418, 'warung', 'Warung Ani'), (419, 'karyawan', 'Budi'), (502, 'warung', 'Warung Sari');\nINSERT INTO transaksi VALUES (1, 419, 418, 25000), (2, 417, 418, 30000), (3, 419, 502, 15000);",
+  "check": "SELECT t.id, t.jumlah, COALESCE(a.nama, '(akun hilang)') AS lawan FROM transaksi t LEFT JOIN akun a ON a.id = t.ke WHERE t.dari = 419 ORDER BY t.id",
+  "predict": {
+    "q": "Panel Before: foreign key sudah ditulis di skema, tapi SQLite belum diminta menegakkannya. Raka menghapus akun Warung Ani. Apa yang terjadi pada pembayaran Budi Rp25.000 ke Warung Ani?",
+    "options": ["Ikut terhapus", "Tetap ada, tapi penerimanya hilang", "Penghapusan ditolak"],
+    "answer": 1,
+    "explain": "Before: SQLite menghapus akun Ani tanpa memeriksa siapa yang menunjuknya, jadi baris pembayaran Budi menunjuk ke akun yang tidak ada. Uang Budi keluar Rp25.000, dan tidak ada yang bisa menjawab ke siapa. After: foreign key ditegakkan, jadi penghapusan ditolak selama Ani masih punya transaksi."
+  },
+  "panels": {
+    "before": {
+      "label": "Before: foreign key ditulis, tidak ditegakkan",
+      "onError": "stop",
+      "steps": [
+        { "sql": "DELETE FROM akun WHERE id = 418" }
+      ]
+    },
+    "after": {
+      "label": "After: foreign key ditegakkan",
+      "onError": "stop",
+      "steps": [
+        { "sql": "PRAGMA foreign_keys = ON", "note": "di SQLite (juga sqflite) wajib per koneksi" },
+        { "sql": "DELETE FROM akun WHERE id = 418" }
+      ]
+    }
+  },
+  "toggles": [
+    {
+      "label": "pakai ON DELETE CASCADE di transaksi.ke",
+      "pairs": [["ke INTEGER NOT NULL REFERENCES akun(id)", "ke INTEGER NOT NULL REFERENCES akun(id) ON DELETE CASCADE"]]
+    }
+  ]
+}

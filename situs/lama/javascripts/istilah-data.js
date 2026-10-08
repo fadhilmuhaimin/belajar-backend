@@ -174,7 +174,7 @@ window.ISTILAH = {
   "n": "1.12 Data modeling dan relasi",
   "s": "istilah-constraint",
   "t": "Constraint",
-  "u": "b-fondasi/b2-1-data-modeling/"
+  "u": "tahap-1/data-modeling/"
  },
  "Container": {
   "b": "C3",
@@ -206,7 +206,7 @@ window.ISTILAH = {
   "n": "1.12 Data modeling dan relasi",
   "s": "istilah-database",
   "t": "Database",
-  "u": "b-fondasi/b2-1-data-modeling/"
+  "u": "tahap-1/data-modeling/"
  },
  "Dead-letter queue": {
   "b": "B10.1",
@@ -278,7 +278,7 @@ window.ISTILAH = {
   "n": "1.12 Data modeling dan relasi",
   "s": "istilah-foreign-key",
   "t": "Foreign key",
-  "u": "b-fondasi/b2-1-data-modeling/"
+  "u": "tahap-1/data-modeling/"
  },
  "GET": {
   "b": "B1.1",
@@ -526,7 +526,7 @@ window.ISTILAH = {
   "n": "1.12 Data modeling dan relasi",
   "s": "istilah-orm",
   "t": "ORM (Object-Relational Mapping)",
-  "u": "b-fondasi/b2-1-data-modeling/"
+  "u": "tahap-1/data-modeling/"
  },
  "Object storage": {
   "b": "B11.2",
@@ -670,7 +670,7 @@ window.ISTILAH = {
   "n": "1.12 Data modeling dan relasi",
   "s": "istilah-primary-key",
   "t": "Primary key",
-  "u": "b-fondasi/b2-1-data-modeling/"
+  "u": "tahap-1/data-modeling/"
  },
  "Problem Details": {
   "b": "B1.2",
@@ -1102,7 +1102,7 @@ window.ISTILAH = {
   "n": "1.12 Data modeling dan relasi",
   "s": "istilah-constraint",
   "t": "Constraint",
-  "u": "b-fondasi/b2-1-data-modeling/"
+  "u": "tahap-1/data-modeling/"
  },
  "container": {
   "b": "C3",
@@ -1126,7 +1126,7 @@ window.ISTILAH = {
   "n": "1.12 Data modeling dan relasi",
   "s": "istilah-database",
   "t": "Database",
-  "u": "b-fondasi/b2-1-data-modeling/"
+  "u": "tahap-1/data-modeling/"
  },
  "dead-letter queue": {
   "b": "B10.1",
@@ -1182,7 +1182,7 @@ window.ISTILAH = {
   "n": "1.12 Data modeling dan relasi",
   "s": "istilah-foreign-key",
   "t": "Foreign key",
-  "u": "b-fondasi/b2-1-data-modeling/"
+  "u": "tahap-1/data-modeling/"
  },
  "handler": {
   "b": "A2",
@@ -1454,7 +1454,7 @@ window.ISTILAH = {
   "n": "1.12 Data modeling dan relasi",
   "s": "istilah-primary-key",
   "t": "Primary key",
-  "u": "b-fondasi/b2-1-data-modeling/"
+  "u": "tahap-1/data-modeling/"
  },
  "proxy": {
   "b": "B11.2",

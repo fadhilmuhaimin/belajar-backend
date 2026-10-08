@@ -535,19 +535,18 @@
       "judul": "Data modeling dan relasi",
       "tahap": 1,
       "topik": "Data",
-      "path": "b-fondasi/b2-1-data-modeling.md",
+      "path": "tahap-1/data-modeling.md",
       "prasyarat": [
-        "A1"
+        "t1-pertukaran-saldo"
       ],
       "inti": true,
-      "masalah": "Bingung merancang tabel akun, transaksi, pesanan",
+      "masalah": "Bingung merancang tabel akun, transaksi, top-up",
       "ada": true,
       "jenis": "konsep",
       "bagian": 3,
       "peran": [
         "backend"
       ],
-      "lama": true,
       "nomor": "1.12",
       "menit": 9
     },
