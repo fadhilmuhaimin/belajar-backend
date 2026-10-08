@@ -15,17 +15,33 @@ import { codeToHtml } from "shiki";
 import { ROOT } from "../../tools/registri.mjs";
 import { temaShiki } from "../lib/shiki-tema.mjs";
 
-interface Props { file?: string; region?: string; lang?: string; title?: string; code?: string }
-const { file, region, lang = "text", title, code } = Astro.props;
+interface Props { file?: string; files?: string[]; region?: string; lines?: string; lang?: string; title?: string; code?: string }
+const { file, files, region, lines: rentang, lang = "text", title, code } = Astro.props;
 
 let src: string;
 if (code != null) {
   src = code;
+} else if (files) {
+  // Beberapa file rekaman digabung berurutan (pola fence dengan beberapa baris --8<-- di MkDocs)
+  src = files.map((f) => {
+    const abs = path.join(ROOT, f);
+    if (!fs.existsSync(abs)) throw new Error(`Snippet: file ${f} tidak ada`);
+    return fs.readFileSync(abs, "utf8").replace(/\n+$/, "");
+  }).join("\n");
 } else {
   if (!file) throw new Error("Snippet: butuh prop file atau code");
   const abs = path.join(ROOT, file);
   if (!fs.existsSync(abs)) throw new Error(`Snippet: file ${file} tidak ada`);
   src = fs.readFileSync(abs, "utf8");
+  if (rentang) {
+    // Rentang baris "awal:akhir" (1-based, inklusif), pola pymdownx `--8<-- "file:1:13"`; salah satu boleh kosong
+    const m = rentang.match(/^(\d*):(\d*)$/);
+    if (!m) throw new Error(`Snippet: rentang baris ${rentang} tidak valid`);
+    const semua = src.split("\n");
+    const a = m[1] ? Number(m[1]) : 1, b = m[2] ? Number(m[2]) : semua.length;
+    if (a < 1 || b > semua.length || a > b) throw new Error(`Snippet: rentang ${rentang} di luar ${file} (${semua.length} baris)`);
+    src = semua.slice(a - 1, b).join("\n");
+  }
   if (region) {
     const lines = src.split("\n");
     const mulai = lines.findIndex((l) => l.includes(`--8<-- [start:${region}]`));
@@ -37,14 +53,14 @@ if (code != null) {
 // Baris penanda region lain di dalam potongan tidak ikut tampil (perilaku pymdownx.snippets).
 src = src.split("\n").filter((l) => !l.includes("--8<-- [")).join("\n").replace(/\n+$/, "");
 
-const kunci = createHash("md5").update(file ?? code ?? "").update(region ?? "").digest("hex").slice(0, 6);
+const kunci = createHash("md5").update(file ?? files?.join("|") ?? code ?? "").update(region ?? rentang ?? "").digest("hex").slice(0, 6);
 const html = await codeToHtml(src, {
   lang,
   theme: temaShiki,
   transformers: [{ line(node, i) { node.properties.id = `__span-${kunci}-${i}`; } }],
 });
 ---
-<div class:list={["highlight", "bb-snippet", { "has-title": !!title }]} data-file={file} data-region={region}>
+<div class:list={["highlight", "bb-snippet", { "has-title": !!title }]} data-file={file ?? files?.join(" ")} data-region={region}>
   {title && <span class="filename">{title}</span>}
   <Fragment set:html={html} />
 </div>

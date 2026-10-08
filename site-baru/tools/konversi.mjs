@@ -38,7 +38,15 @@ function snippetDari(fence) {
   const m = fence.body.length === 1 && fence.body[0].trim().match(/^--8<-- "([^":]+)(?::([^"]+))?"$/);
   if (m) {
     const attrs = [`file="${m[1]}"`];
-    if (m[2]) attrs.push(`region="${m[2]}"`);
+    if (m[2]) attrs.push(/^\d*:\d*$/.test(m[2]) ? `lines="${m[2]}"` : `region="${m[2]}"`);
+    if (fence.lang && fence.lang !== "text") attrs.push(`lang="${fence.lang}"`);
+    if (fence.title) attrs.push(`title="${fence.title}"`);
+    return `<Snippet ${attrs.join(" ")} />`;
+  }
+  const baris = fence.body.map((l) => l.trim()).filter(Boolean);
+  const semua = baris.map((l) => l.match(/^--8<-- "([^":]+)"$/));
+  if (baris.length > 1 && semua.every(Boolean)) {
+    const attrs = [`files={${JSON.stringify(semua.map((x) => x[1]))}}`];
     if (fence.lang && fence.lang !== "text") attrs.push(`lang="${fence.lang}"`);
     if (fence.title) attrs.push(`title="${fence.title}"`);
     return `<Snippet ${attrs.join(" ")} />`;
