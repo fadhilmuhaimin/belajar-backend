@@ -1,0 +1,138 @@
+---
+title: "2.4 Pagination dan idempotent method"
+---
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="B1.3" />
+
+<p class="meta">Baca 6 menit · coba 2 menit · Prasyarat: [[B1.1]] · Jalur inti</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Kenapa pagination `OFFSET` bisa menampilkan item yang sama dua kali di infinite scroll?
+2. Apa yang dikirim app untuk meminta halaman berikutnya di cursor pagination?
+3. Method mana yang aman diulang tanpa idempotency key?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+## Inti
+
+Daftar panjang dikirim per halaman dengan batas ukuran. Cursor meminta "sesudah item terakhir yang kulihat", jadi tetap benar saat data baru masuk.
+
+<WidgetLama nama="arsitektur" tahap={2} />
+
+## Lihat sendiri
+
+SQLite sungguhan di browser. Ani menggulir riwayat penjualannya saat ada pesanan baru masuk.
+
+<WidgetLama nama="runsql" src="data/b1-3-pagination.json" />
+
+## Kenapa ini ada
+
+Riwayat penjualan Ani di Tahap 2 berisi ribuan pesanan. Versi pertama endpoint mengirim semuanya sekaligus. App menunggu lama, dan HP Ani yang sudah tua sempat kehabisan memori.
+
+Raka menambah `?halaman=2&per_halaman=20`, yang di SQL menjadi `OFFSET 20`. Lalu muncul laporan aneh dari Ani: saat ia menggulir di jam ramai, satu pesanan muncul dua kali. Di app Flutter, `ListView` dengan infinite scroll membuat masalah ini mudah terlihat.
+
+## Cara kerjanya
+
+**Offset pagination** menghitung posisi: "lewati 20 baris pertama". Kalau ada baris baru di depan, semua posisi bergeser. Rekaman di PostgreSQL 17:
+
+<Snippet file="labs/b2-query/output/pagination.txt" title="Output rekaman: labs/b2-query/output/pagination.txt" />
+
+Bagian A: pesanan 199900 muncul di halaman 1 dan halaman 2. Bagian C: `OFFSET` tetap membaca semua baris sebelum posisi yang diminta, jadi halaman yang jauh makin lambat.
+
+**Cursor pagination** (keyset) meminta "baris sesudah yang terakhir kulihat". Sort key-nya harus unik dan stabil, mis. `(dibuat, id)`, dengan index yang cocok ([[B2.3]]). Bentuk response yang umum:
+
+```json
+{
+  "data": [ { "id": 199900, "total": 35000 } ],
+  "cursor_berikutnya": "eyJkaWJ1YXQiOiIyMDI2LTEyLTMwVDA1OjUxOjQwWiIsImlkIjoxOTk5MDB9"
+}
+```
+
+Cursor sebaiknya dianggap opaque oleh app, yaitu isinya tidak perlu dipahami: app hanya mengirimnya kembali, tidak membuat sendiri. Contoh di atas adalah JSON `{"dibuat": ..., "id": ...}` yang di-encode base64url, bukan enkripsi. Server tetap harus memvalidasinya.
+
+**Batas ukuran.** Server menentukan maksimal per halaman, mis. 50, apa pun yang diminta app. Tanpa batas, satu request `?per_halaman=100000` bisa menghabiskan memori server.
+
+**Idempotent method** ([RFC 9110 §9.2.2](https://www.rfc-editor.org/rfc/rfc9110.html#name-idempotent-methods)): `GET`, `PUT`, dan `DELETE` boleh diulang tanpa efek tambahan, asal diimplementasikan sesuai artinya. `PUT /profil/no_hp` dengan nilai yang sama dua kali menghasilkan keadaan yang sama. `POST /pembayaran` tidak, jadi butuh idempotency key ([[E3]]).
+
+## Di stack lain
+
+**Skenario:** riwayat penjualan dengan cursor pagination. Tidak ada tab yang dijalankan; semua dicek ke dokumentasi. Perilaku SQL-nya ada di rekaman di atas.
+
+Yang sama di semua stack: cursor adalah nilai sort key dari baris terakhir. Yang berbeda: apakah framework menyediakannya.
+
+| Stack | Cursor pagination | Sumber |
+|---|---|---|
+| Go | Tulis sendiri: `WHERE (dibuat, id) < ($1, $2)` | – |
+| Express | Tulis sendiri, atau lewat library query builder | – |
+| Laravel | Bawaan: `cursorPaginate(20)` | [Laravel: Cursor pagination](https://laravel.com/docs/12.x/pagination#cursor-pagination) |
+| Django (DRF) | `CursorPagination` di Django REST framework | [DRF: Pagination](https://www.django-rest-framework.org/api-guide/pagination/) |
+| Spring | Keyset scrolling di Spring Data (`KeysetScrollPosition`) | [Spring Data: query methods](https://docs.spring.io/spring-data/jpa/reference/repositories/query-methods-details.html) |
+| Supabase | `range(from, to)` berbasis offset; cursor ditulis sebagai filter `lt` | [Supabase: range](https://supabase.com/docs/reference/javascript/range) |
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Offset | Bisa lompat ke halaman ke-N, mudah ditulis | Item ganda atau terlewat saat data berubah; halaman jauh makin lambat |
+| Cursor | Stabil saat data berubah, cepat di halaman mana pun | Tidak bisa lompat ke halaman ke-N; butuh sort key unik + index |
+| Tanpa pagination | Paling sederhana | Response membesar tanpa batas ([[E5]]) |
+
+Rule of thumb: infinite scroll di app mobile memakai cursor. Tabel admin yang butuh "halaman 7 dari 40" boleh memakai offset.
+
+## Cek diri
+
+**1.** Kenapa sort key cursor memakai `(dibuat, id)`, bukan `dibuat` saja?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Dua pesanan bisa punya `dibuat` yang sama persis. Dengan `dibuat` saja, baris dengan waktu sama di batas halaman bisa terlewat atau terulang. `id` membuat sort key-nya unik.
+
+</details>
+
+**2.** Jelaskan kenapa offset pagination bisa menampilkan item yang sama dua kali.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+`OFFSET 20` berarti "lewati 20 baris teratas saat query ini dijalankan". Kalau satu pesanan baru masuk di atas, baris yang tadinya posisi 20 kini posisi 21, jadi muncul lagi di halaman berikutnya. Rekaman: 199900 muncul di halaman 1 dan 2.
+
+</details>
+
+**3.** App memanggil `DELETE /transfers-terjadwal/7` dua kali karena retry. Masalah?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Tidak, kalau diimplementasikan sesuai arti `DELETE`: keadaan akhirnya sama, yaitu jadwal 7 tidak ada. Panggilan kedua boleh dijawab `404` atau `204`, dan app harus memperlakukan keduanya sebagai "sudah terhapus".
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Endpoint daftar punya batas maksimum per halaman di server.
+- [ ] Infinite scroll memakai cursor dengan sort key unik, didukung index.
+- [ ] Cursor divalidasi di server, tidak dipercaya mentah-mentah.
+- [ ] `GET`, `PUT`, `DELETE` tidak punya efek tambahan saat diulang. `POST` yang memindahkan uang memakai idempotency key.
+
+## Bacaan lanjut
+
+- [Use The Index, Luke: Paging through results](https://use-the-index-luke.com/no-offset)
+- [RFC 9110 §9.2.2: Idempotent methods](https://www.rfc-editor.org/rfc/rfc9110.html#name-idempotent-methods)
+- [Laravel: Cursor pagination](https://laravel.com/docs/12.x/pagination#cursor-pagination)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","runsql-core","runsql"]} />
