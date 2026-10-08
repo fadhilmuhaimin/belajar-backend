@@ -157,15 +157,17 @@ body { background: var(--bg); }
 .sl-markdown-content pre.shiki .line { display: inline-block; min-width: 100%; }
 
 /* ── "Kamu di sini" (breadcrumb + rekap) ───────────────────────────────── */
-.sl-markdown-content nav.kamu { margin: 0 0 0.8em; padding: 0.5rem 0.8rem; border: 1px solid var(--k-system-edge); border-left-width: 3px; border-radius: 8px; background: var(--k-system-fill); font-size: 0.82em; }
-.sl-markdown-content .kamu__jalur { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.15rem 0.3rem; align-items: baseline; }
-.sl-markdown-content .kamu__jalur li { margin: 0; }
-.sl-markdown-content .kamu__jalur li + li::before { content: "›"; color: var(--teks-2); margin-right: 0.3rem; }
-.sl-markdown-content .kamu__jalur li[aria-current] { color: var(--judul); font-weight: 600; }
-.sl-markdown-content .kamu__tag { font-weight: 700; color: var(--k-system-ink); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.85em; }
-.sl-markdown-content .kamu__rekap { margin: 0.35rem 0 0; line-height: 1.5; }
+nav.kamu { margin: 0 0 0.6rem; padding: 0; font-size: 0.82rem; color: var(--teks-2); }
+.kamu__jalur { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.15rem 0.3rem; align-items: baseline; }
+.kamu__jalur li { margin: 0; }
+.kamu__jalur li + li::before { content: "›"; color: var(--teks-2); margin-right: 0.3rem; }
+.kamu__jalur li[aria-current] { color: var(--judul); font-weight: 600; }
+.kamu__tag { font-weight: 700; color: var(--k-system-ink); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.85em; }
+.kamu__rekap { margin: 0.35rem 0 0; line-height: 1.5; }
 /* HP: rekap dan nama tahap disembunyikan supaya breadcrumb satu baris dan diagram di bawah Inti tetap muat */
-@media (max-width: 50em) { .sl-markdown-content .kamu__rekap, .sl-markdown-content .kamu__panjang { display: none; } }
+@media (max-width: 50em) { .kamu__rekap, .kamu__panjang { display: none; } }
+.kamu__jalur a { color: inherit; text-decoration: none; }
+.kamu__jalur a:hover { color: var(--aksen); }
 
 /* ── Sebelumnya / Berikutnya (Lanjut.astro) ─────────────────────────────── */
 nav.bb-lanjut { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 2.4em; }
@@ -286,7 +288,7 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 @media (max-width: 50em) {
   /* Layar pertama di HP: judul, "Kamu di sini", meta, pretest, Inti, dan diagram harus muat di 375×667 (tools/layar.mjs). */
   .content-panel { padding-block: 0.45rem; }
-  .sl-markdown-content nav.kamu { margin-bottom: 0.5em; padding: 0.35rem 0.7rem; }
+  nav.kamu { margin-bottom: 0.4rem; }
   .sl-markdown-content p.meta { margin-top: -0.6em; }
   .sl-markdown-content details.question { margin-top: 0.5rem; padding-block: 0.25rem; }
   .sl-markdown-content details.question + h2 { margin-top: 0.3em; }
@@ -546,3 +548,28 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 .sl-markdown-content .blok__lanjut:focus-visible { outline: 3px solid var(--judul); outline-offset: 2px; }
 .sl-markdown-content details.blok > summary:focus-visible { outline: 2px solid var(--aksen); outline-offset: -2px; border-radius: 10px; }
 starlight-toc a.toc-selesai::after, mobile-starlight-toc a.toc-selesai::after { content: " ✓"; color: var(--k-good-ink); }
+
+/* === Pemilih peran di atas sidebar (keputusan 120): menyorot, tidak menyembunyikan === */
+.peran { padding: 0 0 0.8rem; border-bottom: 1px solid var(--garis); margin-bottom: 0.4rem; }
+.peran__judul { margin: 0 0 0.4rem; font-size: 0.75rem; font-weight: 600; color: var(--teks-2); text-transform: uppercase; letter-spacing: 0.05em; }
+.peran__pilihan { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.peran__chip { font: inherit; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid var(--garis-2); background: transparent; color: var(--teks); cursor: pointer; }
+.peran__chip[aria-pressed="true"] { background: var(--aksen); border-color: var(--aksen); color: var(--ink-di-aksen); font-weight: 600; }
+.peran__chip:focus-visible { outline: 2px solid var(--aksen); outline-offset: 2px; }
+.peran__kosong { margin: 0.5rem 0 0; font-size: 0.78rem; color: var(--teks-2); }
+:is(html:not([data-peran]), html[data-peran="generalis"]) .sidebar-content a.nav-inti,
+html[data-peran="mobile"] .sidebar-content a[data-peran~="mobile"],
+html[data-peran="web"] .sidebar-content a[data-peran~="web"],
+html[data-peran="backend"] .sidebar-content a[data-peran~="backend"],
+html[data-peran="devops"] .sidebar-content a[data-peran~="devops"],
+html[data-peran="security"] .sidebar-content a[data-peran~="security"] { box-shadow: inset 3px 0 0 var(--aksen); }
+
+/* === Mode fokus (keputusan 120): sidebar dan daftar isi disembunyikan, kolom baca tetap === */
+.fokus { font: inherit; font-size: 0.85rem; padding: 0.3rem 0.7rem; border-radius: 6px; border: 1px solid var(--garis-2); background: transparent; color: var(--teks); cursor: pointer; white-space: nowrap; }
+.fokus[aria-pressed="true"] { border-color: var(--aksen); color: var(--aksen); }
+@media (min-width: 50rem) {
+  html[data-has-sidebar][data-fokus="ya"] { --sl-content-inline-start: 0rem; }
+  html[data-fokus="ya"] .sidebar-pane, html[data-fokus="ya"] .right-sidebar-container { display: none !important; }
+  html[data-fokus="ya"] .main-pane { width: 100%; }
+  html[data-fokus="ya"] .content-panel > .sl-container { margin-inline: auto; }
+}

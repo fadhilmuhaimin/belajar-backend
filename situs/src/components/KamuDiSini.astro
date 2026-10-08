@@ -1,25 +1,29 @@
 ---
 /**
- * "Kamu di sini" sebagai breadcrumb: Tahap › Kelompok › Halaman, plus rekap satu kalimat tahap ini
- * (PROPOSAL "Desain visual final"). Dibuat saat build dari cerita.json, menggantikan widget kamu-di-sini.
+ * "Kamu di sini" (keputusan 120): satu baris jalur Tahap › Bagian › Halaman di atas judul, plus rekap satu kalimat
+ * tahap ini. Dibuat otomatis dari registry untuk setiap halaman terdaftar (dipanggil JudulHalaman.astro), jadi
+ * halaman tidak perlu menulis komponen ini sendiri. Di HP hanya jalur pendek yang tampil.
  */
-import { muat, byId, label } from "../../tools/registri.mjs";
-interface Props { id: string }
+import { muat, label, url, urlDariId, dariUrl } from "../../tools/registri.mjs";
+
 const d = muat();
-const h = byId(d)[Astro.props.id];
-if (!h) throw new Error(`KamuDiSini: halaman ${Astro.props.id} tidak ada di cerita.json`);
-// Halaman pembuka/sampingan/alat punya tahap non-angka: breadcrumb tanpa rekap tahap.
-const t = Number.isInteger(h.tahap) ? d.tahap.find((x: { no: number }) => x.no === h.tahap) : null;
-if (Number.isInteger(h.tahap) && !t) throw new Error(`KamuDiSini: tahap ${h.tahap} tidak ada di cerita.json`);
+const h = dariUrl(d, urlDariId(Astro.locals.starlightRoute.entry.id));
+type Tahap = { no: number; nama: string; rekap: string; sebelumnya: string; versi?: string; bagian?: { no: number; nama: string }[] };
+const t: Tahap | undefined = h && Number.isInteger(h.tahap) ? d.tahap.find((x: Tahap) => x.no === h.tahap) : undefined;
 const NAMA: Record<string, string> = { pembuka: "Pembuka", sampingan: "Studi sampingan", alat: "Alat" };
+const kelompok = h ? (t?.bagian?.find((b) => b.no === h.bagian)?.nama ?? h.kelompok) : undefined;
+const pembuka = t ? d.halaman.find((x: { tahap: unknown; ada: boolean }) => x.tahap === t.no && x.ada) : undefined;
 ---
-<nav class="kamu" aria-label="Kamu di sini">
-  <ol class="kamu__jalur">
-    <li><span class="kamu__tag">Kamu di sini</span></li>
-    {t ? <li>Tahap {t.no}<span class="kamu__panjang"> dari {d.tahap.length} · {t.nama}</span></li> : <li>{NAMA[h.tahap] ?? h.tahap}</li>}
-    {(t?.bagian?.find((b: { no: number; nama: string }) => b.no === h.bagian)?.nama ?? h.kelompok) &&
-      <li>{t?.bagian?.find((b: { no: number; nama: string }) => b.no === h.bagian)?.nama ?? h.kelompok}</li>}
-    <li aria-current="page">{label(h)}</li>
-  </ol>
-  {t && <p class="kamu__rekap"><strong>{d.app} (fiktif).</strong> {t.rekap} <span class="teks-2">Sebelumnya: {t.sebelumnya}</span></p>}
-</nav>
+{h && (
+  <nav class="kamu" aria-label="Kamu di sini">
+    <ol class="kamu__jalur">
+      <li><span class="kamu__tag">Kamu di sini</span></li>
+      {t
+        ? <li><a href={pembuka ? url(pembuka) : undefined}>Tahap {t.no}<span class="kamu__panjang"> · {t.nama}{t.versi === "lama" ? " (versi lama)" : ""}</span></a></li>
+        : <li>{NAMA[h.tahap] ?? h.tahap}</li>}
+      {kelompok && <li class="kamu__panjang">{kelompok}</li>}
+      <li aria-current="page">{label(h, true)}</li>
+    </ol>
+    {t && <p class="kamu__rekap"><strong>{d.app} (fiktif).</strong> {t.rekap}</p>}
+  </nav>
+)}

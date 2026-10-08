@@ -24,6 +24,8 @@ export default defineConfig({
         MarkdownContent: "./src/components/MarkdownContent.astro",
         PageTitle: "./src/components/JudulHalaman.astro",
         ThemeSelect: "./src/components/PilihTema.astro",
+        Sidebar: "./src/components/SidebarPeran.astro",
+        SocialIcons: "./src/components/TombolFokus.astro",
       },
       // Halaman berblok: daftar isi kanan hanya memuat blok (keputusan 118).
       routeMiddleware: "./src/rute-blok.ts",
