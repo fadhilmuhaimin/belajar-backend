@@ -230,7 +230,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-endpoint",
   "t": "Endpoint",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "Eventual consistency": {
   "b": "D3",
@@ -286,7 +286,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-http-method",
   "t": "HTTP method",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "HTTP method": {
   "b": "B1.1",
@@ -294,7 +294,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-http-method",
   "t": "HTTP method",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "Handler": {
   "b": "A2",
@@ -310,7 +310,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-header",
   "t": "Header",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "Idempotency key": {
   "b": "E3",
@@ -582,7 +582,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-http-method",
   "t": "HTTP method",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "PKCE": {
   "b": "B5.2",
@@ -598,7 +598,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-http-method",
   "t": "HTTP method",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "PUT": {
   "b": "B1.1",
@@ -606,7 +606,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-http-method",
   "t": "HTTP method",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "Pagination": {
   "b": "B1.3",
@@ -806,7 +806,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-router",
   "t": "Router",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "Row Level Security": {
   "b": "B5.3",
@@ -910,7 +910,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-status-code",
   "t": "Status code",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "TTL": {
   "b": "B9",
@@ -1150,7 +1150,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-endpoint",
   "t": "Endpoint",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "eventual consistency": {
   "b": "D3",
@@ -1198,7 +1198,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-header",
   "t": "Header",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "idempotency key": {
   "b": "E3",
@@ -1558,7 +1558,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-router",
   "t": "Router",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "saga": {
   "b": "D3",
@@ -1638,7 +1638,7 @@ window.ISTILAH = {
   "n": "1.16 HTTP",
   "s": "istilah-status-code",
   "t": "Status code",
-  "u": "b-fondasi/b1-1-http/"
+  "u": "tahap-1/http/"
  },
  "throughput": {
   "b": "C2",

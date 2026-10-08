@@ -1,53 +1,64 @@
 ---
 title: "1.16 HTTP: method, status, header"
+description: Method menyatakan maksud request, status code menyatakan hasilnya, dan header membawa informasi tambahan. App memutuskan apa yang ditampilkan dari ketiganya, tanpa menebak isi body.
 ---
+import Blok from "../../../components/Blok.astro";
 import Snippet from "../../../components/Snippet.astro";
 import TabSet from "../../../components/TabSet.astro";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
 
-<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[A2]] · Jalur inti</p>
+<p class="meta">Baca 8 menit · coba 2 menit · Prasyarat: [[B6]] · Jalur inti</p>
 
-<WidgetLama nama="selesai" />
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Method menyatakan maksud request, status code menyatakan hasilnya, dan header membawa informasi tambahan. App harus bisa memutuskan apa yang ditampilkan dari ketiganya, tanpa menebak isi body.
+
+<figure class="bb-fig">
+<ol class="bb-flow">
+<li><code>POST /transfers</code></li>
+<li class="is-good"><code>201</code> + <code>Location</code></li>
+<li><code>GET /transfers/1</code></li>
+</ol>
+<figcaption>Rekaman lab api-t1: satu pembayaran dibuat, lalu dibuka lagi lewat alamat di header.</figcaption>
+</figure>
 
 <details class="question">
 <summary>Sudah tahu? Cek 3 pertanyaan</summary>
 
-1. Method apa untuk "buat transfer baru", dan status apa kalau berhasil?
-2. Apa beda `401` dan `403`?
-3. Di header mana token login dikirim, dan header apa yang wajib menyertai `401`?
+1. Token Budi sudah kedaluwarsa. Server menjawab `401` atau `403`?
+2. Kenapa `GET` boleh diulang app tanpa ragu, sedangkan `POST /transfers` tidak?
+3. Apa gunanya header `Location` di response `201`?
 
 Yakin dengan ketiganya? Lompat ke [[berikutnya]].
 
 </details>
 
-## Inti
+</Blok>
 
-Method menyatakan maksud request. Status code menyatakan hasilnya, dan header membawa informasi tambahan. App harus bisa memutuskan apa yang ditampilkan dari ketiganya, tanpa menebak isi body.
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: digit pertama status code memberi tahu siapa yang salah, dan app bisa memilih tampilan hanya dari angkanya.">
 
-<WidgetLama nama="arsitektur" tahap={1} />
+Untuk setiap kejadian di bawah, tebak status code-nya, lalu periksa. Semua kejadian ini ada di rekaman lab, kecuali database yang tidak bisa dihubungi.
 
-## Lihat sendiri
+<WidgetLama nama="pilah" src="data/t1-http-pilah.json" />
 
-Pilih status code untuk tiap kejadian, lalu cek. Semua contoh diambil dari server lab Rekeningo yang direkam dengan `curl -i`.
+</Blok>
 
-<WidgetLama nama="pilah" src="data/b1-1-pilah.json" />
+<Blok nama="Paham">
 
-## Kenapa ini ada
+### Kenapa ini ada
 
-Di minggu pertama, endpoint transfer buatan Raka selalu menjawab `200`. Kalau gagal, body-nya berisi `{"error": "saldo kurang"}`.
+Di [[t1-m1]], input yang sama menghasilkan tiga status berbeda tergantung versi server: `201`, `500`, dan `422`. Di app absensi lama, Raka terbiasa menulis `if (res.statusCode == 200)`. Kode itu membaca `201` sebagai gagal, dan tidak bisa membedakan "nominalmu salah" dari "server rusak".
 
-Di Flutter, kode lama Raka berbunyi `if (res.statusCode == 200) tampilkanSukses()`. Hasilnya, Budi melihat toast "Transfer berhasil" untuk transfer yang ditolak. Budi baru sadar saat saldo di layar tidak berubah.
-
-Masalahnya bukan di app. Server membuang informasi yang paling dasar: berhasil atau tidak. Raka memutuskan setiap kegagalan harus punya status code yang tepat.
-
-## Cara kerjanya
+### Cara kerjanya
 
 **Method** menyatakan maksud. Dua sifatnya penting untuk app, karena menentukan boleh tidaknya request diulang ([RFC 9110 §9.2](https://www.rfc-editor.org/rfc/rfc9110.html#name-common-method-properties)):
 
 | Method | Untuk | Safe (tidak mengubah data) | Idempotent (aman diulang) |
 |---|---|---|---|
-| `GET` | Membaca: `GET /akun/budi` | Ya | Ya |
+| `GET` | Membaca: `GET /akun/419` | Ya | Ya |
 | `POST` | Membuat atau memproses: `POST /transfers` | Tidak | Tidak |
 | `PUT` | Mengganti seluruh resource | Tidak | Ya |
 | `PATCH` | Mengubah sebagian resource ([RFC 5789](https://www.rfc-editor.org/rfc/rfc5789.html)) | Tidak | Tidak (RFC 5789) |
@@ -56,41 +67,46 @@ Masalahnya bukan di app. Server membuang informasi yang paling dasar: berhasil a
 **Status code** dikelompokkan oleh digit pertamanya: `2xx` berhasil, `4xx` kesalahan di sisi pengirim, `5xx` kesalahan di sisi server ([RFC 9110 §15](https://www.rfc-editor.org/rfc/rfc9110.html#name-status-codes)). Bedakan dua yang sering tertukar:
 
 - `401 Unauthorized`: server belum tahu siapa kamu. Token tidak ada, salah, atau kedaluwarsa.
-- `403 Forbidden`: server tahu siapa kamu, tapi kamu tidak boleh melakukannya.
+- `403 Forbidden`: server tahu siapa kamu, tapi kamu tidak boleh melakukannya. Rekeningo menjawab `404` untuk data milik orang lain; alasannya di [[B5.3]].
 
 **Header** membawa informasi di luar body. Yang muncul di rekaman lab:
 
 | Header | Arah | Isinya |
 |---|---|---|
-| `Authorization: Bearer <token>` | request | Token login |
-| `Content-Type` | keduanya | Format body, mis. `application/json` atau `application/problem+json` untuk error |
+| `Authorization: Bearer <token>` | request | Token sesi |
+| `Content-Type` | keduanya | Format body, misalnya `application/json`, atau `application/problem+json` untuk error |
 | `Location: /transfers/1` | response `201` | Alamat resource yang baru dibuat |
 | `WWW-Authenticate` | response `401` | Cara autentikasi yang diterima. Wajib menyertai `401` ([RFC 9110 §15.5.2](https://www.rfc-editor.org/rfc/rfc9110.html#status.401)) |
-| `Allow: GET, HEAD` | response `405` | Method yang diterima path ini |
+| `Allow` | response `405` | Method yang diterima path ini |
 
-Rekaman lengkap dari server lab:
+Rekaman lab dari database bersih. Pembayaran dibuat, lalu alamat di `Location` dibuka:
 
-<Snippet file="labs/api-t1-lama/output/b1-1-http.txt" title="Output rekaman: labs/api-t1-lama/output/b1-1-http.txt" />
+<Snippet file="labs/api-t1/output/http.txt" lines="23:36" title="Rekaman lab: labs/api-t1/output/http.txt" />
 
-Dua detail dari rekaman di atas:
+Method yang tidak didaftarkan, dan request tanpa token:
 
-- Go menulis `422 Unprocessable Entity`, nama lama sebelum RFC 9110 menggantinya jadi "Unprocessable Content". Tidak masalah, karena client wajib mengabaikan teks itu dan hanya membaca angkanya ([RFC 9112 §4](https://www.rfc-editor.org/rfc/rfc9112.html#name-status-line)).
-- `405` dari router bawaan Go berupa teks biasa, bukan JSON. Kalau app mengharapkan semua error berformat JSON, router perlu dikonfigurasi. Format error dibahas di [[B6]].
+<Snippet file="labs/api-t1/output/http.txt" lines="38:60" title="Rekaman lab: labs/api-t1/output/http.txt" />
 
-## Di stack lain
+Tiga detail dari rekaman di atas:
 
-**Skenario:** Budi mengirim Rp70.000 ke Ani lewat `POST /transfers`. Tab Go dijalankan di lab. Tab lain tidak dijalankan, hanya dicek ke dokumentasi masing-masing.
+- `405` dari router bawaan Go berupa teks biasa, bukan problem+json. Kalau app mengharapkan semua error berformat JSON, router perlu dikonfigurasi. Format error dibahas di [[B6]].
+- Go menulis nama header `Www-Authenticate`. Nama header tidak peka huruf besar-kecil ([RFC 9110 §5.1](https://www.rfc-editor.org/rfc/rfc9110.html#name-field-names)), jadi app harus membacanya tanpa membedakan huruf.
+- Go menulis `422 Unprocessable Entity`, nama lama sebelum RFC 9110 menggantinya jadi "Unprocessable Content". App wajib mengabaikan teks itu dan hanya membaca angkanya ([RFC 9112 §4](https://www.rfc-editor.org/rfc/rfc9112.html#name-status-line)).
+
+### Di stack lain
+
+**Skenario:** Budi membayar Rp25.000 ke Warung Ani lewat `POST /transfers`. Tab Go dijalankan di lab. Tab lain tidak dijalankan, hanya dicek ke dokumentasi masing-masing.
 
 Yang sama di semua stack: router mencocokkan method dan path, middleware membaca token, handler membaca body, lalu menjawab `201` dengan `Location`. Klik satu langkah, dan baris yang mengerjakannya tersorot.
 
-<WidgetLama nama="stackstep" src="data/b1-1-stackstep.json" />
+<WidgetLama nama="stackstep" src="data/t1-http-stackstep.json" />
 
 <TabSet id="stack" labels={["Go","Node.js (Express)","Laravel","Django","Spring"]}>
 <Fragment slot="t0">
 
-*Dijalankan: Go 1.27.1 `net/http`, PostgreSQL 17.11.*
+*Dijalankan: Go 1.27.1 `net/http` di lab `api-t1`.*
 
-<Snippet file="labs/api-t1-lama/main.go" region="rute" lang="go" />
+<Snippet file="labs/api-t1/internal/handler/handler.go" region="rute" lang="go" title="labs/api-t1/internal/handler/handler.go" />
 
 <p class="bb-beda">**Yang berbeda di stack ini:** sejak Go 1.22, method dan path ditulis dalam satu pola, `"POST /transfers"`. Method lain otomatis dijawab `405` dengan header `Allow` ([net/http ServeMux](https://pkg.go.dev/net/http#ServeMux)).</p>
 
@@ -157,7 +173,12 @@ ResponseEntity<Hasil> transfer(@RequestHeader("Authorization") String auth,
 </Fragment>
 </TabSet>
 
-## Trade-off: kapan pakai apa
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### Trade-off: kapan pakai apa
 
 | Pilihan | Kelebihan | Kekurangan |
 |---|---|---|
@@ -165,14 +186,28 @@ ResponseEntity<Hasil> transfer(@RequestHeader("Authorization") String auth,
 | Status code yang tepat | App, log, dan metric error bekerja tanpa membaca body | Tim harus sepakat status mana untuk kasus mana |
 | Status yang tepat + body error standar ([[B6]]) | App bisa menampilkan pesan yang spesifik | Sedikit lebih banyak kode di server |
 
-## Cek diri
+Rekeningo v1 memakai baris ketiga. Keputusan ini salah kalau Rekeningo harus melayani client yang hanya mengerti `200`, misalnya integrasi lama; itu belum ada di v1.
 
-**1.** Budi mengirim `GET /akun/budi` dengan token yang sudah kedaluwarsa. Status apa yang tepat: `401` atau `403`?
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| `405` berformat problem+json | Hanya terjadi kalau app salah method; app v1 dibuat Raka sendiri | Saat ada client pihak ketiga |
+| Mengulang `POST /transfers` dengan aman | `POST` tidak idempotent; v1 menunda retry dari app | Tahap 2: [[E3]] |
+| Daftar halaman di riwayat | Riwayat v1 dibatasi 20 baris | Tahap 2: [[B1.3]] |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Budi membuka `GET /akun/419` dengan token yang sudah kedaluwarsa. Status apa yang tepat: `401` atau `403`?
 
 <details class="success">
 <summary>Jawaban</summary>
 
-`401`. Token kedaluwarsa berarti server tidak bisa memastikan siapa pengirimnya. `403` dipakai kalau server tahu siapa kamu, tapi aksinya tidak diizinkan. Rekaman lab: `{"detail":"token kedaluwarsa"}` dengan status `401`.
+`401`. Token kedaluwarsa berarti server tidak bisa memastikan siapa pengirimnya. `403` dipakai kalau server tahu siapa kamu, tapi aksinya tidak diizinkan.
 
 </details>
 
@@ -181,7 +216,7 @@ ResponseEntity<Hasil> transfer(@RequestHeader("Authorization") String auth,
 <details class="success">
 <summary>Jawaban</summary>
 
-RFC 9112 menyatakan client harus mengabaikan teks itu, karena bisa diterjemahkan, diubah perantara, atau hilang di HTTP/2. Buktinya ada di lab: Go menulis "Unprocessable Entity", padahal RFC 9110 menamainya "Unprocessable Content". Yang bisa diandalkan hanya angka `422`.
+RFC 9112 menyatakan client harus mengabaikan teks itu, karena bisa berbeda antar server atau hilang di HTTP/2. Buktinya ada di lab: Go menulis "Unprocessable Entity", padahal RFC 9110 menamainya "Unprocessable Content". Yang bisa diandalkan hanya angka `422`.
 
 </details>
 
@@ -190,24 +225,23 @@ RFC 9112 menyatakan client harus mengabaikan teks itu, karena bisa diterjemahkan
 <details class="success">
 <summary>Jawaban</summary>
 
-App tahu alamat transfer yang baru dibuat. App bisa membukanya lagi, mis. untuk layar detail atau bukti transfer, tanpa menyusun URL sendiri.
+App tahu alamat pembayaran yang baru dibuat, dan bisa membukanya lagi untuk layar bukti bayar tanpa menyusun URL sendiri. Rekaman lab menunjukkan `GET /transfers/1` menjawab `200` dengan jumlah Rp25.000.
 
 </details>
 
-## Saat me-review kode AI, cek ini
+### Saat me-review kode AI, cek ini
 
 - [ ] Tidak ada `200` untuk kegagalan, dan tidak ada `{"success": false}` dengan status `200`.
-- [ ] `POST` yang membuat resource menjawab `201` dengan header `Location`.
-- [ ] `401` hanya untuk "belum dikenali", `403` atau `404` untuk "dikenali tapi tidak boleh".
+- [ ] `POST` yang membuat resource menjawab `201` dengan header `Location` yang benar-benar bisa dibuka.
+- [ ] `401` hanya untuk "belum dikenali"; data milik orang lain dijawab `404` atau `403` sesuai kesepakatan.
 - [ ] `GET` tidak mengubah data, karena bisa diulang oleh app, proxy, atau browser.
-- [ ] Response error memakai `Content-Type` yang benar, dan app tidak membaca teks status line.
+- [ ] App membaca angka status dan `Content-Type`, bukan teks status line.
 
-## Bacaan lanjut
+### Bacaan lanjut
 
 - [RFC 9110: HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html) · [RFC 9112 §4: Status line](https://www.rfc-editor.org/rfc/rfc9112.html#name-status-line)
 - [MDN: HTTP request methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods) · [MDN: HTTP response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status)
 
-<WidgetLama nama="umpan-balik" />
+</Blok>
 
-
-<SkripLama daftar={["cerita","stackstep","pilah"]} />
+<SkripLama daftar={["cerita","pilah","stackstep"]} />
