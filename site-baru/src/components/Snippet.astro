@@ -23,10 +23,19 @@ if (code != null) {
   src = code;
 } else if (files) {
   // Beberapa file rekaman digabung berurutan (pola fence dengan beberapa baris --8<-- di MkDocs)
+  // Setiap entri boleh membawa rentang baris: "path:awal:akhir"
   src = files.map((f) => {
-    const abs = path.join(ROOT, f);
-    if (!fs.existsSync(abs)) throw new Error(`Snippet: file ${f} tidak ada`);
-    return fs.readFileSync(abs, "utf8").replace(/\n+$/, "");
+    const m = f.match(/^(.*?)(?::(\d*):(\d*))?$/);
+    const abs = path.join(ROOT, m[1]);
+    if (!fs.existsSync(abs)) throw new Error(`Snippet: file ${m[1]} tidak ada`);
+    let isi = fs.readFileSync(abs, "utf8").replace(/\n+$/, "");
+    if (m[2] !== undefined) {
+      const semua = isi.split("\n");
+      const a = m[2] ? Number(m[2]) : 1, b = m[3] ? Number(m[3]) : semua.length;
+      if (a < 1 || b > semua.length || a > b) throw new Error(`Snippet: rentang ${m[2]}:${m[3]} di luar ${m[1]} (${semua.length} baris)`);
+      isi = semua.slice(a - 1, b).join("\n");
+    }
+    return isi;
   }).join("\n");
 } else {
   if (!file) throw new Error("Snippet: butuh prop file atau code");
