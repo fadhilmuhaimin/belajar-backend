@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 196,
-        "halaman": 24
+        "menit": 205,
+        "halaman": 25
       },
       "bagian": [
         {
@@ -693,8 +693,12 @@
       ],
       "label": "Masalah 3 · minggu 2",
       "masalah": "Error 500 saat mencari warung dengan tanda kutip",
-      "ada": false,
-      "nomor": "1.19"
+      "ada": true,
+      "prasyarat": [
+        "B1.4"
+      ],
+      "nomor": "1.19",
+      "menit": 9
     },
     {
       "id": "t1-sql-injection",

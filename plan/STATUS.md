@@ -50,8 +50,9 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.16 HTTP: method, status, header | Ditulis ulang dari B1.1, lab `http.txt` + `GET /transfers/{id}` (keputusan 151, 152) |
 | 1.17 M2: amount atau nominal | Halaman masalah, lab `m2.txt` (keputusan 153, 154) |
 | 1.18 Kontrak OpenAPI + ADR 3 | Ditulis ulang dari B1.4, kontrak `b1-openapi` v1, 400 dengan nama field (keputusan 155, 156) |
+| 1.19 M3: Tanda kutip di pencarian | Halaman masalah, lab `m3.txt` + mode rentan m3, widget React cari-bug (keputusan 157, 158, 159) |
 
-Diperbarui 2026-10-08. 18 dari 42 halaman selesai; berikutnya 1.19. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
+Diperbarui 2026-10-08. 19 dari 42 halaman selesai; berikutnya 1.20. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 

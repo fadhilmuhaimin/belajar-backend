@@ -1,0 +1,75 @@
+---
+title: "1.19 M3: Tanda kutip di pencarian"
+description: Minggu 2. Budi mencari warung dengan tanda kutip dan mendapat Error 500. Dimas mencoba ' OR 1=1 -- dan melihat saldo semua akun.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import CariBug from "../../../widgets/cari-bug/CariBug.tsx";
+import caribug from "../../../../data/widget/t1-m3-caribug.json";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 6 menit · coba 3 menit · Prasyarat: [[B1.4]] · Jalur inti</p>
+
+<Blok nama="Gejala" buka>
+
+Minggu 2, Raka menambahkan kotak pencarian warung di app. Budi mengetik nama warung langganannya, "Ani", dan daftarnya muncul. Lancar.
+
+Siang itu Budi mencari warung yang menjual nasi goreng. Ia mengetik tanda kutip di depan kata karena terbiasa, lalu "nasi". Layar berubah merah: "Error 500". Ia coba lagi, hasilnya sama.
+
+Dimas, staf TI junior di Gedung C, melihat error itu dari balik meja Budi. Ia penasaran. Di HP-nya sendiri, di kotak pencarian warung, ia mengetik `' OR 1=1 --`. Daftarnya tidak kosong. Muncul setiap akun di sistem, lengkap dengan saldonya: 100 karyawan, tiga warung, dan admin. Dimas menyalin daftar itu ke spreadsheet dan mengirimnya ke Sinta dengan satu kalimat: "ini bocor."
+
+</Blok>
+
+<Blok nama="Yang Raka kira" buka>
+
+Raka mengira tanda kutip merusak pencarian, dan solusinya membuang tanda kutip dari input sebelum query dijalankan. Hapus karakter nakal, selesai.
+
+<details class="question">
+<summary>Tebak dulu: cukupkah membuang tanda kutip?</summary>
+
+Tidak. Membuang satu karakter adalah tambal sulam; penyerang punya banyak cara lain menyusun teks yang jadi perintah. Masalah sebenarnya ada di cara query dibangun, dan di berapa banyak data yang dikirim ke app. Blok berikutnya menunjukkan keduanya di kode.
+
+</details>
+
+</Blok>
+
+<Blok nama="Yang sebenarnya">
+
+Ada dua kesalahan di satu fungsi. Pertama, isi pencarian disambung langsung ke teks SQL, jadi tanda kutip dari Budi dan `' OR 1=1 --` dari Dimas menjadi bagian perintah, bukan data. Kedua, query mengambil saldo semua akun, bukan hanya nama warung.
+
+Rekaman lab dari database bersih, mode rentan. Tanda kutip membuat SQL tidak valid, dan app menerima `500`:
+
+<Snippet file="labs/api-t1/output/m3.txt" lines="23:28" title="Rekaman lab: labs/api-t1/output/m3.txt" />
+
+Pesan aslinya hanya ada di log server, bukan di layar Budi:
+
+<Snippet file="labs/api-t1/output/m3.txt" lines="38:38" title="Rekaman lab: labs/api-t1/output/m3.txt" />
+
+Dengan `' OR 1=1 --`, syarat pencarian selalu benar, dan setiap akun ikut terkirim, beserta saldonya:
+
+<Snippet file="labs/api-t1/output/m3.txt" lines="30:36" title="Rekaman lab: labs/api-t1/output/m3.txt" />
+
+Versi benar memakai parameter query, hanya akun warung, dan hanya kolom yang dibutuhkan layar. Tanda kutip dan `' OR 1=1 --` jadi teks biasa:
+
+<Snippet file="labs/api-t1/output/m3.txt" lines="59:69" title="Rekaman lab: labs/api-t1/output/m3.txt" />
+
+<Snippet file="labs/api-t1/internal/repo/repo.go" region="cari-warung" lang="go" title="labs/api-t1/internal/repo/repo.go" />
+
+</Blok>
+
+<Blok nama="Coba sendiri">
+
+Di bawah ini kode pencarian versi minggu 2. Tandai baris yang jadi sumber dua masalah, lalu periksa.
+
+<CariBug client:visible data={caribug} />
+
+</Blok>
+
+<Blok nama="Konsep yang lahir">
+
+- [[t1-sql-injection]]: kenapa jangan pernah menyambung string jadi SQL, dan kenapa parameter query menutup seluruh kelas serangan ini. Halaman itu juga memuat ADR 4: parameterized query, linter, dan response hanya field yang dibutuhkan layar.
+- [[B7.1]]: handler, service, repo. Pencarian yang aman menaruh SQL hanya di repo, dan hanya mengirim field yang dibutuhkan layar.
+
+</Blok>
+
+<SkripLama daftar={["cerita"]} />
