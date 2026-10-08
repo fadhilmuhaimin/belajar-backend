@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 187,
-        "halaman": 23
+        "menit": 194,
+        "halaman": 24
       },
       "bagian": [
         {
@@ -583,8 +583,12 @@
       ],
       "label": "Masalah 1 · minggu 1",
       "masalah": "Bayar nominal minus berhasil dan saldo justru bertambah",
-      "ada": false,
-      "nomor": "1.14"
+      "ada": true,
+      "prasyarat": [
+        "B2.2"
+      ],
+      "nomor": "1.14",
+      "menit": 7
     },
     {
       "id": "B6",

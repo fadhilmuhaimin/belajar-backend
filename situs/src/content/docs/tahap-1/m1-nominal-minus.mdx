@@ -1,0 +1,85 @@
+---
+title: "1.14 M1: Nominal minus lolos"
+description: Minggu 1, Raka menguji sendiri. Bayar minus Rp5.000 berhasil, saldo Budi bertambah, dan saldo Warung Ani jadi negatif.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 5 menit · coba 2 menit · Prasyarat: [[B2.2]] · Jalur inti</p>
+
+<Blok nama="Gejala" buka>
+
+Jumat minggu 1, sebelum app dibagikan ke penguji, Raka mencoba semua layar sendiri dengan akun uji Budi. Di layar Bayar, ia mengetik `-5000` ke kolom nominal karena penasaran. Tombol Bayar tetap aktif.
+
+Layar berikutnya menulis "Pembayaran berhasil". Saldo Budi di pojok atas berubah dari Rp250.000 menjadi Rp255.000. Membayar justru menambah uang.
+
+Raka membuka akun Warung Ani di HP kedua. Saldonya -Rp5.000. Warung yang belum pernah menerima pembayaran sekarang berutang ke sistem.
+
+</Blok>
+
+<Blok nama="Yang Raka kira" buka>
+
+Raka mengira ia hanya lupa satu baris: `if nominal <= 0`. Rencananya, tambahkan pemeriksaan itu di layar Bayar, matikan tombol untuk angka minus, selesai.
+
+<details class="question">
+<summary>Tebak dulu: cukupkah satu `if` di app?</summary>
+
+Belum. Pemeriksaan di app membuat Budi tidak salah ketik, tapi request bisa dikirim tanpa app, misalnya dengan `curl` atau app versi lama. Aturan uang harus diperiksa di backend, dan database menjaga pagar terakhir. Blok berikutnya menunjukkan ketiganya di rekaman lab.
+
+</details>
+
+</Blok>
+
+<Blok nama="Yang sebenarnya">
+
+Masalahnya bukan satu `if` yang lupa, tapi aturan yang belum punya tempat. Ada dua lapis aturan:
+
+| Lapis | Contoh | Diperiksa di |
+|---|---|---|
+| Bentuk | Nominal berupa angka bulat, field `ke` terisi | App (supaya cepat) dan backend |
+| Uang | Nominal lebih dari 0, saldo cukup, saldo tidak negatif | Hanya backend, dengan constraint database sebagai pagar terakhir |
+
+Lab merekam versi minggu 1 dengan mode rentan yang dinyalakan lewat flag. Service versi ini tidak memeriksa jumlah:
+
+<Snippet file="labs/api-t1/internal/service/rentan.go" region="m1" lang="go" title="labs/api-t1/internal/service/rentan.go" />
+
+Tanpa pemeriksaan dan tanpa constraint uang di skema, minus lolos. Jumlah semua saldo tetap Rp25.000.000, jadi hal ketiga dari [[t1-pertukaran-saldo]] masih benar. Yang dilanggar adalah hal kedua: ada saldo di bawah nol.
+
+<Snippet file="labs/api-t1/output/m1.txt" lines="13:31" title="Rekaman lab: labs/api-t1/output/m1.txt" />
+
+Kalau constraint ada di skema tapi service masih tanpa pemeriksaan, database menolak. Uangnya aman, tapi app menerima `500`, seolah-olah server rusak. Budi tidak tahu bahwa nominalnya yang salah.
+
+<Snippet file="labs/api-t1/output/m1.txt" lines="43:56" title="Rekaman lab: labs/api-t1/output/m1.txt" />
+
+Versi benar memeriksa jumlah di service sebelum uang disentuh, dan menjawab `422` dengan nama field yang salah:
+
+<Snippet file="labs/api-t1/output/m1.txt" lines="66:76" title="Rekaman lab: labs/api-t1/output/m1.txt" />
+
+</Blok>
+
+<Blok nama="Coba sendiri">
+
+Skema Before tidak punya constraint uang. Skema After menambahkan dua baris ini, dan menjalankan pembayaran dalam satu transaction:
+
+```sql
+saldo  INTEGER NOT NULL CHECK (saldo >= 0)
+jumlah INTEGER NOT NULL CHECK (jumlah > 0)
+```
+
+Jalankan kedua panel. SQL-nya dijalankan sungguhan di browser dengan SQLite.
+
+<WidgetLama nama="runsql" src="data/t1-m1.json" />
+
+</Blok>
+
+<Blok nama="Konsep yang lahir">
+
+- [[B6]]: validation dua lapis dan format error. App boleh memeriksa bentuk; hanya backend memutuskan uang; database menjaga pagar terakhir. Halaman itu juga memuat ADR 2: `problem+json`, 400 lawan 422, dan constraint `saldo >= 0`.
+- [[B1.1]]: kenapa `500` untuk input yang salah menyesatkan app, dan status mana yang tepat.
+- [[t1-pertukaran-saldo]]: hal kedua dari tiga hal yang harus selalu benar.
+
+</Blok>
+
+<SkripLama daftar={["runsql-core","runsql"]} />

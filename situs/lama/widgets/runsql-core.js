@@ -9,6 +9,7 @@
  *              rowsLabel: arti jumlah baris berubah, mis. {"0": "ditolak", "1": "sukses"}
  *              sql boleh memuat ${nama} atau ${nama - 70} / ${nama + 70}
  *     onError  "stop" (berhenti, tanpa rollback) | "rollback" (jalankan ROLLBACK lalu berhenti)
+ *     setup    (opsional) skema khusus panel ini, menggantikan setup bersama (keputusan 148)
  *   toggles [{ label, pairs: [[cari, ganti], ...] }]  ubah satu hal di semua SQL, lalu jalankan ulang
  */
 (function (root, factory) {
@@ -47,7 +48,7 @@
     var vars = {};
     var log = [];
     try {
-      db.exec(applyToggles(scenario.setup, activeToggles));
+      db.exec(applyToggles(panel.setup || scenario.setup, activeToggles));
       for (var i = 0; i < panel.steps.length; i++) {
         var step = panel.steps[i];
         var sql = fill(applyToggles(step.sql, activeToggles), vars);

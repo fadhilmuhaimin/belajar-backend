@@ -1,0 +1,74 @@
+{
+  "id": "t1-m1",
+  "title": "Bayar minus Rp5.000: siapa yang menolak?",
+  "setup": "CREATE TABLE akun (id INTEGER PRIMARY KEY, nama TEXT NOT NULL, saldo INTEGER NOT NULL);\nCREATE TABLE transaksi (id INTEGER PRIMARY KEY, dari INTEGER NOT NULL, ke INTEGER NOT NULL, jumlah INTEGER NOT NULL);\nINSERT INTO akun VALUES (418, 'Warung Ani', 0), (419, 'Budi', 250000);",
+  "check": "SELECT nama, saldo FROM akun UNION ALL SELECT 'BARIS TRANSAKSI', COUNT(*) FROM transaksi",
+  "predict": {
+    "q": "Service belum memeriksa jumlah. Budi membayar -5000 ke Warung Ani. Di panel Before, skema tanpa constraint uang. Berapa saldo Budi sesudahnya?",
+    "options": [
+      "Rp245.000",
+      "Rp255.000",
+      "Tetap Rp250.000, ditolak"
+    ],
+    "answer": 1,
+    "explain": "Before: saldo - (-5000) sama dengan saldo + 5000. Saldo Budi naik jadi Rp255.000, saldo Ani turun jadi -Rp5.000, dan totalnya tetap. After: constraint saldo >= 0 menolak UPDATE kedua, transaction dibatalkan, dan kedua saldo kembali seperti semula."
+  },
+  "panels": {
+    "before": {
+      "label": "Before: tanpa constraint uang",
+      "onError": "stop",
+      "steps": [
+        {
+          "sql": "UPDATE akun SET saldo = saldo - -5000 WHERE id = 419"
+        },
+        {
+          "sql": "UPDATE akun SET saldo = saldo + -5000 WHERE id = 418"
+        },
+        {
+          "sql": "INSERT INTO transaksi (dari, ke, jumlah) VALUES (419, 418, -5000)"
+        }
+      ]
+    },
+    "after": {
+      "label": "After: constraint di skema, dalam satu transaction",
+      "setup": "CREATE TABLE akun (id INTEGER PRIMARY KEY, nama TEXT NOT NULL, saldo INTEGER NOT NULL CHECK (saldo >= 0));\nCREATE TABLE transaksi (id INTEGER PRIMARY KEY, dari INTEGER NOT NULL, ke INTEGER NOT NULL, jumlah INTEGER NOT NULL CHECK (jumlah > 0));\nINSERT INTO akun VALUES (418, 'Warung Ani', 0), (419, 'Budi', 250000);",
+      "onError": "rollback",
+      "steps": [
+        {
+          "sql": "BEGIN"
+        },
+        {
+          "sql": "UPDATE akun SET saldo = saldo - -5000 WHERE id = 419"
+        },
+        {
+          "sql": "UPDATE akun SET saldo = saldo + -5000 WHERE id = 418"
+        },
+        {
+          "sql": "INSERT INTO transaksi (dari, ke, jumlah) VALUES (419, 418, -5000)"
+        },
+        {
+          "sql": "COMMIT"
+        }
+      ]
+    }
+  },
+  "toggles": [
+    {
+      "label": "Budi membayar 5000, bukan -5000",
+      "pairs": [
+        [
+          "saldo - -5000",
+          "saldo - 5000"
+        ],
+        [
+          "saldo + -5000",
+          "saldo + 5000"
+        ],
+        [
+          "418, -5000)",
+          "418, 5000)"
+        ]
+      ]
+    }
+  ]
+}
