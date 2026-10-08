@@ -11,7 +11,8 @@ const baru = fs.readFileSync(path.join(ROOT, "site-baru/dist", slug, "index.html
 
 function artikel(html) {
   // Situs lama: <article class="md-content__inner ...">; situs baru: <main ...> ... <article>? Starlight: <main> dengan .sl-markdown-content
-  const m = html.match(/<article[\s\S]*?<\/article>/) || html.match(/<main[\s\S]*?<\/main>/);
+  // Situs baru (Starlight): H1 ada di luar <article>, jadi ambil <main>; situs lama: <article class="md-content__inner">
+  const m = html.includes("data-pagefind-body") ? html.match(/<main[\s\S]*?<\/main>/) : html.match(/<article[\s\S]*?<\/article>/);
   return m ? m[0] : html;
 }
 function bersih(html) {
