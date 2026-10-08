@@ -5,11 +5,12 @@
 import { muat, label, url, byId } from "./registri.mjs";
 
 function item(h, by) {
-  const kelas = [h.inti ? "nav-inti" : "", h.ada ? "" : "nav-menyusul", h.lebur_ke || h.diganti_oleh ? "nav-lama" : ""]
+  const kelas = [h.inti ? "nav-inti" : "", h.ada ? "" : "nav-menyusul", h.lama || h.lebur_ke || h.diganti_oleh ? "nav-lama" : ""]
     .filter(Boolean).join(" ");
   const attrs = {};
   if (kelas) attrs.class = kelas;
   if (!h.ada) attrs.title = "Belum ditulis";
+  if (h.lama) attrs.title = "Versi lama; akan ditulis ulang mengikuti naskah";
   if (h.lebur_ke) attrs.title = `Versi lama; isinya digabung ke ${label(by[h.lebur_ke])}`;
   if (h.diganti_oleh) attrs.title = `Versi lama; digantikan ${label(by[h.diganti_oleh])}`;
   if (h.inti) attrs["data-inti"] = "★ jalur inti";

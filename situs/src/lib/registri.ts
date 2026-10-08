@@ -18,6 +18,8 @@ export const Halaman = z
     peran: z.array(z.enum(PERAN)).optional(),
     adr: z.array(z.number().int().positive()).optional(),
     label: z.string().optional(),
+    /** Isi masih versi sebelum naskah; ditulis ulang di Tugas 1, lalu field ini dihapus. */
+    lama: z.boolean().optional(),
     lebur_ke: z.string().optional(),
     diganti_oleh: z.string().optional(),
     kelompok: z.string().optional(),

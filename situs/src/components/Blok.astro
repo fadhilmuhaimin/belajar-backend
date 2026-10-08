@@ -1,0 +1,101 @@
+---
+/**
+ * Satu blok lipat halaman (keputusan 118): judul h2 di dalam summary (ikut daftar isi dan penyorotnya),
+ * "Blok n dari N · m menit", status selesai, dan tombol Berikutnya besar di akhir. Blok terakhir menunjuk halaman
+ * berikutnya di urutan baca. Status selesai disimpan per halaman di localStorage; tanpa JavaScript blok tetap
+ * bisa dibuka dan ditutup. Tidak ada animasi yang jalan sendiri; scroll halus hanya bila reduced motion tidak aktif.
+ *   <Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu ...">...</Blok>
+ */
+import { daftarBlok, slugBlok, menitBlok } from "../lib/blok";
+import { muat, urutanBaca, label, url, urlDariId, dariUrl } from "../../tools/registri.mjs";
+
+interface Props { nama: string; buka?: boolean; menit?: number; aman?: string }
+const { nama, buka = false, aman } = Astro.props;
+const route = Astro.locals.starlightRoute;
+const bloks = daftarBlok(route.entry.body ?? "");
+const i = bloks.findIndex((b) => b.nama === nama);
+if (i < 0) throw new Error(`Blok "${nama}" tidak ditemukan di ${route.entry.id}`);
+const d = muat();
+const sini = urlDariId(route.entry.id);
+const h = dariUrl(d, sini);
+const menit = menitBlok(h?.jenis, bloks[i]!);
+const next = bloks[i + 1];
+const menitNext = next ? menitBlok(h?.jenis, next) : undefined;
+let halBerikut: { nomor?: string; judul: string; path: string } | null = null;
+if (!next) {
+  const urut = urutanBaca(d);
+  const j = urut.findIndex((x: { path: string }) => url(x) === sini);
+  halBerikut = j >= 0 && j + 1 < urut.length ? urut[j + 1] : null;
+}
+const id = slugBlok(nama);
+---
+<details class="blok" data-blok={id} open={buka}>
+  <summary class="blok__kepala">
+    <h2 id={id} class="blok__judul">{nama}</h2>
+    <span class="blok__meta">Blok {i + 1} dari {bloks.length}{menit ? ` · ${menit} menit` : ""}<span class="blok__status" data-status></span></span>
+  </summary>
+  <div class="blok__isi">
+    <slot />
+    {aman && <p class="blok__aman">{aman}</p>}
+    {next && (
+      <button type="button" class="blok__lanjut" data-ke={slugBlok(next.nama)}>
+        <span>Berikutnya</span>{next.nama}{menitNext ? ` · ${menitNext} menit` : ""} →
+      </button>
+    )}
+    {!next && halBerikut && (
+      <a class="blok__lanjut" href={url(halBerikut)} data-akhir>
+        <span>Halaman berikutnya</span>{label(halBerikut)} →
+      </a>
+    )}
+  </div>
+</details>
+
+<script>
+  const kunci = "rtj-blok:" + location.pathname;
+  const baca = (): string[] => { try { return JSON.parse(localStorage.getItem(kunci) || "[]"); } catch { return []; } };
+  const simpan = (a: string[]) => { try { localStorage.setItem(kunci, JSON.stringify(a)); } catch { /* mode privat */ } };
+  const blok = () => [...document.querySelectorAll<HTMLDetailsElement>("details.blok")];
+
+  function tandai() {
+    const selesai = new Set(baca());
+    for (const el of blok()) {
+      const id = el.dataset.blok!;
+      const sudah = selesai.has(id);
+      el.classList.toggle("blok--selesai", sudah);
+      const st = el.querySelector("[data-status]");
+      if (st) st.textContent = sudah ? " · selesai" : "";
+      document.querySelectorAll(`a[href="#${id}"]`).forEach((a) => a.classList.toggle("toc-selesai", sudah));
+    }
+  }
+  function selesaikan(el: HTMLDetailsElement) {
+    const a = baca();
+    if (!a.includes(el.dataset.blok!)) simpan([...a, el.dataset.blok!]);
+  }
+  function bukaDariHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const el = blok().find((x) => x.dataset.blok === id);
+    if (el) el.open = true;
+  }
+
+  document.addEventListener("click", (e) => {
+    const t = (e.target as Element).closest<HTMLElement>(".blok__lanjut");
+    if (!t) return;
+    const kini = t.closest<HTMLDetailsElement>("details.blok");
+    if (!kini) return;
+    selesaikan(kini);
+    if (t.dataset.ke) {
+      const lanjut = blok().find((x) => x.dataset.blok === t.dataset.ke);
+      kini.open = false;
+      if (lanjut) {
+        lanjut.open = true;
+        const halus = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+        lanjut.scrollIntoView({ behavior: halus ? "smooth" : "auto", block: "start" });
+        lanjut.querySelector("summary")?.focus({ preventScroll: true });
+      }
+    }
+    tandai();
+  });
+  window.addEventListener("hashchange", bukaDariHash);
+  bukaDariHash();
+  tandai();
+</script>

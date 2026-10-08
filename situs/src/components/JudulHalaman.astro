@@ -1,0 +1,22 @@
+---
+/**
+ * Mengganti PageTitle Starlight: kicker kecil di atas judul dari registry (keputusan 118), mis. "Masalah 1 · minggu 1",
+ * "ADR 5 dan 6", "Keamanan 1 · ADR 4". Judul tetap dari front matter.
+ */
+import Default from "@astrojs/starlight/components/PageTitle.astro";
+import { muat, urlDariId, dariUrl } from "../../tools/registri.mjs";
+
+const NAMA: Record<string, string> = { prd: "PRD", fitur: "Fitur ke teknis", konsep: "Konsep", adr: "Keputusan", "tim-infra": "Tim dan infra" };
+const h = dariUrl(muat(), urlDariId(Astro.locals.starlightRoute.entry.id));
+// Halaman versi lama tidak diberi kicker: tata letaknya dibuat tanpa baris itu dan layar pertama 1366×657 jadi
+// terlalu sempit (diukur tools/layar.mjs). Penandanya ada di sidebar (miring + title).
+const lama = h?.lama || h?.lebur_ke || h?.diganti_oleh;
+const bagian: string[] = [];
+if (!lama) {
+  if (h?.label) bagian.push(h.label);
+  else if (h?.jenis && h.jenis !== "adr" && h.jenis !== "konsep") bagian.push(NAMA[h.jenis]!);
+  if (h?.adr?.length) bagian.push(`ADR ${h.adr.join(" dan ")}`);
+}
+---
+{bagian.length > 0 && <p class="kicker">{bagian.join(" · ")}</p>}
+<Default />
