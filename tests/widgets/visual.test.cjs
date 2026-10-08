@@ -90,7 +90,7 @@ test("a1-hp: layar valid", () => {
 });
 
 test("A2 'Kenapa ini ada': rujukan (langkah N) menunjuk langkah yang benar", () => {
-  const md = fs.readFileSync(path.join(ROOT, "docs/a-gambaran/a2-perjalanan-request.md"), "utf8");
+  const md = fs.readFileSync(path.join(ROOT, "situs/src/content/docs/a-gambaran/a2-perjalanan-request.mdx"), "utf8");
   const d = json("docs/widgets/data/a2-alur.json");
   const teks = (n) => { const s = d.langkah[n - 1]; return [s.judul, s.kirim || "", s.jelas].join(" "); };
   const refs = [...md.matchAll(/\(langkah (\d+)\)/g)].map((m) => Number(m[1]));
