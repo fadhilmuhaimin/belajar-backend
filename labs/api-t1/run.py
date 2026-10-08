@@ -248,6 +248,14 @@ def rekam_topup():
                 jenis="text/csv", tampil_body="'email,nominal\\nbudi@lestari.example,1000000'")
     harap(s, 403, "top-up oleh bukan admin")
     sql("SELECT saldo FROM akun WHERE id = 419")
+
+    bagian("G. Admin tidak sengaja mengunggah file minggu 1 sekali lagi")
+    s, b = curl("POST", "/topup?keterangan=Tunjangan%20makan%20minggu%201", csv1, token=admin, jenis="text/csv",
+                tampil_body="@minggu-1.csv")
+    harap(s, 200, "unggahan ulang diterima (belum ada pengaman)")
+    hasil = sql("SELECT sum(saldo) AS total_saldo, (SELECT count(*) FROM topup) AS catatan FROM akun WHERE jenis = 'karyawan'")
+    if "50000000" not in hasil:
+        gagal("unggahan ulang harus menggandakan total (risiko yang direkam)")
     tulis("topup.txt")
 
 

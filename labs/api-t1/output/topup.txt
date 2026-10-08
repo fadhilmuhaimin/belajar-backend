@@ -79,3 +79,16 @@ $ psql -c "SELECT saldo FROM akun WHERE id = 419"
  250000
 (1 row)
 
+
+# --- G. Admin tidak sengaja mengunggah file minggu 1 sekali lagi ---
+$ curl -i -X POST '/topup?keterangan=Tunjangan%20makan%20minggu%201' -H 'Authorization: Bearer <token sesi admin>' -H 'Content-Type: text/csv' --data-binary @minggu-1.csv
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"akun":100,"total":25000000}
+$ psql -c "SELECT sum(saldo) AS total_saldo, (SELECT count(*) FROM topup) AS catatan FROM akun WHERE jenis = 'karyawan'"
+ total_saldo | catatan 
+-------------+---------
+    50000000 |     200
+(1 row)
+
