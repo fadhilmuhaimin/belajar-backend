@@ -53,7 +53,7 @@ Semua hijau sebelum commit: build strict 0 warning; sinkron registry tanpa diff 
 </gerbang_kualitas>
 
 <tampilan>
-Gelap default gaya Medium: latar #0B0B0C, teks #E6E6E6, judul #FFFFFF, sekunder #A3A3A8, aksen #7AB8FF; mode terang satu klik. Teks 19–20 px desktop, 17 px HP, line-height 1,65, kolom 680–720 px, Satoshi 400/600 (fallback Inter), JetBrains Mono. Semua warna lewat token. Beranda satu layar: judul, satu kalimat, tombol "Mulai dari PRD", tiga kartu (Cerita, Peran, Masalah), peta enam tahap. Halaman konsep lima blok lipat (Mulai, Coba, Paham, Putuskan, Kunci), dua pertama terbuka, tombol Berikutnya di tiap blok. Sidebar tunggal per tahap, pemilih peran, breadcrumb "Kamu di sini", indeks masalah yang bisa dicari, mode fokus. Tanpa animasi otomatis.
+Gelap default gaya Medium: latar #0B0B0C, teks #E6E6E6, judul #FFFFFF, sekunder #A3A3A8, aksen #7AB8FF; mode terang satu klik. Teks 19–20 px desktop, 17 px HP, line-height 1,65, konten memakai sisa ruang sampai 1024 px dengan daftar isi kanan lebar tetap (keputusan 163), Satoshi 400/600 (fallback Inter), JetBrains Mono. Semua warna lewat token. Beranda satu layar: judul, satu kalimat, tombol "Mulai dari PRD", tiga kartu (Cerita, Peran, Masalah), peta enam tahap. Halaman konsep lima blok lipat (Mulai, Coba, Paham, Putuskan, Kunci), dua pertama terbuka, tombol Berikutnya di tiap blok. Sidebar tunggal per tahap, pemilih peran, breadcrumb "Kamu di sini", indeks masalah yang bisa dicari, mode fokus. Tanpa animasi otomatis.
 </tampilan>
 
 <urutan_kerja>

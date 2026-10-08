@@ -487,7 +487,8 @@ Acuan rasa: Medium dalam mode gelap. Latar hampir hitam, teks terang, judul besa
 | Judul | `#FFFFFF` | Putih hanya untuk judul, supaya hierarki terasa |
 | Teks sekunder | `#A3A3A8` | Kontras ±7:1, masih AA |
 | Aksen | Satu warna: biru `#7AB8FF` untuk link dan komponen baru | Palet makna lama (system/good/warn/old) dipetakan ulang ke versi gelap dengan `contrast.py` yang sudah ada |
-| Ukuran teks isi | 19–20 px desktop, 17 px HP; line-height 1,65; lebar kolom 680–720 px | Mengikuti Medium; teks lebih besar mengkompensasi mode gelap |
+| Ukuran teks isi | 19–20 px desktop, 17 px HP; line-height 1,65 | Mengikuti Medium; teks lebih besar mengkompensasi mode gelap |
+| Lebar layout (revisi 2026-10-09, keputusan 163) | Konten memakai sisa ruang sampai batas 1024 px; daftar isi kanan lebar tetap 256 px; sidebar kiri 300 px | Pemilik: gaya Medium dipakai untuk tipografi dan warna, bukan layout satu kolom sempit. Ruang layar dimaksimalkan dengan rasio seimbang |
 | Huruf isi | Satoshi tetap, atau Inter sebagai fallback | Berat 400 untuk isi, 600 untuk judul; hindari 300 di mode gelap |
 | Huruf kode | JetBrains Mono tetap | Warna sintaks dicek ulang di latar gelap |
 | Mode terang | Tersedia, satu klik, disimpan di `localStorage` | NN/g: performa membaca panjang sedikit lebih baik di teks gelap latar terang, jadi pilihannya diberikan ke pembaca ([rangkuman riset NN/g](https://watsspace.com/blog/dark-mode-vs-light-mode-for-website-design/), [NN/g](https://www.nngroup.com/articles/dark-mode/)) |

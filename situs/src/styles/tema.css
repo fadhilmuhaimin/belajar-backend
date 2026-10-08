@@ -85,7 +85,7 @@
   --sl-text-h2: 1.3rem;
   --sl-text-h3: 1.2rem;
   --sl-text-h4: 1.05rem;
-  --sl-content-width: 44rem;      /* 704 px, di rentang 680–720 */
+  --sl-content-width: 64rem;      /* batas 1024 px: konten memakai sisa ruang setelah sidebar dan TOC lebar tetap (keputusan 163) */
 
   /* Shiki (tema css-variables, src/lib/shiki-tema.mjs) */
   --shiki-foreground: var(--teks);
@@ -572,6 +572,18 @@ html[data-peran="security"] .sidebar-content a[data-peran~="security"] { box-sha
   html[data-fokus="ya"] .sidebar-pane, html[data-fokus="ya"] .right-sidebar-container { display: none !important; }
   html[data-fokus="ya"] .main-pane { width: 100%; }
   html[data-fokus="ya"] .content-panel > .sl-container { margin-inline: auto; }
+}
+
+/* === Lebar layout (keputusan 163): daftar isi kanan selebar isinya, sisa ruang untuk konten ===
+   Bawaan Starlight memberi kolom kanan separuh dari ruang kosong (makin lebar layar, makin lebar),
+   padahal isinya hanya beberapa tautan. Di sini lebarnya tetap, dan konten berada di tengah sisa ruang. */
+:root { --rk-toc-width: 16rem; }
+@media (min-width: 72rem) {
+  .right-sidebar-container { width: var(--rk-toc-width); flex: none; }
+  html[data-has-sidebar][data-has-toc]:not([data-fokus="ya"]) .main-pane {
+    width: calc(100% - var(--rk-toc-width));
+    --sl-content-margin-inline: auto;
+  }
 }
 
 /* === Beranda satu layar (keputusan 121): diukur tools/layar.mjs di 4 ukuran, tanpa scroll === */
