@@ -4,6 +4,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- 140: hooks PreCompact/SessionStart, `tools/jalankan-tahap.sh` (loop headless + crosscheck akhir), CLAUDE.md butir 7.
 - 109: konten dulu, satu tahap sampai tuntas; CERITA jadi sumber tertinggi; tiga skill wajib.
 - 110: job CI `pesan_commit` menolak Co-Authored-By/Claude di pesan commit PR.
 - 111: gerbang situs `tools/cek_situs.sh` (registry, istilah, audit, build, ID, kontras, tes; `--layar`).
@@ -22,7 +23,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Catatan untuk penulisan ulang Tahap 1
 
-- Lab baru `labs/api-t1` (keputusan 132) dibangun per halaman; halaman lama memakai `labs/api-t1-lama`. Saat 1.6 sudah punya lab berfolder, ganti tiga Snippet komentar file di 1.6 dengan folder nyata. Setelah tidak ada halaman yang memakai `api-t1-lama`, tanyakan ke pemilik apakah boleh dihapus.
+- Lab baru `labs/api-t1` (keputusan 132) dibangun per halaman; halaman lama memakai `labs/api-t1-lama`. Saat 1.6 sudah punya lab berfolder, ganti tiga Snippet komentar file di 1.6 dengan folder nyata. Pemilik menyetujui (2026-10-08) menghapus `labs/api-t1-lama`, tapi hanya setelah `grep -rn api-t1-lama situs/ labs/ tools/` kosong (tidak ada halaman atau Snippet yang merujuknya); bukti grep ditulis di PR hapus.
 - Kolom "Halaman" di tabel lab README memakai nomor lama sebelum registry v2; perbarui saat lab dipakai halaman baru.
 - 1.33 (E1, app versi lama): prasyarat B4.2 (Tahap 2) dibuang; isi lama memakai rekaman crash B4.2. Saat ditulis ulang, ADR 10 (expand lalu contract) harus berdiri sendiri.
 - 1.15 (B6) memuat ADR 2: tabel status saldo kurang 400/409/422 dengan kutipan RFC 9110 (isi lama A2, dihapus dari 1.5 di keputusan 130), plus problem+json.
@@ -35,21 +36,24 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Perlu dicek pemilik
 
-- Cloudflare Pages (keputusan 115): buat API token di dashboard Cloudflare (Custom Token, izin Account > Cloudflare Pages > Edit), lalu `gh secret set CLOUDFLARE_API_TOKEN` dan `gh secret set CLOUDFLARE_ACCOUNT_ID`. Sampai itu, job deploy lewat dan belum ada preview URL.
+- Cloudflare Pages (keputusan 115), belum ada; job deploy dilewati dan pekerjaan jalan terus. Yang dibutuhkan:
+  1. Di dashboard Cloudflare: My Profile > API Tokens > Create Custom Token, izin **Account > Cloudflare Pages > Edit**, untuk akun yang memiliki project Pages.
+  2. Account ID: dashboard Cloudflare, Workers & Pages, kolom kanan "Account ID".
+  3. Jalankan di root repo: `gh secret set CLOUDFLARE_API_TOKEN` lalu `gh secret set CLOUDFLARE_ACCOUNT_ID` (keduanya meminta nilai lewat prompt, tidak masuk riwayat shell).
 
 ## Sedang dikerjakan
 
-2026-10-08 · BERHENTI atas permintaan pemilik. Tugas 0 selesai kecuali secret Cloudflare (lihat "Perlu dicek pemilik"). Tugas 1: halaman 1.1–1.9 sudah di `main` (keputusan 122–138). Lab `labs/api-t1` versi naskah punya bagian login, topup, bayar, riwayat; irisan riwayat + laporan harian ada di PR #93 (branch `tahap-1/lab-riwayat`, keputusan 139) dan BELUM di-merge.
-Lanjutkan dengan urutan ini:
-1. Cek CI PR #93 (`gh pr checks 93`), merge bila hijau (`gh pr merge 93 --merge --delete-branch`).
-2. Halaman 1.10 "Fitur: saldo, riwayat, laporan warung" BELUM ditulis: branch `tahap-1/halaman-fitur-saldo` dari main, `situs/src/content/docs/tahap-1/fitur-saldo.mdx` (jenis fitur, kerangka `situs/templat/fitur.mdx`), rekaman `labs/api-t1/output/riwayat.txt`, widget runsql laporan GROUP BY (naskah), prasyarat `t1-fitur-bayar`.
-3. Lalu 1.11 Pertukaran saldo (`t1-pertukaran-saldo`, konsep lima blok, runsql + widget jumlah-total = widget React pertama; ADR dependency PGlite bila dipakai).
-Pola kerja per halaman: lab dulu (PR sendiri, `make -C labs/api-t1 run BAGIAN=<nama>`), lalu halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/`; satu PR per halaman, merge sendiri bila CI hijau.
-
-2026-10-08 · Fase 1 selesai secara isi: 60/60 halaman ada di `situs/` (Astro 7.3.7 + Starlight 0.42.5, tanpa React), semua widget lama jalan apa adanya, tooltip istilah jalan, CI job `situs` (build strict, tes token, kontras 2 mode, tangkapan 2 ukuran × 2 mode, layar pertama 4 ukuran) hijau di `main` (PR #2–#64). Belum: hapus MkDocs (gerbang PROPOSAL: kedua situs dibangun di CI sampai fase 1 dinyatakan lolos; keputusan pemilik), beranda satu layar dan lima blok (fase 3), hosting Cloudflare Pages dan link checker (fase 0 tersisa). Berikutnya menurut PROPOSAL: fase 2, satu widget per PR ditulis ulang ke TypeScript (mulai `alur` dan `pilah`, yang paling banyak dipakai: 22 dan 13 halaman), Zod untuk JSON, PGlite menggantikan sql.js di `runsql`; React masuk bersama widget React pertama (ADR dependency wajib). Perintah kerja: `cd situs && npm run build && npm test && node tools/layar.mjs && node tools/tangkap.mjs` dengan `npm run preview` di 127.0.0.1:4321.
+2026-10-08 · Halaman 1.1–1.9 dan lab riwayat (PR #93, keputusan 139) sudah di `main`. PR hooks memori (keputusan 140) memasang `.claude/settings.json`, `tools/jalankan-tahap.sh`, dan `plan/PROMPT-CROSSCHECK.md`. Pemilik akan menjalankan `bash tools/jalankan-tahap.sh`.
+Halaman berikutnya: **1.10 "Fitur: saldo, riwayat, laporan warung"**.
+1. Branch `tahap-1/halaman-fitur-saldo` dari `main`; file `situs/src/content/docs/tahap-1/fitur-saldo.mdx` (jenis fitur, kerangka `situs/templat/fitur.mdx`, contoh tetangga `fitur-bayar.mdx`), prasyarat `t1-fitur-bayar`.
+2. Bahan lab sudah ada: rekaman `labs/api-t1/output/riwayat.txt` (D riwayat Budi baris 56–61, E 404 akun orang lain 63–68, F laporan Ani + psql cocok 70–80, G 404 Dimas 83–88); region Snippet `repo/riwayat.go` `riwayat` dan `laporan`, `service/riwayat.go` `laporan`; index di `schema.sql` baris 48–50.
+3. Widget runsql baru `situs/lama/widgets/data/t1-laporan.json` (format sama dengan `t1-topup.json`, sql.js): laporan dihitung `GROUP BY` di database vs semua baris dikirim ke app; kunci hasilnya di tes runsql seperti 1.8.
+4. Lalu 1.11 Pertukaran saldo (`t1-pertukaran-saldo`, konsep lima blok, runsql + widget jumlah-total = widget React pertama; ADR dependency PGlite bila dipakai).
+Pola per halaman: lab dulu bila perlu (PR sendiri, `make -C labs/api-t1 run BAGIAN=<nama>`), lalu halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar | tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/`; merge sendiri bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42 merge dan tangkapan seluruh Tahap 1 dilihat: tulis "Tahap 1: selesai" di STATUS.
 
 ## Pelajaran
 
+- Hook PreCompact: stdout dan stderr dengan exit 0 hanya masuk debug log, tidak terlihat model; exit 2 memblokir compaction. Stdout SessionStart masuk konteks (docs hooks resmi).
 - Di dalam blok, Cek diri ditulis `### Cek diri`; sinkron membacanya sejak keputusan 127 dan menolak halaman konsep baru dengan kurang dari 3 kartu.
 - Widget lama dengan baris horizontal (flex) kena margin saudara Starlight; tambahkan kontainernya ke aturan `:is(...) > * + *` di tema.css (keputusan 124, 128).
 - ThemeSelect bawaan Starlight memilih "auto" bila belum ada pilihan dan menimpa default gelap; diganti `PilihTema.astro` (keputusan 119). `tangkap.mjs` kini memeriksa kunjungan pertama dengan sistem terang.

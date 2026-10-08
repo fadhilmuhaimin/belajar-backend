@@ -8,6 +8,7 @@ __pycache__/
 # QA gambar (seharusnya di /tmp/fig-check, jaga-jaga)
 fig-check/
 tmp/
+log/
 
 # Font: Satoshi (ITF FFL) tidak boleh diredistribusi. Unduh: bash tools/get_fonts.sh (ke situs/public/fonts,
 # diabaikan lewat situs/.gitignore)
@@ -17,3 +18,5 @@ tmp/
 *.pdf
 .claude/*
 !.claude/skills/
+!.claude/settings.json
+!.claude/hooks/

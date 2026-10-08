@@ -41,9 +41,9 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.7 Fitur: login karyawan | Halaman baru, lab `api-t1` versi naskah (keputusan 132–134) |
 | 1.8 Fitur: top-up oleh admin | Halaman baru (keputusan 135, 136) |
 | 1.9 Fitur: bayar ke warung | Halaman baru (keputusan 137, 138) |
-| 1.10 Fitur: saldo, riwayat, laporan warung | Lab siap di PR #93 (keputusan 139, belum di-merge); halaman belum ditulis |
+| 1.10 Fitur: saldo, riwayat, laporan warung | Lab di `main` (PR #93, keputusan 139); halaman belum ditulis |
 
-Diperbarui 2026-10-08 saat berhenti atas permintaan pemilik. Berikutnya: merge PR #93, tulis halaman 1.10, lalu 1.11 Pertukaran saldo. 9 dari 42 halaman selesai.
+Diperbarui 2026-10-08. 9 dari 42 halaman selesai; berikutnya 1.10. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 
