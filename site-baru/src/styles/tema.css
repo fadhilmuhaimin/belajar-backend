@@ -401,4 +401,8 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 .sl-markdown-content .bb-banding__note { margin: 0.3rem 0 0; font-size: 0.85em; padding-left: 0.5rem; border-left: 3px solid var(--k-system-edge); }
 .sl-markdown-content .bb-banding__note.is-warn { border-left-color: var(--k-warn-edge); }
 @media (max-width: 50em) { .sl-markdown-content .bb-banding__cols { grid-template-columns: 1fr; } }
+/* Ilustrasi cerita (SVG per tahap) */
+.sl-markdown-content figure.bb-ilus { margin: 1.2em 0; }
+.sl-markdown-content figure.bb-ilus img { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--garis); }
+.sl-markdown-content figure.bb-ilus figcaption { font-size: 0.85em; color: var(--teks-2); margin-top: 0.4rem; max-width: none; text-align: left; }
 /* === akhir widget lama === */
