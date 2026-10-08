@@ -85,3 +85,60 @@ jobs:
           name: tangkapan-situs
           path: situs/tangkapan/*.png
           retention-days: 7
+      # Hasil build yang sudah lolos gerbang dipakai job deploy, supaya yang di-deploy sama dengan yang diperiksa.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: situs-dist
+          path: situs/dist
+          retention-days: 3
+
+  # Cloudflare Pages lewat Direct Upload (keputusan 115). Setiap PR mendapat preview per branch; push ke main = produksi.
+  # Butuh dua secret repo: CLOUDFLARE_API_TOKEN (izin Account > Cloudflare Pages > Edit) dan CLOUDFLARE_ACCOUNT_ID.
+  # Tanpa secret (belum disiapkan, atau PR dari fork) job ini lewat tanpa gagal.
+  # Sumber: https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/
+  deploy:
+    name: deploy Cloudflare Pages
+    needs: situs_baru
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+    env:
+      PROYEK: rekeningo-tech-journey
+    steps:
+      - name: Cek secret Cloudflare
+        id: cf
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          AKUN: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$AKUN" ]; then echo "ada=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::Secret Cloudflare belum ada; deploy dilewati."; echo "ada=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/download-artifact@v8
+        if: steps.cf.outputs.ada == 'true'
+        with:
+          name: situs-dist
+          path: dist
+      - uses: cloudflare/wrangler-action@v4.1.3
+        id: wrangler
+        if: steps.cf.outputs.ada == 'true'
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.148.0"
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          # Proyek dibuat sekali bila belum ada; perintah ini gagal tanpa efek bila proyek sudah ada.
+          preCommands: npx wrangler pages project create "$PROYEK" --production-branch=main || true
+          command: pages deploy dist --project-name=${{ env.PROYEK }} --branch=${{ github.head_ref || github.ref_name }}
+      - name: Tulis URL preview di PR
+        if: steps.cf.outputs.ada == 'true' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          URL: ${{ steps.wrangler.outputs.deployment-url }}
+          ALIAS: ${{ steps.wrangler.outputs.pages-deployment-alias-url }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} \
+            --body "Preview situs: ${ALIAS:-$URL} (commit ${{ github.event.pull_request.head.sha }}, deploy ${URL})"

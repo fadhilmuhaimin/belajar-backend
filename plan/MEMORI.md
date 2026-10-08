@@ -8,6 +8,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - 110: job CI `pesan_commit` menolak Co-Authored-By/Claude di pesan commit PR.
 - 111: gerbang situs `tools/cek_situs.sh` (registry, istilah, audit, build, ID, kontras, tes; `--layar`).
 - 112–114: MkDocs, halaman Markdown lama, dan `docs/` dihapus; registry di `situs/data/cerita.json`, widget lama di `situs/lama/`.
+- 115: Cloudflare Pages Direct Upload dari CI; menunggu secret pemilik.
 
 ## Usulan perubahan cerita
 
@@ -15,7 +16,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Perlu dicek pemilik
 
-(kosong)
+- Cloudflare Pages (keputusan 115): buat API token di dashboard Cloudflare (Custom Token, izin Account > Cloudflare Pages > Edit), lalu `gh secret set CLOUDFLARE_API_TOKEN` dan `gh secret set CLOUDFLARE_ACCOUNT_ID`. Sampai itu, job deploy lewat dan belum ada preview URL.
 
 ## Sedang dikerjakan
 
