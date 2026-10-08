@@ -1,0 +1,73 @@
+# server: ./api-t1 -rentan m3
+
+# --- A. Mode rentan: isi pencarian masuk ke teks SQL ---
+$ curl -i -X POST '/login' -d '{"email": "dimas@lestari.example", "password": "sementara-417"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Dimas>"}
+$ curl -i -X GET '/warung?cari=' OR 1=1 --' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{"warung":[ ... semua akun, beserta saldo]}
+# yang diterima PostgreSQL (log_statement=all):
+LOG:  execute stmtcache_…: SELECT id, jenis, nama, saldo FROM akun WHERE nama LIKE '%' OR 1=1 --%'
+
+server log: PERINGATAN: mode rentan m3 menyala
+# server: ./api-t1
+
+# --- B. Versi benar: teks SQL tetap, isi pencarian dikirim terpisah sebagai $1 ---
+$ curl -i -X POST '/login' -d '{"email": "dimas@lestari.example", "password": "sementara-417"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Dimas>"}
+$ curl -i -X GET '/warung?cari=' OR 1=1 --' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"warung":[]}
+# yang diterima PostgreSQL (log_statement=all):
+LOG:  execute stmtcache_…: SELECT id, nama FROM akun WHERE jenis = 'warung' AND nama ILIKE '%' || $1 || '%' ORDER BY id
+DETAIL:  Parameters: $1 = ''' OR 1=1 --'
+
+
+# --- C. Linter: gosec aturan G201 dan G202 (SQL dibangun dari string) ---
+$ go run github.com/securego/gosec/v2/cmd/gosec@v2.29.0 -include=G201,G202 ./...
+Results:
+
+[internal/repo/repo.go:107] - G202 (CWE-89): SQL string concatenation (Confidence: HIGH, Severity: MEDIUM)
+    106: func (r Repo) CariWarungRentanM3(ctx context.Context, cari string) ([]Akun, error) {
+  > 107: 	q := "SELECT id, jenis, nama, saldo FROM akun WHERE nama LIKE '%" + cari + "%'"
+    108: 	rows, err := r.db.QueryContext(ctx, q) //nolint:rowserrcheck // lab: rows.Err dicek di bawah
+
+Autofix:
+
+Summary:
+  Gosec  : dev
+  Files  : 13
+  Lines  : 1072
+  Nosec  : 0
+  Issues : 1
+# exit status 1
+
+# --- D. Batas parameter: nama kolom tidak bisa jadi $1 ---
+# $1 selalu nilai. ORDER BY $1 memberi semua baris nilai yang sama, jadi teks nama DESC tidak berpengaruh.
+$ psql -c "PREPARE urut(text) AS SELECT id, nama FROM akun WHERE jenis = 'warung' ORDER BY $1; EXECUTE urut('nama DESC');"
+ id  |        nama         
+-----+---------------------
+ 418 | Warung Ani
+ 502 | Warung Sari
+ 503 | Warung Mie Pak Joko
+(3 rows)
+
+$ psql -c "SELECT id, nama FROM akun WHERE jenis = 'warung' ORDER BY nama DESC;"
+ id  |        nama         
+-----+---------------------
+ 502 | Warung Sari
+ 503 | Warung Mie Pak Joko
+ 418 | Warung Ani
+(3 rows)
+
