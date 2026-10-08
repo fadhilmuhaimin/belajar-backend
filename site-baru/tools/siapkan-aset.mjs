@@ -38,6 +38,10 @@ salinDir(path.join(DOCS, "widgets"), path.join(PUB, "widgets"), (n) => n.endsWit
 fs.rmSync(path.join(PUB, "vendor"), { recursive: true, force: true });
 salinDir(path.join(DOCS, "vendor"), path.join(PUB, "vendor"));
 
+// Ilustrasi cerita (SVG dari tools/ilustrasi_cerita.py) dipakai halaman tahap: ../assets/cerita/*.svg -> /assets/cerita/
+fs.rmSync(path.join(PUB, "assets/cerita"), { recursive: true, force: true });
+if (fs.existsSync(path.join(DOCS, "assets/cerita"))) salinDir(path.join(DOCS, "assets/cerita"), path.join(PUB, "assets/cerita"));
+
 const fonts = path.join(DOCS, "assets/fonts");
 const ada = fs.existsSync(fonts) && fs.readdirSync(fonts).some((n) => n.endsWith(".woff2"));
 if (ada) salinDir(fonts, path.join(PUB, "fonts"), (n) => n.endsWith(".woff2"));

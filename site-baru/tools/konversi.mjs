@@ -122,7 +122,8 @@ function konversiBlok(ls, dalamTab) {
       const srcM = w[2].match(/data-src="([^"]+)"/); if (srcM) attrs.push(`src="${srcM[1]}"`);
       const tM = w[2].match(/data-tahap="([^"]+)"/); if (tM) attrs.push(`tahap={${tM[1]}}`);
       const sisa = w[2].replace(/data-(src|tahap)="[^"]+"/g, "").trim();
-      if (sisa) peringatan.push(`atribut widget ${nama} tidak dikonversi: ${sisa}`);
+      for (const a of sisa.matchAll(/([\w-]+)="([^"]*)"/g)) attrs.push(`${a[1]}="${a[2]}"`);
+      if (sisa && !/^(\s*[\w-]+="[^"]*")+\s*$/.test(sisa)) peringatan.push(`atribut widget ${nama} tidak dikonversi: ${sisa}`);
       out.push(`<WidgetLama ${attrs.join(" ")} />`);
       continue;
     }
@@ -135,18 +136,25 @@ function konversiBlok(ls, dalamTab) {
       return `](${url(h)}${hash || ""})`;
     });
     if (lnk !== l) { out.push(lnk); continue; }
-    if (l.includes("<!--")) peringatan.push("komentar HTML perlu jadi {/* */}: " + l.trim());
-    if (/!\[/.test(l)) peringatan.push("gambar perlu path baru: " + l.trim());
-    if (/<\w+[^>]*\bmarkdown\b/.test(l)) peringatan.push("atribut markdown pada HTML: " + l.trim());
-    out.push(l);
+    let baris = l;
+    // Komentar HTML -> komentar JSX
+    baris = baris.replace(/<!--([\s\S]*?)-->/g, (m, isi) => `{/*${isi}*/}`);
+    // Atribut `markdown` (md_in_html) tidak perlu di MDX: isi elemen HTML tetap diproses sebagai Markdown
+    baris = baris.replace(/(<\w+[^>]*)\s+markdown(?:="[^"]*")?(\s*>)/g, "$1$2");
+    // Gambar ilustrasi: ../assets/... -> /assets/... (disalin tools/siapkan-aset.mjs)
+    baris = baris.replace(/\]\((?:\.\.\/)+assets\//g, "](/assets/");
+    if (/!\[/.test(baris) && !/\]\(\/assets\//.test(baris)) peringatan.push("gambar dengan path tak dikenal: " + baris.trim());
+    out.push(baris);
   }
   return out;
 }
 
 let body = konversiBlok(lines, false);
 // {  } di prosa (di luar backtick) merusak MDX
+let diFence = false;
 for (const l of body) {
-  if (l.startsWith("<") || l.startsWith("```")) continue;
+  if (/^```/.test(l)) { diFence = !diFence; continue; }
+  if (diFence || l.startsWith("<") || l.startsWith("{/*")) continue;
   const tanpaKode = l.replace(/`[^`]*`/g, "");
   if (/[{}]/.test(tanpaKode)) peringatan.push("kurung kurawal di prosa: " + l.trim().slice(0, 80));
 }
