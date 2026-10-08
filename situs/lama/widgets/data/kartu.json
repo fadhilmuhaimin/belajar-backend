@@ -96,6 +96,30 @@
   "jawab": "Go tidak mengizinkan proyek lain mengimpor paket di `internal/`. Jadi isi folder itu bisa diubah tanpa takut merusak kode di luar proyek."
  },
  {
+  "id": "t1-pertukaran-saldo-1",
+  "halaman": "t1-pertukaran-saldo",
+  "judul": "1.11 Pertukaran saldo: tiga hal yang harus selalu benar",
+  "url": "tahap-1/pertukaran-saldo/",
+  "tanya": "Budi membayar Rp25.000. Sesudahnya, jumlah semua saldo turun Rp25.000. Apa yang paling mungkin terjadi?",
+  "jawab": "Saldo Budi berkurang, tapi penambahan ke saldo Ani tidak terjadi. Hal pertama dilanggar: perubahan yang harus bersama tidak dibungkus satu unit, atau unit itu tidak dibatalkan saat langkah kedua gagal."
+ },
+ {
+  "id": "t1-pertukaran-saldo-2",
+  "halaman": "t1-pertukaran-saldo",
+  "judul": "1.11 Pertukaran saldo: tiga hal yang harus selalu benar",
+  "url": "tahap-1/pertukaran-saldo/",
+  "tanya": "Kenapa service tetap memeriksa saldo kalau database sudah punya constraint `saldo_tidak_negatif`?",
+  "jawab": "Service bisa menolak dengan jawaban yang jelas untuk app (`422` dengan pesan \"Saldo tidak cukup\") sebelum uang disentuh. Constraint adalah pagar terakhir untuk kode yang lupa memeriksa, dan error-nya bukan pesan untuk Budi."
+ },
+ {
+  "id": "t1-pertukaran-saldo-3",
+  "halaman": "t1-pertukaran-saldo",
+  "judul": "1.11 Pertukaran saldo: tiga hal yang harus selalu benar",
+  "url": "tahap-1/pertukaran-saldo/",
+  "tanya": "Admin menambah top-up Rp250.000 untuk Budi. Apakah jumlah semua saldo boleh berubah?",
+  "jawab": "Boleh, karena uang baru masuk ke sistem. Yang harus tetap sama adalah jumlah semua saldo dibanding jumlah semua top-up yang tercatat."
+ },
+ {
   "id": "B2.1-1",
   "halaman": "B2.1",
   "judul": "1.12 Data modeling dan relasi",
