@@ -1,0 +1,49 @@
+---
+/**
+ * Mengganti ThemeSelect Starlight (keputusan 119): hanya Gelap dan Terang, tanpa "Otomatis". Bawaan Starlight memilih
+ * "auto" bila belum ada pilihan tersimpan, lalu menimpa default gelap dengan tema sistem; itu melanggar keputusan 105
+ * (gelap default, terang satu klik). Pilihan tetap disimpan di localStorage `starlight-theme`, kunci yang sama dengan
+ * ThemeProvider. Markup dan Select sama dengan komponen asli Starlight 0.42.5.
+ */
+import Select from "@astrojs/starlight/components/Select.astro";
+---
+<starlight-theme-select>
+  <Select
+    icon="moon"
+    label={Astro.locals.t("themeSelect.accessibleLabel")}
+    options={[
+      { label: Astro.locals.t("themeSelect.dark"), selected: true, value: "dark" },
+      { label: Astro.locals.t("themeSelect.light"), selected: false, value: "light" },
+    ]}
+    width="6.25em"
+  />
+</starlight-theme-select>
+
+<script is:inline>
+  StarlightThemeProvider.updatePickers();
+</script>
+
+<script>
+  type Tema = "dark" | "light";
+  const KUNCI = "starlight-theme";
+  // Belum ada pilihan, atau nilai lama "auto"/kosong dari ThemeSelect bawaan: gelap.
+  const muat = (): Tema => {
+    try { return localStorage.getItem(KUNCI) === "light" ? "light" : "dark"; } catch { return "dark"; }
+  };
+  function pakai(tema: Tema, simpan: boolean) {
+    StarlightThemeProvider.updatePickers(tema);
+    document.documentElement.dataset.theme = tema;
+    if (simpan) try { localStorage.setItem(KUNCI, tema); } catch { /* mode privat */ }
+  }
+  class PilihTema extends HTMLElement {
+    constructor() {
+      super();
+      pakai(muat(), false);
+      this.querySelector("select")?.addEventListener("change", (e) => {
+        const v = (e.currentTarget as HTMLSelectElement).value;
+        pakai(v === "light" ? "light" : "dark", true);
+      });
+    }
+  }
+  customElements.define("starlight-theme-select", PilihTema);
+</script>
