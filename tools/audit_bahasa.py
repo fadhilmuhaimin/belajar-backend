@@ -1,7 +1,7 @@
-"""Audit bahasa: cari terjemahan literal dan metafora berlapis di docs/.
+"""Audit bahasa: cari terjemahan literal dan metafora berlapis di halaman situs (situs/src/content/docs).
 
 Pakai:
-    python tools/audit_bahasa.py                 # ringkasan per pola (semua docs)
+    python tools/audit_bahasa.py                 # ringkasan per pola (semua halaman)
     python tools/audit_bahasa.py --md            # laporan Markdown lengkap (file:baris + usulan)
     python tools/audit_bahasa.py --check [PATH...]
 
@@ -13,19 +13,20 @@ Pakai:
     - nama merek nyata (bank, e-wallet, ride-hailing, payment gateway) = ERROR.
       Dicek juga di data widget (docs/widgets/data/*.json) dan ilustrasi (docs/assets/cerita/*.svg).
     - tabel "Di stack lain" dengan beberapa stack di satu sel = ERROR, kecuali di halaman
-      konseptual Bagian A (docs/a-gambaran/). Halaman konsep lain: satu stack per baris atau tab.
-    - tanpa PATH: semua docs/.
+      konseptual Bagian A (a-gambaran/). Halaman konsep lain: satu stack per baris atau tab.
+    - tanpa PATH: semua halaman situs (.md dan .mdx). Baris import, komentar JSX, dan tag komponen bukan prosa.
     Exit 1 bila ada ERROR.
 """
 import re, sys, pathlib, collections
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SOURCES = [ROOT / "docs"]
+SOURCES = [ROOT / "situs/src/content/docs"]
+HALAMAN = (".md", ".mdx")
 
 # Folder yang dikecualikan dari aturan nama merek dan pola TINGGI (saat ini tidak ada).
 KECUALI = ()
 # Halaman konseptual: boleh merangkum beberapa stack dalam satu baris tabel "Di stack lain".
-A_DIRS = ("docs/a-gambaran/",)
+A_DIRS = ("situs/src/content/docs/a-gambaran/",)
 # Selain Markdown, teks yang tampil ke pembaca juga ada di data widget dan ilustrasi.
 EXTRA_GLOBS = ("docs/widgets/data/**/*.json", "docs/assets/cerita/*.svg")
 # Tidak ada konten lama yang dikecualikan.
@@ -111,7 +112,8 @@ def stack_table_errors(f, rel):
 
 
 def prose_lines(text, is_md=True):
-    """Hasilkan (nomor_baris, teks) di luar blok kode, dengan inline code dihapus."""
+    """Hasilkan (nomor_baris, teks) di luar blok kode, dengan inline code dihapus.
+    Di MDX, baris import dan komentar JSX ({/* ... */}) bukan teks yang dibaca pembaca."""
     fence = False
     for i, line in enumerate(text.splitlines(), 1):
         stripped = line.strip()
@@ -120,6 +122,8 @@ def prose_lines(text, is_md=True):
             continue
         if fence:
             continue
+        if is_md and (stripped.startswith("import ") or stripped.startswith("{/*")):
+            continue
         yield i, re.sub(r"`[^`]*`", "", line)
 
 
@@ -127,11 +131,11 @@ def scan(files=None, skip_code=False):
     hits = collections.defaultdict(list)
     if files is None:
         files = [f for base in SOURCES for f in sorted(base.rglob("*"))
-                 if f.suffix in (".md", ".py") and "__pycache__" not in f.parts]
+                 if f.suffix in HALAMAN and "__pycache__" not in f.parts]
     for f in files:
         rel = f.relative_to(ROOT)
         text = f.read_text(encoding="utf-8")
-        lines = prose_lines(text, f.suffix == ".md") if skip_code else enumerate(text.splitlines(), 1)
+        lines = prose_lines(text, f.suffix in HALAMAN) if skip_code else enumerate(text.splitlines(), 1)
         for i, line in lines:
             for key, rx, lvl, fix in RULES:
                 if re.search(rx, line, re.I):
@@ -180,15 +184,15 @@ def check(paths):
         files = []
         for p in paths:
             p = (ROOT / p).resolve() if not pathlib.Path(p).is_absolute() else pathlib.Path(p)
-            files += sorted(f for ext in ("*.md", "*.json", "*.svg") for f in p.rglob(ext)) if p.is_dir() else [p]
+            files += sorted(f for ext in ("*.md", "*.mdx", "*.json", "*.svg") for f in p.rglob(ext)) if p.is_dir() else [p]
     else:
-        files = [f for f in sorted((ROOT / "docs").rglob("*.md"))
-                 if not str(f.relative_to(ROOT)).startswith(OLD)]
+        files = [f for base in SOURCES for f in sorted(base.rglob("*")) if f.suffix in HALAMAN
+                 and not str(f.relative_to(ROOT)).startswith(OLD)]
         files += sorted(f for g in EXTRA_GLOBS for f in ROOT.glob(g))
-    md_files = [f for f in files if f.suffix == ".md"]
+    md_files = [f for f in files if f.suffix in HALAMAN]
     hits = scan(md_files, skip_code=True)
     # JSON dan SVG: teksnya tampil ke pembaca, jadi pola bahasa ikut dicek (tanpa aturan gaya kalimat).
-    for k, v in scan([f for f in files if f.suffix != ".md"]).items():
+    for k, v in scan([f for f in files if f.suffix not in HALAMAN]).items():
         hits[k] += v
     errors, warns = [], []
     for f in files:
@@ -198,7 +202,7 @@ def check(paths):
         for i, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
             for m in BRANDS.finditer(line):
                 errors.append(f"ERROR   {rel}:{i}  [merek nyata: {m.group(0)}] {BRAND_FIX}")
-        if f.suffix == ".md" and not rel.startswith(A_DIRS):
+        if f.suffix in HALAMAN and not rel.startswith(A_DIRS):
             errors += [f"ERROR   {p}:{ln}  {msg}" for p, ln, msg in stack_table_errors(f, rel)]
     for k, v in hits.items():
         for path, ln, text in v:
@@ -224,7 +228,7 @@ def main():
     if "--md" in sys.argv:
         order = {"TINGGI": 0, "SEDANG": 1, "RENDAH": 2}
         print("# Audit bahasa (dibuat otomatis oleh tools/audit_bahasa.py)\n")
-        print("Sumber: `docs/**/*.md`, data widget, dan ilustrasi cerita.\n")
+        print("Sumber: halaman situs, data widget, dan ilustrasi cerita.\n")
         print("| Pola | Tingkat | Jumlah | Usulan |\n|---|---|---|---|")
         for k in sorted(hits, key=lambda k: (order[meta[k][0]], -len(hits[k]))):
             print(f"| {k} | {meta[k][0]} | {len(hits[k])} | {meta[k][1]} |")
