@@ -79,6 +79,7 @@ export default function CariBug({ data: mentah }: { data: unknown }) {
             {[...ditandai].filter((i) => !data.bug.includes(i)).map((i) => (
               <li key={"s" + i}>
                 <span className="bb-chip">{L.salahTanda} · baris {i + 1}</span>
+                {data.aman[String(i)] && <span>{data.aman[String(i)]}</span>}
               </li>
             ))}
           </ul>

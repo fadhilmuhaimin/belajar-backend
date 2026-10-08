@@ -1,0 +1,66 @@
+{
+  "id": "t1-sqli-caribug",
+  "judul": "Draf AI: laporan warung yang bisa dicari dan diurutkan",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Kode dari labs/api-t1/latihan/laporan.go. Dites ke database bersih dengan urut=(SELECT 1/0), lalu di-lint dengan gosec v2.29.0 (rekaman injection.txt bagian E)."
+  },
+  "bahasa": "go",
+  "baris": [
+    "func LaporanDraf(ctx context.Context, db *sql.DB, warung int64, cari, urut string, batas int) (*sql.Rows, error) {",
+    "\tq := \"SELECT t.id, a.nama, t.jumlah FROM transaksi t JOIN akun a ON a.id = t.dari\" +",
+    "\t\t\" WHERE t.ke = $1 AND a.nama ILIKE '%' || $2 || '%'\" +",
+    "\t\t\" ORDER BY \" + urut +",
+    "\t\tfmt.Sprintf(\" LIMIT %d\", batas)",
+    "\treturn db.QueryContext(ctx, q, warung, cari)",
+    "}"
+  ],
+  "bug": [
+    3
+  ],
+  "alasan": {
+    "3": "Isi urut dari app disambung ke teks SQL. Rekaman lab: urut=(SELECT 1/0) dijalankan PostgreSQL dan gagal division by zero. Penyerang tidak butuh tanda kutip sama sekali."
+  },
+  "aman": {
+    "2": "Tanda || di sini operator SQL di dalam teks yang tetap. Isi cari tidak disambung; ia dikirim terpisah sebagai $2.",
+    "4": "batas bertipe int, dan %d hanya bisa menghasilkan angka. Tidak ada teks dari app yang masuk. Versi benar tetap memindahkannya ke $3 supaya seragam.",
+    "5": "warung dan cari dikirim terpisah dari teks SQL. Masalahnya ada di teks q yang sudah disambung sebelum baris ini."
+  },
+  "tebak": {
+    "q": "Tiga baris di draf ini memakai sambungan atau format. Hanya satu yang membuka SQL injection. Yang mana?",
+    "petunjuk": "Untuk tiap baris, tanya: apakah isi dari app masuk ke teks SQL, atau dikirim terpisah sebagai $n?"
+  },
+  "perbaikan": {
+    "label": "Versi benar: allowlist untuk urutan, parameter untuk nilai",
+    "baris": [
+      "var kolomUrut = map[string]string{",
+      "\t\"waktu\":  \"t.dibuat DESC, t.id DESC\",",
+      "\t\"jumlah\": \"t.jumlah DESC, t.id DESC\",",
+      "}",
+      "",
+      "func LaporanBenar(ctx context.Context, db *sql.DB, warung int64, cari, urut string, batas int) (*sql.Rows, error) {",
+      "\turutan, ok := kolomUrut[urut]",
+      "\tif !ok {",
+      "\t\treturn nil, fmt.Errorf(\"urut tidak dikenal: %q\", urut)",
+      "\t}",
+      "\tq := \"SELECT t.id, a.nama, t.jumlah FROM transaksi t JOIN akun a ON a.id = t.dari\" +",
+      "\t\t\" WHERE t.ke = $1 AND a.nama ILIKE '%' || $2 || '%'\" +",
+      "\t\t\" ORDER BY \" + urutan + \" LIMIT $3\"",
+      "\trows, err := db.QueryContext(ctx, q, warung, cari, batas)",
+      "\treturn rows, err",
+      "}"
+    ],
+    "catatan": "App mengirim kunci waktu atau jumlah; server memilih potongan SQL dari allowlist dan menolak kunci lain. Rekaman lab: urut=(SELECT 1/0) ditolak sebelum menyentuh database."
+  },
+  "label": {
+    "sumber": "Rekaman lab",
+    "tebakDulu": "Tebak dulu:",
+    "perintah": "Klik baris yang jadi sumber bug, lalu Periksa.",
+    "periksa": "Periksa tanda saya",
+    "ulang": "Ulang",
+    "benar": "sumber bug",
+    "lewat": "bug yang terlewat",
+    "salahTanda": "baris ini tidak salah",
+    "perbaikanTombol": "Lihat versi benar"
+  }
+}
