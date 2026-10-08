@@ -16,9 +16,15 @@ import (
 	"lab/apit1/internal/service"
 )
 
-type Server struct{ svc service.Service }
+type Server struct {
+	svc    service.Service
+	rentan string // mode rentan lab (flag -rentan); kosong = versi benar
+}
 
 func Baru(svc service.Service) Server { return Server{svc: svc} }
+
+// DenganRentan menyalakan satu mode rentan untuk rekaman halaman masalah (keputusan 148).
+func (s Server) DenganRentan(mode string) Server { s.rentan = mode; return s }
 
 // --8<-- [start:rute]
 func (s Server) Rute() *http.ServeMux {
@@ -171,7 +177,11 @@ func (s Server) bayar(w http.ResponseWriter, r *http.Request) {
 		tulisProblem(w, Problem{Type: "/problems/json-rusak", Title: "Body bukan JSON yang valid", Status: 400})
 		return
 	}
-	id, saldo, err := s.svc.Bayar(r.Context(), peminta(r), in.Ke, in.Jumlah)
+	bayar := s.svc.Bayar
+	if s.rentan == "m1" {
+		bayar = s.svc.BayarM1
+	}
+	id, saldo, err := bayar(r.Context(), peminta(r), in.Ke, in.Jumlah)
 	var errV service.ErrValidasi
 	switch {
 	case errors.As(err, &errV):
