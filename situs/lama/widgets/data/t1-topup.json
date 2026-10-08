@@ -1,0 +1,50 @@
+{
+  "id": "t1-topup",
+  "title": "Top-up minggu 2: baris ketiga salah ketik",
+  "setup": "CREATE TABLE akun (id INTEGER PRIMARY KEY, nama TEXT NOT NULL, saldo INTEGER NOT NULL DEFAULT 0);\nCREATE TABLE topup (akun_id INTEGER NOT NULL, nominal INTEGER NOT NULL CHECK (nominal > 0), keterangan TEXT NOT NULL);\nINSERT INTO akun VALUES (401, 'Karyawan 401', 0), (402, 'Karyawan 402', 0), (403, 'Karyawan 403', 0), (404, 'Karyawan 404', 0);",
+  "check": "SELECT nama, saldo FROM (SELECT nama, saldo, 0 AS urut FROM akun UNION ALL SELECT 'TOTAL', SUM(saldo), 1 FROM akun UNION ALL SELECT 'CATATAN TOP-UP', COUNT(*), 2 FROM topup) ORDER BY urut, nama",
+  "predict": {
+    "q": "Baris ketiga CSV salah ketik: -250000. Di panel Before, berapa karyawan yang saldonya sudah terisi saat error muncul?",
+    "options": ["0 karyawan", "2 karyawan", "4 karyawan"],
+    "answer": 1,
+    "explain": "Before: tiap perintah langsung permanen, jadi dua baris pertama sudah tersimpan sebelum baris ketiga ditolak. Dua karyawan terisi, dua tidak, dan admin tidak tahu harus mengulang dari mana. After: ROLLBACK membatalkan semuanya, jadi admin cukup membetulkan CSV lalu mengunggah ulang."
+  },
+  "panels": {
+    "before": {
+      "label": "Before: baris per baris, tanpa transaction",
+      "onError": "stop",
+      "steps": [
+        { "sql": "INSERT INTO topup VALUES (401, 250000, 'minggu 2')" },
+        { "sql": "UPDATE akun SET saldo = saldo + 250000 WHERE id = 401" },
+        { "sql": "INSERT INTO topup VALUES (402, 250000, 'minggu 2')" },
+        { "sql": "UPDATE akun SET saldo = saldo + 250000 WHERE id = 402" },
+        { "sql": "INSERT INTO topup VALUES (403, -250000, 'minggu 2')" },
+        { "sql": "UPDATE akun SET saldo = saldo + -250000 WHERE id = 403" },
+        { "sql": "INSERT INTO topup VALUES (404, 250000, 'minggu 2')" },
+        { "sql": "UPDATE akun SET saldo = saldo + 250000 WHERE id = 404" }
+      ]
+    },
+    "after": {
+      "label": "After: satu transaction",
+      "onError": "rollback",
+      "steps": [
+        { "sql": "BEGIN" },
+        { "sql": "INSERT INTO topup VALUES (401, 250000, 'minggu 2')" },
+        { "sql": "UPDATE akun SET saldo = saldo + 250000 WHERE id = 401" },
+        { "sql": "INSERT INTO topup VALUES (402, 250000, 'minggu 2')" },
+        { "sql": "UPDATE akun SET saldo = saldo + 250000 WHERE id = 402" },
+        { "sql": "INSERT INTO topup VALUES (403, -250000, 'minggu 2')" },
+        { "sql": "UPDATE akun SET saldo = saldo + -250000 WHERE id = 403" },
+        { "sql": "INSERT INTO topup VALUES (404, 250000, 'minggu 2')" },
+        { "sql": "UPDATE akun SET saldo = saldo + 250000 WHERE id = 404" },
+        { "sql": "COMMIT" }
+      ]
+    }
+  },
+  "toggles": [
+    {
+      "label": "Betulkan baris ketiga jadi 250000",
+      "pairs": [["(403, -250000, 'minggu 2')", "(403, 250000, 'minggu 2')"], ["saldo + -250000 WHERE id = 403", "saldo + 250000 WHERE id = 403"]]
+    }
+  ]
+}

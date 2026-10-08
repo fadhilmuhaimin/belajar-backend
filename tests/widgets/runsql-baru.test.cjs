@@ -48,3 +48,13 @@ test("B1.3: OFFSET menampilkan 108 dua kali, cursor tidak", () => {
   const a = core.runPanel(SQL, s, "after", []);
   assert.equal(a.log[3].result, "107; 106; 105");
 });
+
+test("1.8 top-up: tanpa transaction 2 dari 4 terisi; dengan transaction 0; CSV dibetulkan 4", () => {
+  const s = load("t1-topup");
+  const before = core.runPanel(SQL, s, "before", []);
+  assert.match(before.log.find((x) => !x.ok).result, /CHECK constraint failed/);
+  assert.deepEqual(baris(before).slice(-2), ["TOTAL|500000", "CATATAN TOP-UP|2"]);
+  assert.equal(s.predict.options[s.predict.answer], "2 karyawan");
+  assert.deepEqual(baris(core.runPanel(SQL, s, "after", [])).slice(-2), ["TOTAL|0", "CATATAN TOP-UP|0"]);
+  for (const p of ["before", "after"]) assert.deepEqual(baris(core.runPanel(SQL, s, p, s.toggles)).slice(-2), ["TOTAL|1000000", "CATATAN TOP-UP|4"]);
+});

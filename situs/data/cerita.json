@@ -460,9 +460,13 @@
         "backend"
       ],
       "masalah": "Admin mengisi saldo 100 akun sekaligus tiap Senin",
-      "ada": false,
+      "ada": true,
       "pendek": "Fitur top-up",
-      "nomor": "1.8"
+      "prasyarat": [
+        "t1-fitur-login"
+      ],
+      "nomor": "1.8",
+      "menit": 6
     },
     {
       "id": "t1-fitur-bayar",
