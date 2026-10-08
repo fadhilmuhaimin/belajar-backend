@@ -61,6 +61,16 @@ Skrip yang sama dijalankan GitHub Actions di setiap pull request (`.github/workf
 
 Lolos semua adalah syarat minimum, bukan bukti kualitas.
 
+## Situs baru (fase 1, `site-baru/`)
+
+Situs sedang dipindah ke Astro + Starlight sesuai `plan/PROPOSAL.md`. Keduanya dibangun berdampingan sampai fase 1 selesai; MkDocs tetap jadi situs utama.
+
+```bash
+npm --prefix site-baru ci && npm --prefix site-baru run build
+```
+
+`npm --prefix site-baru test` memeriksa token tema, `python3 tools/contrast.py` memeriksa kontras dua mode, `node site-baru/tools/tangkap.mjs` (butuh `npx playwright install chromium` dan `npm --prefix site-baru run preview`) mengambil tangkapan layar desktop dan HP dalam mode gelap dan terang, dan `node site-baru/tools/banding.mjs <slug>` membandingkan teks, heading, dan link halaman lama vs baru.
+
 ## Menjalankan lab
 
 Setiap halaman yang menampilkan **Rekaman lab** menyebut file output-nya, misalnya `labs/api-t1/output/b1-1-http.txt`. Output yang direkam sudah ada di repo. Kamu menjalankan lab untuk melihat perilakunya sendiri, atau untuk membuat ulang rekaman setelah mengubah kode lab.
