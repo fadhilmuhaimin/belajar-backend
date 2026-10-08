@@ -1,0 +1,132 @@
+---
+title: "1.4 Backend sendiri, bukan BaaS"
+description: ADR 1. Untuk bayar ke warung, pertanyaan penentunya adalah siapa yang boleh mengubah angka saldo. Raka memilih satu backend Go dengan PostgreSQL.
+---
+import Blok from "../../../components/Blok.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import Snippet from "../../../components/Snippet.astro";
+
+<p class="meta">Baca 6 menit · coba 2 menit · Prasyarat: [[A1]] · Jalur inti</p>
+
+<Blok nama="Kebutuhan" buka>
+
+PRD v1 memberi Raka 6 minggu dan satu VPS. Pak Hadi menambah satu aturan: "Tidak ada angka yang berubah tanpa catatan siapa, kapan, kenapa." Fitur yang paling berisiko adalah bayar ke warung. Setiap pembayaran mengubah dua saldo dan menulis satu catatan.
+
+Raka sudah memakai Firebase di beberapa app Flutter. Dalam dua hari, prototipe Supabase-nya sudah bisa login dan menampilkan daftar warung tanpa satu baris kode server. Lalu ia sampai di tombol Bayar.
+
+Pertanyaan penentunya: **siapa yang boleh mengubah angka saldo?** Jawaban yang ia butuhkan adalah "hanya satu tempat yang Raka kendalikan".
+
+</Blok>
+
+<Blok nama="Opsi" buka>
+
+Raka membandingkan tiga jalan untuk satu fitur saja: bayar ke warung.
+
+| | A. Supabase | B. Firebase | C. Go + PostgreSQL |
+|---|---|---|---|
+| Cara kerja | API dibuat otomatis dari skema database oleh PostgREST. Izin per baris ditulis sebagai policy RLS; logika banyak langkah sebagai fungsi SQL yang dipanggil lewat `rpc` | App membaca dan menulis Firestore langsung. Izin ditulis sebagai Security Rules; logika uang di Cloud Functions | Raka menulis endpoint sendiri. Aturan uang ada di lapisan logika bisnis, satu transaction per pembayaran |
+| Kelebihan | Login dan baca data selesai dalam hari | Paling dikenal Raka; emulator lokal tersedia | Semua aturan uang di satu tempat; dites dan di-review seperti kode biasa |
+| Kekurangan | Setiap tabel bisa dijangkau API; yang membatasi hanya RLS dan grant. Aturan tersebar di policy, fungsi SQL, dan app | Aturan tersebar di Rules, Functions, dan app; Admin SDK di Functions tidak dibatasi Rules | Paling lambat dibuat: login, endpoint, dan deploy ditulis sendiri |
+| Biaya operasional | Server dikelola penyedia | Server dikelola penyedia | Raka memelihara satu VPS: update, backup, deploy |
+
+Sumber: [Supabase: API](https://supabase.com/docs/guides/api), [Supabase: Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security), [Firebase Security Rules](https://firebase.google.com/docs/rules), [Firebase: Admin SDK dan Rules](https://firebase.blog/posts/2019/03/firebase-security-rules-admin-sdk-tips/).
+
+</Blok>
+
+<Blok nama="Yang dipilih dan kenapa">
+
+**Keputusan: opsi C.** Satu monolith Go dengan satu PostgreSQL, di VPS Divisi TI.
+
+Alasannya bukan kecepatan. Di opsi A dan B, ada beberapa jalan yang bisa mengubah saldo: policy, fungsi, rules, dan kode app. Aturan Pak Hadi harus dijaga di setiap jalan itu. Di opsi C hanya ada satu jalan, jadi catatan "siapa, kapan, kenapa" cukup ditulis sekali.
+
+Dokumentasi Supabase sendiri memperingatkan bahwa tabel di skema terbuka tanpa RLS bisa dibaca dan ditulis oleh role yang punya grant. Di backend sendiri, kebalikannya berlaku. Lupa menulis endpoint hanya membuat fitur belum jalan, bukan data terbuka.
+
+**Pre-mortem.** Bayangkan keputusan ini gagal 6 bulan lagi. Tiga penyebab yang paling mungkin:
+
+1. Raka kehabisan waktu menulis login dan infrastruktur, dan uji coba terlambat. Pencegahannya: hanya fitur P0 di minggu pertama, login memakai library yang sudah ada.
+2. Satu VPS mati dan datanya hilang. Ini dicatat sebagai risiko, dibahas di [[t1-tim-infra]].
+3. Aturan uang tetap bocor ke handler atau app. Pencegahannya: struktur folder di [[t1-struktur-folder]] dan satu transaction di service ([[t1-adr-transaction]]).
+
+**Yang sengaja ditunda:** dashboard web untuk warung dan integrasi bank. Keduanya bukan lingkup v1.
+
+</Blok>
+
+<Blok nama="Wujud di kode">
+
+Aturan bayar ada di satu fungsi lapisan logika bisnis. Di lab, bayar ke warung adalah transfer dari akun karyawan ke akun warung.
+
+<Snippet file="labs/api-t1/layanan.go" region="aturan" lang="go" title="labs/api-t1/layanan.go" />
+
+Handler tidak memeriksa saldo, dan app tidak bisa mengubah saldo tanpa lewat fungsi ini. Satu panggilan ke `l.data.Pindahkan` menjalankan kedua `UPDATE` dalam satu transaction ([[B3.1]]).
+
+</Blok>
+
+<Blok nama="Coba keduanya">
+
+Dua cara membangun Rekeningo v1. Pilih satu fitur, lalu lihat bagian mana yang mengerjakannya di setiap opsi. Mulailah dari "Daftar warung", lalu bandingkan dengan "Bayar ke warung".
+
+<WidgetLama nama="banding" src="data/a4-banding.json" />
+
+Widget ini ilustrasi. Lab repo ini tidak memakai akun penyedia BaaS, jadi opsi A dan B tidak direkam.
+
+</Blok>
+
+<Blok nama="Kapan keputusan ini salah">
+
+Keputusan ini salah kalau keadaannya berbeda:
+
+- Datanya sebagian besar milik satu user dan tidak menyangkut uang, misalnya catatan pribadi. BaaS jauh lebih cepat.
+- Tidak ada orang yang bisa memelihara server, dan tim tidak punya waktu belajar.
+- Waktunya dua minggu, bukan enam. Prototipe BaaS dengan policy yang di-review lebih masuk akal.
+
+Belum ada keputusan yang merevisi ADR 1. Di Tahap 4, monolith ini dipecah jadi modul dan satu service pembayaran, tapi aturan "saldo hanya diubah backend" tetap.
+
+### Cek diri
+
+**1.** Di Supabase, Raka membuat tabel `transaksi` baru tapi lupa menulis policy RLS-nya. Apa risikonya?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Tergantung RLS aktif atau tidak di tabel itu. Tanpa RLS, tabel di skema terbuka bisa dibaca dan ditulis oleh role yang punya grant, termasuk lewat API otomatis. Dengan RLS aktif tapi tanpa policy, semua akses lewat API ditolak. Karena itu setiap tabel baru di BaaS harus diperiksa RLS-nya ([Supabase: Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)).
+
+</details>
+
+**2.** Jelaskan kenapa "daftar warung" cocok untuk BaaS, tapi "bayar ke warung" kurang cocok untuk Rekeningo.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Daftar warung adalah data yang hanya dibaca, dan API otomatis langsung cukup. Bayar mengubah dua saldo dan menulis catatan, dan semuanya harus berhasil bersama. Di BaaS, itu jadi fungsi SQL atau Cloud Function tersendiri, satu dari beberapa jalan yang bisa mengubah saldo.
+
+</details>
+
+**3.** Benar atau salah: memakai Supabase berarti tidak punya backend.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Salah. Backend-nya ada (PostgREST, Auth, PostgreSQL), hanya saja dijalankan oleh Supabase. Aturan bisnis tetap harus kamu tulis, dalam bentuk policy dan fungsi.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Di proyek BaaS: setiap tabel baru punya RLS aktif dan policy yang jelas.
+- [ ] Logika uang tidak dijalankan di app lalu hasilnya ditulis langsung ke tabel.
+- [ ] Key `service_role` Supabase atau kredensial admin Firebase tidak ada di kode app.
+- [ ] Hanya ada satu jalan di kode yang mengubah saldo.
+
+### Bacaan lanjut
+
+- [Supabase: REST API](https://supabase.com/docs/guides/api) · [Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security) · [Memanggil fungsi lewat rpc](https://supabase.com/docs/reference/javascript/rpc)
+- [PostgREST](https://docs.postgrest.org/en/stable/)
+- [Firebase: Security Rules](https://firebase.google.com/docs/rules) · [Firestore transactions](https://firebase.google.com/docs/firestore/manage-data/transactions) · [Cloud Functions](https://firebase.google.com/docs/functions)
+- [Michael Nygard: Documenting Architecture Decisions](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions), asal format ADR
+
+<WidgetLama nama="umpan-balik" />
+
+</Blok>
+
+<SkripLama daftar={["cerita","banding"]} />
