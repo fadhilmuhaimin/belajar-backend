@@ -1,11 +1,12 @@
-"""Registry halaman dari docs/widgets/data/cerita.json, dipakai sinkron_cerita.py, build_istilah.py, dan hook MkDocs.
+"""Registry halaman dari docs/widgets/data/cerita.json, dipakai sinkron_cerita.py dan build_istilah.py.
 
 ID halaman (A1, B3.1, ...) hanya kunci internal. Yang tampil ke pembaca:
   - nomor tampilan "T.N" = urutan baca di dalam Tahap T (dihitung dari urutan registry, termasuk halaman yang belum ada,
     supaya nomor tidak bergeser saat halaman baru ditulis)
   - judul
 
-Rujukan antar halaman di Markdown ditulis [[B3.1]] atau [[B3.1|teks sendiri]]; hook MkDocs mengubahnya jadi link.
+Rujukan antar halaman ditulis [[B3.1]] atau [[B3.1|teks sendiri]]; plugin remark situs (situs/src/plugins/remark-rujukan.mjs)
+mengubahnya jadi link. Halaman ada di situs/src/content/docs/<path> dengan akhiran .mdx (atau .md).
 """
 import json
 import pathlib
@@ -13,6 +14,7 @@ import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
+SITUS = ROOT / "situs/src/content/docs"
 CERITA = DOCS / "widgets/data/cerita.json"
 TOKEN = re.compile(r"\[\[([A-Za-z0-9.\-]+)(?:\|([^\]]+))?\]\]")
 URUT_BACA = ("pembuka", 1, 2, 3, 4, 5, "sampingan")   # "alat" di luar urutan baca
@@ -24,11 +26,23 @@ def muat():
     return d
 
 
+def file_situs(h):
+    """File halaman di situs: path registry dengan akhiran .mdx, atau .md bila tidak ada .mdx."""
+    p = SITUS / h["path"]
+    mdx = p.with_suffix(".mdx")
+    return mdx if mdx.exists() else p
+
+
+def file_konten():
+    """Semua halaman Markdown/MDX di situs."""
+    return sorted(f for ext in ("*.md", "*.mdx") for f in SITUS.rglob(ext))
+
+
 def lengkapi(d):
     """Isi field turunan: ada, nomor."""
     hitung = {}
     for h in d["halaman"]:
-        h["ada"] = (DOCS / h["path"]).exists()
+        h["ada"] = file_situs(h).exists()
         h.pop("nomor", None)
         t = h["tahap"]
         if isinstance(t, int) and not re.fullmatch(r"T\d", h["id"]):
@@ -48,16 +62,21 @@ def label(h, singkat=False):
 
 
 def url_halaman(path):
-    """docs path -> URL MkDocs: a/b.md -> a/b/, a/index.md -> a/, index.md -> ''."""
+    """path registry -> URL relatif root situs: a/b.md -> a/b/, a/index.md -> a/, index.md -> ''."""
     if path == "index.md" or path.endswith("/index.md"):
         return path[: -len("index.md")]
     return path[:-3] + "/"
 
 
 def rel(dari, ke):
-    """Link Markdown relatif dari file docs/<dari> ke docs/<ke>."""
+    """Link Markdown relatif dari file docs/<dari> ke docs/<ke>. Hanya untuk tools/mkdocs_hooks.py (situs lama)."""
     up = len(pathlib.PurePosixPath(dari).parent.parts)
     return "../" * up + ke
+
+
+def url_mutlak(path):
+    """path registry -> URL absolut situs: a/b.md -> /a/b/."""
+    return "/" + url_halaman(path)
 
 
 def urutan_baca(d):
@@ -65,8 +84,9 @@ def urutan_baca(d):
     return [h for k in URUT_BACA for h in d["halaman"] if h["tahap"] == k and h["ada"]]
 
 
-def ganti_token(teks, d, dari=None):
-    """[[ID]] -> link Markdown (dari = path halaman) atau teks polos (dari=None). ID tak dikenal -> ValueError."""
+def ganti_token(teks, d, dari=None, link=False):
+    """[[ID]] -> teks polos; link Markdown absolut (link=True); atau link relatif dari docs/<dari> (situs lama).
+    ID tak dikenal -> ValueError."""
     by = {h["id"]: h for h in d["halaman"]}
 
     def f(m):
@@ -74,9 +94,9 @@ def ganti_token(teks, d, dari=None):
         if not h:
             raise ValueError(f"rujukan [[{m.group(1)}]] tidak ada di cerita.json")
         teks_link = m.group(2) or label(h, singkat=True)
-        if dari is None:
+        if not link and dari is None:
             return teks_link
         if not h["ada"]:
             return f"{teks_link} *(menyusul)*"
-        return f"[{teks_link}]({rel(dari, h['path'])})"
+        return f"[{teks_link}]({rel(dari, h['path']) if dari else url_mutlak(h['path'])})"
     return TOKEN.sub(f, teks)

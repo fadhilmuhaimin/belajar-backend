@@ -1,9 +1,9 @@
 """Pastikan ID internal halaman (A1, B3.1, C2, ...) tidak tampil ke pembaca.
 
-Memeriksa teks yang terlihat di site/ hasil build: isi artikel, sidebar, judul tab, dan string di data widget
-(site/widgets/data/**/*.json, yang dirender JavaScript). Kode aturan gosec (G101, G104, ...) bukan ID halaman dan dilewati.
+Memeriksa teks yang terlihat di situs/dist hasil build: isi artikel, sidebar, judul tab, dan string di data widget
+(dist/widgets/data/**/*.json, yang dirender JavaScript). Kode aturan gosec (G101, G104, ...) bukan ID halaman dan dilewati.
 
-    .venv/bin/mkdocs build --strict && python tools/cek_id_tampil.py
+    npm --prefix situs run build && python3 tools/cek_id_tampil.py
 """
 import html.parser
 import json
@@ -12,7 +12,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SITE = ROOT / "site"
+SITE = ROOT / "situs/dist"
 POLA = re.compile(r"(?<![\w./#-])[A-G]\d+(?:\.\d+)?(?![\w])")
 LEWAT_HAL = ()
 LEWAT_TOKEN = re.compile(r"^G\d{3}$")          # aturan gosec
@@ -56,11 +56,11 @@ def strings(o):
 
 def main():
     if not (SITE / "index.html").exists():
-        sys.exit("site/ belum ada. Jalankan: .venv/bin/mkdocs build --strict")
+        sys.exit("situs/dist belum ada. Jalankan: npm --prefix situs run build")
     salah = []
     for p in sorted(SITE.rglob("*.html")):
         rel = str(p.relative_to(SITE))
-        if any(x in rel for x in LEWAT_HAL) or rel.startswith(("assets/", "vendor/")) or rel == "404.html":
+        if any(x in rel for x in LEWAT_HAL) or rel.startswith(("assets/", "vendor/", "_astro/", "pagefind/")) or rel == "404.html":
             continue
         t = Teks()
         t.feed(p.read_text())

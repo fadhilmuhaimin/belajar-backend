@@ -1,4 +1,4 @@
-<!-- Dibuat oleh tools/build_istilah.py dari docs/alat/glosarium.md. Jangan diedit langsung. -->
+<!-- Dibuat oleh tools/build_istilah.py dari situs/src/content/docs/alat/glosarium.mdx. Jangan diedit langsung. -->
 *[API]: Sekumpulan endpoint yang disediakan server supaya program lain, mis. app Flutter, bisa membaca dan mengubah data.
 *[Application Programming Interface]: Sekumpulan endpoint yang disediakan server supaya program lain, mis. app Flutter, bisa membaca dan mengubah data.
 *[Endpoint]: Pasangan method dan path yang dilayani server, mis. POST /transfers.

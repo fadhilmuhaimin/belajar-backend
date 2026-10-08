@@ -1,12 +1,12 @@
-"""Bangun data tooltip istilah dari docs/alat/glosarium.md (satu-satunya sumber).
+"""Bangun data tooltip istilah dari situs/src/content/docs/alat/glosarium.mdx (satu-satunya sumber).
 
-Kolom "Halaman" berisi rujukan [[ID]] (mis. [[B3.1]]); hook MkDocs merendernya jadi link berjudul.
+Kolom "Halaman" berisi rujukan [[ID]] (mis. [[B3.1]]); plugin remark situs merendernya jadi link berjudul.
 Path dan label (nomor tampilan + judul) diambil dari registry docs/widgets/data/cerita.json (tools/registri.py);
 link popover hanya dibuat untuk halaman yang sudah ada.
 
 Menghasilkan dua file:
-  includes/istilah.md               definisi abbr (*[RLS]: ...), ditempel otomatis ke
-                                    setiap halaman oleh pymdownx.snippets (auto_append)
+  includes/istilah.md               definisi abbr (*[RLS]: ...), dibaca plugin
+                                    situs/src/plugins/remark-abbr.mjs (keputusan 107)
   docs/javascripts/istilah-data.js  ringkasan + bab rujukan untuk popover
 
     python tools/build_istilah.py           # tulis ulang kedua file
@@ -18,7 +18,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-GLOS = ROOT / "docs/alat/glosarium.md"
+GLOS = ROOT / "situs/src/content/docs/alat/glosarium.mdx"
 CERITA = ROOT / "docs/widgets/data/cerita.json"
 OUT_MD = ROOT / "includes/istilah.md"
 OUT_JS = ROOT / "docs/javascripts/istilah-data.js"
@@ -47,18 +47,11 @@ def slug(s):
     return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
 
 
-def url_halaman(path):
-    """docs path -> URL MkDocs: a/b.md -> a/b/, a/index.md -> a/, index.md -> ''."""
-    if path == "index.md" or path.endswith("/index.md"):
-        return path[: -len("index.md")]
-    return path[:-3] + "/"
-
-
 def nav_paths():
     """ID halaman -> (URL relatif root situs atau None kalau belum ada, label tampilan)."""
     sys.path.insert(0, str(ROOT / "tools"))
     import registri
-    return {h["id"]: (url_halaman(h["path"]) if h["ada"] else None, registri.label(h, singkat=True))
+    return {h["id"]: (registri.url_halaman(h["path"]) if h["ada"] else None, registri.label(h, singkat=True))
             for h in registri.muat()["halaman"]}
 
 
@@ -95,7 +88,7 @@ def parse():
 
 
 def render(entries):
-    md = ["<!-- Dibuat oleh tools/build_istilah.py dari docs/alat/glosarium.md. Jangan diedit langsung. -->"]
+    md = ["<!-- Dibuat oleh tools/build_istilah.py dari situs/src/content/docs/alat/glosarium.mdx. Jangan diedit langsung. -->"]
     data = {}
     for e in entries:
         for k in e["keys"]:
@@ -103,7 +96,7 @@ def render(entries):
                 continue
             md.append(f"*[{k}]: {e['d']}")
             data[k] = {"t": e["term"], "d": e["d"], "b": e["b"], "n": e["n"], "u": e["u"], "s": e["s"]}
-    js = ("// Dibuat oleh tools/build_istilah.py dari docs/alat/glosarium.md. Jangan diedit langsung.\n"
+    js = ("// Dibuat oleh tools/build_istilah.py dari situs/src/content/docs/alat/glosarium.mdx. Jangan diedit langsung.\n"
           "window.ISTILAH = " + json.dumps(data, ensure_ascii=False, indent=1, sort_keys=True) + ";\n")
     return "\n".join(md) + "\n", js
 

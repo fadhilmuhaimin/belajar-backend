@@ -1,21 +1,21 @@
 """Sinkronkan semua turunan dari docs/widgets/data/cerita.json (satu sumber cerita Rekeningo).
 
 ID halaman (A1, B3.1, ...) hanya kunci internal. Pembaca melihat nomor tampilan "T.N" (urutan baca di
-dalam Tahap T) dan judul. Rujukan antar halaman ditulis [[ID]] dan dirender hook MkDocs. Lihat tools/registri.py.
+dalam Tahap T) dan judul. Rujukan antar halaman ditulis [[ID]] dan dirender plugin remark situs. Lihat tools/registri.py.
+Halaman dibaca dari situs/src/content/docs (MDX); sidebar dibuat situs/tools/sidebar.mjs langsung dari cerita.json.
 
 Yang ditulis:
   - cerita.json         field turunan: "ada", "nomor", "menit" per halaman; "jalur_inti" per tahap
-  - mkdocs.yml          blok nav di antara "# NAV:MULAI" dan "# NAV:SELESAI" (hanya halaman yang ada)
-  - setiap halaman      nomor tampilan di judul (front matter + H1); baris meta "Prasyarat: ... · Jalur inti"
+  - setiap halaman      nomor tampilan di title front matter; baris meta <p class="meta"> "Prasyarat: ... · Jalur inti"
                         dibuat dari field "prasyarat", "prasyarat_lain", dan "inti"
-  - alat/indeks-topik.md  indeks per topik (field "topik"), nav kedua
+  - alat/indeks-topik.mdx  indeks per topik (field "topik")
   - widgets/data/kartu.json  kartu ulang, diambil dari bagian "## Cek diri" setiap halaman
-  - cerita/tahap-N.md   tabel "Masalah yang muncul" di antara <!-- daftar-tahap --> dan <!-- /daftar-tahap -->
+  - cerita/tahap-N.mdx  tabel "Masalah yang muncul" di antara {/* daftar-tahap */} dan {/* /daftar-tahap */}
 
 Yang diperiksa (--check, juga dijalankan tools/cek_batch.sh):
   - semua file di atas sinkron dengan cerita.json
   - tidak ada halaman yang muncul sebelum prasyaratnya (urutan registry = urutan baca)
-  - setiap rujukan [[ID]] di docs/ (Markdown dan data widget) menunjuk ID yang ada
+  - setiap rujukan [[ID]] di halaman situs dan data widget menunjuk ID yang ada
   - angka asumsi beban di tabel halaman mana pun cocok dengan hitungan dari cerita.json (toleransi 5%)
     Baris tabel dikenali dari kolom pertama: "User terdaftar", "DAU"/"User aktif harian",
     "Request per hari", "Puncak ...", "Data transaksi per tahun", "File ... per tahun".
@@ -30,18 +30,15 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from registri import (ROOT, DOCS, CERITA, TOKEN, URUT_BACA, lengkapi, label, rel, url_halaman,  # noqa: E402
-                      ganti_token)
+from registri import (ROOT, DOCS, SITUS, CERITA, TOKEN, URUT_BACA, lengkapi, label, url_halaman,  # noqa: E402
+                      url_mutlak, ganti_token, file_situs, file_konten)
 
-MKDOCS = ROOT / "mkdocs.yml"
-INDEKS = DOCS / "alat/indeks-topik.md"
+INDEKS = SITUS / "alat/indeks-topik.mdx"
 KARTU = DOCS / "widgets/data/kartu.json"
 MAKS_INTI = 175
 
 TOPIK = ["Gambaran besar", "API", "Data", "Keamanan", "Struktur kode", "Operasional", "Skala dan kinerja",
          "Integrasi pihak ketiga", "Khusus app mobile", "Desain sistem", "Bekerja dengan AI"]
-GRUP = [("pembuka", "Mulai"), (1, None), (2, None), (3, None), (4, None), (5, None),
-        ("sampingan", "Studi sampingan"), ("alat", "Alat")]
 BERID = re.compile(r"^[A-G]\d")
 PREFIKS = re.compile(r"^(?:[A-G]\d+(?:\.\d+)?[a-c]? · |\d\.\d+ )")
 NAMA_TAHAP = {}
@@ -77,10 +74,10 @@ def angka(sel):
 def cek_angka(tahap):
     salah = []
     nilai = {t["no"]: hitung(t["asumsi"]) for t in tahap}
-    for p in sorted(DOCS.rglob("*.md")):
+    for p in file_konten():
         teks = p.read_text()
-        m = re.search(r'data-tahap="(\d)"', teks)
-        tahap_hal = int(m.group(1)) if m else None
+        m = re.search(r'tahap=\{(\d)\}|data-tahap="(\d)"', teks)
+        tahap_hal = int(m.group(1) or m.group(2)) if m else None
         for no, baris in enumerate(teks.splitlines(), 1):
             if not baris.startswith("|") or baris.startswith("|---"):
                 continue
@@ -104,46 +101,29 @@ def cek_angka(tahap):
 
 # ---- turunan ----------------------------------------------------------------------------------
 
-def nav(h_ada):
-    out = ["nav:"]
-    for kunci, nama in GRUP:
-        isi = [h for h in h_ada if h["tahap"] == kunci]
-        if not isi:
-            continue
-        if nama is None:
-            nama = f"Tahap {kunci} · {NAMA_TAHAP[kunci]}"
-        out.append(f"  - {nama}:")
-        for h in isi:
-            out.append(f"      - \"{label(h)}\": {h['path']}")
-    return "\n".join(out)
-
-
-def indeks(hs):
-    out = ["---", "title: Indeks per topik", "---", "",
-           "<!-- Dibuat oleh tools/sinkron_cerita.py dari docs/widgets/data/cerita.json. Jangan diedit langsung. -->",
-           "", "# Indeks per topik", "",
-           "Navigasi utama mengikuti tahap cerita. Halaman ini menyusun halaman yang sama per topik, "
-           "untuk kamu yang mencari satu konsep tanpa mengikuti cerita. Nomor halaman menunjukkan tahap "
-           "dan urutan baca: 2.3 adalah halaman ketiga di Tahap 2.", ""]
+def indeks(hs, lama):
+    """Isi indeks per topik. Kepala file (front matter, import, komentar, pengantar) diambil dari file lama."""
+    kepala = lama.split("\n## ", 1)[0].rstrip("\n") + "\n"
+    ekor = "\n\n\n\n<SkripLama daftar={[]} />\n" if "<SkripLama" in lama else "\n"
+    out = []
     for topik in TOPIK:
         isi = [h for h in hs if h.get("topik") == topik]
         if not isi:
             continue
-        out += [f"## {topik}", "", "| Halaman | Tahap | Masalah yang dijawab |", "|---|---|---|"]
+        out += ["", f"## {topik}", "", "| Halaman | Tahap | Masalah yang dijawab |", "|---|---|---|"]
         for h in isi:
-            nama = f"[{label(h)}]({rel('alat/indeks-topik.md', h['path'])})" if h["ada"] else f"{label(h)} · *menyusul*"
+            nama = f"[{label(h)}]({url_mutlak(h['path'])})" if h["ada"] else f"{label(h)} · *menyusul*"
             t = f"Tahap {h['tahap']}" if isinstance(h["tahap"], int) else {"sampingan": "Studi sampingan"}.get(h["tahap"], "")
             out.append(f"| {nama} | {t} | {h.get('masalah', '–')} |")
-        out.append("")
-    return "\n".join(out)
+    return kepala + "\n".join(out) + ekor
 
 
-def daftar_tahap(no, hs, path_tahap):
+def daftar_tahap(no, hs):
     out = ["| Masalah | Halaman |", "|---|---|"]
     for h in hs:
         if h["tahap"] != no or not h.get("masalah"):
             continue
-        nama = f"[{label(h)}]({rel(path_tahap, h['path'])})" if h["ada"] else f"{label(h)} · *menyusul*"
+        nama = f"[{label(h)}]({url_mutlak(h['path'])})" if h["ada"] else f"{label(h)} · *menyusul*"
         out.append(f"| {h['masalah']} | {nama} |")
     return "\n".join(out)
 
@@ -155,22 +135,21 @@ def polos(md):
 
 
 def kartu(hs):
-    """Soal "**N.** ..." + admonition ??? success "Jawaban" di bagian ## Cek diri."""
+    """Soal "**N.** ..." + <details class="success"><summary>Jawaban</summary> di bagian ## Cek diri."""
     out = []
     for h in hs:
         if not h["ada"] or not BERID.match(h["id"]):
             continue
-        teks = (DOCS / h["path"]).read_text()
+        teks = file_situs(h).read_text()
         m = re.search(r"^## Cek diri\s*$(.*?)(?=^## |\Z)", teks, re.S | re.M)
         if not m:
             continue
         rx = (r"^\*\*(\d+)\.\*\*\s+(.+?)\n\n"                          # soal satu baris
               r"(?:```[^\n]*\n((?:(?!```)[^\n]*\n)*)```\n\n)?"             # blok kode opsional
-              r"\?\?\? \w+ \"Jawaban\"\n\n((?:    .*\n|\n)+)")
-        for sm in re.finditer(rx, m.group(1), re.M):
-            jawab = "\n".join(l[4:] for l in sm.group(4).splitlines())
+              r"<details class=\"\w+\">\n<summary>Jawaban</summary>\n\n(.*?)\n\n</details>")
+        for sm in re.finditer(rx, m.group(1), re.M | re.S):
             c = {"id": f"{h['id']}-{sm.group(1)}", "halaman": h["id"], "judul": label(h),
-                 "url": url_halaman(h["path"]), "tanya": polos(sm.group(2)), "jawab": polos(jawab)}
+                 "url": url_halaman(h["path"]), "tanya": polos(sm.group(2)), "jawab": polos(sm.group(4))}
             if sm.group(3):
                 c["kode"] = sm.group(3).rstrip("\n")
             out.append(c)
@@ -180,19 +159,18 @@ def kartu(hs):
 # ---- judul dan baris meta per halaman --------------------------------------------------------
 
 def judul_bernomor(isi, h):
-    """Front matter title dan H1 pertama: buang prefiks lama (ID atau nomor), pasang nomor tampilan."""
+    """Title front matter: buang prefiks lama (ID atau nomor), pasang nomor tampilan. MDX tidak punya H1 di badan."""
     pre = f"{h['nomor']} " if h.get("nomor") else ""
 
     def fm(m):
         q, t = m.group(2), m.group(3)
         return f"{m.group(1)}{q}{pre}{PREFIKS.sub('', t)}{q}"
-    isi = re.sub(r'^(title: )("?)(.*?)\2$', fm, isi, count=1, flags=re.M)
-    return re.sub(r"^# (.*)$", lambda m: f"# {pre}{PREFIKS.sub('', m.group(1))}", isi, count=1, flags=re.M)
+    return re.sub(r'^(title: )("?)(.*?)\2$', fm, isi, count=1, flags=re.M)
 
 
 def meta_baru(isi, h):
     """Baris meta 'Baca N menit · ... · Prasyarat: [[ID]] · Jalur inti' dari field registry."""
-    m = re.search(r"^(Baca [^\n]*)\n\{: \.meta \}", isi, re.M)
+    m = re.search(r'^<p class="meta">(Baca [^\n]*?)</p>$', isi, re.M)
     if not m:
         return isi
     bag = m.group(1).split(" · ")
@@ -207,7 +185,7 @@ def meta_baru(isi, h):
 
 
 def menit(isi):
-    m = re.search(r"^Baca (\d+) menit(?: · coba (\d+) menit)?", isi, re.M)
+    m = re.search(r'^<p class="meta">Baca (\d+) menit(?: · coba (\d+) menit)?', isi, re.M)
     return int(m.group(1)) + int(m.group(2) or 0) if m else None
 
 
@@ -228,7 +206,7 @@ def cek_prasyarat(hs):
 
 def cek_token(ids):
     salah = []
-    for p in sorted(list(DOCS.rglob("*.md")) + list((DOCS / "widgets/data").rglob("*.json"))):
+    for p in file_konten() + sorted((DOCS / "widgets/data").rglob("*.json")):
         if p == CERITA:
             continue
         for m in TOKEN.finditer(p.read_text()):
@@ -260,7 +238,7 @@ def main():
     for h in hs:
         if not h["ada"] or h["tahap"] == "alat":
             continue
-        p = DOCS / h["path"]
+        p = file_situs(h)
         lama = tulis.get(p, p.read_text())
         baru = meta_baru(lama, h)
         if BERID.match(h["id"]):
@@ -275,19 +253,16 @@ def main():
         t["jalur_inti"] = {"menit": sum(h.get("menit", 0) for h in inti), "halaman": len(inti)}
 
     tulis[CERITA] = json.dumps(d, ensure_ascii=False, indent=2) + "\n"
-    yml = MKDOCS.read_text()
-    blok = "# NAV:MULAI (dibuat tools/sinkron_cerita.py dari cerita.json)\n" + nav([h for h in hs if h["ada"]]) + "\n# NAV:SELESAI"
-    tulis[MKDOCS] = re.sub(r"# NAV:MULAI.*?# NAV:SELESAI", lambda _: blok, yml, flags=re.S)
-    tulis[INDEKS] = indeks(hs) + "\n"
+    tulis[INDEKS] = indeks(hs, INDEKS.read_text())
     for t in d["tahap"]:
         hal = next((h for h in hs if h["id"] == f"T{t['no']}" and h["ada"]), None)
         if not hal:
             continue
-        p = DOCS / hal["path"]
+        p = file_situs(hal)
         isi = tulis.get(p, p.read_text())
-        if "<!-- daftar-tahap -->" in isi:
-            tulis[p] = re.sub(r"<!-- daftar-tahap -->.*?<!-- /daftar-tahap -->",
-                              lambda _: "<!-- daftar-tahap -->\n" + daftar_tahap(t["no"], hs, hal["path"]) + "\n<!-- /daftar-tahap -->",
+        if "{/* daftar-tahap */}" in isi:
+            tulis[p] = re.sub(r"\{/\* daftar-tahap \*/\}.*?\{/\* /daftar-tahap \*/\}",
+                              lambda _: "{/* daftar-tahap */}\n" + daftar_tahap(t["no"], hs) + "\n{/* /daftar-tahap */}",
                               isi, flags=re.S)
 
     for p, c in tulis.items():
@@ -313,11 +288,11 @@ def main():
         subprocess.run([sys.executable, str(ROOT / "tools/build_istilah.py")], check=True)
     beda += cek_angka(d["tahap"])
     # Aturan layar pertama: Inti pendek supaya diagram di bawahnya muat di 375×667.
-    for p in sorted(DOCS.rglob("*.md")):
+    for p in file_konten():
         m = re.search(r"^## Inti\n\n([^\n]+)", p.read_text(), re.M)
         if m and len(m.group(1)) > MAKS_INTI:
             print(f"PERINGATAN {p.relative_to(ROOT)}: Inti {len(m.group(1))} karakter (> {MAKS_INTI}); "
-                  "pastikan cek_layar_pertama lolos di 375x667")
+                  "pastikan situs/tools/layar.mjs lolos di 375x667")
     if beda:
         print("\n".join(beda))
         sys.exit(1)

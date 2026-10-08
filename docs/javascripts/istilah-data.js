@@ -1,4 +1,4 @@
-// Dibuat oleh tools/build_istilah.py dari docs/alat/glosarium.md. Jangan diedit langsung.
+// Dibuat oleh tools/build_istilah.py dari situs/src/content/docs/alat/glosarium.mdx. Jangan diedit langsung.
 window.ISTILAH = {
  "ACID": {
   "b": "B3.1",
