@@ -40,8 +40,9 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.6 Struktur folder pertama | Halaman baru (keputusan 131) |
 | 1.7 Fitur: login karyawan | Halaman baru, lab `api-t1` versi naskah (keputusan 132–134) |
 | 1.8 Fitur: top-up oleh admin | Halaman baru (keputusan 135, 136) |
+| 1.9 Fitur: bayar ke warung | Halaman baru (keputusan 137, 138) |
 
-Berikutnya: 1.9 Fitur: bayar ke warung (lab: `POST /bayar` atau `/transfers` ke akun warung).
+Berikutnya: 1.10 Fitur: saldo, riwayat, laporan warung (lab: riwayat milik sendiri, laporan harian SUM/GROUP BY).
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 

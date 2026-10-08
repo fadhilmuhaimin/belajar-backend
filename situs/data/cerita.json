@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 171,
-        "halaman": 21
+        "menit": 178,
+        "halaman": 22
       },
       "bagian": [
         {
@@ -482,9 +482,13 @@
         "backend"
       ],
       "masalah": "Karyawan membayar makan dalam 5 detik",
-      "ada": false,
+      "ada": true,
       "pendek": "Fitur bayar ke warung",
-      "nomor": "1.9"
+      "prasyarat": [
+        "t1-fitur-topup"
+      ],
+      "nomor": "1.9",
+      "menit": 7
     },
     {
       "id": "t1-fitur-saldo",
