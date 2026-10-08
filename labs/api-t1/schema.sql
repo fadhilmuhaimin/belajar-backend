@@ -12,6 +12,7 @@ CREATE TABLE akun (
   email         text   NOT NULL UNIQUE,            -- email perusahaan, untuk login
   password_hash text   NOT NULL,                   -- bcrypt, bukan password asli
   saldo         bigint NOT NULL DEFAULT 0          -- rupiah, integer
+                CONSTRAINT saldo_tidak_negatif CHECK (saldo >= 0)
 );
 -- --8<-- [end:akun]
 
@@ -34,3 +35,14 @@ CREATE TABLE topup (
   keterangan text        NOT NULL                        -- kenapa
 );
 -- --8<-- [end:topup]
+
+-- --8<-- [start:transaksi]
+CREATE TABLE transaksi (
+  id     bigserial   PRIMARY KEY,
+  dari   bigint      NOT NULL REFERENCES akun(id),      -- siapa yang membayar
+  ke     bigint      NOT NULL REFERENCES akun(id),      -- warung penerima
+  jumlah bigint      NOT NULL CONSTRAINT jumlah_positif CHECK (jumlah > 0),
+  dibuat timestamptz NOT NULL DEFAULT now(),
+  CHECK (dari <> ke)
+);
+-- --8<-- [end:transaksi]

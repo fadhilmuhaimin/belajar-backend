@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -26,6 +27,7 @@ func (s Server) Rute() *http.ServeMux {
 	mux.HandleFunc("POST /logout", s.wajibLogin(s.logout))
 	mux.HandleFunc("GET /akun/{id}", s.wajibLogin(s.lihatAkun))
 	mux.HandleFunc("POST /topup", s.wajibLogin(s.topup))
+	mux.HandleFunc("POST /transfers", s.wajibLogin(s.bayar))
 	return mux
 }
 
@@ -156,3 +158,31 @@ func (s Server) topup(w http.ResponseWriter, r *http.Request) {
 }
 
 // --8<-- [end:topup]
+
+// --8<-- [start:bayar]
+func (s Server) bayar(w http.ResponseWriter, r *http.Request) {
+	var in struct {
+		Ke     int64 `json:"ke"`
+		Jumlah int64 `json:"jumlah"`
+	}
+	if json.NewDecoder(r.Body).Decode(&in) != nil {
+		tulisProblem(w, Problem{Type: "/problems/json-rusak", Title: "Body bukan JSON yang valid", Status: 400})
+		return
+	}
+	id, saldo, err := s.svc.Bayar(r.Context(), peminta(r), in.Ke, in.Jumlah)
+	var errV service.ErrValidasi
+	switch {
+	case errors.As(err, &errV):
+		tulisProblem(w, Problem{Type: "/problems/validasi", Title: "Input tidak memenuhi aturan", Status: 422,
+			Errors: []map[string]string{{"field": errV.Field, "pesan": errV.Pesan}}})
+	case errors.Is(err, service.ErrSaldoKurang):
+		tulisProblem(w, Problem{Type: "/problems/saldo-kurang", Title: "Saldo tidak cukup", Status: 422})
+	case err != nil:
+		s.errorInternal(w, err)
+	default:
+		w.Header().Set("Location", fmt.Sprintf("/transfers/%d", id))
+		tulisJSON(w, 201, map[string]int64{"id": id, "saldo": saldo})
+	}
+}
+
+// --8<-- [end:bayar]

@@ -112,12 +112,20 @@ def login(email, password, label):
     return token
 
 
-def log_statement(sejak):
-    """Statement yang diterima PostgreSQL dari lab ini sejak waktu tertentu (log_statement=all di labs/b3-race)."""
-    r = subprocess.run(["docker", "compose", "-f", str(HERE / "../b3-race/docker-compose.yml"), "logs", "--no-log-prefix",
-                        "--since", sejak, "db"], capture_output=True, text=True).stdout
+def _log_db():
+    return subprocess.run(["docker", "compose", "-f", str(HERE / "../b3-race/docker-compose.yml"), "logs",
+                           "--no-log-prefix", "db"], capture_output=True, text=True).stdout.splitlines()
+
+
+def posisi_log():
+    """Jumlah baris log PostgreSQL saat ini; dipakai sebagai penanda awal sebelum request yang diamati."""
+    return len(_log_db())
+
+
+def log_statement(posisi):
+    """Statement yang diterima PostgreSQL dari lab ini sesudah penanda posisi (log_statement=all di labs/b3-race)."""
     out = []
-    for l in r.splitlines():
+    for l in _log_db()[posisi:]:
         if "api-t1|" not in l:
             continue
         m = re.search(r"(?:statement|execute [^:]*): (.*)$", l)
@@ -207,7 +215,7 @@ def rekam_topup():
     bagian("B. Senin minggu 1: admin mengunggah CSV 100 karyawan, Rp250.000 per orang")
     csv1 = csv_minggu(250000)
     log.append("$ head -4 minggu-1.csv\n" + "\n".join(csv1.splitlines()[:4]) + "\n... (100 baris + header)\n\n")
-    sejak = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() - 1))
+    sejak = posisi_log()
     s, b = curl("POST", "/topup?keterangan=Tunjangan%20makan%20minggu%201", csv1, token=admin, jenis="text/csv",
                 tampil_body="@minggu-1.csv")
     harap((s, json.loads(b)), (200, {"akun": 100, "total": 25000000}), "top-up minggu 1")
@@ -259,8 +267,63 @@ def rekam_topup():
     tulis("topup.txt")
 
 
+def topup_awal():
+    """Top-up minggu 1 tanpa menulis detailnya ke rekaman (rinciannya ada di topup.txt)."""
+    n = len(log)
+    admin = login("admin.tunjangan@lestari.example", "sementara-400", "<token sesi admin>")
+    s, _ = curl("POST", "/topup?keterangan=Tunjangan%20makan%20minggu%201", csv_minggu(250000), token=admin,
+                jenis="text/csv", tampil_body="@minggu-1.csv")
+    harap(s, 200, "top-up awal")
+    del log[n:]
+    log.append("# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)\n")
+
+
+def rekam_bayar():
+    """1.9 Fitur: bayar ke warung."""
+    reset()
+    mulai()
+    bagian("A. Persiapan")
+    topup_awal()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+
+    bagian("B. Budi membayar Rp25.000 ke Warung Ani (akun 418)")
+    sejak = posisi_log()
+    s, b = curl("POST", "/transfers", '{"ke": 418, "jumlah": 25000}', token=budi)
+    harap((s, json.loads(b)), (201, {"id": 1, "saldo": 225000}), "bayar Rp25.000")
+
+    bagian("C. Dua saldo berubah, satu catatan transaksi ditulis")
+    hasil = sql("SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id")
+    if "225000" not in hasil or "25000" not in hasil:
+        gagal("saldo Budi 225000 dan Warung Ani 25000")
+    sql("SELECT id, dari, ke, jumlah FROM transaksi")
+
+    bagian("D. Yang diterima PostgreSQL selama pembayaran: satu transaction")
+    st = [x for x in log_statement(sejak) if x.lower().startswith(("begin", "commit", "update akun", "insert into transaksi"))]
+    harap([x.split()[0].lower() for x in st], ["begin", "update", "update", "insert", "commit"], "urutan transaction bayar")
+    log.append("$ docker compose logs db | grep 'api-t1|'   (hanya statement pembayaran)\n" + "\n".join(st) + "\n\n")
+
+    bagian("E. Budi membayar Rp200.000 ke Warung Sari (502)")
+    s, b = curl("POST", "/transfers", '{"ke": 502, "jumlah": 200000}', token=budi)
+    harap((s, json.loads(b)["saldo"]), (201, 25000), "bayar Rp200.000")
+
+    bagian("F. Sisa saldo Rp25.000; Budi mencoba membayar Rp30.000")
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 30000}', token=budi)
+    harap(s, 422, "saldo kurang")
+    sql("SELECT saldo FROM akun WHERE id = 419")
+
+    bagian("G. Budi mencoba membayar ke Dimas (karyawan, bukan warung)")
+    s, b = curl("POST", "/transfers", '{"ke": 417, "jumlah": 10000}', token=budi)
+    harap((s, json.loads(b)["errors"][0]["field"]), (422, "ke"), "ke akun karyawan")
+
+    bagian("H. Ani membuka akun warungnya")
+    ani = login("warung.ani@lestari.example", "sementara-418", "<token sesi Warung Ani>")
+    s, b = curl("GET", "/akun/418", token=ani)
+    harap((s, json.loads(b)["saldo"]), (200, 25000), "saldo Warung Ani")
+    tulis("bayar.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()

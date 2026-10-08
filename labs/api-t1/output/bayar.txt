@@ -1,0 +1,81 @@
+# server: ./api-t1
+
+# --- A. Persiapan ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+
+# --- B. Budi membayar Rp25.000 ke Warung Ani (akun 418) ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 25000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/1
+
+{"id":1,"saldo":225000}
+
+# --- C. Dua saldo berubah, satu catatan transaksi ditulis ---
+$ psql -c "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+ id  |    nama    | saldo  
+-----+------------+--------
+ 418 | Warung Ani |  25000
+ 419 | Budi       | 225000
+(2 rows)
+
+$ psql -c "SELECT id, dari, ke, jumlah FROM transaksi"
+ id | dari | ke  | jumlah 
+----+------+-----+--------
+  1 |  419 | 418 |  25000
+(1 row)
+
+
+# --- D. Yang diterima PostgreSQL selama pembayaran: satu transaction ---
+$ docker compose logs db | grep 'api-t1|'   (hanya statement pembayaran)
+begin
+UPDATE akun SET saldo = saldo - $1 WHERE id = $2 RETURNING saldo
+UPDATE akun SET saldo = saldo + $1 WHERE id = $2
+INSERT INTO transaksi (dari, ke, jumlah) VALUES ($1, $2, $3) RETURNING id
+commit
+
+
+# --- E. Budi membayar Rp200.000 ke Warung Sari (502) ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 502, "jumlah": 200000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/2
+
+{"id":2,"saldo":25000}
+
+# --- F. Sisa saldo Rp25.000; Budi mencoba membayar Rp30.000 ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 30000}'
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+
+{"type":"/problems/saldo-kurang","title":"Saldo tidak cukup","status":422}
+$ psql -c "SELECT saldo FROM akun WHERE id = 419"
+ saldo 
+-------
+ 25000
+(1 row)
+
+
+# --- G. Budi mencoba membayar ke Dimas (karyawan, bukan warung) ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 417, "jumlah": 10000}'
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+
+{"type":"/problems/validasi","title":"Input tidak memenuhi aturan","status":422,"errors":[{"field":"ke","pesan":"harus akun warung"}]}
+
+# --- H. Ani membuka akun warungnya ---
+$ curl -i -X POST '/login' -d '{"email": "warung.ani@lestari.example", "password": "sementara-418"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Warung Ani>"}
+$ curl -i -X GET '/akun/418' -H 'Authorization: Bearer <token sesi Warung Ani>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":418,"jenis":"warung","nama":"Warung Ani","saldo":25000}
