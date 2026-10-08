@@ -1,0 +1,156 @@
+---
+title: "1.6 Struktur folder pertama: handler, service, repo"
+description: Sebelum menulis kode, Raka memisahkan HTTP, aturan uang, dan SQL ke tiga tempat, supaya aturan uang hanya punya satu rumah saat PRD v2 datang.
+---
+import Blok from "../../../components/Blok.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import Snippet from "../../../components/Snippet.astro";
+
+<p class="meta">Baca 4 menit · coba 2 menit · Prasyarat: [[A2]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Struktur folder pertama memisahkan kode menurut tugasnya: handler untuk HTTP, service untuk aturan uang, dan repo untuk SQL. Tujuannya satu: setiap aturan uang hanya punya satu tempat.
+
+<figure class="bb-fig" role="img" aria-label="Tiga folder: handler untuk HTTP, service untuk aturan uang, repo untuk SQL. Request masuk lewat handler, turun ke service, lalu ke repo.">
+<ol class="bb-flow">
+<li><code>handler/</code> HTTP: JSON, sesi, status code</li>
+<li><code>service/</code> aturan uang</li>
+<li><code>repo/</code> SQL</li>
+</ol>
+<figcaption>Request masuk lewat handler, turun ke service, lalu ke repo. Tidak ada yang melompat.</figcaption>
+</figure>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu alasannya: perubahan berikutnya hanya menyentuh satu tempat.">
+
+Struktur folder baru terasa gunanya saat ada perubahan. Pilih satu perubahan yang akan datang, lalu lihat bagian mana yang harus diubah di tiap opsi.
+
+<WidgetLama nama="banding" src="data/t1-struktur-banding.json" />
+
+Widget ini ilustrasi. Perubahannya diambil dari cerita: PRD v2, aturan Pak Hadi, dan worker di Tahap 3.
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Raka punya 6 minggu dan belum pernah menulis backend. Godaan pertamanya adalah menaruh semuanya di fungsi handler: baca JSON, periksa saldo, jalankan `UPDATE`, tulis response. Untuk satu endpoint, itu bekerja.
+
+Lalu ia membaca ulang PRD v1. Ada empat fitur yang mengubah atau membaca saldo, dan PRD v2 sudah menunggu dengan transfer antar karyawan. Aturan Pak Hadi juga berlaku untuk semuanya. Kalau aturan uang ditulis di setiap handler, setiap fitur baru menambah satu salinan aturan.
+
+### Cara kerjanya
+
+Ini struktur yang Raka rencanakan untuk proyeknya:
+
+```text
+rekeningo/
+├── cmd/api/main.go          titik masuk
+├── internal/
+│   ├── handler/             HTTP: parsing, sesi, status code
+│   ├── service/             aturan uang: bayar, top-up, saldo
+│   └── repo/                akses data: SQL
+├── migrations/
+└── go.mod
+```
+
+Panduan resmi Go untuk proyek server menyarankan hal yang sama: perintah di `cmd/`, dan paket logika server di `internal/` ([Go: Organizing a Go module](https://go.dev/doc/modules/layout)). Paket di `internal/` tidak bisa diimpor proyek lain, jadi tidak ada yang bergantung pada isinya tanpa sengaja.
+
+Aturan arahnya sederhana:
+
+1. Handler memanggil service. Handler tidak menulis SQL dan tidak memutuskan aturan uang.
+2. Service memanggil repo. Service tidak tahu HTTP, JSON, atau status code.
+3. Repo hanya menjalankan SQL. Repo tidak tahu aturan uang.
+
+Lab di repo ini menyederhanakannya: ketiga lapisan adalah tiga file di satu package Go, supaya mudah dibaca. Komentar di kepala tiap file menyebut tugasnya.
+
+<Snippet file="labs/api-t1/handler.go" lines="3:3" lang="go" title="labs/api-t1/handler.go" />
+<Snippet file="labs/api-t1/layanan.go" lines="3:3" lang="go" title="labs/api-t1/layanan.go" />
+<Snippet file="labs/api-t1/data.go" lines="3:3" lang="go" title="labs/api-t1/data.go" />
+
+Aturan arah ini dipaksa dan diuji di [[B7.1]], setelah masalah pertama menunjukkan kenapa ia perlu.
+
+### Di stack lain
+
+| Stack | Handler | Service | Repo |
+|---|---|---|---|
+| Go | `internal/handler` | `internal/service` | `internal/repo` |
+| Node.js (Express, NestJS) | routes atau controllers | services | repositories |
+| Laravel | `app/Http/Controllers` | class service atau action (konvensi tim) | model Eloquent atau repository |
+| Django | `views.py` | `services.py` (konvensi tim) | `models.py` |
+| Dart (Serverpod) | class `Endpoint` | class Dart biasa | model hasil generator |
+
+Di framework mana pun, folder handler dan data biasanya sudah disediakan. Folder service jarang disediakan, jadi kamu yang harus menjaganya.
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### Trade-off: lapisan dulu atau fitur dulu
+
+| Pilihan | Kelebihan | Kekurangan | Cocok saat |
+|---|---|---|---|
+| Satu file atau semua di handler | Paling cepat untuk satu endpoint | Aturan uang tersalin di banyak tempat | Prototipe yang akan dibuang |
+| Lapisan dulu: `handler/`, `service/`, `repo/` | Mudah dipahami satu orang; aturan punya satu tempat | Satu fitur tersebar di tiga folder | Tahap 1: satu orang, sedikit fitur |
+| Fitur dulu: `pembayaran/`, `merchant/`, masing-masing berlapis | Batas jelas per tim | Butuh aturan siapa boleh memanggil siapa | Tahap 4: tiga tim di satu codebase |
+
+Dokumentasi Serverpod menyebut kedua gaya ini sebagai pilihan yang sah: `src/endpoints/` untuk lapisan dulu, `src/features/<fitur>/` untuk fitur dulu ([Your Serverpod project](https://docs.serverpod.dev/concepts/server-fundamentals/your-serverpod-project)).
+
+**Sengaja belum dilakukan:** interface untuk setiap repo, dependency injection container, dan paket `domain/` terpisah. Untuk satu orang dan empat fitur, tiga folder sudah memisahkan yang perlu dipisah.
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Raka menulis `if saldo < jumlah` di handler bayar. Apa yang terjadi saat PRD v2 menambah transfer antar karyawan?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Aturan yang sama harus disalin ke handler transfer. Sekarang ada dua salinan aturan uang. Kalau satu diubah dan yang lain lupa, bayar dan transfer memakai aturan berbeda.
+
+</details>
+
+**2.** Di folder mana kode yang memetakan "saldo kurang" ke status `422`?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Di `handler/`. Status code adalah urusan HTTP. Service hanya mengembalikan error "saldo kurang", dan handler yang menerjemahkannya.
+
+</details>
+
+**3.** Kenapa paket di `internal/` membantu proyek Go yang tumbuh?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Go tidak mengizinkan proyek lain mengimpor paket di `internal/`. Jadi isi folder itu bisa diubah tanpa takut merusak kode di luar proyek.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Handler tidak berisi SQL dan tidak memutuskan aturan uang.
+- [ ] Service tidak mengimpor paket HTTP dan tidak menulis status code.
+- [ ] Hanya ada satu fungsi yang mengubah saldo untuk satu jenis transaksi.
+- [ ] AI tidak menambah lapisan, interface, atau container yang belum dibutuhkan.
+
+### Bacaan lanjut
+
+- [Go: Organizing a Go module](https://go.dev/doc/modules/layout), bagian Server project
+- [Martin Fowler: Presentation Domain Data Layering](https://martinfowler.com/bliki/PresentationDomainDataLayering.html)
+- [Serverpod: Your Serverpod project](https://docs.serverpod.dev/concepts/server-fundamentals/your-serverpod-project)
+
+<WidgetLama nama="umpan-balik" />
+
+</Blok>
+
+<SkripLama daftar={["cerita","banding"]} />
