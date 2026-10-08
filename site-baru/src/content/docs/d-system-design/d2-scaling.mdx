@@ -1,0 +1,142 @@
+---
+title: "5.1 Scaling"
+---
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+import KamuDiSini from "../../../components/KamuDiSini.astro";
+
+
+<KamuDiSini id="D2" />
+
+<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[B2.5]], [[B9]]</p>
+
+<WidgetLama nama="selesai" />
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Apa syarat supaya API bisa ditambah instance-nya tanpa mengubah app?
+2. Database penuh oleh query baca. Langkah apa yang dicoba sebelum menambah server?
+3. Kenapa sharding diletakkan paling akhir?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+## Inti
+
+Ukur dulu, lalu ambil langkah paling ringan: query, cache, instance, replica, partisi. Sharding paling akhir.
+
+<WidgetLama nama="arsitektur" tahap={5} />
+
+## Lihat sendiri
+
+Di Tahap 5, API berjalan di beberapa instance di belakang load balancer. Rekaman ini memakai dua instance Go dan load balancer round robin.
+
+<WidgetLama nama="alur" src="data/skenario/d2-lb.json" />
+
+## Kenapa ini ada
+
+Rekeningo dipakai di banyak kota. Metric menunjukkan database utama sibuk melayani query baca, dan laporan bulanan merchant membuat transaksi harian ikut melambat.
+
+Usulan pertama di rapat: pindah ke database yang "bisa scale", dan pecah data per kota. Sinta bertanya berapa biayanya, dan apa yang terjadi kalau ternyata salah. Raka mengusulkan urutan langkah, dimulai dari yang paling mudah dibatalkan.
+
+## Cara kerjanya
+
+**Angka Tahap 5 (asumsi, bukan pengukuran):**
+
+| Besaran | Nilai | Cara hitung |
+|---|---|---|
+| User aktif harian (DAU) | 200.000 | 1.000.000 user × 20% |
+| Puncak request per detik | ±1.400 | 12 juta request ÷ 86.400 × 10 |
+| Data transaksi per tahun | ±44 GB | 200.000 × 2 transaksi × 365 × 300 B |
+
+Angka ini tidak berarti "butuh N server". Jumlah koneksi yang dibutuhkan bergantung pada lama kerja tiap request ([[B2.5]]). Misalkan setiap request memegang koneksi 20 ms (asumsi): 1.400 × 0,02 = 28 koneksi. Dengan 200 ms: 280 koneksi.
+
+Lama kerja lebih menentukan dari jumlah user.
+
+**Urutan langkah**, dari yang paling ringan dan paling mudah dibatalkan:
+
+1. **Perbaiki query.** Index, N+1, pagination ([[B2.3]], [[B2.4]]). Sering cukup.
+2. **Cache** untuk baca yang berat dan berulang ([[B9]]).
+3. **Server lebih besar** (scale up). Tanpa ubah kode, tapi ada batas atasnya.
+4. **Tambah instance API** (scale out). Syaratnya stateless: proses tidak menyimpan apa pun yang harus bertahan antar-request ([twelve-factor](https://12factor.net/processes)). Widget di atas menunjukkan akibatnya kalau session disimpan di memori.
+5. **Read replica** untuk query baca. Akibatnya: replica bisa tertinggal ([[D3]]).
+6. **Partisi** tabel yang sangat besar, mis. per bulan.
+7. **Sharding**: data dipecah ke beberapa database. Hampir semua query berubah, dan sulit dibatalkan. Rekeningo sengaja belum melakukannya.
+
+**Partisi.** PostgreSQL hanya memindai partisi yang relevan (partition pruning), dan membuang satu partisi jauh lebih cepat dari `DELETE` massal ([PostgreSQL: partitioning](https://www.postgresql.org/docs/17/ddl-partitioning.html)):
+
+<Snippet files={["labs/t5-skala/output/partisi.txt:3:7","labs/t5-skala/output/partisi.txt:23:24"]} title="Output rekaman: labs/t5-skala/output/partisi.txt" />
+
+Query tanpa filter tanggal tetap memindai ketiga partisi (rekaman lengkap di file yang sama). Partisi membantu kalau query dan arsip mengikuti partition key-nya.
+
+## Di stack lain
+
+Syarat stateless sering dilanggar lewat penyimpanan session bawaan. Hanya Go yang dijalankan di lab. Baris lain dicek ke dokumentasi.
+
+| Stack | Session bawaan disimpan di | Catatan | Sumber |
+|---|---|---|---|
+| Express (`express-session`) | `MemoryStore`, memori proses | Dokumentasinya menulis MemoryStore sengaja tidak dirancang untuk production | [express-session](https://github.com/expressjs/session) |
+| Laravel | Database | Driver bisa diganti ke Redis | [Laravel: session](https://laravel.com/docs/12.x/session) |
+| Django | Database | Bisa diganti ke cache atau file | [Django: sessions](https://docs.djangoproject.com/en/stable/topics/http/sessions/) |
+| Spring | Session milik servlet container (tanpa Spring Session) | Spring Session menyimpan session di Redis atau JDBC supaya bisa dipakai bersama di cluster | [Spring Session](https://docs.spring.io/spring-session/reference/) |
+| Go (lab) | Tidak ada bawaan | Lab membandingkan map di memori dengan token yang punya signature | Rekaman di atas |
+
+## Trade-off: kapan pakai apa
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Scale up | Tanpa ubah kode atau arsitektur | Ada batas atas; satu server tetap jadi single point of failure: kalau mati, semua berhenti |
+| Scale out API | Tambah atau kurangi instance sesuai beban | Syarat stateless; butuh load balancer |
+| Read replica | Beban baca pindah dari primary | Replication lag; read-your-writes harus ditangani ([[D3]]) |
+| Partisi | Query per periode dan arsip jadi ringan | Query tanpa partition key tidak terbantu; partition key sulit diubah |
+
+## Cek diri
+
+**1.** API Rekeningo menyimpan file upload sementara di disk lokal instance, lalu memprosesnya di request berikutnya. Apa yang terjadi setelah scale out ke tiga instance?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Request berikutnya bisa diarahkan ke instance lain yang tidak punya file itu, sama seperti session di memori di widget. File harus disimpan di tempat bersama (object storage), atau diproses dalam request yang sama.
+
+</details>
+
+**2.** Jelaskan kenapa angka "±1.400 request per detik" saja tidak cukup untuk memutuskan jumlah server.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Kebutuhan sumber daya bergantung pada lama kerja tiap request, bukan hanya jumlahnya. Dengan Little's Law, 1.400 request per detik yang masing-masing memegang koneksi 20 ms butuh ±28 koneksi; dengan 200 ms, ±280. Angka ini juga asumsi. Keputusan diambil dari metric sistem sungguhan ([[C2]]).
+
+</details>
+
+**3.** Laporan bulanan merchant memindai seluruh tabel transaksi. Langkah apa yang paling ringan untuk melindungi transaksi harian?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Jalankan laporan di read replica khusus laporan, supaya beban baca berat tidak menyentuh primary. Kalau laporan per bulan, partisi per bulan membuat laporan hanya memindai satu partisi. Data di replica bisa tertinggal sebentar, dan untuk laporan bulanan itu biasanya bisa diterima.
+
+</details>
+
+## Saat me-review kode AI, cek ini
+
+- [ ] Usulan scaling menyebut metric yang menunjukkan bottleneck, bukan hanya "supaya scalable".
+- [ ] API tidak menyimpan session, file, atau state lain di memori atau disk lokal instance.
+- [ ] Query baca yang diarahkan ke replica boleh menerima data yang tertinggal.
+- [ ] Partisi memakai partition key yang memang dipakai di filter query dan arsip.
+- [ ] Sharding tidak diusulkan sebelum query, cache, replica, dan partisi dicoba.
+
+## Bacaan lanjut
+
+- [The Twelve-Factor App: Processes](https://12factor.net/processes)
+- [PostgreSQL: Table partitioning](https://www.postgresql.org/docs/17/ddl-partitioning.html)
+- [PostgreSQL: High availability, load balancing, and replication](https://www.postgresql.org/docs/17/high-availability.html)
+
+<WidgetLama nama="umpan-balik" />
+
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
