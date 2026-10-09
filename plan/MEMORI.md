@@ -5,6 +5,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 ## Keputusan baru
 
 - Nomor keputusan: sesi konten memakai 165–199; 163–164 dan 200–219 milik sesi layout/redesain (pesan sesi "Rekeningo Tech Journey planning", 2026-10-09).
+- 173: 1.25 migration; 172: lab b4-migration v1 (drift laptop/server, dirty).
 - 171: 1.24 ADR 5–6; 170: lab DalamTx + koreksi.
 - 169: 1.23 transaction.
 - 168: 1.22 M4; 167: mode rentan m4 + `m4.txt`, PORT_PREVIEW di cek_situs.sh.
@@ -66,7 +67,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-09 · Halaman **1.25 "Migration: skema sebagai kode"** (`B4.1`), branch `tahap-1/migration` dari `main` (1b82983, berisi 1.24). File: `situs/src/content/docs/tahap-1/migration.mdx` (pindahan dari `b-fondasi/b4-1-migration.mdx`), registry, data widget alur, mungkin `labs/b4-migration` (migration untuk skema v1: batas saldo warung yang ditambah tangan di M4, tabel koreksi ADR 6). Worktree `/Users/fadhilmuhaimin/Project/Web/rekeningo-konten`, gerbang `PORT_PREVIEW=4323 bash tools/cek_situs.sh --layar`. Batas file selama redesain (#120, draft) belum merge: konten, labs, registry, data widget, KEPUTUSAN 165–199, MEMORI/STATUS; jangan CSS, komponen layout, CLAUDE.md, PROPOSAL.md; MDX tanpa class/style tambahan. Ilustrasi M3-M6 belum. 1.6 masih Snippet `api-t1-lama` (PR kecil terpisah).
+2026-10-09 · 1.25 selesai (lab #126 merged; halaman di branch `tahap-1/migration`). Berikutnya **1.26 "M5: Angka di URL"** (`t1-m5`, masalah, ★, widget alur, lab api-t1; naskah: Dimas mengganti 417 jadi 418 di URL, melihat saldo Ani, menyimpan 100 saldo ke spreadsheet; token tersimpan di tempat yang salah di app; mode rentan M5 yang direkam). Lab `api-t1` sudah punya cek pemilik di `service.LihatAkun` (404 untuk akun orang lain); M5 butuh mode rentan `-rentan m5` tanpa cek pemilik. Worktree `/Users/fadhilmuhaimin/Project/Web/rekeningo-konten`, gerbang `PORT_PREVIEW=4323 bash tools/cek_situs.sh --layar`. Batas file selama redesain (#120, draft) belum merge: konten, labs, registry, data widget, KEPUTUSAN 165–199, MEMORI/STATUS; jangan CSS, komponen layout, CLAUDE.md, PROPOSAL.md; MDX tanpa class/style tambahan. Ilustrasi M3-M6 belum (setelah #120: `<Blok ilustrasi="mN">`). 1.6 masih Snippet `api-t1-lama` (PR kecil terpisah).
 Aturan PR (pemilik, 2026-10-09): merge sendiri setiap PR begitu CI hijau, sebelum memulai halaman berikutnya; paling banyak satu PR terbuka. #120 (redesain) tidak boleh di-merge sesi ini.
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.

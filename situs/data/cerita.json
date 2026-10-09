@@ -37,7 +37,7 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 239,
+        "menit": 241,
         "halaman": 28
       },
       "bagian": [
@@ -815,9 +815,9 @@
       "judul": "Migration: skema sebagai kode",
       "tahap": 1,
       "topik": "Data",
-      "path": "b-fondasi/b4-1-migration.md",
+      "path": "tahap-1/migration.md",
       "prasyarat": [
-        "B2.1"
+        "t1-m4"
       ],
       "inti": true,
       "masalah": "Skema database di laptop dan di server berbeda",
@@ -828,9 +828,8 @@
         "backend",
         "devops"
       ],
-      "lama": true,
       "nomor": "1.25",
-      "menit": 8
+      "menit": 10
     },
     {
       "id": "t1-m5",

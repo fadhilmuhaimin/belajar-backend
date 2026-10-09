@@ -462,7 +462,7 @@ window.ISTILAH = {
   "n": "1.25 Migration",
   "s": "istilah-migration",
   "t": "Migration",
-  "u": "b-fondasi/b4-1-migration/"
+  "u": "tahap-1/migration/"
  },
  "Modular monolith": {
   "b": "B7.2",
@@ -1310,7 +1310,7 @@ window.ISTILAH = {
   "n": "1.25 Migration",
   "s": "istilah-migration",
   "t": "Migration",
-  "u": "b-fondasi/b4-1-migration/"
+  "u": "tahap-1/migration/"
  },
  "modular monolith": {
   "b": "B7.2",
