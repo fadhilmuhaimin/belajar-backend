@@ -163,8 +163,10 @@ baris_selesai() {
 }
 
 # Status CI terakhir di main: hijau, merah, atau tidak-diketahui (gh gagal, belum ada run, run dibatalkan,
-# atau masih berjalan sesudah 30 menit). Run yang masih berjalan ditunggu dengan polling tiap 30 detik:
-# `gh run watch` tanpa terminal tidak bisa diandalkan menunggu (2026-10-10: run berjalan terbaca merah).
+# atau masih berjalan sesudah 30 menit). Run yang masih berjalan ditunggu dengan polling tiap 30 detik.
+# Versi dengan `gh run watch` sempat membaca run yang masih berjalan sebagai merah (2026-10-10, --periksa);
+# penyebabnya belum pasti (dengan stdin /dev/null `gh run watch` terbukti menunggu 243 detik), jadi skrip
+# memakai polling yang langkahnya bisa dibaca, dan status selain completed:success tidak dianggap hijau.
 status_main() {
   local run status kesimpulan
   for _ in $(seq 1 60); do
