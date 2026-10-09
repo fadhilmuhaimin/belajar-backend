@@ -905,7 +905,7 @@ main > .content-panel:first-of-type > .sl-container { max-width: var(--rk-ukur);
 .sl-markdown-content.sl-markdown-content > :not(.not-content), .sl-markdown-content.sl-markdown-content .blok__isi.blok__isi > *,
 .sl-markdown-content details.blok > summary.blok__kepala, nav.bb-lanjut, p.catatan-fiktif { max-width: var(--rk-ukur); margin-inline: auto; }
 .sl-markdown-content.sl-markdown-content > details.blok { max-width: none; }
-.sl-markdown-content.sl-markdown-content :is(.sl-markdown-content > *, .blok__isi.blok__isi > *):is(div.highlight, table, [data-bb], figure:not(.blok__ilustrasi), astro-island, .tabbed-set, pre, .expressive-code) {
+.sl-markdown-content.sl-markdown-content :is(.sl-markdown-content > *, .blok__isi.blok__isi > *):is(div.highlight, table, [data-bb], figure:not(.blok__ilustrasi), astro-island, .tabbed-set, pre, .expressive-code, figure.peta-fitur) {
   width: fit-content; min-width: min(100%, var(--rk-ukur)); max-width: 100%; margin-inline: auto;
 }
 /* Garis pemisah blok pindah ke kepala blok, supaya selebar teks. */
@@ -931,3 +931,31 @@ main > .content-panel:first-of-type > .sl-container { max-width: var(--rk-ukur);
 .kamu__toc { border-color: transparent; color: var(--teks-2); padding-inline: 0.4rem; }
 .kamu__toc:hover, .kamu__toc[aria-expanded="true"] { border-color: transparent; color: var(--aksen); }
 p.catatan-fiktif { margin-top: 1.6rem; color: var(--teks-2); font-size: var(--rk-ui); }
+
+/* ==========================================================================
+   Peta fitur (keputusan 211): jalur app, backend, database sebagai kolom; langkah bernomor sebagai baris.
+   ========================================================================== */
+.sl-markdown-content figure.peta-fitur { margin-top: 1.2rem; padding: 0; font-size: 1rem; line-height: 1.45; }
+.peta-fitur__judul { display: flex; flex-wrap: wrap; gap: 0.3rem 0.7rem; align-items: center; margin: 0 0 0.8rem; color: var(--judul); font-size: 1rem; text-align: left; }
+.sl-markdown-content .peta-fitur ol.peta-fitur__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--pf-jalur), minmax(0, 1fr)); gap: 0.5rem 0.9rem;
+  background-image: repeating-linear-gradient(90deg, transparent 0, transparent calc(100% / var(--pf-jalur) - 1px), var(--garis) calc(100% / var(--pf-jalur) - 1px), var(--garis) calc(100% / var(--pf-jalur))); }
+.sl-markdown-content .peta-fitur ol.peta-fitur__grid > li { margin: 0; }
+.peta-fitur__jalur { grid-row: 1; padding: 0.35rem 0.6rem; border-radius: 6px; font-weight: 600; font-size: var(--rk-ui); color: var(--judul); background: var(--bg-2); text-align: center; }
+.peta-fitur__langkah { position: relative; align-self: start; display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.55rem; align-items: start; padding: 0.6rem 0.7rem; border: 1px solid var(--garis-2); border-radius: 8px; background: var(--bg); }
+.peta-fitur__langkah.is-backend { border-color: var(--k-system-edge); }
+.peta-fitur__langkah.is-db { border-color: var(--k-good-edge); }
+.peta-fitur__no { grid-row: 1 / span 2; display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--aksen); color: var(--ink-di-aksen); font-weight: 700; font-size: var(--rk-ui-kecil); }
+.peta-fitur__di { display: none; font-size: var(--rk-ui-kecil); color: var(--teks-2); }
+.peta-fitur__isi { display: grid; gap: 0.3rem; min-width: 0; }
+.peta-fitur__isi b { color: var(--judul); font-weight: 600; }
+.sl-markdown-content .peta-fitur__isi ul { margin: 0; padding-left: 1.1rem; color: var(--teks); font-size: var(--rk-ui); }
+.sl-markdown-content .peta-fitur__isi ul li { margin: 0; }
+.sl-markdown-content .peta-fitur__isi code { display: block; white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--rk-ui-kecil); line-height: 1.45; padding: 0.4rem 0.5rem; background: var(--bg-2); border-radius: 6px; color: var(--teks); }
+.peta-fitur__catatan { margin: 0.9rem 0 0; color: var(--teks-2); font-size: var(--rk-ui); }
+@media (max-width: 50em) {
+  .sl-markdown-content .peta-fitur ol.peta-fitur__grid { grid-template-columns: 1fr; background-image: none; }
+  .peta-fitur__jalur { display: none; }
+  .peta-fitur__langkah { grid-column: 1 !important; grid-row: auto !important; }
+  .peta-fitur__di { display: block; }
+  .peta-fitur__langkah:not(:last-child)::after { content: "↓"; position: absolute; left: 1.05rem; bottom: -0.55rem; color: var(--teks-2); font-size: var(--rk-ui-kecil); line-height: 1; }
+}

@@ -1,0 +1,33 @@
+---
+/**
+ * Peta fitur (keputusan 211): satu fitur diikuti langkah demi langkah melintasi app, backend, dan database.
+ * Desktop: jalur sebagai kolom, langkah ditumpuk di jalurnya dan diberi nomor urut waktu. HP: satu kolom,
+ * nama jalur di setiap kartu. Semua label elemen DOM; data JSON divalidasi Zod di src/lib/peta-fitur.ts.
+ *   <PetaFitur data={petaBayar} />
+ */
+import { DataPetaFitur, kolom, baris } from "../lib/peta-fitur";
+
+const d = DataPetaFitur.parse(Astro.props.data);
+const CHIP: Record<string, string> = { rekaman: "is-system", ilustrasi: "is-warn", asumsi: "is-warn" };
+const nama = (id: string) => d.jalur.find((j) => j.id === id)!;
+---
+<figure class="peta-fitur" style={`--pf-jalur: ${d.jalur.length}`} aria-label={d.judul}>
+  <figcaption class="peta-fitur__judul"><strong>{d.judul}</strong> <span class:list={["bb-chip", CHIP[d.sumber.jenis]]}>{d.sumber.teks}</span></figcaption>
+  <ol class="peta-fitur__grid">
+    {d.jalur.map((j, i) => (
+      <li class:list={["peta-fitur__jalur", `is-${j.jenis}`]} style={`grid-column: ${i + 1}`} aria-hidden="true">{j.nama}</li>
+    ))}
+    {d.langkah.map((l, i) => (
+      <li class:list={["peta-fitur__langkah", `is-${nama(l.jalur).jenis}`]} style={`grid-column: ${kolom(d, l)}; grid-row: ${baris(d, i)}`}>
+        <span class="peta-fitur__no">{i + 1}</span>
+        <span class="peta-fitur__di">{nama(l.jalur).nama}</span>
+        <span class="peta-fitur__isi">
+          <b>{l.judul}</b>
+          {l.rinci.length > 0 && <ul>{l.rinci.map((r) => <li>{r}</li>)}</ul>}
+          {l.kode.length > 0 && <code translate="no">{l.kode.join("\n")}</code>}
+        </span>
+      </li>
+    ))}
+  </ol>
+  {d.catatan && <p class="peta-fitur__catatan">{d.catatan}</p>}
+</figure>

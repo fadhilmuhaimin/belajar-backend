@@ -1,0 +1,83 @@
+{
+  "id": "t1-peta-bayar",
+  "judul": "Satu pembayaran Rp25.000, dari HP Budi sampai HP Warung Ani",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · bayar.txt"
+  },
+  "jalur": [
+    {
+      "id": "budi",
+      "nama": "App Budi",
+      "jenis": "app"
+    },
+    {
+      "id": "api",
+      "nama": "Backend",
+      "jenis": "backend"
+    },
+    {
+      "id": "db",
+      "nama": "PostgreSQL",
+      "jenis": "db"
+    },
+    {
+      "id": "ani",
+      "nama": "App Warung Ani",
+      "jenis": "app"
+    }
+  ],
+  "langkah": [
+    {
+      "jalur": "budi",
+      "judul": "Budi memilih Warung Ani, mengisi Rp25.000, menekan Bayar",
+      "rinci": [
+        "App memeriksa bentuk: angka, lebih dari 0"
+      ]
+    },
+    {
+      "jalur": "api",
+      "judul": "Handler menerima request dan mengecek sesi",
+      "kode": [
+        "POST /transfers",
+        "{\"ke\": 418, \"jumlah\": 25000}"
+      ]
+    },
+    {
+      "jalur": "api",
+      "judul": "Service memeriksa aturan uang",
+      "rinci": [
+        "Jumlah lebih dari 0",
+        "Penerimanya warung",
+        "Saldo Budi cukup"
+      ]
+    },
+    {
+      "jalur": "db",
+      "judul": "Repo menjalankan tiga perubahan dalam satu transaction",
+      "kode": [
+        "begin",
+        "UPDATE akun SET saldo = saldo - $1 WHERE id = $2 RETURNING saldo",
+        "UPDATE akun SET saldo = saldo + $1 WHERE id = $2",
+        "INSERT INTO transaksi (dari, ke, jumlah) VALUES ($1, $2, $3) RETURNING id",
+        "commit"
+      ]
+    },
+    {
+      "jalur": "budi",
+      "judul": "Layar Budi: berhasil, saldo Rp225.000",
+      "kode": [
+        "201 Created",
+        "{\"id\":1,\"saldo\":225000}"
+      ]
+    },
+    {
+      "jalur": "ani",
+      "judul": "Riwayat Warung Ani: masuk Rp25.000 dari Budi",
+      "rinci": [
+        "Saldo warung Rp25.000"
+      ]
+    }
+  ],
+  "catatan": "Gagal di langkah 3 berarti tidak ada yang berubah: backend menjawab 422 dan saldo Budi tetap. Gagal di tengah langkah 4 membatalkan ketiga perubahan."
+}
