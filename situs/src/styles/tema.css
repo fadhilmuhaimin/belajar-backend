@@ -864,3 +864,30 @@ nav.kamu .kamu__rekap { grid-column: 1 / -1; }
   .kamu__jalur li[aria-current] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .kamu__toc-teks { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
+
+/* ==========================================================================
+   Redesain · progres baca, ilustrasi blok cerita, transisi buka (keputusan 206, 207).
+   ========================================================================== */
+.baca-progres { position: fixed; top: var(--sl-nav-height); left: 0; right: 0; height: 3px; z-index: 6; pointer-events: none; background: transparent; }
+.baca-progres span { display: block; height: 100%; background: var(--aksen); transform: scaleX(0); transform-origin: left center; }
+html[data-fokus="ya"] .baca-progres { top: 0; }
+.sl-markdown-content figure.blok__ilustrasi { float: right; width: 12.5rem; margin: 0.2rem 0 0.8rem 1.4rem; }
+.sl-markdown-content figure.blok__ilustrasi svg { display: block; width: 100%; height: auto; overflow: visible; }
+@media (max-width: 50em) { .sl-markdown-content figure.blok__ilustrasi { float: none; width: 12.5rem; margin: 0 0 0.8rem; } }
+.sl-markdown-content .blok__isi::after { content: ""; display: block; clear: both; }
+.blok__ilustrasi text { font-family: inherit; font-size: 14px; font-weight: 600; }
+.blok__ilustrasi .il-mono { font-family: var(--sl-font-mono, monospace); }
+.blok__ilustrasi .il-garis { stroke: var(--garis-2); stroke-width: 1.5; fill: none; }
+.blok__ilustrasi .il-isi { fill: var(--bg-2); }
+.blok__ilustrasi .il-isi.il-garis, .blok__ilustrasi .il-garis.il-latar { fill: var(--bg-2); }
+.blok__ilustrasi .il-orang { fill: var(--k-old-fill); stroke: var(--k-old-edge); stroke-width: 1.5; }
+.blok__ilustrasi .il-aksen-isi { fill: var(--k-system-fill); stroke: var(--k-system-edge); stroke-width: 1.5; }
+.blok__ilustrasi .il-warn { fill: var(--k-warn-fill); stroke: var(--k-warn-edge); stroke-width: 1.5; }
+.blok__ilustrasi .il-teks { fill: var(--teks); }
+.blok__ilustrasi .il-teks-2 { fill: var(--teks-2); font-weight: 400; }
+.blok__ilustrasi .il-teks-aksen { fill: var(--k-system-ink); }
+.blok__ilustrasi .il-teks-warn { fill: var(--k-warn-ink); }
+/* Transisi buka: 180 ms, hanya setelah pembaca membuka blok (Blok.astro menambah kelasnya). */
+@keyframes blok-muncul { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.sl-markdown-content details.blok.blok--muncul > .blok__isi { animation: blok-muncul 180ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .sl-markdown-content details.blok.blok--muncul > .blok__isi { animation: none; } }

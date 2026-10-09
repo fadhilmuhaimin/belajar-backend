@@ -17,6 +17,7 @@ const pembuka = t ? d.halaman.find((x: { tahap: unknown; ada: boolean }) => x.ta
 const adaToc = (Astro.locals.starlightRoute.toc?.items?.length ?? 0) > 0;
 ---
 {h && (
+  <div class="baca-progres" aria-hidden="true"><span data-progres></span></div>
   <nav class="kamu" aria-label="Kamu di sini" data-judul-halaman={label(h)}>
     <ol class="kamu__jalur">
       <li><span class="kamu__tag">Kamu di sini</span></li>
@@ -56,6 +57,24 @@ const adaToc = (Astro.locals.starlightRoute.toc?.items?.length ?? 0) > 0;
     segarkan();
   });
   addEventListener("resize", segarkan);
+  // Progres baca (keputusan 206): garis tipis di bawah header mengikuti posisi gulir di artikel. Bukan animasi:
+  // lebarnya berubah hanya saat pembaca menggulir.
+  const garis = document.querySelector<HTMLElement>("[data-progres]");
+  const artikel = document.querySelector<HTMLElement>(".sl-markdown-content");
+  if (garis && artikel) {
+    let antre = false;
+    const ukur = () => {
+      antre = false;
+      const r = artikel.getBoundingClientRect();
+      const jalan = r.height - innerHeight;
+      const p = jalan > 0 ? Math.min(1, Math.max(0, -r.top / jalan)) : 1;
+      garis.style.transform = `scaleX(${p})`;
+    };
+    addEventListener("scroll", () => { if (!antre) { antre = true; requestAnimationFrame(ukur); } }, { passive: true });
+    addEventListener("resize", ukur);
+    document.addEventListener("toggle", () => requestAnimationFrame(ukur), true);
+    ukur();
+  }
   // Halaman terakhir yang dibuka, untuk kartu Lanjutkan di beranda (keputusan 208).
   const nav = document.querySelector<HTMLElement>("nav.kamu[data-judul-halaman]");
   if (nav) {

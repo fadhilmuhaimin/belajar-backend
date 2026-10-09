@@ -7,12 +7,15 @@
  * per halaman di localStorage; tanpa JavaScript blok tetap
  * bisa dibuka dan ditutup. Tidak ada animasi yang jalan sendiri; scroll halus hanya bila reduced motion tidak aktif.
  *   <Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu ...">...</Blok>
+ * Blok cerita boleh membawa ilustrasi kecil di awalnya (keputusan 207): <Blok nama="Gejala" buka ilustrasi="m1">.
+ * Saat pembaca membuka blok, isinya muncul dengan transisi 180 ms (tidak saat dimuat, tidak bila reduced motion).
  */
 import { daftarBlok, slugBlok, menitBlok } from "../lib/blok";
+import Ilustrasi from "./Ilustrasi.astro";
 import { muat, urutanBaca, label, url, urlDariId, dariUrl } from "../../tools/registri.mjs";
 
-interface Props { nama: string; buka?: boolean; menit?: number; aman?: string }
-const { nama, buka = false, aman } = Astro.props;
+interface Props { nama: string; buka?: boolean; menit?: number; aman?: string; ilustrasi?: string }
+const { nama, buka = false, aman, ilustrasi } = Astro.props;
 const route = Astro.locals.starlightRoute;
 const bloks = daftarBlok(route.entry.body ?? "");
 const i = bloks.findIndex((b) => b.nama === nama);
@@ -36,6 +39,7 @@ const id = slugBlok(nama);
     <span class="blok__meta">Blok {i + 1} dari {bloks.length}{menit ? ` · ${menit} menit` : ""}<span class="blok__status" data-status></span></span>
   </summary>
   <div class="blok__isi">
+    {ilustrasi && <Ilustrasi nama={ilustrasi} />}
     <slot />
     {aman && <p class="blok__aman">{aman}</p>}
     <span class="blok__akhir" data-akhir-blok aria-hidden="true"></span>
@@ -118,6 +122,17 @@ const id = slugBlok(nama);
   addEventListener("touchmove", olehPembaca, { passive: true });
   addEventListener("keydown", (e) => { if (["ArrowDown", "PageDown", "End", " "].includes(e.key)) digulir = true; });
   addEventListener("scroll", () => { if (digulir && !antre) { antre = true; requestAnimationFrame(cekAkhir); } }, { passive: true });
+  // Transisi buka (keputusan 207): hanya untuk blok yang dibuka pembaca, bukan yang terbuka saat dimuat.
+  let interaksi = false;
+  addEventListener("pointerdown", () => { interaksi = true; }, { capture: true });
+  addEventListener("keydown", () => { interaksi = true; }, { capture: true });
+  document.addEventListener("toggle", (e) => {
+    const el = e.target as HTMLElement;
+    if (!interaksi || !el.matches?.("details.blok") || !(el as HTMLDetailsElement).open) return;
+    el.classList.remove("blok--muncul");
+    void el.offsetWidth;
+    el.classList.add("blok--muncul");
+  }, true);
   window.addEventListener("hashchange", bukaDariHash);
   bukaDariHash();
   tandai();
