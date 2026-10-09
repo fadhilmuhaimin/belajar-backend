@@ -162,19 +162,25 @@ baris_selesai() {
     grep -oE 'Iterasi selesai: [^ ]+ [a-z-]+' | tail -1
 }
 
-# Status CI terakhir di main: hijau, merah, atau tidak-diketahui (gh gagal atau belum ada run).
-# Menunggu run yang masih berjalan. Hanya "merah" yang dihitung sebagai main merah.
+# Status CI terakhir di main: hijau, merah, atau tidak-diketahui (gh gagal, belum ada run, run dibatalkan,
+# atau masih berjalan sesudah 30 menit). Run yang masih berjalan ditunggu dengan polling tiap 30 detik:
+# `gh run watch` tanpa terminal tidak bisa diandalkan menunggu (2026-10-10: run berjalan terbaca merah).
 status_main() {
   local run status kesimpulan
-  run=$(gh run list --branch main --workflow cek --limit 1 --json databaseId,status,conclusion 2>/dev/null)
-  if [ -z "$run" ] || [ "$(jq 'length' <<<"$run" 2>/dev/null)" != 1 ]; then echo tidak-diketahui; return; fi
-  status=$(jq -r '.[0].status // ""' <<<"$run")
-  if [ -n "$status" ] && [ "$status" != completed ]; then
-    gh run watch "$(jq -r '.[0].databaseId' <<<"$run")" --interval 30 >/dev/null 2>&1
-    run=$(gh run list --branch main --workflow cek --limit 1 --json conclusion)
-  fi
+  for _ in $(seq 1 60); do
+    run=$(gh run list --branch main --workflow cek --limit 1 --json status,conclusion 2>/dev/null)
+    if [ -z "$run" ] || [ "$(jq 'length' <<<"$run" 2>/dev/null)" != 1 ]; then echo tidak-diketahui; return; fi
+    status=$(jq -r '.[0].status // ""' <<<"$run")
+    [ "$status" = completed ] && break
+    sleep 30
+  done
   kesimpulan=$(jq -r '.[0].conclusion // ""' <<<"$run")
-  [ "$kesimpulan" = success ] && echo hijau || echo merah
+  case "$status:$kesimpulan" in
+    completed:success) echo hijau ;;
+    completed:cancelled | completed:skipped | completed:) echo tidak-diketahui ;;
+    completed:*) echo merah ;;
+    *) echo tidak-diketahui ;;
+  esac
 }
 
 # PR kecil dari skrip untuk memarkir tugas yang sesinya gagal dua kali. $1 id, $2 alasan.
