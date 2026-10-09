@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "siapkan": "node tools/siapkan-aset.mjs",
-    "dev": "npm run siapkan && astro dev",
-    "build": "npm run siapkan && astro build",
+    "dev": "bun run siapkan && astro dev",
+    "build": "bun run siapkan && astro build",
     "preview": "astro preview",
     "test": "node --test tests/*.test.mjs && vitest run",
     "cek-tipe": "astro check",

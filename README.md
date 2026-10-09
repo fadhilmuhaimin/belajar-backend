@@ -24,15 +24,15 @@ Yang membedakan panduan ini:
 
 ## Menjalankan situs
 
-Butuh Node 22 atau lebih baru.
+Butuh Node 22 atau lebih baru dan bun 1.4.2 (`curl -fsSL https://bun.com/install | bash -s "bun-v1.4.2"`). bun memasang paket dan menjalankan skrip; astro, Playwright, dan tes tetap berjalan di Node.
 
 ```bash
 bash tools/get_fonts.sh
-npm --prefix situs ci
-npm --prefix situs run dev
+bun install --cwd situs --frozen-lockfile
+bun run --cwd situs dev
 ```
 
-Buka `http://127.0.0.1:4321`. Versi dependency dikunci di `situs/package.json` dan `situs/package-lock.json`.
+Buka `http://127.0.0.1:4321`. Versi dependency dikunci di `situs/package.json` dan `situs/bun.lock`.
 
 ### Font
 
@@ -48,7 +48,7 @@ bash tools/cek_situs.sh --layar
 
 Skrip yang sama dijalankan GitHub Actions di setiap pull request (`.github/workflows/cek.yml`). Isinya: sinkron registry dan angka asumsi, istilah, audit bahasa, build strict, ID internal yang tidak boleh tampil, kontras dua mode, tes, layar pertama setiap halaman di empat ukuran, dan tangkapan layar desktop dan HP dalam mode gelap dan terang.
 
-Pemeriksaan layar butuh Chromium Playwright (`cd situs && npx playwright install chromium`) dan font asli. Dengan font fallback, teks lebih tinggi dan halaman bisa gagal di layar 375×667. Tanpa `--layar`, skrip melewati pemeriksaan yang butuh browser. Lama jalannya sekitar 3 menit.
+Pemeriksaan layar butuh Chromium Playwright (`cd situs && bunx playwright install chromium`) dan font asli. Dengan font fallback, teks lebih tinggi dan halaman bisa gagal di layar 375×667. Tanpa `--layar`, skrip melewati pemeriksaan yang butuh browser. Lama jalannya sekitar 3 menit.
 
 Lolos semua adalah syarat minimum, bukan bukti kualitas.
 
