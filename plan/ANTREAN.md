@@ -65,11 +65,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K0d · Judul dua baris menempel ke baris meta di HP
 
 - jenis: perbaikan
-- status: antre
-- percobaan: 0
+- status: selesai
+- percobaan: 1
 - bergantung: -
 - selesai bila: di 375×667 baris kedua judul halaman (mis. "hilang" di 1.22) punya jarak yang terlihat ke baris "Baca … menit"; dicek dengan tangkapan 1.22 dan 1.24 (judul dua baris) gelap dan terang; halaman judul satu baris tidak berubah.
-- catatan: Temuan laporan pagi uji kering 2026-10-10 (bukti `tmp/laporan-pagi/tahap-1_m4-rp70000-hilang-hp-dark.png`); crosscheck K0 tidak menangkapnya karena `layar.mjs` hanya mengukur margin.
+- catatan: Temuan laporan pagi uji kering 2026-10-10 (bukti `tmp/laporan-pagi/tahap-1_m4-rp70000-hilang-hp-dark.png`); crosscheck K0 tidak menangkapnya karena `layar.mjs` hanya mengukur margin. Selesai (keputusan 223): margin negatif `p.meta` dihapus; celah judul→meta HP −5,0 → 4,0 px, diukur `situs/tools/ukur-judul.mjs` (masuk gerbang). Judul satu baris di desktop ikut turun ±6 px (tidak bisa dibedakan dengan CSS); `/cerita/peta/` (halaman lama) desktop 1366×657 tipis 14 px.
 
 ### K0e · Ilustrasi M2: chip amount dan jumlah lebih lebar dari kotaknya
 

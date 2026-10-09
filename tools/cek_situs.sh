@@ -46,5 +46,7 @@ if [ "${1:-}" = "--layar" ]; then
   trap 'kill $PID 2>/dev/null || true' EXIT
   for _ in $(seq 1 30); do curl -sf "http://127.0.0.1:$PORT/" >/dev/null && break; sleep 1; done
   (cd situs && node tools/layar.mjs --url "http://127.0.0.1:$PORT" && node tools/tangkap.mjs --url "http://127.0.0.1:$PORT")
+  echo "== jarak judul ke meta (K0d)"
+  (cd situs && node tools/ukur-judul.mjs --url "http://127.0.0.1:$PORT" | grep -v "^ok ")
 fi
 echo "== semua pemeriksaan lolos"
