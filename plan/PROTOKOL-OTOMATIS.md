@@ -2,6 +2,15 @@
 
 Dibaca di awal SETIAP iterasi `tools/jalankan-otomatis.sh` (keputusan 216). Kamu satu-satunya pekerja di repo ini: tidak ada sesi lain, tidak ada worktree. Pemilik sedang tidak ada; tidak ada yang menjawab pertanyaan, dan izin di luar allowlist `.claude/settings.json` langsung ditolak (mode `dontAsk`). Kalau sebuah perintah ditolak, ganti caranya; jangan ulangi perintah yang sama. Jalankan perintah dari root repo; `cd <folder> && git ...` ditolak (pakai `git -C`). `sleep` di depan diblokir: tunggu dengan `gh pr checks --watch`, `gh run watch`, atau perintah yang memang berjalan lama. macOS ini tidak punya `timeout`.
 
+Pola perintah yang ditolak di uji kering 2026-10-10 (log `log/otomatis-2026-10-10/`), dan penggantinya:
+
+| Ditolak | Pakai |
+|---|---|
+| Path absolut ke skrip repo: `bash /Users/.../tools/cek_situs.sh` | Path relatif dari root: `bash tools/cek_situs.sh` |
+| Heredoc: `python3 - <<'EOF' ... EOF` | Tulis skrip ke `tmp/<nama>.py` dengan Write, lalu `python3 tmp/<nama>.py` |
+| Loop shell: `for f in ...; do ...; done` | Skrip Python di `tmp/`, atau satu perintah per file |
+| `$?` dan `echo ... >> berkas`: `...; echo "exit $?" >> tmp/cek.txt` | `... && echo LOLOS \|\| echo GAGAL` |
+
 Urutan sumber kebenaran tetap seperti CLAUDE.md: CERITA > PROPOSAL > KEPUTUSAN > MEMORI > STATUS. Protokol ini mengatur cara kerja loop, bukan isi.
 
 ## a. Ambil satu tugas
@@ -29,7 +38,7 @@ Urutan sumber kebenaran tetap seperti CLAUDE.md: CERITA > PROPOSAL > KEPUTUSAN >
 
 "Kelihatannya benar" bukan verifikasi. Yang dihitung (setelah I1 selesai, perintah npm diganti padanannya di README dan `tools/cek_situs.sh`):
 
-- Gerbang penuh: `bash tools/cek_situs.sh --layar > tmp/cek.txt 2>&1; echo $?; tail -30 tmp/cek.txt`. Sebelumnya hentikan preview yang tertinggal: `npx --prefix situs astro preview stop`.
+- Gerbang penuh: `bash tools/cek_situs.sh --layar > tmp/cek.txt 2>&1 && echo LOLOS || echo GAGAL`, lalu `tail -30 tmp/cek.txt` sebagai perintah terpisah. Sebelumnya hentikan preview yang tertinggal: `npx --prefix situs astro preview stop`.
 - Tangkapan: `npm --prefix situs run preview -- --port 4321 --host 127.0.0.1` di latar, lalu dari `situs/` `node tools/tangkap.mjs --url http://127.0.0.1:4321 --path /<path>/`. Buka PNG-nya dengan Read dan lihat sendiri.
 - Rekaman lab dari database bersih dibandingkan dengan yang di-commit (status, saldo, urutan; bukan waktu).
 - Sumber primer untuk setiap versi, API, dan klaim (WebSearch/WebFetch). Yang tidak bisa dicek diberi [perlu verifikasi] dan dicatat di MEMORI "Perlu dicek pemilik".
