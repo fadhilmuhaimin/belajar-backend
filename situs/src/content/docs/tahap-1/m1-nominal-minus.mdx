@@ -3,6 +3,8 @@ title: "1.14 M1: Nominal minus lolos"
 description: Minggu 1, Raka menguji sendiri. Bayar minus Rp5.000 berhasil, saldo Budi bertambah, dan saldo Warung Ani jadi negatif.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import duaLapis from "../../../../data/diagram/t1-m1-dua-lapis.json";
 import Snippet from "../../../components/Snippet.astro";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
@@ -35,6 +37,8 @@ Belum. Pemeriksaan di app membuat Budi tidak salah ketik, tapi request bisa diki
 <Blok nama="Yang sebenarnya">
 
 Masalahnya bukan satu `if` yang lupa, tapi aturan yang belum punya tempat. Ada dua lapis aturan:
+
+<Rantai data={duaLapis} />
 
 | Lapis | Contoh | Diperiksa di |
 |---|---|---|

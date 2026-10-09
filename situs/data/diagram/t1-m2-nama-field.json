@@ -1,0 +1,65 @@
+{
+  "id": "t1-m2-nama-field",
+  "judul": "Tiga bentuk body, tiga jawaban server",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · m2.txt"
+  },
+  "baris": [
+    {
+      "label": "Nama berbeda",
+      "simpul": [
+        {
+          "teks": "{\"ke\": 418, \"amount\": 25000}",
+          "kode": true
+        },
+        {
+          "teks": "Go mengabaikan amount",
+          "sub": "field jumlah tetap 0",
+          "nada": "warn"
+        },
+        {
+          "teks": "422",
+          "sub": "jumlah harus lebih dari 0",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Tipe berbeda",
+      "simpul": [
+        {
+          "teks": "{\"ke\": \"418\", \"jumlah\": 25000}",
+          "kode": true
+        },
+        {
+          "teks": "ke berupa teks, server butuh angka",
+          "nada": "warn"
+        },
+        {
+          "teks": "400",
+          "sub": "Body bukan JSON yang valid, tanpa nama field",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Bentuk yang dibaca server",
+      "simpul": [
+        {
+          "teks": "{\"ke\": 418, \"jumlah\": 25000}",
+          "kode": true
+        },
+        {
+          "teks": "Nama dan tipe cocok",
+          "nada": "good"
+        },
+        {
+          "teks": "201 Created",
+          "nada": "good"
+        }
+      ]
+    }
+  ],
+  "catatan": "Nama dan tipe field tidak tertulis di mana pun, jadi app dan server menebak. Kontrak tertulis menghapus tebakan itu."
+}

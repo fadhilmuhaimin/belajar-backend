@@ -3,6 +3,8 @@ title: "1.17 M2: amount atau nominal"
 description: Minggu 1, Raka membuat app dan backend sendirian. App mengirim amount, server membaca jumlah, dan Budi diberi tahu nominalnya harus lebih dari 0 padahal ia mengetik Rp25.000.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import namaField from "../../../../data/diagram/t1-m2-nama-field.json";
 import Snippet from "../../../components/Snippet.astro";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
@@ -35,6 +37,8 @@ Typo-nya memang ada, tapi itu gejala. Satu angka punya tiga nama: Nominal di lay
 <Blok nama="Yang sebenarnya">
 
 App dan backend tidak punya kontrak tertulis. Raka-mobile dan Raka-backend adalah orang yang sama, tapi menulis di dua hari yang berbeda, dengan kebiasaan penamaan yang berbeda.
+
+<Rantai data={namaField} />
 
 Rekaman lab dari database bersih. App mengirim `amount`; server membaca `jumlah`. Go mengabaikan key yang tidak punya pasangan field di struct ([encoding/json](https://pkg.go.dev/encoding/json#Unmarshal)), jadi `jumlah` tetap 0 dan service menolaknya:
 
