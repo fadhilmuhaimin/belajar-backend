@@ -1,0 +1,64 @@
+{
+  "id": "t1-transaction-commit-rollback",
+  "judul": "Satu transaction, dua akhir",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · bayar.txt, m4.txt"
+  },
+  "baris": [
+    {
+      "label": "Bayar Rp25.000",
+      "sub": "semua perintah berhasil",
+      "simpul": [
+        {
+          "teks": "begin",
+          "kode": true
+        },
+        {
+          "teks": "Budi −Rp25.000",
+          "sub": "belum permanen"
+        },
+        {
+          "teks": "Ani +Rp25.000",
+          "sub": "belum permanen"
+        },
+        {
+          "teks": "INSERT transaksi",
+          "sub": "catatan transaksi, belum permanen"
+        },
+        {
+          "teks": "commit",
+          "kode": true,
+          "sub": "201; Budi Rp225.000, Ani Rp25.000",
+          "nada": "good"
+        }
+      ]
+    },
+    {
+      "label": "Bayar Rp70.000",
+      "sub": "batas warung Rp1.500.000",
+      "simpul": [
+        {
+          "teks": "begin",
+          "kode": true
+        },
+        {
+          "teks": "Budi −Rp70.000",
+          "sub": "belum permanen"
+        },
+        {
+          "teks": "Ani +Rp70.000 ditolak",
+          "sub": "batas_saldo_warung",
+          "nada": "warn"
+        },
+        {
+          "teks": "rollback",
+          "kode": true,
+          "sub": "Budi tetap Rp250.000; total Rp25.000.000",
+          "nada": "good"
+        }
+      ]
+    }
+  ],
+  "catatan": "Sebelum commit, perubahan belum permanen. Commit menyimpan semuanya sekaligus; rollback membatalkan semuanya sekaligus."
+}
