@@ -4,6 +4,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
+- Nomor keputusan: sesi konten memakai 165–199; 163–164 dan 200–219 milik sesi layout/redesain (pesan sesi "Rekeningo Tech Journey planning", 2026-10-09).
+- 166: 1.21 lapisan dasar; 165: `cek_arah.py` + rekaman `lapisan.txt`.
 - 162: 1.20 SQL injection + ADR 4; 161: cari-bug field `aman` + CSS baris; 160: rekaman injection (log PG, gosec, latihan/).
 - 159: 1.19 M3 (injection); 158: widget React cari-bug; 157: lab pencarian + mode rentan m3.
 - 156: 1.18 + ADR 3; 155: kontrak b1-openapi v1, bacaJSON/wajibAda, -rentan m2.
@@ -55,8 +57,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-09 · Halaman 1.20 selesai di worktree `../rekeningo-wt-1-20` (branch `tahap-1/sql-injection`), gerbang lolos; PR lab #115 hijau dan PR halaman dibuka, keduanya menunggu merge oleh pemilik (merge lewat `gh pr merge` ditolak pengaman mode otomatis sesi ini). Working tree utama dipakai sesi lain (branch `tahap-1/lebar-layout`), jangan ganti branch di sana.
-Halaman berikutnya: **1.21 "Lapisan dasar: handler tidak tahu SQL"** (`B7.1`, konsep, ★, backend, widget pilah, lab api-t1; isi lama `b-fondasi/b7-1-lapisan-dasar.md`). Ambil dari `main` setelah #115 dan PR 1.20 di-merge. Ilustrasi M3-M6 belum dibuat.
+2026-10-09 · Halaman 1.21 selesai di worktree `../rekeningo-wt-1-20`, branch `tahap-1/lapisan-dasar`, gerbang lolos. PR bertumpuk: #115 (lab 1.20) → #116 (halaman 1.20) → #118 (lab 1.21, base `tahap-1/sql-injection`) → PR halaman 1.21 (base `tahap-1/lab-lapisan`); semua menunggu merge pemilik, urut dari #115. Working tree utama dipakai sesi redesain (jangan ganti branch di sana).
+Halaman berikutnya: **1.22 "M4: Rp70.000 yang hilang"** (`t1-m4`, masalah, ★, widget runsql, lab b3-stack). Lab `api-t1` sudah membungkus `Pindahkan` dalam transaction; M4 butuh mode rentan (dua UPDATE tanpa transaction + constraint warung yang ditambah tangan) atau lab b3-stack. Ilustrasi M3-M6 belum dibuat. 1.6 masih memakai Snippet `api-t1-lama` (tiga komentar file); ganti dengan folder nyata `api-t1` di PR kecil terpisah.
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 

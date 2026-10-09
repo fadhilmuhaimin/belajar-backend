@@ -1,0 +1,51 @@
+{
+  "judul": "Baris kode lab ini milik lapisan mana?",
+  "kelompok": [
+    "handler",
+    "service",
+    "repo"
+  ],
+  "item": [
+    {
+      "teks": "if p := bacaJSON(r.Body, &in); p != nil {",
+      "jawab": 0,
+      "kenapa": "Membaca body HTTP adalah urusan handler. Service menerima nilai yang sudah jadi: peminta, ke, jumlah."
+    },
+    {
+      "teks": "if jumlah <= 0 || jumlah > MaksBayar {",
+      "jawab": 1,
+      "kenapa": "Batas bayar adalah aturan uang dari ADR 2. Aturan ini harus berlaku untuk setiap jalan masuk, jadi tempatnya di service."
+    },
+    {
+      "teks": "UPDATE akun SET saldo = saldo - $1 WHERE id = $2 RETURNING saldo",
+      "jawab": 2,
+      "kenapa": "SQL hanya ada di repo. Service tidak tahu nama tabel dan kolomnya."
+    },
+    {
+      "teks": "case errors.Is(err, service.ErrSaldoKurang):",
+      "jawab": 0,
+      "kenapa": "Service hanya mengembalikan \"saldo kurang\". Menerjemahkannya ke status 422 adalah urusan HTTP, jadi dilakukan sekali di handler."
+    },
+    {
+      "teks": "if pembayar.Saldo < jumlah {",
+      "jawab": 1,
+      "kenapa": "Saldo harus cukup: aturan uang. Kalau besok ada jalan masuk selain HTTP, aturan ini tetap berlaku karena tinggal di service."
+    },
+    {
+      "teks": "w.Header().Set(\"Location\", fmt.Sprintf(\"/transfers/%d\", id))",
+      "jawab": 0,
+      "kenapa": "Header dan status code adalah urusan HTTP."
+    },
+    {
+      "teks": "SELECT id, nama FROM akun WHERE jenis = 'warung' AND nama ILIKE '%' || $1 || '%' ORDER BY id",
+      "jawab": 2,
+      "kenapa": "Query pencarian dari ADR 4, dengan parameter $1. Karena SQL hanya di repo, review injection cukup melihat satu folder."
+    },
+    {
+      "teks": "if errors.Is(err, repo.ErrTidakAda) || (err == nil && penerima.Jenis != \"warung\") {",
+      "jawab": 1,
+      "kenapa": "Hanya boleh membayar ke warung: aturan PRD v1. Service memakai error dari repo, tapi keputusannya milik service."
+    }
+  ],
+  "penutup": "Uji cepatnya: kalau minggu depan admin menjalankan bayar dari skrip tanpa HTTP, lapisan mana yang tetap dipakai? Service dan repo. Handler tidak."
+}

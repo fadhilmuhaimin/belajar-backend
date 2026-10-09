@@ -266,26 +266,26 @@
  {
   "id": "B7.1-1",
   "halaman": "B7.1",
-  "judul": "1.21 Lapisan dasar",
-  "url": "b-fondasi/b7-1-lapisan-dasar/",
-  "tanya": "Fitur transfer terjadwal dijalankan worker tiap tanggal 1. Lapisan mana yang dipakai worker?",
-  "jawab": "Logika bisnis dan akses data. Worker tidak menerima HTTP request, jadi handler tidak terlibat. Karena aturan ada di `Layanan.Transfer`, batas dan cek saldo otomatis berlaku untuk transfer terjadwal."
+  "judul": "1.21 Lapisan dasar: handler tidak tahu SQL",
+  "url": "tahap-1/lapisan-dasar/",
+  "tanya": "Raka menambah fitur: admin menjalankan bayar dari skrip CSV, tanpa HTTP. Lapisan mana yang dipakai skrip itu?",
+  "jawab": "Service dan repo. Skrip tidak menerima request, jadi handler tidak terlibat. Karena batas bayar dan cek saldo ada di service, keduanya otomatis berlaku untuk skrip."
  },
  {
   "id": "B7.1-2",
   "halaman": "B7.1",
-  "judul": "1.21 Lapisan dasar",
-  "url": "b-fondasi/b7-1-lapisan-dasar/",
-  "tanya": "Jelaskan kenapa pemetaan `ErrSaldoKurang` ke `422` ditulis di handler, bukan di logika bisnis.",
-  "jawab": "Status code adalah konsep HTTP. Worker atau test tidak butuh `422`, mereka butuh tahu \"saldo kurang\". Kalau logika bisnis mengembalikan status HTTP, ia jadi bergantung pada HTTP dan sulit dipakai di luar request."
+  "judul": "1.21 Lapisan dasar: handler tidak tahu SQL",
+  "url": "tahap-1/lapisan-dasar/",
+  "tanya": "`go build` lolos, tapi `cek_arah.py` gagal dengan \"handler: mengimpor database/sql\". Apa artinya, dan apa perbaikannya?",
+  "jawab": "Ada handler yang menjalankan SQL sendiri. Kodenya sah bagi Go, tapi melanggar aturan arah. Pindahkan query ke repo, tambahkan fungsi service yang memanggilnya, lalu handler memanggil service."
  },
  {
   "id": "B7.1-3",
   "halaman": "B7.1",
-  "judul": "1.21 Lapisan dasar",
-  "url": "b-fondasi/b7-1-lapisan-dasar/",
-  "tanya": "AI menghasilkan `TransferService`, `TransferServiceImpl`, `TransferRepository`, `TransferRepositoryImpl`, `TransferDTO`, `TransferEntity`, dan `TransferMapper` untuk satu endpoint. Apa yang kamu tanyakan?",
-  "jawab": "Masalah apa yang dijawab setiap file. Interface tanpa implementasi kedua, atau DTO dan entity yang bentuknya sama, menambah kode tanpa manfaat. Pertahankan yang punya alasan, mis. interface yang dipakai unit test."
+  "judul": "1.21 Lapisan dasar: handler tidak tahu SQL",
+  "url": "tahap-1/lapisan-dasar/",
+  "tanya": "Kenapa saldo bisa sampai ke app di M3 walaupun handler tidak mengimpor repo?",
+  "jawab": "Handler menerima struct `repo.Akun` dari service dan mengirimnya apa adanya. Tag JSON di struct milik repo, termasuk `saldo`, ikut sampai ke app. Daftar import tidak menangkap tipe yang lewat, hanya paket yang diimpor."
  },
  {
   "id": "B3.1-1",
