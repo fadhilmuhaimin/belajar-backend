@@ -32,6 +32,28 @@ func (s Service) BayarM1(ctx context.Context, peminta, ke, jumlah int64) (id, sa
 
 // --8<-- [end:m1]
 
+// BayarM4 adalah Bayar versi minggu 3: aturan sama dengan Bayar, tapi memanggil repo tanpa transaction.
+func (s Service) BayarM4(ctx context.Context, peminta, ke, jumlah int64) (id, saldo int64, err error) {
+	if jumlah <= 0 || jumlah > MaksBayar {
+		return 0, 0, ErrValidasi{"jumlah", "harus lebih dari 0 dan paling banyak 200000"}
+	}
+	penerima, err := s.repo.Akun(ctx, ke)
+	if errors.Is(err, repo.ErrTidakAda) || (err == nil && penerima.Jenis != "warung") {
+		return 0, 0, ErrValidasi{"ke", "harus akun warung"}
+	}
+	if err != nil {
+		return 0, 0, err
+	}
+	pembayar, err := s.repo.Akun(ctx, peminta)
+	if err != nil {
+		return 0, 0, err
+	}
+	if pembayar.Saldo < jumlah {
+		return 0, 0, ErrSaldoKurang
+	}
+	return s.repo.PindahkanM4(ctx, peminta, ke, jumlah)
+}
+
 // CariWarungRentanM3 meneruskan ke repo rentan (string concat + semua field). Hanya mode -rentan m3.
 func (s Service) CariWarungRentanM3(ctx context.Context, cari string) ([]repo.Akun, error) {
 	return s.repo.CariWarungRentanM3(ctx, cari)

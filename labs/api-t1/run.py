@@ -754,8 +754,71 @@ def rekam_lapisan():
     tulis("lapisan.txt")
 
 
+def bayar_banyak(n, jumlah):
+    """Persiapan: n karyawan (selain Budi dan Dimas) membayar ke Warung Ani. Rinciannya tidak ditulis ke rekaman."""
+    k = len(log)
+    ids = [i for i in range(401, 520) if i not in (417, 418, 419)][:n]
+    for i in ids:
+        t = login(f"karyawan{i}@lestari.example", f"sementara-{i}", f"<token {i}>")
+        s, _ = curl("POST", "/transfers", json.dumps({"ke": 418, "jumlah": jumlah}), token=t)
+        harap(s, 201, f"bayar karyawan {i}")
+    del log[k:]
+    log.append(f"# persiapan: {n} karyawan lain masing-masing membayar Rp{jumlah:,} ke Warung Ani\n".replace(",", "."))
+
+
+BATAS_WARUNG = "ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000)"
+SALDO_M4 = "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+
+
+def rekam_m4():
+    """1.22 M4: Rp70.000 yang hilang (mode rentan m4, keputusan 167)."""
+    reset()
+    bagian("A. Minggu 2: Raka menambah batas saldo warung langsung di server, lewat psql (tidak ada di schema.sql)")
+    sql(BATAS_WARUNG)
+    mulai("-rentan", "m4")
+    topup_awal()
+    bagian("B. Minggu 3, Jumat siang: Warung Ani ramai")
+    bayar_banyak(29, 50000)
+    harap("1450000" in sql(SALDO_M4), True, "Ani 1.450.000 sebelum Budi")
+    harap(total(), ["25000000", "25000000", "29"], "total sebelum Budi")
+
+    bagian("C. Budi membayar Rp70.000; app menampilkan gagal")
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    p = posisi_log()
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 70000}', token=budi)
+    harap(s, 500, "UPDATE kedua ditolak batas warung")
+    time.sleep(0.3)
+    st = [x for x in log_statement(p) if x.lower().startswith(("begin", "commit", "rollback", "update akun", "insert into transaksi"))]
+    harap([x.split()[0].upper() for x in st], ["UPDATE", "UPDATE"], "tanpa transaction: dua UPDATE, tanpa BEGIN/ROLLBACK")
+    log.append("# yang diterima PostgreSQL (log_statement=all):\n" + "\n".join(st) + "\n\n")
+    hasil = sql(SALDO_M4)
+    harap(("180000" in hasil, "1450000" in hasil), (True, True), "Budi berkurang, Ani tetap")
+    sql("SELECT count(*) AS transaksi_budi FROM transaksi WHERE dari = 419")
+    harap(total(), ["24930000", "25000000", "29"], "Rp70.000 hilang dari total")
+    stop()
+
+    bagian("D. Versi benar: tiga perubahan dalam satu transaction, batas warung yang sama")
+    reset()
+    sql(BATAS_WARUNG)
+    mulai()
+    topup_awal()
+    bayar_banyak(29, 50000)
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    p = posisi_log()
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 70000}', token=budi)
+    harap(s, 500, "versi benar: tetap gagal")
+    time.sleep(0.3)
+    st = [x for x in log_statement(p) if x.lower().startswith(("begin", "commit", "rollback", "update akun", "insert into transaksi"))]
+    harap([x.split()[0].upper() for x in st], ["BEGIN", "UPDATE", "UPDATE", "ROLLBACK"], "transaction dibatalkan")
+    log.append("# yang diterima PostgreSQL (log_statement=all):\n" + "\n".join(st) + "\n\n")
+    hasil = sql(SALDO_M4)
+    harap(("250000" in hasil, "1450000" in hasil), (True, True), "Budi utuh, Ani tetap")
+    harap(total(), ["25000000", "25000000", "29"], "total utuh")
+    tulis("m4.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()

@@ -39,10 +39,11 @@ node --test tests/widgets/*.cjs >/dev/null 2>&1
 
 if [ "${1:-}" = "--layar" ]; then
   echo "== layar pertama 4 ukuran + tangkapan"
-  npm --prefix situs run preview -- --port 4321 --host 127.0.0.1 >/dev/null 2>&1 &
+  PORT="${PORT_PREVIEW:-4321}"   # worktree paralel memakai port lain, mis. PORT_PREVIEW=4323
+  npm --prefix situs run preview -- --port "$PORT" --host 127.0.0.1 >/dev/null 2>&1 &
   PID=$!
   trap 'kill $PID 2>/dev/null || true' EXIT
-  for _ in $(seq 1 30); do curl -sf http://127.0.0.1:4321/ >/dev/null && break; sleep 1; done
-  (cd situs && node tools/layar.mjs --url http://127.0.0.1:4321 && node tools/tangkap.mjs --url http://127.0.0.1:4321)
+  for _ in $(seq 1 30); do curl -sf "http://127.0.0.1:$PORT/" >/dev/null && break; sleep 1; done
+  (cd situs && node tools/layar.mjs --url "http://127.0.0.1:$PORT" && node tools/tangkap.mjs --url "http://127.0.0.1:$PORT")
 fi
 echo "== semua pemeriksaan lolos"
