@@ -71,3 +71,183 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - selesai bila: komponen DiagramArsitektur di atas React Flow, data dari registry tahap (kotak, zona, catatan, baru/lama), skema Zod, warna dari token; pengaturan `nodesDraggable` false, `zoomOnScroll` false, `panOnDrag` false di layar sempit, `preventScrolling` false, `fitView`; klik kotak membuka catatannya di bawah diagram (bukan tooltip) dan bisa dioperasikan dengan keyboard; dimuat hanya di halaman yang memakainya (`client:visible`); selalu ada versi statis untuk pembaca layar (`role="img"` + `aria-label`) dan sebelum JS dimuat; CSS React Flow hanya base, gaya dari token, `contrast.py` lolos gelap dan terang; dipakai di satu halaman uji; halaman lain tidak memuat React Flow; butir I6.
 - catatan: -
 
+### 1.26-lab · Lab M5: rekaman mode rentan m5
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: mode `-rentan m5` di `labs/api-t1` (GET akun tanpa cek pemilik, `service.LihatAkunM5`) dan rekaman `labs/api-t1/output/m5.txt` dari database bersih: Dimas membaca akun 417 miliknya, lalu 418 Warung Ani, lalu enumerasi 401–503; versi benar menjawab 404 untuk akun orang lain; output dibandingkan (status, saldo, urutan; bukan waktu); keputusan baru.
+- catatan: Setengah jalan dari worktree konten yang ditutup: lanjutkan dari branch `tahap-1/lab-m5` (commit 860e6b9, kode mode m5 tanpa rekaman dan tanpa `run.py`). Rebase ke main dulu.
+
+### 1.26 · M5: Angka di URL
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: 1.26-lab
+- selesai bila: halaman `t1-m5` (masalah, ★, peran security) dengan template masalah: gejala (Dimas mengganti 417 jadi 418, menyimpan 100 saldo ke spreadsheet, mengirimnya ke Sinta) → yang Raka kira (UUID) → yang sebenarnya (backend tidak pernah bertanya pemilik; token di tempat yang salah di app) → coba sendiri dari `m5.txt` → konsep → ADR 7–8 dirujuk; widget alur; ilustrasi adegan M5 baru di `Ilustrasi.astro` (token gelap/terang, tanpa teks di SVG) lewat `<Blok ilustrasi="m5">`; token di app berlabel Ilustrasi bila tidak direkam.
+- catatan: -
+
+### 1.27 · Authentication
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: B5.1 ditulis ulang dari `b-fondasi/b5-1-authentication.mdx` ke `tahap-1/` dengan lima blok, contoh dari login PRD v1 (`login.txt` lab api-t1), widget alur; tanpa Snippet `api-t1-lama`; registry tanpa `lama`.
+- catatan: Jalur Mobile menonjolkan halaman ini.
+
+### 1.28 · Authorization
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: B5.3 ditulis ulang ke `tahap-1/` dengan lima blok, widget alur dan pilah, lab api-t1 (cek pemilik di service) dan b5-rls; tanpa Snippet `api-t1-lama`; registry tanpa `lama`.
+- catatan: -
+
+### I5a · Blok: buka/tutup dengan layout animation
+
+- jenis: interaksi
+- status: antre
+- percobaan: 0
+- bergantung: I3
+- selesai bila: buka/tutup blok memakai layout animation dari fondasi gerak, menggantikan transisi CSS; tangkapan sebelum/sesudah; butir I6.
+- catatan: -
+
+### 1.29 · Keamanan 2: IDOR, enumerasi, token di app + ADR 7–8
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: 1.26
+- selesai bila: halaman `t1-idor` dengan ADR 7 (cek pemilik di `service/` + RLS sebagai pagar kedua; 404 bukan 403) dan ADR 8 (sesi acak dengan masa berlaku, secure storage; JWT ditunda ke Tahap 4 dengan alasan), masing-masing minimal tiga opsi dan "kapan keputusan ini salah"; widget alur dan banding; lab b5-rls.
+- catatan: Jalur Mobile dan Security.
+
+### 1.30-lab · Lab M6: rekaman prober deploy
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: rekaman prober deploy dari database bersih: prober memanggil API tiap detik saat binary diganti dan kolom diganti nama; terekam jeda layanan, error untuk client versi lama sesudah ganti nama kolom, dan tidak ada binary lama untuk kembali; output dibandingkan tanpa waktu; keputusan baru.
+- catatan: Naskah M6 menyebut "app mati 5 menit" dan "11 HP"; angka itu cerita, angka lab yang tampil di halaman harus dari rekaman.
+
+### 1.30 · M6: Deploy hari Senin
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: 1.30-lab
+- selesai bila: halaman `t1-m6` (masalah, ★, peran devops) dengan template masalah dari rekaman prober; widget alur; ilustrasi adegan M6 baru lewat `<Blok ilustrasi="m6">`.
+- catatan: -
+
+### K1 · Crosscheck kecil 1.26–1.30
+
+- jenis: crosscheck
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: bagian K1 di `plan/CROSSCHECK-KECIL.md` memuat 1.26–1.30 dengan bukti; temuan menjadi tugas perbaikan di bawah K1.
+- catatan: -
+
+### 1.31 · Deployment dan rollback + ADR 9
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: 1.30
+- selesai bila: C3 ditulis ulang ke `tahap-1/` dengan ADR 9 (image per commit, rollback = tag lama, CI pertama); Infra 1 (satu VPS, Compose, kenapa cukup); widget alur; tanpa Snippet `api-t1-lama`.
+- catatan: Jalur DevOps.
+
+### I5b · Beranda: peta tahap memakai DiagramArsitektur
+
+- jenis: interaksi
+- status: antre
+- percobaan: 0
+- bergantung: I3, I4
+- selesai bila: peta tahap di beranda memakai DiagramArsitektur; memilih tahap mengubah diagram dengan transisi; jawaban teka-teki muncul dengan gerak singkat; tangkapan sebelum/sesudah; butir I6.
+- catatan: -
+
+### 1.32 · Testing: apa dites di level mana
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: C1 ditulis ulang ke `tahap-1/` dengan lima blok, widget pilah dan stackstep, lab api-t1; tanpa Snippet `api-t1-lama`.
+- catatan: -
+
+### 1.33 · App versi lama + ADR 10
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: E1 ditulis ulang ke `tahap-1/` dengan ADR 10 (field tidak pernah diganti nama, expand lalu contract) yang berdiri sendiri tanpa rekaman B4.2; widget alur; tanpa Snippet `api-t1-lama`.
+- catatan: Prasyarat B4.2 (Tahap 2) dibuang (MEMORI). Jalur Mobile.
+
+### P1 · 1.4 dan 1.6 lepas dari api-t1-lama
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: `adr-1-backend-sendiri.mdx` dan `struktur-folder.mdx` memakai Snippet dari `labs/api-t1` (folder nyata), bukan `api-t1-lama`; `grep -rn api-t1-lama situs/src/content/docs/tahap-1/` kosong.
+- catatan: -
+
+### P2 · Hapus labs/api-t1-lama
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: 1.27, 1.28, 1.31, 1.32, 1.33, P1
+- selesai bila: `grep -rn api-t1-lama situs/ labs/ tools/` kosong kecuali folder itu sendiri, bukti grep tertulis di PR; folder `labs/api-t1-lama` dihapus; tabel lab di README diperbarui.
+- catatan: Disetujui pemilik 2026-10-08 dengan syarat grep kosong (MEMORI "Catatan untuk penulisan ulang Tahap 1"). Kalau grep tidak kosong, jangan hapus: parkir dengan daftar rujukannya.
+
+### 1.34-lab · Lab M7: .env di riwayat git
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: mode rentan M7 yang direkam di dalam container atau folder sementara lab: repo contoh meng-commit `.env` berisi nilai palsu, file dihapus, gitleaks tetap menemukannya di riwayat, pre-commit hook menolak commit berikutnya; rekaman dibandingkan tanpa waktu; tidak ada secret nyata; keputusan baru.
+- catatan: Lab serangan hanya di dalam container atau folder sementara lab.
+
+### 1.34 · M7: .env di repo
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: 1.34-lab
+- selesai bila: halaman `t1-m7` (masalah, peran security) dengan template masalah dari rekaman M7.
+- catatan: -
+
+### I5c · Widget alur
+
+- jenis: interaksi
+- status: antre
+- percobaan: 0
+- bergantung: I3
+- selesai bila: widget alur (pindah ke React bila belum): paket data bergerak dari komponen ke komponen saat Berikutnya ditekan; lapisan yang aktif tersorot; semua halaman yang memakai alur tetap jalan; tangkapan sebelum/sesudah; butir I6.
+- catatan: -
+
+### 1.35 · Keamanan 3: secret + ADR 11
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: 1.34
+- selesai bila: halaman `t1-secret` dengan ADR 11 (`.env.example`, pre-commit gitleaks, secret hanya di server), minimal tiga opsi dan "kapan keputusan ini salah"; lab api-t1.
+- catatan: Jalur Security.
+
+### K2 · Crosscheck kecil 1.31–1.35
+
+- jenis: crosscheck
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: bagian K2 di `plan/CROSSCHECK-KECIL.md` memuat 1.31–1.35 dengan bukti; temuan menjadi tugas perbaikan di bawah K2.
+- catatan: -
+
