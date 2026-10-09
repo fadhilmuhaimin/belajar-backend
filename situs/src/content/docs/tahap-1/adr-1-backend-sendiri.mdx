@@ -3,6 +3,8 @@ title: "1.4 Backend sendiri, bukan BaaS"
 description: ADR 1. Untuk bayar ke warung, pertanyaan penentunya adalah siapa yang boleh mengubah angka saldo. Raka memilih satu backend Go dengan PostgreSQL.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import aturanUang from "../../../../data/diagram/t1-adr1-aturan-uang.json";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
 import Snippet from "../../../components/Snippet.astro";
@@ -16,6 +18,10 @@ PRD v1 memberi Raka 6 minggu dan satu VPS. Pak Hadi menambah satu aturan: "Tidak
 Raka sudah memakai Firebase di beberapa app Flutter. Dalam dua hari, prototipe Supabase-nya sudah bisa login dan menampilkan daftar warung tanpa satu baris kode server. Lalu ia sampai di tombol Bayar.
 
 Pertanyaan penentunya: **siapa yang boleh mengubah angka saldo?** Jawaban yang ia butuhkan adalah "hanya satu tempat yang Raka kendalikan".
+
+Gambar di bawah meringkas jawaban ketiga pilihan untuk pertanyaan itu. Rinciannya, beserta kelebihan dan kekurangannya, ada di blok Opsi.
+
+<Rantai data={aturanUang} />
 
 </Blok>
 

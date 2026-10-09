@@ -1,0 +1,36 @@
+{
+  "id": "t1-adr1-aturan-uang",
+  "judul": "Bayar ke warung: di mana aturan uang tinggal?",
+  "sumber": { "jenis": "ilustrasi", "teks": "Ringkasan dokumentasi resmi · sumber di blok Opsi" },
+  "baris": [
+    {
+      "label": "A. Supabase",
+      "simpul": [
+        { "teks": "App Budi", "sub": "client Supabase" },
+        { "teks": "API otomatis", "sub": "PostgREST dari skema" },
+        { "teks": "Policy RLS + fungsi SQL", "sub": "aturan tersebar di database dan app", "nada": "warn" },
+        { "teks": "PostgreSQL" }
+      ]
+    },
+    {
+      "label": "B. Firebase",
+      "simpul": [
+        { "teks": "App Budi", "sub": "SDK Firebase" },
+        { "teks": "Security Rules", "sub": "izin baca dan tulis", "nada": "warn" },
+        { "teks": "Cloud Functions", "sub": "logika uang; Admin SDK lolos Rules", "nada": "warn" },
+        { "teks": "Firestore" }
+      ]
+    },
+    {
+      "label": "C. Go + PostgreSQL",
+      "sub": "dipilih",
+      "simpul": [
+        { "teks": "App Budi", "sub": "hanya memanggil API" },
+        { "teks": "Handler", "sub": "HTTP, sesi" },
+        { "teks": "Service", "sub": "semua aturan uang di satu tempat", "nada": "good" },
+        { "teks": "PostgreSQL", "sub": "satu transaction per pembayaran" }
+      ]
+    }
+  ],
+  "catatan": "Kuning: aturan uang tersebar di lebih dari satu tempat. Hijau: satu tempat yang Raka tulis, tes, dan review sendiri."
+}
