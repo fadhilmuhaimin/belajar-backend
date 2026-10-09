@@ -14,8 +14,8 @@ Location: /transfers/1
 
 {"id":1,"saldo":225000}
 
-# --- B. Relasi di skema: setiap foreign key menunjuk ke akun ---
-$ psql -c "SELECT conrelid::regclass AS tabel, conname AS nama, pg_get_constraintdef(oid) AS aturan FROM pg_constraint WHERE contype = 'f' AND connamespace = 'tahap1'::regnamespace ORDER BY 1, 2"
+# --- B. Relasi di skema minggu 1 (tabel koreksi baru ada sejak minggu 3): setiap foreign key menunjuk ke akun ---
+$ psql -c "SELECT conrelid::regclass AS tabel, conname AS nama, pg_get_constraintdef(oid) AS aturan FROM pg_constraint WHERE contype = 'f' AND connamespace = 'tahap1'::regnamespace AND conrelid <> 'koreksi'::regclass ORDER BY 1, 2"
    tabel   |        nama         |                   aturan                   
 -----------+---------------------+--------------------------------------------
  sesi      | sesi_akun_id_fkey   | FOREIGN KEY (akun_id) REFERENCES akun(id)

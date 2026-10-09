@@ -49,3 +49,15 @@ CREATE TABLE transaksi (
 CREATE INDEX transaksi_dari_dibuat ON transaksi (dari, dibuat DESC);
 CREATE INDEX transaksi_ke_dibuat   ON transaksi (ke, dibuat DESC);
 -- --8<-- [end:transaksi]
+
+-- --8<-- [start:koreksi]
+-- ADR 6: setiap perubahan saldo di luar bayar dan top-up punya baris di sini. Baris tidak pernah diubah atau dihapus.
+CREATE TABLE koreksi (
+  id       bigserial   PRIMARY KEY,
+  akun_id  bigint      NOT NULL REFERENCES akun(id),
+  jumlah   bigint      NOT NULL CHECK (jumlah <> 0),                -- positif menambah, negatif mengurangi
+  alasan   text        NOT NULL CHECK (length(trim(alasan)) >= 20), -- kenapa
+  admin_id bigint      NOT NULL REFERENCES akun(id),                -- siapa
+  dibuat   timestamptz NOT NULL DEFAULT now()                       -- kapan
+);
+-- --8<-- [end:koreksi]

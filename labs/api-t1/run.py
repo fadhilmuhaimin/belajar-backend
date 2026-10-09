@@ -444,9 +444,10 @@ def rekam_relasi():
     s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 25000}', token=budi)
     harap(s, 201, "bayar Rp25.000")
 
-    bagian("B. Relasi di skema: setiap foreign key menunjuk ke akun")
+    bagian("B. Relasi di skema minggu 1 (tabel koreksi baru ada sejak minggu 3): setiap foreign key menunjuk ke akun")
     fk = sql("SELECT conrelid::regclass AS tabel, conname AS nama, pg_get_constraintdef(oid) AS aturan "
-             "FROM pg_constraint WHERE contype = 'f' AND connamespace = 'tahap1'::regnamespace ORDER BY 1, 2")
+             "FROM pg_constraint WHERE contype = 'f' AND connamespace = 'tahap1'::regnamespace "
+             "AND conrelid <> 'koreksi'::regclass ORDER BY 1, 2")
     harap(fk.count("REFERENCES akun(id)"), 5, "lima foreign key ke akun")
 
     bagian("C. Transaksi ke akun yang tidak ada ditolak database")
@@ -817,8 +818,61 @@ def rekam_m4():
     tulis("m4.txt")
 
 
+KOREKSI_BUDI = ("SELECT a.saldo, t.topup, k.keluar, m.masuk, x.koreksi, t.topup - k.keluar + m.masuk + x.koreksi AS dari_catatan "
+                "FROM akun a, (SELECT coalesce(sum(nominal), 0) AS topup FROM topup WHERE akun_id = 419) t, "
+                "(SELECT coalesce(sum(jumlah), 0) AS keluar FROM transaksi WHERE dari = 419) k, "
+                "(SELECT coalesce(sum(jumlah), 0) AS masuk FROM transaksi WHERE ke = 419) m, "
+                "(SELECT coalesce(sum(jumlah), 0) AS koreksi FROM koreksi WHERE akun_id = 419) x WHERE a.id = 419")
+
+
+def rekam_koreksi():
+    """1.24 ADR 6: tabel koreksi (keputusan 170). Insiden M4, lalu koreksi Rp70.000 yang tercatat."""
+    reset()
+    bagian("A. Insiden M4 diulang: server minggu 3 (mode rentan m4), batas saldo warung, 29 pembayaran, Budi Rp70.000")
+    sql(BATAS_WARUNG)
+    mulai("-rentan", "m4")
+    topup_awal()
+    bayar_banyak(29, 50000)
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    n = len(log)
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 70000}', token=budi)
+    harap(s, 500, "insiden M4")
+    del log[n:]
+    log.append("# Budi membayar Rp70.000: 500, saldo terpotong tanpa baris transaksi (rinciannya di m4.txt)\n")
+    harap(total(), ["24930000", "25000000", "29"], "selisih Rp70.000")
+    stop()
+
+    bagian("B. Versi benar di-deploy (data tetap). Hanya admin yang boleh mengoreksi, dan alasan wajib")
+    mulai()
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    admin = login("admin.tunjangan@lestari.example", "sementara-400", "<token sesi admin>")
+    s, _ = curl("POST", "/koreksi", '{"akun": 419, "jumlah": 70000, "alasan": "saldo saya hilang, tolong kembalikan"}', token=budi)
+    harap(s, 403, "karyawan tidak boleh koreksi")
+    s, b = curl("POST", "/koreksi", '{"akun": 419, "jumlah": 70000, "alasan": "salah sistem"}', token=admin)
+    harap((s, json.loads(b)["errors"][0]["field"]), (422, "alasan"), "alasan terlalu pendek")
+
+    bagian("C. Admin mengoreksi saldo Budi, dengan alasan yang bisa dibaca Keuangan")
+    p = posisi_log()
+    alasan = "Pembayaran Budi ke Warung Ani, Jumat minggu 3 pukul 12.15, gagal di tengah; saldo terpotong tanpa baris transaksi (M4)"
+    s, b = curl("POST", "/koreksi", json.dumps({"akun": 419, "jumlah": 70000, "alasan": alasan}, ensure_ascii=False), token=admin)
+    harap((s, json.loads(b)["saldo"]), (201, 250000), "koreksi tercatat")
+    time.sleep(0.3)
+    st = [x for x in log_statement(p) if x.lower().startswith(("begin", "commit", "rollback", "update akun", "insert into koreksi"))]
+    harap([x.split()[0].upper() for x in st], ["BEGIN", "UPDATE", "INSERT", "COMMIT"], "koreksi dalam satu transaction")
+    log.append("# yang diterima PostgreSQL (log_statement=all):\n" + "\n".join(st) + "\n\n")
+    sql("SELECT akun_id, jumlah, admin_id, alasan FROM koreksi")
+    harap(total(), ["25000000", "25000000", "29"], "total kembali")
+
+    bagian("D. Rekonsiliasi akun Budi dari catatan: top-up - keluar + masuk + koreksi")
+    hasil = sql(KOREKSI_BUDI)
+    harap([x.strip() for x in hasil.split("\n")[2].split("|")], ["250000", "250000", "0", "0", "70000", "320000"],
+          "pemotongan M4 tanpa baris: catatan menghitung 320000")
+    log.append("# Saldo Rp250.000, catatan menghitung Rp320.000. Pemotongan Rp70.000 di M4 tidak punya baris di tabel mana pun.\n")
+    tulis("koreksi.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()
