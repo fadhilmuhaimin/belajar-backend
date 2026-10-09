@@ -56,7 +56,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-09 (sesi 2) · Redesain dilanjutkan, branch `redesain/tampilan`, PR #120 (jangan merge). PR #117 ditutup. Selesai: 201 tipografi + layar pertama (eb8320c), 203 blok tanpa kotak (a61af02), 204 Berikutnya (7f653df), 205 meta PRD (46229f8), 208 beranda baru + widget tebak (5cb9df1). Sisa: (6) progres baca 206, ilustrasi kecil di awal blok cerita 207, transisi buka blok; push; (7) tangkapan sebelum/sesudah + riset di `plan/AUDIT-TAMPILAN.md`, PROPOSAL "Desain visual final" + CLAUDE.md beranda (bukan lagi satu layar penuh, keputusan 208) perlu persetujuan pemilik untuk PROPOSAL. Gerbang manual di preview 127.0.0.1:4322 (proses astro preview lama masih hidup, membaca dist terbaru). Alat sementara di scratchpad: shot.mjs, full.mjs, axe/axe.min.js.
+2026-10-09 (sesi 2) · Redesain langkah 1–7 selesai di branch `redesain/tampilan`, PR #120 draft (JANGAN merge; pemilik memutuskan). Keputusan 201, 203–208 tercatat; 209–219 masih bebas untuk redesain. Sisa yang menunggu pemilik: (a) merge PR #120; (b) usulan perubahan PROPOSAL + CLAUDE.md di `plan/AUDIT-TAMPILAN.md` bagian 6. Setelah merge, lanjut konten dari 1.20 (lihat paragraf 2026-10-08 di bawah) di atas `main` baru; halaman masalah baru memakai `<Blok ... ilustrasi="mN">` (tambah adegan di `situs/src/components/Ilustrasi.astro`), dan 1.42 memakai widget `tebak`. Paragraf sesi 1 di bawah ini sudah usang kecuali nomor keputusan.
 
 2026-10-09 · SESI REDESAIN TAMPILAN, BERHENTI atas permintaan pemilik (tidak ada pekerjaan baru di sesi ini). PR TIDAK di-merge; pemilik yang memutuskan.
 - Branch `redesain/tampilan` (dari `main` a2084bd), PR draft #120 terbuka (https://github.com/fadhilmuhaimin/rekeningo-tech-journey/pull/120), JANGAN merge. Commit lolos gerbang: e3d3f6a audit (keputusan 200), 227014f satu kolom baca (202). Gerbang terakhir di 227014f: `tools/cek_situs.sh` lolos; `layar.mjs` 0 gagal 0 tipis; `tangkap.mjs` 9 ok (layar dan tangkapan dijalankan manual terhadap preview 127.0.0.1:4322 karena port 4321 dipakai dev server pemilik, lihat Pelajaran).
@@ -70,6 +70,10 @@ Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran
+
+- Token di `:root[data-theme="light"]` (mis. `--sl-content-width`) mengalahkan override splash Starlight; beranda harus menyetel lebarnya sendiri di `.content-panel:has(.beranda)`.
+- Build `main` di worktree: symlink `node_modules` membuat Vite gagal (path ganda); pakai `cp -cR` (clone APFS) dan salin `public/fonts` (di-.gitignore).
+- Audit bahasa menolak kata "pemakai" (juga di kunci JSON registry); pakai "user".
 
 - `tools/cek_situs.sh --layar` menyalakan preview di 127.0.0.1:4321; bila port itu dipakai dev server (yang mendengar di `localhost`), langkah layar gagal ECONNREFUSED. Jalankan `node tools/layar.mjs --url <preview lain>` dan `tangkap.mjs --url` manual; jangan mematikan dev server pemilik.
 - Starlight 0.42 menyetel ukuran artikel dari `--sl-text-base`, bukan `--sl-text-body`; aturan `details {font-size:0.92em}` mengenai `details.blok` (keputusan 200).

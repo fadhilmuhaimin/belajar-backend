@@ -1,6 +1,6 @@
 # Status
 
-Diperbarui: 2026-10-09 (sesi redesain tampilan berhenti; PR draft #120). Catatan singkat tentang keadaan panduan dan pekerjaan yang masih terbuka. Keputusan dan alasannya ada di [KEPUTUSAN.md](KEPUTUSAN.md).
+Diperbarui: 2026-10-09 (redesain tampilan langkah 1–7 selesai; PR draft #120 menunggu pemilik). Catatan singkat tentang keadaan panduan dan pekerjaan yang masih terbuka. Keputusan dan alasannya ada di [KEPUTUSAN.md](KEPUTUSAN.md).
 
 ## Keadaan sekarang
 
@@ -62,12 +62,16 @@ Masalah pemilik (pembaca ADHD): kaku, padat, teks kecil, kontras kurang, beranda
 |---|---|
 | Ukur sebelum (keputusan 200) | Selesai: teks isi 16/14,7 px (spesifikasi 19 px tidak pernah berlaku), 9 jenis teks UI < 14 px, sekunder 7,83:1, axe `color-contrast` 13 elemen dan `link-in-text-block` |
 | Riset bersumber | Selesai (laporan subagen), belum ditulis ke AUDIT-TAMPILAN.md bagian 2 |
-| Tipografi (201) | Di stash `redesain-tipografi`; axe 0 pelanggaran, tapi layar pertama gagal di 9 halaman lama (diukur sebelum 202) |
-| Satu kolom, TOC tersembunyi, sidebar terlipat, menu peran (202) | Commit 227014f, gerbang hijau |
-| Blok tanpa kotak, Berikutnya, meta PRD, progres baca, ilustrasi blok (203–207) | Belum |
-| Beranda baru (208+) | Belum |
-| Tangkapan sebelum/sesudah, ukur ulang | Belum |
-| PR #117 (konten 1024 px, keputusan 163) | Terbuka, bertentangan dengan kolom 680 px; menunggu pemilik |
+| Tipografi + layar pertama (201) | Commit eb8320c; layar pertama 0 gagal, 1 tipis (b3-1 lama) |
+| Satu kolom, TOC tersembunyi, sidebar terlipat, menu peran (202) | Commit 227014f |
+| Blok tanpa kotak, selesai setelah digulir (203) | Commit a61af02 |
+| Berikutnya kecil rata kanan (204) | Commit 7f653df |
+| Kepala PRD dua baris (205) | Commit 46229f8 |
+| Progres baca, ilustrasi blok cerita, transisi buka (206, 207) | Commit 3a2add4 |
+| Beranda baru + widget React tebak (208) | Commit 5cb9df1 |
+| Riset bersumber, ukuran sesudah, tangkapan sebelum/sesudah | Commit 0a0b526, `plan/AUDIT-TAMPILAN.md`; gambar di `situs/tangkapan/banding/` (tidak di-commit) |
+| PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` | Usulan di AUDIT-TAMPILAN.md bagian 6; menunggu pemilik |
+| PR #117 (konten 1024 px, keputusan 163) | Ditutup 2026-10-09 |
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 
