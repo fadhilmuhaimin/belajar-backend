@@ -47,8 +47,8 @@ Autofix:
 
 Summary:
   Gosec  : dev
-  Files  : 13
-  Lines  : 1124
+  Files  : 16
+  Lines  : 1271
   Nosec  : 0
   Issues : 1
 # exit status 1

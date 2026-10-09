@@ -41,7 +41,11 @@ Service memeriksa tiga aturan sebelum uang disentuh: jumlah masuk akal, penerima
 
 Perhatikan cara saldo diperiksa: service membaca saldo, lalu membandingkannya. Untuk satu request, ini benar. Untuk dua request yang datang bersamaan, ada celah, dan celah itu baru terlihat di Tahap 2.
 
-Repo menjalankan ketiga perubahan dalam satu transaction. Di server uji coba, transaction ini baru ditambahkan setelah [[t1-m4]] di minggu 3.
+Service membuka satu transaction untuk ketiga perubahan. Di server uji coba, transaction ini baru ditambahkan setelah [[t1-m4]] di minggu 3, dan tempatnya di service diputuskan di [[t1-adr-transaction]].
+
+<Snippet file="labs/api-t1/internal/service/bayar.go" region="pindahkan" lang="go" title="labs/api-t1/internal/service/bayar.go" />
+
+Repo menyediakan SQL untuk ketiga langkah. Method-nya milik `Tx`, jadi tidak bisa dipanggil di luar transaction:
 
 <Snippet file="labs/api-t1/internal/repo/transaksi.go" region="pindahkan" lang="go" title="labs/api-t1/internal/repo/transaksi.go" />
 

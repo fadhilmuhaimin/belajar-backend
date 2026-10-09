@@ -38,7 +38,26 @@ func (s Service) Bayar(ctx context.Context, peminta, ke, jumlah int64) (id, sald
 	if pembayar.Saldo < jumlah {
 		return 0, 0, ErrSaldoKurang
 	}
-	return s.repo.Pindahkan(ctx, peminta, ke, jumlah)
+	return s.pindahkan(ctx, peminta, ke, jumlah)
 }
 
 // --8<-- [end:bayar]
+
+// --8<-- [start:pindahkan]
+// pindahkan: satu pembayaran adalah satu transaction, dan service yang membukanya (ADR 5).
+// Kalau salah satu langkah gagal, DalamTx mengirim ROLLBACK dan ketiganya batal.
+func (s Service) pindahkan(ctx context.Context, dari, ke, jumlah int64) (id, saldo int64, err error) {
+	err = s.repo.DalamTx(ctx, func(tx repo.Tx) error {
+		if saldo, err = tx.KurangiSaldo(ctx, dari, jumlah); err != nil {
+			return err
+		}
+		if err = tx.TambahSaldo(ctx, ke, jumlah); err != nil {
+			return err
+		}
+		id, err = tx.CatatTransaksi(ctx, dari, ke, jumlah)
+		return err
+	})
+	return id, saldo, err
+}
+
+// --8<-- [end:pindahkan]
