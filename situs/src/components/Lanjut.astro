@@ -17,3 +17,6 @@ const next = i >= 0 && i + 1 < urut.length ? urut[i + 1] : null;
     {next && <a href={url(next)} class:list={["bb-lanjut__next", { menyusul: !next.diporting }]} rel="next"><span>Berikutnya →</span>{label(next)}</a>}
   </nav>
 )}
+{Astro.locals.starlightRoute.entry.data.template !== "splash" && (
+  <p class="catatan-fiktif">{d.app}, Grup Lestari, semua tokoh, dan semua angka cerita di panduan ini fiktif.</p>
+)}

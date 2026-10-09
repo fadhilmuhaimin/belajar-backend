@@ -85,7 +85,8 @@
   --sl-text-h2: 1.3rem;
   --sl-text-h3: 1.2rem;
   --sl-text-h4: 1.05rem;
-  --sl-content-width: 42.5rem;    /* 680 px: satu kolom baca (redesain, keputusan 201) */
+  --sl-content-width: 64rem;      /* wadah 1024 px: diagram, tabel, kode, dan widget boleh selebar ini (keputusan 209) */
+  --rk-ukur: 48rem;               /* 768 px, ±73 karakter per baris di 20 px: lebar teks (keputusan 209) */
 
   /* Shiki (tema css-variables, src/lib/shiki-tema.mjs) */
   --shiki-foreground: var(--teks);
@@ -852,9 +853,7 @@ nav.kamu .kamu__rekap { grid-column: 1 / -1; }
 .content-panel + .content-panel { padding-top: 0.45rem; }
 .kamu__toc { display: inline-flex; align-items: center; gap: 0.35rem; }
 .kamu__toc-ikon { flex: none; }
-/* Judul halaman tepat di bawah jalur, jadi nama halaman di jalur hanya untuk pembaca layar (HP dan desktop);
-   jalur tetap satu baris saat tombol daftar isi ada di sebelahnya. */
-.kamu__jalur li[aria-current] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
 .sl-markdown-content details.blok:first-of-type { margin-top: 0; border-top: 0; }
 .sl-markdown-content details.blok:first-of-type > summary.blok__kepala { padding-top: 0.6rem; }
 /* Meta tepat di atas blok pertama: kepala blok sudah memberi ruang atas. */
@@ -895,3 +894,40 @@ html[data-fokus="ya"] .baca-progres { top: 0; }
 @keyframes blok-muncul { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 .sl-markdown-content details.blok.blok--muncul > .blok__isi { animation: blok-muncul 180ms ease-out; }
 @media (prefers-reduced-motion: reduce) { .sl-markdown-content details.blok.blok--muncul > .blok__isi { animation: none; } }
+
+/* ==========================================================================
+   Redesain · lebar kolom (keputusan 209). Teks 48rem (±73 karakter per baris; Baymard 50–75, WCAG 1.4.8 ≤ 80);
+   diagram, tabel, kode, dan widget boleh melebar sampai wadah 64rem supaya kiri-kanan tidak kosong. Elemen lebar
+   paling sempit selebar teks dan selalu di tengah, jadi tepi kirinya sejajar teks bila isinya pendek.
+   ========================================================================== */
+main > .content-panel:first-of-type > .sl-container { max-width: var(--rk-ukur); }
+/* Kelas digandakan supaya menang atas aturan lama yang menulis margin: x 0 (mis. p.blok__lanjut-baris, .prd-kepala). */
+.sl-markdown-content.sl-markdown-content > :not(.not-content), .sl-markdown-content.sl-markdown-content .blok__isi.blok__isi > *,
+.sl-markdown-content details.blok > summary.blok__kepala, nav.bb-lanjut, p.catatan-fiktif { max-width: var(--rk-ukur); margin-inline: auto; }
+.sl-markdown-content.sl-markdown-content > details.blok { max-width: none; }
+.sl-markdown-content.sl-markdown-content :is(.sl-markdown-content > *, .blok__isi.blok__isi > *):is(div.highlight, table, [data-bb], figure:not(.blok__ilustrasi), astro-island, .tabbed-set, pre, .expressive-code) {
+  width: fit-content; min-width: min(100%, var(--rk-ukur)); max-width: 100%; margin-inline: auto;
+}
+/* Garis pemisah blok pindah ke kepala blok, supaya selebar teks. */
+.sl-markdown-content details.blok { border-top: 0; }
+.sl-markdown-content details.blok:last-of-type { border-bottom: 0; }
+.sl-markdown-content details.blok + details.blok > summary.blok__kepala { border-top: 1px solid var(--garis); }
+/* Ilustrasi blok cerita: di atas teks, rata kiri kolom teks (tidak mengapung ke tepi wadah lebar). */
+.sl-markdown-content figure.blok__ilustrasi { float: none; width: auto; margin: 0 auto 0.8rem; }
+.sl-markdown-content figure.blok__ilustrasi svg { width: 12.5rem; }
+
+/* ==========================================================================
+   Redesain · bagian atas halaman (keputusan 210): jalur, judul, meta. Tanpa label "Kamu di sini" yang terlihat,
+   tanpa rekap tahap (pindah ke tooltip tautan tahap), tanpa garis di antara judul dan meta, jenis halaman sebagai
+   butir terakhir jalur, tombol daftar isi tanpa bingkai.
+   ========================================================================== */
+.content-panel + .content-panel { border-top: 0; padding-top: 0; }
+.content-panel:has(nav.kamu) { padding-bottom: 0.2rem; }
+.content-panel h1 { margin-top: 0.1rem; }
+.sl-markdown-content p.meta:has(+ details.blok) { margin-bottom: 0.5rem; }
+.sl-markdown-content details.blok:first-of-type > summary.blok__kepala { padding-top: 1rem; }
+.kamu__sr, .kamu__ini:not(.kamu__ini--jenis) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.kamu__jalur li.kamu__ini--jenis { color: var(--teks-2); font-weight: 400; }
+.kamu__toc { border-color: transparent; color: var(--teks-2); padding-inline: 0.4rem; }
+.kamu__toc:hover, .kamu__toc[aria-expanded="true"] { border-color: transparent; color: var(--aksen); }
+p.catatan-fiktif { margin-top: 1.6rem; color: var(--teks-2); font-size: var(--rk-ui); }

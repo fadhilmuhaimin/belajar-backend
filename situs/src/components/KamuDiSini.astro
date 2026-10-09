@@ -1,7 +1,7 @@
 ---
 /**
- * "Kamu di sini" (keputusan 120): satu baris jalur Tahap › Bagian › Halaman di atas judul, plus rekap satu kalimat
- * tahap ini (rekap di registry sudah memuat tanda fiktif). Dibuat otomatis dari registry untuk setiap halaman terdaftar (dipanggil JudulHalaman.astro), jadi
+ * "Kamu di sini" (keputusan 120, dirapikan 210): satu baris jalur Tahap › Bagian › jenis halaman di atas judul.
+ * Rekap tahap ada di tooltip tautan tahap; catatan fiktif ada di bawah halaman (Lanjut.astro). Dibuat otomatis dari registry untuk setiap halaman terdaftar (dipanggil JudulHalaman.astro), jadi
  * halaman tidak perlu menulis komponen ini sendiri. Di HP hanya jalur pendek yang tampil.
  */
 import { muat, label, url, urlDariId, dariUrl } from "../../tools/registri.mjs";
@@ -15,25 +15,32 @@ const kelompok = h ? (t?.bagian?.find((b) => b.no === h.bagian)?.nama ?? h.kelom
 const pembuka = t ? d.halaman.find((x: { tahap: unknown; ada: boolean }) => x.tahap === t.no && x.ada) : undefined;
 // Redesain (keputusan 202): daftar isi tersembunyi bawaan; tombol ini membukanya di semua ukuran layar.
 const adaToc = (Astro.locals.starlightRoute.toc?.items?.length ?? 0) > 0;
+// Butir terakhir jalur (keputusan 210): jenis halaman, tanpa bagian yang sudah tertulis di judul atau jalur.
+// Mis. "ADR 1" tetap; "Masalah 3" dibuang bila judul memuat "M3"; "PRD" dibuang di bagian PRD.
+const { jenis = "" } = Astro.props as { jenis?: string };
+const judul = String(Astro.locals.starlightRoute.entry.data.title ?? "").toLowerCase();
+const ulang = (x: string) => {
+  const k = x.toLowerCase(), m = /^masalah (\d+)$/.exec(k);
+  return judul.includes(k) || (m !== null && judul.includes(`m${m[1]}`)) || k === String(kelompok ?? "").toLowerCase();
+};
+const tanda = jenis.split(" · ").filter((x) => x && !ulang(x)).join(" · ");
 ---
 {h && (
   <div class="baca-progres" aria-hidden="true"><span data-progres></span></div>
   <nav class="kamu" aria-label="Kamu di sini" data-judul-halaman={label(h)}>
     <ol class="kamu__jalur">
-      <li><span class="kamu__tag">Kamu di sini</span></li>
       {t
-        ? <li><a href={pembuka ? url(pembuka) : undefined}>Tahap {t.no}<span class="kamu__panjang"> · {t.nama}{t.versi === "lama" ? " (versi lama)" : ""}</span></a></li>
+        ? <li><a href={pembuka ? url(pembuka) : undefined} title={t.rekap}>Tahap {t.no}<span class="kamu__panjang"> · {t.nama}{t.versi === "lama" ? " (versi lama)" : ""}</span></a></li>
         : <li>{NAMA[h.tahap] ?? h.tahap}</li>}
       {kelompok && <li class="kamu__panjang">{kelompok}</li>}
-      <li aria-current="page">{label(h, true)}</li>
+      <li aria-current="page" class:list={["kamu__ini", { "kamu__ini--jenis": tanda }]}><span class="kamu__sr">{label(h, true)}</span>{tanda && <span aria-hidden="true">{tanda}</span>}</li>
     </ol>
     {adaToc && (
-      <button type="button" class="kamu__toc" data-toc-tombol aria-expanded="false" aria-label="Isi halaman" title="Isi halaman">
+      <button type="button" class="kamu__toc" data-toc-tombol aria-expanded="false" aria-label="Isi halaman">
         <svg class="kamu__toc-ikon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 3.5h1.5M5.5 3.5H14M2 8h1.5M5.5 8H14M2 12.5h1.5M5.5 12.5H14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
         <span class="kamu__toc-teks">Isi halaman</span>
       </button>
     )}
-    {t && <p class="kamu__rekap">{t.rekap}</p>}
   </nav>
 )}
 
