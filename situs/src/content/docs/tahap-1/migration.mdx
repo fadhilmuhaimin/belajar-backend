@@ -3,6 +3,8 @@ title: "1.25 Migration: skema sebagai kode"
 description: Setiap perubahan skema adalah file bernomor di Git, dan database mencatat versi yang sudah dijalankan. Konsep yang lahir dari batas saldo warung yang ditambah tangan di server.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import drift from "../../../../data/diagram/t1-migration-drift.json";
 import Snippet from "../../../components/Snippet.astro";
 import TabSet from "../../../components/TabSet.astro";
 import WidgetLama from "../../../components/WidgetLama.astro";
@@ -16,12 +18,11 @@ import SkripLama from "../../../components/SkripLama.astro";
 
 Migration menulis setiap perubahan skema sebagai file bernomor di Git.
 
-<figure>
-<Snippet file="labs/b4-migration/output/migrate.txt" lines="4:7" />
-<figcaption>Rekaman lab: laptop Raka.</figcaption>
-</figure>
+<Rantai data={drift} ringkas />
 
-Database mencatat versi yang sudah dijalankan. Mesin mana pun yang menjalankan file yang sama mendapat skema yang sama, dan bisa membuktikannya.
+Database mencatat versi terakhir yang sudah dijalankan di tabel `schema_migrations`. Mesin mana pun yang menjalankan file yang sama mendapat skema yang sama. Di minggu 2, Raka menambah batas saldo warung lewat `psql` di server saja. Laptop dan server sama-sama di versi 3, tapi server punya 3 constraint dan laptop 2.
+
+Di minggu 3, batas itu ditulis sebagai file `000005`. Server menolaknya karena constraint sudah ada, lalu berhenti di versi 5 dengan tanda dirty. Raka memeriksa skema server, menjalankan `force 5`, dan sekarang kedua mesin di versi 5 dengan 3 constraint yang sama.
 
 <details class="question">
 <summary>Sudah tahu? Cek 3 pertanyaan</summary>
