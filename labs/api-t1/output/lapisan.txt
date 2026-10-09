@@ -1,0 +1,40 @@
+
+# --- A. Import tiap lapisan, menurut go list ---
+$ go list -f '{{.ImportPath}}: {{join .Imports " "}}' ./internal/...
+internal/handler: context encoding/json errors fmt io internal/service log net/http strconv strings time
+internal/repo: context database/sql errors fmt time
+internal/service: context crypto/rand crypto/sha256 encoding/csv encoding/hex errors fmt golang.org/x/crypto/bcrypt internal/repo strconv strings time
+
+
+# --- B. Aturan arah: handler tidak tahu SQL, service tidak tahu HTTP, repo tidak tahu aturan uang ---
+$ python3 cek_arah.py
+handler: lolos
+repo: lolos
+service: lolos
+# exit status 0
+
+# --- C. Pintas AI: handler menjalankan SQL sendiri (file sementara internal/handler/pintas_ai.go) ---
+$ cat internal/handler/pintas_ai.go
+package handler
+
+import (
+	"database/sql"
+	"net/http"
+)
+
+// cariLangsung: pintas buatan AI. Handler menjalankan SQL sendiri, melewati service dan repo.
+func cariLangsung(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	rows, err := db.QueryContext(r.Context(),
+		`SELECT id, nama FROM akun WHERE jenis = 'warung' AND nama ILIKE '%' || $1 || '%'`, r.URL.Query().Get("cari"))
+	if err == nil {
+		rows.Close()
+	}
+}
+
+$ go build ./...
+# exit status 0: compiler Go tidak tahu soal lapisan
+$ python3 cek_arah.py
+handler: mengimpor database/sql (dilarang)
+repo: lolos
+service: lolos
+# exit status 1

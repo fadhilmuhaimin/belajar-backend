@@ -708,8 +708,54 @@ def rekam_injection():
     tulis("injection.txt")
 
 
+PINTAS = """package handler
+
+import (
+	"database/sql"
+	"net/http"
+)
+
+// cariLangsung: pintas buatan AI. Handler menjalankan SQL sendiri, melewati service dan repo.
+func cariLangsung(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	rows, err := db.QueryContext(r.Context(),
+		`SELECT id, nama FROM akun WHERE jenis = 'warung' AND nama ILIKE '%' || $1 || '%'`, r.URL.Query().Get("cari"))
+	if err == nil {
+		rows.Close()
+	}
+}
+"""
+
+
+def rekam_lapisan():
+    """1.21 Lapisan dasar (keputusan 165): arah import antar lapisan, diperiksa cek_arah.py."""
+    bagian("A. Import tiap lapisan, menurut go list")
+    r = subprocess.run(["go", "list", "-f", "{{.ImportPath}}: {{join .Imports \" \"}}", "./internal/..."],
+                       cwd=HERE, capture_output=True, text=True, check=True)
+    log.append("$ go list -f '{{.ImportPath}}: {{join .Imports \" \"}}' ./internal/...\n" + r.stdout.replace("lab/apit1/", "") + "\n")
+
+    bagian("B. Aturan arah: handler tidak tahu SQL, service tidak tahu HTTP, repo tidak tahu aturan uang")
+    c = subprocess.run([sys.executable, "cek_arah.py"], cwd=HERE, capture_output=True, text=True)
+    harap((c.returncode, c.stdout.count("lolos")), (0, 3), "cek_arah: tiga lapisan lolos")
+    log.append(f"$ python3 cek_arah.py\n{c.stdout}# exit status {c.returncode}\n")
+
+    bagian("C. Pintas AI: handler menjalankan SQL sendiri (file sementara internal/handler/pintas_ai.go)")
+    f = HERE / "internal/handler/pintas_ai.go"
+    try:
+        f.write_text(PINTAS)
+        log.append("$ cat internal/handler/pintas_ai.go\n" + PINTAS + "\n")
+        b = subprocess.run(["go", "build", "./..."], cwd=HERE, capture_output=True, text=True)
+        harap(b.returncode, 0, "pintas tetap lolos compile")
+        log.append(f"$ go build ./...\n# exit status {b.returncode}: compiler Go tidak tahu soal lapisan\n")
+        c = subprocess.run([sys.executable, "cek_arah.py"], cwd=HERE, capture_output=True, text=True)
+        harap((c.returncode, "handler: mengimpor database/sql (dilarang)" in c.stdout), (1, True), "cek_arah menolak pintas")
+        log.append(f"$ python3 cek_arah.py\n{c.stdout}# exit status {c.returncode}\n")
+    finally:
+        f.unlink(missing_ok=True)
+    tulis("lapisan.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()
