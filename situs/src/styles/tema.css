@@ -852,7 +852,11 @@ nav.kamu .kamu__rekap { grid-column: 1 / -1; }
 .content-panel + .content-panel { padding-top: 0.45rem; }
 .kamu__toc { display: inline-flex; align-items: center; gap: 0.35rem; }
 .kamu__toc-ikon { flex: none; }
+/* Judul halaman tepat di bawah jalur, jadi nama halaman di jalur hanya untuk pembaca layar (HP dan desktop);
+   jalur tetap satu baris saat tombol daftar isi ada di sebelahnya. */
+.kamu__jalur li[aria-current] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .sl-markdown-content details.blok:first-of-type { margin-top: 0; border-top: 0; }
+.sl-markdown-content details.blok:first-of-type > summary.blok__kepala { padding-top: 0.6rem; }
 /* Meta tepat di atas blok pertama: kepala blok sudah memberi ruang atas. */
 .sl-markdown-content p.meta:has(+ details.blok) { margin-bottom: 0.2rem; }
 .sl-markdown-content details.blok[open] > summary.blok__kepala { padding-bottom: 0.6rem; }
@@ -862,8 +866,6 @@ nav.kamu .kamu__rekap { grid-column: 1 / -1; }
   .kamu__toc { padding: 0.3rem; }
   /* Ruang samping diagram lebih sempit di HP supaya baris tidak patah lebih cepat. */
   .sl-markdown-content figure.bb-fig { padding-inline: 0.6rem; }
-  /* Di HP judul halaman tepat di bawah jalur; nama halaman di jalur hanya untuk pembaca layar. */
-  .kamu__jalur li[aria-current] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .kamu__toc-teks { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 
