@@ -1,6 +1,6 @@
 # Status
 
-Diperbarui: 2026-10-09 (redesain tampilan langkah 1–7 selesai; PR draft #120 menunggu pemilik). Catatan singkat tentang keadaan panduan dan pekerjaan yang masih terbuka. Keputusan dan alasannya ada di [KEPUTUSAN.md](KEPUTUSAN.md).
+Diperbarui: 2026-10-09 (redesain #120 di-merge; sistem kerja otomatis siap, keputusan 216). Catatan singkat tentang keadaan panduan dan pekerjaan yang masih terbuka. Keputusan dan alasannya ada di [KEPUTUSAN.md](KEPUTUSAN.md).
 
 ## Keadaan sekarang
 
@@ -58,11 +58,20 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.24 ADR 5–6: Transaction di service; tabel koreksi | Lab `DalamTx` + tabel koreksi (keputusan 170), halaman ADR + runsql `t1-adr6.json` (keputusan 171) |
 | 1.25 Migration: skema sebagai kode | Lab `b4-migration` ditulis ulang ke skema v1 (keputusan 172), halaman + alur `t1-migration.json` (keputusan 173) |
 
-Diperbarui 2026-10-08. 25 dari 42 halaman selesai; berikutnya 1.26. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
+Diperbarui 2026-10-09. 25 dari 42 halaman selesai; berikutnya 1.26 lewat loop otomatis (antrean di `plan/ANTREAN.md`).
 
-## Redesain tampilan (sesi 2026-10-09, menunggu keputusan pemilik)
+## Sistem kerja otomatis (keputusan 216)
 
-Masalah pemilik (pembaca ADHD): kaku, padat, teks kecil, kontras kurang, beranda tanpa aktivitas. Branch `redesain/tampilan`, PR draft #120 (jangan merge). Rincian dan langkah berikutnya di MEMORI "Sedang dikerjakan"; ukuran di `plan/AUDIT-TAMPILAN.md`.
+| Bagian | Keadaan |
+|---|---|
+| `plan/ANTREAN.md` | 46 tugas awal: K0, I1–I4, 1.26–1.42 dengan I5a–I5f dan crosscheck kecil K1–K3, P1–P4, R1–R6, X1–X2 |
+| `plan/PROTOKOL-OTOMATIS.md` | Dibaca setiap iterasi; satu tugas per iterasi, maksimal 3 percobaan, parkir, laporan pagi |
+| `tools/jalankan-otomatis.sh` | `claude -p` per iterasi, `dontAsk` + allowlist, model Opus 5.5 dengan cadangan Opus 4.8, syarat berhenti, laporan pagi + notifikasi |
+| `tools/antrean.py` | Pemeriksa format (masuk gerbang), pemilih tugas berikutnya, parkir dari skrip |
+
+## Redesain tampilan (sesi 2026-10-09, di-merge lewat #120)
+
+Masalah pemilik (pembaca ADHD): kaku, padat, teks kecil, kontras kurang, beranda tanpa aktivitas. PR #120 di-merge 2026-10-09 atas keputusan pemilik (keputusan 217); sisa langkah 5–6 sesi 3 jadi tugas R1–R6 di ANTREAN. Rincian dan langkah berikutnya di MEMORI "Sedang dikerjakan"; ukuran di `plan/AUDIT-TAMPILAN.md`.
 
 | Langkah | Keadaan |
 |---|---|

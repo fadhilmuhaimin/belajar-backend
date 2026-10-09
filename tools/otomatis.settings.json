@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(/CLAUDE.md)",
+      "Edit(/plan/CERITA-*.md)",
+      "Edit(/plan/PROPOSAL.md)",
+      "Edit(/plan/PROTOKOL-OTOMATIS.md)",
+      "Edit(/.claude/**)",
+      "Edit(/tools/jalankan-otomatis.sh)",
+      "Edit(/tools/otomatis.settings.json)",
+      "Bash(gh secret *)",
+      "Bash(gh api *)",
+      "Bash(gh repo delete *)",
+      "Bash(gh workflow *)",
+      "Bash(claude *)",
+      "Bash(osascript *)"
+    ]
+  }
+}

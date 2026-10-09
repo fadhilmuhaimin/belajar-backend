@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Digantikan tools/jalankan-otomatis.sh (keputusan 216); file ini dibiarkan sebagai arsip.
 # Loop headless Tahap 1 (keputusan 140). Tahan ditinggal:
 #   - tiap iterasi satu sesi `claude -p` baru untuk SATU halaman; kesinambungan dijaga
 #     plan/MEMORI.md dan hook SessionStart di .claude/settings.json;

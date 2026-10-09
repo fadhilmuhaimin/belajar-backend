@@ -14,6 +14,7 @@ echo "== sinkron registry (prasyarat, nomor, [[ID]], angka asumsi, kartu, indeks
 $PY tools/sinkron_cerita.py --check | grep -v "^PERINGATAN" || true
 $PY tools/sinkron_cerita.py --check >/dev/null
 
+echo "== antrean loop otomatis"; $PY tools/antrean.py --check
 echo "== istilah";              $PY tools/build_istilah.py --check
 echo "== audit bahasa";         $PY tools/audit_bahasa.py --check | tail -1
 $PY tools/audit_bahasa.py --check >/dev/null
