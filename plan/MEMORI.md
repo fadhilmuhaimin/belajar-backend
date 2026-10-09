@@ -47,6 +47,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Perlu dicek pemilik
 
+- Redesain (PR #120): usulan perubahan PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` (beranda bukan lagi satu layar penuh; warna, ukuran, navigasi) ada di `plan/AUDIT-TAMPILAN.md` bagian 6. Belum diubah karena butuh persetujuan pemilik.
+
 - Cloudflare Pages (keputusan 115), belum ada; job deploy dilewati dan pekerjaan jalan terus. Yang dibutuhkan:
   1. Di dashboard Cloudflare: My Profile > API Tokens > Create Custom Token, izin **Account > Cloudflare Pages > Edit**, untuk akun yang memiliki project Pages.
   2. Account ID: dashboard Cloudflare, Workers & Pages, kolom kanan "Account ID".
