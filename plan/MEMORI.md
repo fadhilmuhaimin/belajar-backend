@@ -5,6 +5,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 ## Keputusan baru
 
 - Nomor keputusan: sesi konten memakai 165–199; 163–164 dan 200–219 milik sesi layout/redesain (pesan sesi "Rekeningo Tech Journey planning", 2026-10-09).
+- 169: 1.23 transaction.
 - 168: 1.22 M4; 167: mode rentan m4 + `m4.txt`, PORT_PREVIEW di cek_situs.sh.
 - 166: 1.21 lapisan dasar; 165: `cek_arah.py` + rekaman `lapisan.txt`.
 - 162: 1.20 SQL injection + ADR 4; 161: cari-bug field `aman` + CSS baris; 160: rekaman injection (log PG, gosec, latihan/).
@@ -35,6 +36,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Usulan perubahan cerita
 
+- M4 (naskah bagian 4): naskah belum menyebut asal batas saldo warung. Halaman 1.22 memakai: minggu 2, Raka menambah batas Rp1.500.000 untuk saldo akun warung langsung di server lewat psql, untuk membatasi kerugian kalau ada salah top-up ke akun warung; Jumat minggu 3 saldo Ani Rp1.450.000 setelah 29 pembayaran Rp50.000. Disetujui pemilik 2026-10-09; mohon naskah M4 diperbarui.
 - M2 (naskah bagian 4): naskah menulis server membaca `nominal`; lab dan halaman sejak 1.9 memakai field `jumlah` (label layar tetap "Nominal"). Halaman 1.17 menulis tiga nama: Nominal di layar, `amount` di Dart, `jumlah` di server. Usul: naskah menyebut `jumlah`, atau dibiarkan (konsepnya sama).
 
 ## Catatan untuk penulisan ulang Tahap 1
@@ -51,7 +53,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Untuk sesi redesain
 
-- (kosong)
+- Sesi redesain mengubah `.mdx` konten di folder utama (mis. `m3-tanda-kutip.mdx`: prop `ilustrasi="m3"` di Blok); saat rebase setelah redesain merge, cek bentrok di halaman Tahap 1.
+- Widget lama stackstep (1.23 `tahap-1/transaction`): tombol langkah pertama lebih tinggi/turun dari tombol lain di 375 px dan desktop terang; kemungkinan margin saudara Starlight (`* + *`) seperti keputusan 124/128. Kontainer tombol stackstep perlu masuk aturan margin di tema.css.
 
 ## Perlu dicek pemilik
 
@@ -62,14 +65,16 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-09 · Worktree konten: `/Users/fadhilmuhaimin/Project/Web/rekeningo-konten` (folder utama milik sesi redesain: jangan checkout/stash/reset/commit di sana). Preview dan gerbang di port 4323: `PORT_PREVIEW=4323 bash tools/cek_situs.sh --layar`. Batas file selama redesain belum merge: hanya `situs/src/content/docs/**`, `labs/**`, `situs/data/cerita.json`, data widget, KEPUTUSAN 165–199, MEMORI/STATUS bagian konten; jangan CSS, komponen layout, CLAUDE.md, PROPOSAL.md. Konten tanpa class/style tambahan di MDX, paragraf pendek. Setelah redesain di-merge: rebase branch terbuka ke main, cek ulang tangkapan halaman yang ditulis paralel (1.22 dst.), hapus worktree.
-PR bertumpuk, semua OPEN per 2026-10-09 (pemilik mengira sudah merge; `main` masih a2084bd): #115 → #116 → #118 → #119 → #121 (lab m4) → PR halaman 1.22. Merge urut; sebelum merge cek base sudah `main`.
-Halaman berikutnya: **1.23 "Transaction"** (`B3.1`, konsep, ★, runsql + stackstep, lab b3-stack; isi lama `b-fondasi/b3-1-transaction.mdx`). Buka dari M4 (Rp70.000, `m4.txt`). Catatan: ADR 5 (1.24) menaruh transaction di `service/`, sedangkan lab `api-t1` membukanya di `repo.Pindahkan`; 1.24 perlu memindahkan atau menjelaskan. Ilustrasi M3-M6 belum dibuat. 1.6 masih memakai Snippet `api-t1-lama` (PR kecil terpisah).
+2026-10-09 · Halaman 1.23 selesai (PR menyusul merge); berikutnya **1.24 ADR 5–6** (lab dulu: service membuka transaction dan meneruskan Tx ke repo; lalu halaman). Branch 1.23: `tahap-1/transaction` dari `main` (cf229e9, berisi 1.20–1.22). Worktree konten: `/Users/fadhilmuhaimin/Project/Web/rekeningo-konten` (folder utama milik sesi redesain: jangan checkout/stash/reset/commit di sana). Gerbang: `PORT_PREVIEW=4323 bash tools/cek_situs.sh --layar`. Batas file selama redesain (#120) belum merge: hanya `situs/src/content/docs/**`, `labs/**`, `situs/data/cerita.json`, data widget, KEPUTUSAN 165–199, MEMORI/STATUS bagian konten; jangan CSS, komponen layout, CLAUDE.md, PROPOSAL.md. Konten tanpa class/style tambahan di MDX, paragraf pendek. Setelah redesain di-merge: rebase branch terbuka ke main, cek ulang tangkapan halaman yang ditulis paralel (1.22 dst.), hapus worktree.
+Aturan PR (pemilik, 2026-10-09): merge sendiri setiap PR begitu CI hijau, sebelum memulai halaman berikutnya; paling banyak satu PR terbuka. #120 (redesain) tidak boleh di-merge sesi ini.
+Rencana 1.23: lima blok dari isi lama `b-fondasi/b3-1-transaction.mdx`; buka dari M4 (`m4.txt`) tanpa mengulang ceritanya; Coba = stackstep + TabSet b3-stack; tab Spring diganti Dart (Serverpod, tidak dijalankan, docs data-and-the-database/database/transactions); runsql lama `b3-1-transfer.json` tidak dipakai (sudah ada di 1.22). Lalu 1.24: PR lab dulu (service membuka transaction, meneruskan Tx ke repo; ADR 5 sesuai naskah), baru halaman. Ilustrasi M3-M6 belum. 1.6 masih Snippet `api-t1-lama` (PR kecil terpisah).
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran
 
+- Merge berhenti sejak #115 (2026-10-09): `gh pr merge` ditolak pengaman mode otomatis satu kali, lalu sesi terus menumpuk PR (#116–#122) dan melapor "menunggu merge pemilik"; pemilik mengira sudah merge. Sekarang pemilik mengizinkan merge sendiri. Kalau merge ditolak lagi: berhenti, laporkan di baris pertama laporan, dan jangan memulai halaman berikutnya di atas PR yang belum di-merge.
+- Setelah gerbang lolos, perubahan teks apa pun (termasuk perbaikan audit di Cek diri) wajib diikuti `python3 tools/sinkron_cerita.py` dan gerbang ulang; CI #119 gagal karena `kartu.json` tertinggal.
 - gosec v2.29.0 G201/G202 hanya memeriksa query di assignment dan expression statement; query yang langsung di `return` tidak diperiksa (rekaman injection.txt E).
 - Aturan Starlight `:is(ol,ul):has(> li > :not(...)) > li > :last-child` memberi margin-bottom 1.25rem; list berisi tombol (cari-bug) perlu override.
 - Astro 7 `astro preview` berjalan di latar dan singleton; setelah build ulang, `astro preview stop` lalu jalankan lagi, kalau tidak halaman lama tersaji. Port bisa pindah ke 4322 (cek `astro preview status`).

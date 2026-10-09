@@ -37,7 +37,7 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 226,
+        "menit": 228,
         "halaman": 27
       },
       "bagian": [
@@ -771,11 +771,10 @@
       "judul": "Transaction",
       "tahap": 1,
       "topik": "Data",
-      "path": "b-fondasi/b3-1-transaction.md",
+      "path": "tahap-1/transaction.md",
       "prasyarat": [
-        "A2"
+        "t1-m4"
       ],
-      "prasyarat_lain": "`SELECT`, `UPDATE`",
       "inti": true,
       "masalah": "Transfer gagal di tengah, saldo hilang",
       "ada": true,
@@ -784,9 +783,8 @@
       "peran": [
         "backend"
       ],
-      "lama": true,
       "nomor": "1.23",
-      "menit": 8
+      "menit": 10
     },
     {
       "id": "t1-adr-transaction",
