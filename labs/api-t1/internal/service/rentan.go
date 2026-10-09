@@ -58,3 +58,16 @@ func (s Service) BayarM4(ctx context.Context, peminta, ke, jumlah int64) (id, sa
 func (s Service) CariWarungRentanM3(ctx context.Context, cari string) ([]repo.Akun, error) {
 	return s.repo.CariWarungRentanM3(ctx, cari)
 }
+
+// --8<-- [start:m5]
+// LihatAkunM5 adalah LihatAkun versi minggu 4: login sudah dicek di handler, tapi tidak ada
+// pertanyaan "apakah yang login ini pemilik akun id?". Parameter peminta diterima, lalu tidak dipakai.
+func (s Service) LihatAkunM5(ctx context.Context, peminta, id int64) (repo.Akun, error) {
+	a, err := s.repo.Akun(ctx, id)
+	if errors.Is(err, repo.ErrTidakAda) {
+		return repo.Akun{}, ErrTidakDitemukan
+	}
+	return a, err
+}
+
+// --8<-- [end:m5]

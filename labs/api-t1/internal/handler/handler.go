@@ -170,7 +170,11 @@ func (s Server) lihatAkun(w http.ResponseWriter, r *http.Request) {
 		tulisProblem(w, Problem{Type: "/problems/tidak-ditemukan", Title: "Akun tidak ditemukan", Status: 404})
 		return
 	}
-	a, err := s.svc.LihatAkun(r.Context(), peminta(r), id)
+	lihat := s.svc.LihatAkun
+	if s.rentan == "m5" {
+		lihat = s.svc.LihatAkunM5
+	}
+	a, err := lihat(r.Context(), peminta(r), id)
 	if errors.Is(err, service.ErrTidakDitemukan) {
 		tulisProblem(w, Problem{Type: "/problems/tidak-ditemukan", Title: "Akun tidak ditemukan", Status: 404})
 		return
