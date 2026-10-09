@@ -3,6 +3,8 @@ title: "1.10 Fitur: saldo, riwayat, laporan warung"
 description: Budi melihat saldo dan riwayatnya, Ani melihat total per hari. Tiga endpoint baca, masing-masing hanya untuk pemilik akunnya.
 ---
 import Blok from "../../../components/Blok.astro";
+import PetaFitur from "../../../components/PetaFitur.astro";
+import petaSaldo from "../../../../data/widget/t1-peta-saldo.json";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
 import Snippet from "../../../components/Snippet.astro";
@@ -10,6 +12,8 @@ import Snippet from "../../../components/Snippet.astro";
 <p class="meta">Baca 5 menit · coba 2 menit · Prasyarat: [[t1-fitur-bayar]]</p>
 
 Top-up dan bayar mengubah angka. Fitur ini hanya membaca angka, dan pembacanya paling teliti: Ani mencocokkan setiap baris dengan buku tulisnya.
+
+Ada tiga layar baca: saldo, riwayat Budi, dan laporan harian Warung Ani. Ketiganya hanya mengambil data milik akun yang login, dan laporan Ani menjumlahkan pembayaran per tanggal. Peta di bawah mengikuti riwayat Budi dan laporan Ani dari rekaman lab.
 
 <Blok nama="Yang diminta PRD" buka>
 
@@ -20,9 +24,7 @@ Top-up dan bayar mengubah angka. Fitur ini hanya membaca angka, dan pembacanya p
 
 PRD juga menulis kapan Ani berhenti memakai Rekeningo: angkanya beda dengan bukunya.
 
-| Di app | Di backend | Di database |
-|---|---|---|
-| Layar saldo, riwayat, dan laporan warung | Tiga endpoint baca, hanya untuk pemilik akun | Index per akun dan waktu; `SUM` + `GROUP BY` |
+<PetaFitur data={petaSaldo} />
 
 Ketiga endpoint: `GET /akun/{id}` untuk saldo, `GET /akun/{id}/riwayat`, dan `GET /warung/{id}/laporan`. Index-nya `transaksi(dari, dibuat)` dan `transaksi(ke, dibuat)`.
 

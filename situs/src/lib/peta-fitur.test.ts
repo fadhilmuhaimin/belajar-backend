@@ -1,4 +1,6 @@
 import { describe, expect, test } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 import mentah from "../../data/widget/t1-peta-bayar.json";
 import { DataPetaFitur, kolom, baris } from "./peta-fitur";
 
@@ -21,5 +23,13 @@ describe("peta fitur 1.9 bayar", () => {
     const rusak = structuredClone(mentah);
     rusak.langkah[0].jalur = "server";
     expect(DataPetaFitur.safeParse(rusak).success).toBe(false);
+  });
+});
+
+const dir = path.resolve(__dirname, "../../data/widget");
+describe("semua peta fitur", () => {
+  test.each(fs.readdirSync(dir).filter((f) => /^t1-peta-.*\.json$/.test(f)))("%s valid", (f) => {
+    const x = DataPetaFitur.parse(JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")));
+    expect(x.id).toBe(f.replace(/\.json$/, ""));
   });
 });

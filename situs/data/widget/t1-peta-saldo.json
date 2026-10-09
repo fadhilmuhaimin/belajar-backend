@@ -1,0 +1,85 @@
+{
+  "id": "t1-peta-saldo",
+  "judul": "Tiga layar baca: saldo, riwayat Budi, laporan Warung Ani",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · riwayat.txt"
+  },
+  "jalur": [
+    {
+      "id": "budi",
+      "nama": "App Budi",
+      "jenis": "app"
+    },
+    {
+      "id": "api",
+      "nama": "Backend",
+      "jenis": "backend"
+    },
+    {
+      "id": "db",
+      "nama": "PostgreSQL",
+      "jenis": "db"
+    },
+    {
+      "id": "ani",
+      "nama": "App Warung Ani",
+      "jenis": "app"
+    }
+  ],
+  "langkah": [
+    {
+      "jalur": "budi",
+      "judul": "Budi membuka riwayatnya",
+      "kode": [
+        "GET /akun/419/riwayat"
+      ]
+    },
+    {
+      "jalur": "api",
+      "judul": "Hanya pemilik akun yang boleh membaca",
+      "rinci": [
+        "Budi membuka riwayat akun 418: 404, bukan 403"
+      ]
+    },
+    {
+      "jalur": "db",
+      "judul": "Query memakai index per akun dan waktu",
+      "kode": [
+        "transaksi(dari, dibuat)",
+        "transaksi(ke, dibuat)"
+      ]
+    },
+    {
+      "jalur": "budi",
+      "judul": "Riwayat terbaru dulu",
+      "kode": [
+        "keluar · Warung Sari · 15000",
+        "keluar · Warung Ani · 25000"
+      ]
+    },
+    {
+      "jalur": "ani",
+      "judul": "Ani membuka laporan tiga hari",
+      "kode": [
+        "GET /warung/418/laporan?dari=…&sampai=…"
+      ]
+    },
+    {
+      "jalur": "db",
+      "judul": "SUM dan GROUP BY per tanggal",
+      "kode": [
+        "25000 · 30000 · 40000",
+        "total 95000, 3 transaksi"
+      ]
+    },
+    {
+      "jalur": "ani",
+      "judul": "Ani mencocokkan dengan buku tulisnya",
+      "rinci": [
+        "Satu baris per hari: jumlah transaksi dan total"
+      ]
+    }
+  ],
+  "catatan": "Fitur ini hanya membaca. Kalau angkanya beda dengan buku Ani, sumbernya ada di cara tanggal dihitung, bukan di uang yang hilang (blok Coba)."
+}
