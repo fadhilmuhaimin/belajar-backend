@@ -888,6 +888,7 @@ html[data-fokus="ya"] .baca-progres { top: 0; }
 .blok__ilustrasi .il-warn { fill: var(--k-warn-fill); stroke: var(--k-warn-edge); stroke-width: 1.5; }
 .blok__ilustrasi .il-teks { fill: var(--teks); }
 .blok__ilustrasi .il-teks-2 { fill: var(--teks-2); font-weight: 400; }
+.blok__ilustrasi .il-coret { text-decoration: line-through; }
 .blok__ilustrasi .il-teks-aksen { fill: var(--k-system-ink); }
 .blok__ilustrasi .il-teks-warn { fill: var(--k-warn-ink); }
 /* Transisi buka: 180 ms, hanya setelah pembaca membuka blok (Blok.astro menambah kelasnya). */

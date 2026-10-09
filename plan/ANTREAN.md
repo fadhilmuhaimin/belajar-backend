@@ -56,11 +56,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K0c · Ilustrasi M4: teks keluar bingkai
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: di ilustrasi Gejala 1.22, teks "bukan 250.000" tetap di dalam bingkai layar HP di 375×667 dan 1366×657, gelap dan terang; dicek dengan tangkapan; ilustrasi lain yang memakai komponen yang sama tidak berubah tampilannya.
-- catatan: Dari K0.
+- catatan: Dari K0. Selesai 2026-10-10 (keputusan 222): saldo lama dicoret di atas saldo baru; `situs/tools/ukur-ilustrasi.mjs` mengukur luapan teks, M4 lolos di 4 kombinasi; alat menemukan luapan chip M2, jadi K0e.
 
 ### K0d · Judul dua baris menempel ke baris meta di HP
 
@@ -70,6 +70,15 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - bergantung: -
 - selesai bila: di 375×667 baris kedua judul halaman (mis. "hilang" di 1.22) punya jarak yang terlihat ke baris "Baca … menit"; dicek dengan tangkapan 1.22 dan 1.24 (judul dua baris) gelap dan terang; halaman judul satu baris tidak berubah.
 - catatan: Temuan laporan pagi uji kering 2026-10-10 (bukti `tmp/laporan-pagi/tahap-1_m4-rp70000-hilang-hp-dark.png`); crosscheck K0 tidak menangkapnya karena `layar.mjs` hanya mengukur margin.
+
+### K0e · Ilustrasi M2: chip amount dan jumlah lebih lebar dari kotaknya
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: `node situs/tools/ukur-ilustrasi.mjs --url <preview>` lolos (0 teks keluar bingkai, 5 halaman × 2 ukuran × 2 tema); teks chip M2 tetap `amount` dan `jumlah`; alat itu dijalankan oleh `tools/cek_situs.sh --layar` sesudah layar pertama; tangkapan 1.17 gelap dan terang dilihat.
+- catatan: Temuan alat K0c (keputusan 222): `amount` keluar 3,2 satuan (teks 10,8–61,2, kotak 12–60), `jumlah` keluar 1,2 (136,8–187,2, kotak 136–188).
 
 ### I1 · Pindah ke bun
 
