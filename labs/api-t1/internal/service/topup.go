@@ -76,7 +76,19 @@ func (s Service) Topup(ctx context.Context, peminta int64, keterangan, isiCSV st
 	if len(salah) > 0 {
 		return 0, 0, ErrCSV{salah}
 	}
-	return len(baris), total, s.repo.Topup(ctx, peminta, keterangan, baris)
+	// ADR 5: semua baris dalam satu transaction yang dibuka service. Satu gagal, semua batal.
+	err = s.repo.DalamTx(ctx, func(tx repo.Tx) error {
+		for _, b := range baris {
+			if err := tx.TambahSaldo(ctx, b.AkunID, b.Nominal); err != nil {
+				return fmt.Errorf("akun %d: %w", b.AkunID, err)
+			}
+			if err := tx.CatatTopup(ctx, b, peminta, keterangan); err != nil {
+				return fmt.Errorf("catatan akun %d: %w", b.AkunID, err)
+			}
+		}
+		return nil
+	})
+	return len(baris), total, err
 }
 
 // --8<-- [end:topup]

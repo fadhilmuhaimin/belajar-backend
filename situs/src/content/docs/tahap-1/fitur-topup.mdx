@@ -39,7 +39,9 @@ Service memeriksa semua baris lebih dulu. Satu baris salah menolak seluruh file,
 
 <Snippet file="labs/api-t1/internal/service/topup.go" region="topup" lang="go" title="labs/api-t1/internal/service/topup.go" />
 
-Setelah semua baris lolos, repo menjalankan 100 perubahan saldo dan 100 catatan dalam satu transaction.
+Setelah semua baris lolos, service membuka satu transaction untuk 100 perubahan saldo dan 100 catatan. Kenapa transaction dibuka di service dibahas di [[t1-adr-transaction]].
+
+Repo hanya menyediakan SQL untuk satu catatan:
 
 <Snippet file="labs/api-t1/internal/repo/topup.go" region="topup" lang="go" title="labs/api-t1/internal/repo/topup.go" />
 
