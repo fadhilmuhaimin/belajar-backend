@@ -118,3 +118,14 @@ PROPOSAL dan CLAUDE.md tidak saya ubah, karena keduanya butuh persetujuan pemili
 2. **"Layar pertama"**: beranda bukan lagi satu layar penuh. Usul kalimat baru: "Layar pertama beranda memuat judul, satu kalimat, Mulai dari PRD, kartu Lanjutkan, tiga pintu, dan satu teka-teki dari cerita; peta enam tahap, peran, dan pencarian masalah ada tepat di bawahnya." CLAUDE.md `<tampilan>` perlu kalimat yang sama.
 3. **"Navigasi"**: daftar isi kanan tersembunyi bawaan (tombol "Isi halaman"), kecuali layar ≥ 1600 px; pemilih peran berupa menu, bukan deretan chip; tombol Berikutnya berupa tautan kecil rata kanan, bukan tombol besar.
 4. **"ADHD-friendly", aturan 1**: "Progres terlihat di tiap blok" diperjelas: status selesai hanya setelah akhir blok digulir pembaca; ditambah garis progres baca di bawah header.
+
+## 7. Ukuran JS per halaman (tugas interaksi, butir I6)
+
+Diukur dari `situs/dist`: jumlah byte file JS yang dirujuk tiap `index.html` (`<script src>`, `modulepreload`, `component-url`, `renderer-url`), mentah dan gzip level 9. 73 halaman.
+
+| Tugas | Halaman | Sebelum | Sesudah | Catatan |
+|---|---|---|---|---|
+| I1 (keputusan 225) | 1.19 M3, 1.20 SQL injection | 307.614 B (88.149 gzip), 10 file | sama | Terberat: React + widget cari-bug |
+| I1 | 1.11 Pertukaran saldo | 288.687 B (81.888 gzip), 8 file | sama | React + jumlah-total |
+| I1 | Beranda | 286.058 B (80.779 gzip), 6 file | sama | React + tebak |
+| I1 | Semua 73 halaman | - | sama | 280 file `dist/`, HTML/JS/CSS identik byte per byte; React Flow belum terpasang |

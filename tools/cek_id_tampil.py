@@ -3,7 +3,7 @@
 Memeriksa teks yang terlihat di situs/dist hasil build: isi artikel, sidebar, judul tab, dan string di data widget
 (dist/widgets/data/**/*.json, yang dirender JavaScript). Kode aturan gosec (G101, G104, ...) bukan ID halaman dan dilewati.
 
-    npm --prefix situs run build && python3 tools/cek_id_tampil.py
+    bun run --cwd situs build && python3 tools/cek_id_tampil.py
 """
 import html.parser
 import json
@@ -56,7 +56,7 @@ def strings(o):
 
 def main():
     if not (SITE / "index.html").exists():
-        sys.exit("situs/dist belum ada. Jalankan: npm --prefix situs run build")
+        sys.exit("situs/dist belum ada. Jalankan: bun run --cwd situs build")
     salah = []
     for p in sorted(SITE.rglob("*.html")):
         rel = str(p.relative_to(SITE))
