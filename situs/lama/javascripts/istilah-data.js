@@ -6,7 +6,7 @@ window.ISTILAH = {
   "n": "1.23 Transaction",
   "s": "istilah-acid",
   "t": "ACID",
-  "u": "b-fondasi/b3-1-transaction/"
+  "u": "tahap-1/transaction/"
  },
  "ADR": {
   "b": "D5",
@@ -62,7 +62,7 @@ window.ISTILAH = {
   "n": "1.23 Transaction",
   "s": "istilah-atomicity",
   "t": "Atomicity",
-  "u": "b-fondasi/b3-1-transaction/"
+  "u": "tahap-1/transaction/"
  },
  "Auth": {
   "b": "B5.1",
@@ -142,7 +142,7 @@ window.ISTILAH = {
   "n": "1.23 Transaction",
   "s": "istilah-commit",
   "t": "COMMIT",
-  "u": "b-fondasi/b3-1-transaction/"
+  "u": "tahap-1/transaction/"
  },
  "Cache": {
   "b": "B9",
@@ -454,7 +454,7 @@ window.ISTILAH = {
   "n": "1.21 Lapisan dasar",
   "s": "istilah-middleware",
   "t": "Middleware",
-  "u": "b-fondasi/b7-1-lapisan-dasar/"
+  "u": "tahap-1/lapisan-dasar/"
  },
  "Migration": {
   "b": "B4.1",
@@ -726,7 +726,7 @@ window.ISTILAH = {
   "n": "1.23 Transaction",
   "s": "istilah-rollback",
   "t": "ROLLBACK",
-  "u": "b-fondasi/b3-1-transaction/"
+  "u": "tahap-1/transaction/"
  },
  "Race condition": {
   "b": "B3.2",
@@ -982,7 +982,7 @@ window.ISTILAH = {
   "n": "1.23 Transaction",
   "s": "istilah-transaction",
   "t": "Transaction",
-  "u": "b-fondasi/b3-1-transaction/"
+  "u": "tahap-1/transaction/"
  },
  "WAL": {
   "b": "D3",
@@ -1030,7 +1030,7 @@ window.ISTILAH = {
   "n": "1.23 Transaction",
   "s": "istilah-atomicity",
   "t": "Atomicity",
-  "u": "b-fondasi/b3-1-transaction/"
+  "u": "tahap-1/transaction/"
  },
  "auth": {
   "b": "B5.1",
@@ -1302,7 +1302,7 @@ window.ISTILAH = {
   "n": "1.21 Lapisan dasar",
   "s": "istilah-middleware",
   "t": "Middleware",
-  "u": "b-fondasi/b7-1-lapisan-dasar/"
+  "u": "tahap-1/lapisan-dasar/"
  },
  "migration": {
   "b": "B4.1",
@@ -1694,7 +1694,7 @@ window.ISTILAH = {
   "n": "1.23 Transaction",
   "s": "istilah-transaction",
   "t": "Transaction",
-  "u": "b-fondasi/b3-1-transaction/"
+  "u": "tahap-1/transaction/"
  },
  "webhook": {
   "b": "B10.2",

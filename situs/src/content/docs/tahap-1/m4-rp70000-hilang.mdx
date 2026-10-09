@@ -1,0 +1,97 @@
+---
+title: "1.22 M4: Rp70.000 yang hilang"
+description: Minggu 3, Jumat siang. Budi membayar Rp70.000, layarnya menulis gagal, saldonya tetap berkurang, dan Warung Ani tidak menerima apa-apa. Pak Hadi bertanya uang itu ke mana.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 6 menit · coba 3 menit · Prasyarat: [[t1-pertukaran-saldo]] · Jalur inti</p>
+
+<Blok nama="Gejala" buka>
+
+Jumat minggu 3, pukul 12.15. Warung Ani ramai. Sejak pagi sudah 29 pembayaran masuk lewat Rekeningo.
+
+Budi membayar makan siang bertiga dengan dua rekannya: Rp70.000. Layarnya menulis "Pembayaran gagal. Coba lagi."
+
+Jempolnya sudah di atas tombol Bayar. Lalu ia melihat saldo di pojok atas: Rp180.000, bukan Rp250.000. Pembayarannya gagal, tapi uangnya berkurang.
+
+Ani membuka laporan hari ini di HP-nya. Totalnya Rp1.450.000, tanpa Rp70.000 dari Budi. Ia membuka buku tulisnya: tidak ada juga. Budi akhirnya membayar tunai.
+
+Senin pagi, Pak Hadi membaca rekap uji coba. Jumlah semua saldo Rp24.930.000, jumlah semua top-up Rp25.000.000. Ia menulis satu kalimat ke Sinta dan Raka: "Rp70.000 ini ke mana?"
+
+</Blok>
+
+<Blok nama="Yang Raka kira" buka>
+
+Raka membuka log server dan menemukan satu baris: `violates check constraint "batas_saldo_warung"`. Ia ingat batas itu.
+
+Di minggu 2, ia menambah batas Rp1.500.000 untuk saldo akun warung. Tujuannya membatasi kerugian kalau ada salah top-up ke akun warung. Ia menambahkannya langsung di server, lewat `psql`.
+
+Kesimpulannya: batas itu terlalu kecil untuk Jumat siang. Hapus batasnya, masalah selesai.
+
+<details class="question">
+<summary>Tebak dulu: kalau batas itu dihapus, apakah uang tidak akan hilang lagi?</summary>
+
+Tidak. Batas itu hanya satu dari banyak alasan perintah kedua bisa gagal. Koneksi putus, server restart, atau constraint lain akan meninggalkan keadaan yang sama. Blok berikutnya menunjukkan urutannya di rekaman lab.
+
+</details>
+
+</Blok>
+
+<Blok nama="Yang sebenarnya">
+
+Bayar ke warung terdiri dari tiga perubahan: saldo Budi berkurang, saldo Ani bertambah, satu baris transaksi dicatat. Di server minggu 3, ketiganya dijalankan sebagai tiga perintah terpisah.
+
+<Snippet file="labs/api-t1/internal/repo/transaksi.go" region="m4" lang="go" title="labs/api-t1/internal/repo/transaksi.go" />
+
+Setiap perintah langsung tersimpan begitu selesai. Saat perintah kedua ditolak, perintah pertama tidak ikut batal.
+
+Rekaman lab, mode rentan, dari database bersih. Sebelum Budi membayar, 29 karyawan lain sudah membayar Rp50.000, jadi saldo Ani Rp1.450.000. Budi membayar Rp70.000:
+
+<Snippet file="labs/api-t1/output/m4.txt" lines="29:36" title="Rekaman lab: labs/api-t1/output/m4.txt" />
+
+PostgreSQL menerima dua `UPDATE` dan tidak ada `BEGIN`. `UPDATE` kedua ditolak, dan `INSERT` tidak pernah dikirim. Hasilnya:
+
+<Snippet file="labs/api-t1/output/m4.txt" lines="38:55" title="Rekaman lab: labs/api-t1/output/m4.txt" />
+
+Saldo Budi turun, saldo Ani tetap, dan tidak ada baris transaksi untuk pembayaran itu. Jumlah semua saldo turun Rp70.000. Ini hal pertama dan ketiga dari [[t1-pertukaran-saldo]] yang dilanggar sekaligus.
+
+Ada dua masalah lain di balik kejadian ini.
+
+Pertama, tidak ada catatan yang bisa menjawab Pak Hadi. Tabel `transaksi` kosong untuk Budi. Yang tersisa hanya satu baris log server:
+
+<Snippet file="labs/api-t1/output/m4.txt" lines="58:58" title="Rekaman lab: labs/api-t1/output/m4.txt" />
+
+Kedua, batas saldo warung hanya ada di server. Skema di laptop Raka tidak memilikinya, jadi kejadian ini tidak pernah muncul saat ia menguji.
+
+Versi benar menjalankan ketiga perubahan dalam satu transaction, dengan batas yang sama. Pembayaran tetap gagal, tapi uangnya tidak hilang:
+
+<Snippet file="labs/api-t1/output/m4.txt" lines="75:92" title="Rekaman lab: labs/api-t1/output/m4.txt" />
+
+Kode repo yang kamu lihat di [[t1-fitur-bayar]] dan [[t1-pertukaran-saldo]] sudah memakai transaction. Itu versi sesudah M4.
+
+</Blok>
+
+<Blok nama="Coba sendiri">
+
+Kedua panel memakai batas saldo warung Rp1.500.000 dan saldo Ani Rp1.450.000. Panel Before menjalankan tiga perintah tanpa transaction, seperti server minggu 3. Panel After membungkusnya dengan `BEGIN` dan `COMMIT`.
+
+SQL-nya dijalankan sungguhan di browser dengan SQLite.
+
+<WidgetLama nama="runsql" src="data/t1-m4.json" />
+
+Setelah itu, nyalakan "Ubah satu hal". Dengan Rp50.000, saldo Ani tepat Rp1.500.000 dan kedua panel memberi hasil yang sama. Selama tidak ada yang gagal, versi tanpa transaction terlihat benar. Karena itu Raka tidak melihat masalah ini saat menguji.
+
+</Blok>
+
+<Blok nama="Konsep yang lahir">
+
+- [[B3.1]]: transaction. Dua perubahan uang terjadi bersama, atau tidak sama sekali.
+- [[t1-adr-transaction]]: ADR 5 menaruh setiap perubahan lebih dari satu baris uang dalam satu transaction. ADR 6 menambah tabel koreksi, supaya Rp70.000 ini punya catatan siapa, kapan, dan kenapa.
+- [[B4.1]]: migration. Batas yang ditambah tangan di server membuat skema laptop dan server berbeda.
+
+</Blok>
+
+<SkripLama daftar={["runsql-core","runsql"]} />

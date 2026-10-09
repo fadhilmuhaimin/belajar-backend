@@ -625,8 +625,200 @@ def rekam_m3():
     tulis("m3.txt")
 
 
+def diterima_db(posisi):
+    """Query pencarian warung yang diterima PostgreSQL sesudah penanda posisi, beserta baris parameternya."""
+    time.sleep(0.3)   # log container ditulis asinkron
+    out = []
+    for l in _log_db()[posisi:]:
+        if not l.startswith("api-t1|"):
+            continue
+        isi = l.split("|", 2)[2]
+        if "FROM akun WHERE" in isi or (out and isi.startswith("DETAIL:")):
+            out.append(re.sub(r"stmtcache_[0-9a-f]+", "stmtcache_…", isi))
+        elif out:
+            break
+    if not out:
+        gagal("query pencarian tidak ada di log PostgreSQL")
+    log.append("# yang diterima PostgreSQL (log_statement=all):\n" + "\n".join(out) + "\n\n")
+    return out
+
+
+GOSEC = "github.com/securego/gosec/v2/cmd/gosec@v2.29.0"
+
+
+def rekam_injection():
+    """1.20 Keamanan 1: SQL injection (keputusan 160). Teks SQL vs parameter di log PostgreSQL, lalu gosec."""
+    reset()
+    mulai("-rentan", "m3")
+    bagian("A. Mode rentan: isi pencarian masuk ke teks SQL")
+    dimas = login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+    p = posisi_log()
+    s, _ = curl("GET", "/warung?cari=%27%20OR%201%3D1%20--", token=dimas, tampil_path="/warung?cari=' OR 1=1 --",
+                resp_tampil="{\"warung\":[ ... semua akun, beserta saldo]}")
+    harap(s, 200, "rentan: 200")
+    st = diterima_db(p)
+    harap(any("LIKE '%' OR 1=1 --%'" in x for x in st) and not any(x.startswith("DETAIL:") for x in st), True,
+          "rentan: OR 1=1 ada di teks SQL, tanpa parameter")
+    stop()
+
+    reset()
+    mulai()
+    bagian("B. Versi benar: teks SQL tetap, isi pencarian dikirim terpisah sebagai $1")
+    dimas = login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+    p = posisi_log()
+    s, b = curl("GET", "/warung?cari=%27%20OR%201%3D1%20--", token=dimas, tampil_path="/warung?cari=' OR 1=1 --")
+    harap((s, json.loads(b)["warung"]), (200, []), "benar: 0 hasil")
+    st = diterima_db(p)
+    harap(any("|| $1 ||" in x for x in st) and any(x.startswith("DETAIL:  Parameters: $1 = ") for x in st), True,
+          "benar: SQL memakai $1, parameter di baris terpisah")
+    stop()
+
+    bagian("C. Linter: gosec aturan G201 dan G202 (SQL dibangun dari string)")
+    r = subprocess.run(["go", "run", GOSEC, "-fmt=text", "-include=G201,G202", "./..."], cwd=HERE,
+                       capture_output=True, text=True)
+    hasil = r.stdout.replace(str(HERE) + "/", "").replace("\n\n\n", "\n\n").strip()
+    harap(("G202" in hasil, "Issues : 1" in hasil, r.returncode != 0), (True, True, True),
+          "gosec: tepat satu temuan, di fungsi rentan")
+    hasil = "\n".join(l.rstrip() for l in hasil.splitlines())
+    log.append(f"$ go run {GOSEC} -include=G201,G202 ./...\n{hasil}\n# exit status {r.returncode}\n")
+
+    bagian("D. Batas parameter: nama kolom tidak bisa jadi $1")
+    log.append("# $1 selalu nilai. ORDER BY $1 memberi semua baris nilai yang sama, jadi teks nama DESC tidak berpengaruh.\n")
+    a = sql("PREPARE urut(text) AS SELECT id, nama FROM akun WHERE jenis = 'warung' ORDER BY $1; EXECUTE urut('nama DESC');")
+    b = sql("SELECT id, nama FROM akun WHERE jenis = 'warung' ORDER BY nama DESC;")
+    harap((a.split().index("418") < a.split().index("502"), b.split().index("502") < b.split().index("418")),
+          (True, True), "ORDER BY $1 tidak mengurutkan; ORDER BY nama DESC mengurutkan")
+
+    bagian("E. Latihan: draf AI laporan warung (latihan/laporan.go), dites ke database lalu di-lint")
+    reset()
+    t = subprocess.run(["go", "test", "-v", "-count=1", "./..."], cwd=HERE / "latihan", env=ENV,
+                       capture_output=True, text=True)
+    keluaran = re.sub(r" \(\d+\.\d+s\)", "", t.stdout)
+    keluaran = re.sub(r"(ok\s+lab/latihan)\s+\d+\.\d+s", r"\1", keluaran).strip()
+    harap((t.returncode, "division by zero" in keluaran, "urut tidak dikenal" in keluaran), (0, True, True),
+          "latihan: draf menjalankan urut sebagai SQL, versi benar menolaknya")
+    log.append(f"$ cd latihan && go test -v ./...\n{keluaran}\n")
+    r = subprocess.run(["go", "run", GOSEC, "-fmt=text", "-include=G201,G202", "./..."], cwd=HERE / "latihan",
+                       capture_output=True, text=True)
+    ringkas = "\n".join(l.rstrip() for l in r.stdout.splitlines() if l.strip() and not l.startswith("Results"))
+    harap(("Issues : 0" in ringkas, r.returncode), (True, 0), "gosec tidak menandai draf (query di return)")
+    log.append(f"$ cd latihan && go run {GOSEC} -include=G201,G202 ./...\n{ringkas}\n")
+    log.append("# Draf menjalankan urut sebagai SQL (tes pertama), tapi gosec tidak menandainya:\n"
+               "# aturan G202 memeriksa query di assignment (rows, err := ...), bukan yang langsung di return.\n")
+    tulis("injection.txt")
+
+
+PINTAS = """package handler
+
+import (
+	"database/sql"
+	"net/http"
+)
+
+// cariLangsung: pintas buatan AI. Handler menjalankan SQL sendiri, melewati service dan repo.
+func cariLangsung(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	rows, err := db.QueryContext(r.Context(),
+		`SELECT id, nama FROM akun WHERE jenis = 'warung' AND nama ILIKE '%' || $1 || '%'`, r.URL.Query().Get("cari"))
+	if err == nil {
+		rows.Close()
+	}
+}
+"""
+
+
+def rekam_lapisan():
+    """1.21 Lapisan dasar (keputusan 165): arah import antar lapisan, diperiksa cek_arah.py."""
+    bagian("A. Import tiap lapisan, menurut go list")
+    r = subprocess.run(["go", "list", "-f", "{{.ImportPath}}: {{join .Imports \" \"}}", "./internal/..."],
+                       cwd=HERE, capture_output=True, text=True, check=True)
+    log.append("$ go list -f '{{.ImportPath}}: {{join .Imports \" \"}}' ./internal/...\n" + r.stdout.replace("lab/apit1/", "") + "\n")
+
+    bagian("B. Aturan arah: handler tidak tahu SQL, service tidak tahu HTTP, repo tidak tahu aturan uang")
+    c = subprocess.run([sys.executable, "cek_arah.py"], cwd=HERE, capture_output=True, text=True)
+    harap((c.returncode, c.stdout.count("lolos")), (0, 3), "cek_arah: tiga lapisan lolos")
+    log.append(f"$ python3 cek_arah.py\n{c.stdout}# exit status {c.returncode}\n")
+
+    bagian("C. Pintas AI: handler menjalankan SQL sendiri (file sementara internal/handler/pintas_ai.go)")
+    f = HERE / "internal/handler/pintas_ai.go"
+    try:
+        f.write_text(PINTAS)
+        log.append("$ cat internal/handler/pintas_ai.go\n" + PINTAS + "\n")
+        b = subprocess.run(["go", "build", "./..."], cwd=HERE, capture_output=True, text=True)
+        harap(b.returncode, 0, "pintas tetap lolos compile")
+        log.append(f"$ go build ./...\n# exit status {b.returncode}: compiler Go tidak tahu soal lapisan\n")
+        c = subprocess.run([sys.executable, "cek_arah.py"], cwd=HERE, capture_output=True, text=True)
+        harap((c.returncode, "handler: mengimpor database/sql (dilarang)" in c.stdout), (1, True), "cek_arah menolak pintas")
+        log.append(f"$ python3 cek_arah.py\n{c.stdout}# exit status {c.returncode}\n")
+    finally:
+        f.unlink(missing_ok=True)
+    tulis("lapisan.txt")
+
+
+def bayar_banyak(n, jumlah):
+    """Persiapan: n karyawan (selain Budi dan Dimas) membayar ke Warung Ani. Rinciannya tidak ditulis ke rekaman."""
+    k = len(log)
+    ids = [i for i in range(401, 520) if i not in (417, 418, 419)][:n]
+    for i in ids:
+        t = login(f"karyawan{i}@lestari.example", f"sementara-{i}", f"<token {i}>")
+        s, _ = curl("POST", "/transfers", json.dumps({"ke": 418, "jumlah": jumlah}), token=t)
+        harap(s, 201, f"bayar karyawan {i}")
+    del log[k:]
+    log.append(f"# persiapan: {n} karyawan lain masing-masing membayar Rp{jumlah:,} ke Warung Ani\n".replace(",", "."))
+
+
+BATAS_WARUNG = "ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000)"
+SALDO_M4 = "SELECT id, nama, saldo FROM akun WHERE id IN (418, 419) ORDER BY id"
+
+
+def rekam_m4():
+    """1.22 M4: Rp70.000 yang hilang (mode rentan m4, keputusan 167)."""
+    reset()
+    bagian("A. Minggu 2: Raka menambah batas saldo warung langsung di server, lewat psql (tidak ada di schema.sql)")
+    sql(BATAS_WARUNG)
+    mulai("-rentan", "m4")
+    topup_awal()
+    bagian("B. Minggu 3, Jumat siang: Warung Ani ramai")
+    bayar_banyak(29, 50000)
+    harap("1450000" in sql(SALDO_M4), True, "Ani 1.450.000 sebelum Budi")
+    harap(total(), ["25000000", "25000000", "29"], "total sebelum Budi")
+
+    bagian("C. Budi membayar Rp70.000; app menampilkan gagal")
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    p = posisi_log()
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 70000}', token=budi)
+    harap(s, 500, "UPDATE kedua ditolak batas warung")
+    time.sleep(0.3)
+    st = [x for x in log_statement(p) if x.lower().startswith(("begin", "commit", "rollback", "update akun", "insert into transaksi"))]
+    harap([x.split()[0].upper() for x in st], ["UPDATE", "UPDATE"], "tanpa transaction: dua UPDATE, tanpa BEGIN/ROLLBACK")
+    log.append("# yang diterima PostgreSQL (log_statement=all):\n" + "\n".join(st) + "\n\n")
+    hasil = sql(SALDO_M4)
+    harap(("180000" in hasil, "1450000" in hasil), (True, True), "Budi berkurang, Ani tetap")
+    sql("SELECT count(*) AS transaksi_budi FROM transaksi WHERE dari = 419")
+    harap(total(), ["24930000", "25000000", "29"], "Rp70.000 hilang dari total")
+    stop()
+
+    bagian("D. Versi benar: tiga perubahan dalam satu transaction, batas warung yang sama")
+    reset()
+    sql(BATAS_WARUNG)
+    mulai()
+    topup_awal()
+    bayar_banyak(29, 50000)
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    p = posisi_log()
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 70000}', token=budi)
+    harap(s, 500, "versi benar: tetap gagal")
+    time.sleep(0.3)
+    st = [x for x in log_statement(p) if x.lower().startswith(("begin", "commit", "rollback", "update akun", "insert into transaksi"))]
+    harap([x.split()[0].upper() for x in st], ["BEGIN", "UPDATE", "UPDATE", "ROLLBACK"], "transaction dibatalkan")
+    log.append("# yang diterima PostgreSQL (log_statement=all):\n" + "\n".join(st) + "\n\n")
+    hasil = sql(SALDO_M4)
+    harap(("250000" in hasil, "1450000" in hasil), (True, True), "Budi utuh, Ani tetap")
+    harap(total(), ["25000000", "25000000", "29"], "total utuh")
+    tulis("m4.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()

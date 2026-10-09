@@ -51,8 +51,12 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.17 M2: amount atau nominal | Halaman masalah, lab `m2.txt` (keputusan 153, 154) |
 | 1.18 Kontrak OpenAPI + ADR 3 | Ditulis ulang dari B1.4, kontrak `b1-openapi` v1, 400 dengan nama field (keputusan 155, 156) |
 | 1.19 M3: Tanda kutip di pencarian | Halaman masalah, lab `m3.txt` + mode rentan m3, widget React cari-bug (keputusan 157, 158, 159) |
+| 1.20 Keamanan 1: SQL injection + ADR 4 | Halaman baru, lab `injection.txt` + modul `latihan/` + gosec v2.29.0, widget cari-bug data kedua dengan baris aman (keputusan 160, 161, 162) |
+| 1.21 Lapisan dasar: handler tidak tahu SQL | Ditulis ulang dari B7.1, lab `lapisan.txt` + `cek_arah.py`, pilah dari baris lab (keputusan 165, 166) |
+| 1.22 M4: Rp70.000 yang hilang | Halaman masalah, mode rentan `m4` + rekaman `m4.txt`, runsql `t1-m4.json` (keputusan 167, 168) |
+| 1.23 Transaction | Ditulis ulang dari B3.1, Inti dari `m4.txt`, stackstep b3-stack dengan tab Dart (Serverpod) (keputusan 169) |
 
-Diperbarui 2026-10-08. 19 dari 42 halaman selesai; berikutnya 1.20. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
+Diperbarui 2026-10-08. 23 dari 42 halaman selesai; berikutnya 1.24. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
 
 ## Redesain tampilan (sesi 2026-10-09, menunggu keputusan pemilik)
 

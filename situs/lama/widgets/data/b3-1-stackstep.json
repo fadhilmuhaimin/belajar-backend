@@ -101,24 +101,24 @@
         "rb": "Tidak ditulis di kode: exception yang keluar dari blok membuat Django mengirim ROLLBACK"
       }
     },
-    "Spring": {
-      "md": "situs/src/content/docs/b-fondasi/b3-1-transaction.mdx",
+    "Dart (Serverpod)": {
+      "md": "situs/src/content/docs/tahap-1/transaction.mdx",
       "pola": {
         "begin": [
-          "@Transactional"
+          "session.db.transaction"
         ],
         "u1": [
-          "saldo - ?"
+          "budi.saldo -= jumlah"
         ],
         "u2": [
-          "saldo + ?"
+          "ani.saldo += jumlah"
         ],
         "rb": [
-          "@Transactional"
+          "session.db.transaction"
         ]
       },
       "catatan": {
-        "rb": "Tidak ditulis di kode: Spring rollback untuk unchecked exception (tidak dijalankan di lab)"
+        "rb": "Tidak ditulis di kode: exception di dalam callback membuat Serverpod rollback (tidak dijalankan di lab)"
       }
     },
     "Supabase": {
@@ -139,7 +139,7 @@
         "begin": "Tidak ada BEGIN dari app: satu panggilan rpc = satu transaction implisit",
         "rb": "Tidak ada ROLLBACK dari app maupun dari fungsi: error membatalkan seluruh panggilan (lihat output rekaman)"
       },
-      "md": "situs/src/content/docs/b-fondasi/b3-1-transaction.mdx"
+      "md": "situs/src/content/docs/tahap-1/transaction.mdx"
     }
   }
 }

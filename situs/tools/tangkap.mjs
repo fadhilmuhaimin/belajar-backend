@@ -1,5 +1,5 @@
 // Tangkapan layar halaman situs baru dengan Playwright: desktop 1366×657 dan HP 375×667, mode gelap dan terang.
-// Pakai: node tools/tangkap.mjs [--url http://127.0.0.1:4321] [--path /b-fondasi/b3-1-transaction/]
+// Pakai: node tools/tangkap.mjs [--url http://127.0.0.1:4321] [--path /tahap-1/transaction/]
 // Hasil: tangkapan/<nama>-<ukuran>-<mode>.png (di-.gitignore). Mode diatur lewat localStorage starlight-theme,
 // sama seperti pilihan pembaca. Juga mencetak lebar scroll horizontal (harus = lebar viewport).
 import fs from "node:fs";
@@ -8,7 +8,7 @@ import { chromium } from "@playwright/test";
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const BASE = arg("--url", "http://127.0.0.1:4321");
-const PATHS = (arg("--path", "/b-fondasi/b3-1-transaction/,/")).split(",");
+const PATHS = (arg("--path", "/tahap-1/transaction/,/")).split(",");
 const OUT = path.resolve("tangkapan");
 fs.mkdirSync(OUT, { recursive: true });
 const UKURAN = [{ nama: "desktop", width: 1366, height: 657 }, { nama: "hp", width: 375, height: 667, mobile: true }];

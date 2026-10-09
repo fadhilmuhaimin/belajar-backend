@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 205,
-        "halaman": 25
+        "menit": 228,
+        "halaman": 27
       },
       "bagian": [
         {
@@ -753,29 +753,32 @@
         4
       ],
       "masalah": "Input pencarian menampilkan semua akun beserta saldo",
-      "ada": false,
-      "nomor": "1.20"
+      "ada": true,
+      "prasyarat": [
+        "t1-m3"
+      ],
+      "nomor": "1.20",
+      "menit": 11
     },
     {
       "id": "B7.1",
-      "judul": "Lapisan dasar",
+      "judul": "Lapisan dasar: handler tidak tahu SQL",
       "tahap": 1,
       "topik": "Struktur kode",
-      "path": "b-fondasi/b7-1-lapisan-dasar.md",
+      "path": "tahap-1/lapisan-dasar.md",
       "prasyarat": [
-        "A2"
+        "t1-sql-injection"
       ],
       "inti": true,
-      "masalah": "Logika transfer tercampur parsing HTTP",
+      "masalah": "Input bisa jadi SQL di folder mana saja",
       "ada": true,
       "jenis": "konsep",
       "bagian": 4,
       "peran": [
         "backend"
       ],
-      "lama": true,
       "nomor": "1.21",
-      "menit": 9
+      "menit": 10
     },
     {
       "id": "t1-m4",
@@ -791,19 +794,22 @@
       ],
       "label": "Masalah 4 · minggu 3",
       "masalah": "Saldo pembeli berkurang, saldo warung tidak bertambah",
-      "ada": false,
-      "nomor": "1.22"
+      "ada": true,
+      "prasyarat": [
+        "t1-pertukaran-saldo"
+      ],
+      "nomor": "1.22",
+      "menit": 9
     },
     {
       "id": "B3.1",
       "judul": "Transaction",
       "tahap": 1,
       "topik": "Data",
-      "path": "b-fondasi/b3-1-transaction.md",
+      "path": "tahap-1/transaction.md",
       "prasyarat": [
-        "A2"
+        "t1-m4"
       ],
-      "prasyarat_lain": "`SELECT`, `UPDATE`",
       "inti": true,
       "masalah": "Transfer gagal di tengah, saldo hilang",
       "ada": true,
@@ -812,9 +818,8 @@
       "peran": [
         "backend"
       ],
-      "lama": true,
       "nomor": "1.23",
-      "menit": 8
+      "menit": 10
     },
     {
       "id": "t1-adr-transaction",

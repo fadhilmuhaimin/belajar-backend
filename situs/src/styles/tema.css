@@ -742,8 +742,10 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
 /* Widget React cari-bug (keputusan 158): pembaca menandai baris kode sumber bug. */
 .sl-markdown-content .cb-petunjuk { margin: 0.3rem 0 0; font-size: 0.9em; }
 .sl-markdown-content .cb-perintah { margin: 0.6rem 0 0.4rem; }
-.sl-markdown-content .cb-kode { list-style: none; margin: 0.4rem 0 0.8rem; padding: 0; border: 1px solid var(--garis); border-radius: 8px; overflow: hidden; font-family: var(--sl-font-mono); font-size: 0.85em; }
+.sl-markdown-content .cb-kode { tab-size: 2; list-style: none; margin: 0.4rem 0 0.8rem; padding: 0; border: 1px solid var(--garis); border-radius: 8px; overflow: hidden; font-family: var(--sl-font-mono); font-size: 0.85em; }
 .sl-markdown-content .cb-kode > li.cb-baris { margin: 0; }
+/* Starlight memberi margin 1.25rem ke anak terakhir item list; tombol baris kode tidak boleh ikut. */
+.sl-markdown-content ol.cb-kode > li.cb-baris > .cb-tombol { margin-bottom: 0; }
 .sl-markdown-content .cb-tombol { display: flex; gap: 0.6rem; width: 100%; text-align: left; background: transparent; border: 0; border-left: 3px solid transparent; padding: 0.25rem 0.6rem; cursor: pointer; color: var(--teks); font: inherit; }
 .sl-markdown-content .cb-tombol:hover:not(:disabled) { background: var(--bg-2); }
 .sl-markdown-content .cb-tombol:focus-visible { outline: 2px solid var(--aksen); outline-offset: -2px; }

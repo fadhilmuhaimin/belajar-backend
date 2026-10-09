@@ -200,6 +200,7 @@ func (s Server) lihatTransaksi(w http.ResponseWriter, r *http.Request) {
 	tulisJSON(w, 200, t)
 }
 
+// --8<-- [start:cari-warung]
 // GET /warung?cari=<teks>: cari warung menurut nama. Versi benar; mode rentan m3 di rentan.go.
 func (s Server) cariWarung(w http.ResponseWriter, r *http.Request) {
 	cari := r.URL.Query().Get("cari")
@@ -214,6 +215,8 @@ func (s Server) cariWarung(w http.ResponseWriter, r *http.Request) {
 	}
 	tulisJSON(w, 200, map[string]any{"warung": hasil})
 }
+
+// --8<-- [end:cari-warung]
 
 // --8<-- [start:topup]
 // POST /topup?keterangan=...  body text/csv: email,nominal
@@ -267,6 +270,9 @@ func (s Server) selesaikanBayar(w http.ResponseWriter, r *http.Request, ke, juml
 	bayar := s.svc.Bayar
 	if s.rentan == "m1" {
 		bayar = s.svc.BayarM1
+	}
+	if s.rentan == "m4" {
+		bayar = s.svc.BayarM4
 	}
 	id, saldo, err := bayar(r.Context(), peminta(r), ke, jumlah)
 	var errV service.ErrValidasi

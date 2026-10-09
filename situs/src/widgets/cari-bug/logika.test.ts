@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import mentah from "../../../data/widget/t1-m3-caribug.json";
+import sqli from "../../../data/widget/t1-sqli-caribug.json";
 import { DataCariBug } from "./skema";
 import { periksa } from "./logika";
 
@@ -34,5 +35,28 @@ describe("cari-bug t1-m3 (1.19)", () => {
     const rusak = structuredClone(mentah);
     rusak.bug.push(4);
     expect(DataCariBug.safeParse(rusak).success).toBe(false);
+  });
+});
+
+describe("cari-bug t1-sqli (1.20)", () => {
+  const d = DataCariBug.parse(sqli);
+
+  test("satu baris bug; baris yang tampak berbahaya punya penjelasan aman", () => {
+    expect(d.bug).toEqual([3]);
+    expect(Object.keys(d.aman).sort()).toEqual(["2", "4", "5"]);
+  });
+
+  test("menandai baris LIMIT %d: bug terlewat dan satu tanda salah", () => {
+    const h = periksa(d, new Set([4]));
+    expect(h.tepat).toBe(false);
+    expect(h.nilai).toEqual({ 3: "lewat", 4: "salah" });
+  });
+
+  test("data lama tanpa field aman tetap valid", () => {
+    expect(data.aman).toEqual({});
+  });
+
+  test("baris aman yang juga bug ditolak skema", () => {
+    expect(DataCariBug.safeParse({ ...sqli, aman: { "3": "x" } }).success).toBe(false);
   });
 });

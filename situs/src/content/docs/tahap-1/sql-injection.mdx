@@ -1,0 +1,192 @@
+---
+title: "1.20 Keamanan 1: SQL injection dan ADR 4"
+description: Kenapa menyambung input ke teks SQL membuka seluruh database, kenapa parameter query menutupnya, dan di mana parameter tidak menolong. Memuat ADR 4.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import CariBug from "../../../widgets/cari-bug/CariBug.tsx";
+import caribug from "../../../../data/widget/t1-sqli-caribug.json";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 8 menit · coba 3 menit · Prasyarat: [[t1-m3]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+SQL injection terjadi saat input ikut menjadi teks perintah SQL. Parameter query mengirim perintah dan data secara terpisah, jadi data tetap data.
+
+<figure class="bb-fig bb-arch">
+<ol class="bb-flow">
+<li class="is-warn">teks + <code>cari</code></li>
+<li class="is-warn">satu teks</li>
+<li class="is-warn"><code>cari</code> jadi perintah</li>
+</ol>
+<ol class="bb-flow">
+<li class="is-good">teks + <code>$1</code></li>
+<li class="is-good"><code>cari</code> terpisah</li>
+<li class="is-good"><code>cari</code> tetap data</li>
+</ol>
+<figcaption>Atas: pencarian minggu 2. Bawah: versi benar. Keduanya direkam di blok Paham.</figcaption>
+</figure>
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Kenapa membuang tanda kutip dari input tidak menutup SQL injection?
+2. Apa yang sebenarnya diterima PostgreSQL saat query memakai `$1`?
+3. Bisakah nama kolom untuk `ORDER BY` dikirim sebagai `$1`?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: yang berbahaya adalah input dari app yang masuk ke teks SQL, bukan tanda sambung itu sendiri.">
+
+Setelah [[t1-m3]], Sinta meminta laporan warung bisa dicari nama pembayar dan diurutkan. Raka meminta AI menulis draf query-nya. Draf ini dites ke database bersih dan diperiksa linter; hasilnya ada di rekaman lab.
+
+<CariBug client:visible data={caribug} />
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Di [[t1-m3]], Dimas mengetik `' OR 1=1 --` dan melihat saldo setiap akun. Satu fungsi pencarian sudah membuka seluruh tabel `akun`. API v1 punya delapan operasi, dan hampir semuanya membawa input dari app ke database: email saat login, nama warung, nominal bayar, isi CSV top-up.
+
+Di M3, satu tempat yang terlupa sudah membocorkan semuanya. Karena itu aturannya harus berlaku di setiap query, bukan hanya di tempat yang sedang diingat. Injection ada di urutan kelima [OWASP Top 10:2025](https://top10.owasp.org/2025).
+
+### Cara kerjanya
+
+**Menyambung string.** Server membangun satu teks dari potongan SQL dan isi pencarian, lalu mengirim teks itu. PostgreSQL tidak bisa membedakan bagian mana yang ditulis Raka dan bagian mana yang diketik Dimas. Rekaman lab, baris yang diterima PostgreSQL di mode rentan:
+
+<Snippet file="labs/api-t1/output/injection.txt" lines="16:16" title="Rekaman lab: labs/api-t1/output/injection.txt" />
+
+Tanda kutip Dimas menutup teks `'%'`, `OR 1=1` membuat syarat selalu benar, dan `--` menjadikan sisanya komentar.
+
+**Parameter query.** Server mengirim teks SQL yang tetap, dengan tempat kosong `$1`. Isi pencarian dikirim terpisah sebagai nilai untuk `$1`. Driver Go yang dipakai lab, pgx, memakai extended protocol PostgreSQL untuk ini secara default ([dokumentasi pgx v5](https://pkg.go.dev/github.com/jackc/pgx/v5)). Request yang sama, versi benar:
+
+<Snippet file="labs/api-t1/output/injection.txt" lines="33:34" title="Rekaman lab: labs/api-t1/output/injection.txt" />
+
+Teks SQL tidak berubah oleh input apa pun. `' OR 1=1 --` hanya muncul di baris parameter, sebagai nilai yang dicari di kolom `nama`. Dokumentasi PostgreSQL menyebut keuntungan utamanya: nilai parameter terpisah dari teks perintah, jadi tidak perlu quoting dan escaping yang rawan salah ([libpq, PQexecParams](https://www.postgresql.org/docs/17/libpq-exec.html)).
+
+**Batas parameter: hanya untuk nilai.** `$1` selalu dibaca sebagai nilai, tidak pernah sebagai nama kolom atau kata kunci. Rekaman lab dengan `ORDER BY $1`:
+
+<Snippet file="labs/api-t1/output/injection.txt" lines="58:72" title="Rekaman lab: labs/api-t1/output/injection.txt" />
+
+Tidak ada error, tapi tidak ada pengurutan juga: setiap baris mendapat nilai `'nama DESC'` yang sama. Karena itu draf AI di blok Coba menyambung `urut` ke teks, dan di situlah lubangnya. Nama kolom, nama tabel, dan arah urut butuh allowlist: app mengirim kunci, server memilih potongan SQL-nya ([OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)).
+
+<Snippet file="labs/api-t1/latihan/laporan.go" region="benar" lang="go" title="labs/api-t1/latihan/laporan.go" />
+
+**Linter: jaring, bukan jaminan.** gosec memeriksa kode Go dan punya dua aturan untuk SQL yang dibangun dari string: G201 untuk format, G202 untuk sambungan. Di lab `api-t1`, gosec menemukan tepat satu baris, yaitu fungsi mode rentan:
+
+<Snippet file="labs/api-t1/output/injection.txt" lines="41:43" title="Rekaman lab: labs/api-t1/output/injection.txt" />
+
+Draf laporan warung di blok Coba lain cerita. Tes ke database membuktikan `urut` dijalankan sebagai SQL, tapi gosec tidak menandai apa pun:
+
+<Snippet file="labs/api-t1/output/injection.txt" lines="77:94" title="Rekaman lab: labs/api-t1/output/injection.txt" />
+
+Penyebabnya terlihat di kode sumber gosec v2.29.0: aturan ini memeriksa query di dalam assignment (`rows, err := ...`) dan pernyataan biasa, bukan query yang langsung di-`return` ([rules/sql.go](https://github.com/securego/gosec/blob/v2.29.0/rules/sql.go)). Linter menangkap pola yang ia kenal. Tes dengan input jahat dan review tetap dibutuhkan.
+
+**Field minimal.** M3 punya dua kesalahan, dan yang kedua bukan injection: query mengambil `saldo` semua akun, lalu mengirimnya apa adanya. Versi benar memakai struct khusus layar pencarian:
+
+<Snippet file="labs/api-t1/internal/repo/repo.go" lines="75:79" lang="go" title="labs/api-t1/internal/repo/repo.go" />
+
+Kalau suatu hari ada query lain yang bocor, struct ini membatasi apa yang bisa ikut terkirim ke app.
+
+### Di stack lain
+
+| Stack | Nilai dikirim sebagai parameter | Nama kolom dari input | Sumber |
+|---|---|---|---|
+| Go | `db.QueryContext(ctx, "... $1", cari)` | Allowlist; gosec G201/G202 sebagai jaring | [pgx](https://pkg.go.dev/github.com/jackc/pgx/v5), [gosec](https://github.com/securego/gosec) |
+| Express (node-postgres) | `client.query("... $1", [cari])` | Tidak didukung parameter; dokumentasinya menyarankan escaping lewat pg-format | [node-postgres: queries](https://node-postgres.com/features/queries) |
+| Laravel | Query builder memakai PDO binding; `DB::select("... ?", [$cari])` | "PDO does not support binding column names", termasuk kolom `order by` | [Laravel: query builder](https://laravel.com/docs/13.x/queries) |
+| Django | ORM, atau `cursor.execute("... %s", [cari])` | Jangan memakai string formatting pada raw query | [Django: raw SQL](https://docs.djangoproject.com/en/5.2/topics/db/sql/) |
+| Dart (Serverpod) | ORM, atau `session.db.unsafeQuery(sql, parameters: QueryParameters.named({...}))` | `unsafeSimpleQuery` tanpa parameter; hindari untuk input user | [Serverpod: raw access](https://docs.serverpod.dev/concepts/database/raw-access) |
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### ADR 4: parameter query, allowlist, linter, dan field minimal
+
+**Kebutuhan.** M3 menunjukkan satu fungsi bisa membocorkan seluruh tabel `akun`. v1 punya delapan operasi API yang membawa input ke database. Engineer-nya satu, dan sebagian kode ditulis bersama AI. Aturannya harus bisa diperiksa, bukan diingat.
+
+| Opsi | Kelebihan | Kekurangan |
+|---|---|---|
+| Membersihkan input: buang atau escape tanda kutip | Kode query lama tidak berubah | OWASP menandainya "strongly discouraged"; draf di blok Coba diserang tanpa tanda kutip sama sekali |
+| ORM atau query builder | Parameter otomatis untuk kasus umum | Dependency baru; tetap ada jalan keluar raw SQL; delapan query satu orang tidak membutuhkannya |
+| **Parameter query, allowlist, linter, field minimal** | Satu aturan untuk semua nilai; terbukti di log PostgreSQL | Nama kolom tetap butuh allowlist manual; linter bisa melewatkan bentuk kode tertentu |
+
+**Yang dipilih.**
+
+1. Setiap nilai dari luar masuk sebagai `$n`. Tidak ada `+` atau `fmt.Sprintf` yang membawa input ke teks SQL.
+2. Nama kolom dan arah urut hanya dari allowlist di server. Kunci yang tidak dikenal ditolak.
+3. gosec aturan G201 dan G202 dijalankan sebelum commit, dan masuk CI pertama di [[C3]].
+4. Setiap endpoint punya struct response sendiri berisi field yang dibutuhkan layar. Struct tabel tidak pernah dikirim apa adanya.
+
+**Kapan keputusan ini salah.** Saat query dibangun dinamis dari banyak filter, allowlist manual mulai tersebar di banyak fungsi, dan satu yang terlewat membuka lubang lagi. Linter juga tidak menjamin apa pun: rekaman menunjukkan gosec melewatkan draf yang terbukti bisa disusupi. Pengamannya adalah tes dengan input jahat, seperti `'` dan `(SELECT 1/0)`, untuk setiap endpoint yang menerima teks.
+
+**Yang merevisinya nanti.** Saat engineer kedua masuk di Tahap 2, gosec dan tes input jahat jadi syarat merge. Di Tahap 4, security review menambah pemeriksaan statis yang lebih luas dan user database dengan hak minimal per modul.
+
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| User database dengan hak minimal | Satu server, satu schema; OWASP menyarankannya sebagai lapisan kedua | Tahap 4 |
+| ORM atau query builder | Delapan query, satu orang; SQL yang ditulis langsung terlihat utuh di review | Tahap 2, saat query bertambah |
+| WAF di depan API | Puncak 0,14 request per detik, satu gedung, penguji internal | Tahap 5 |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Raka membuang semua tanda kutip dari isi pencarian sebelum query dijalankan. Apakah draf laporan warung di blok Coba jadi aman?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Tidak. Serangan di rekaman lab, `(SELECT 1/0)`, tidak memakai tanda kutip. `urut` masuk ke bagian `ORDER BY`, tempat SQL tidak butuh tanda kutip untuk menyisipkan perintah. Yang menutupnya adalah allowlist.
+
+</details>
+
+**2.** Jelaskan kenapa `' OR 1=1 --` tidak berbahaya di versi benar, padahal teksnya sampai ke PostgreSQL.
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Teks itu sampai sebagai nilai untuk `$1`, terpisah dari teks perintah. PostgreSQL sudah tahu bentuk perintahnya sebelum membaca nilai, jadi nilai hanya dibandingkan dengan kolom `nama`. Rekaman: hasilnya `{"warung":[]}`.
+
+</details>
+
+**3.** gosec lolos tanpa temuan di sebuah PR. Apa yang masih perlu kamu cek sebelum merge?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Linter hanya menangkap bentuk kode yang ia kenal. Cek manual setiap query: tidak ada input yang disambung ke teks, nama kolom dari allowlist, dan response hanya berisi field layar. Lalu jalankan tes dengan input jahat ke endpoint yang menerima teks.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Tidak ada `+`, `fmt.Sprintf`, atau template string yang membawa input dari request ke teks SQL.
+- [ ] `ORDER BY`, nama kolom, dan nama tabel dari input hanya lewat allowlist.
+- [ ] Query yang langsung di-`return` diperiksa manual; linter bisa melewatkannya.
+- [ ] Response memakai struct khusus layar, bukan struct tabel.
+- [ ] Ada tes dengan `'` dan `(SELECT 1/0)` untuk endpoint yang menerima teks.
+
+### Bacaan lanjut
+
+- [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)
+- [OWASP Top 10:2025: Injection](https://top10.owasp.org/2025)
+- [PostgreSQL: libpq command execution](https://www.postgresql.org/docs/17/libpq-exec.html) · [gosec](https://github.com/securego/gosec)
+
+</Blok>
+
+<SkripLama daftar={["cerita"]} />
