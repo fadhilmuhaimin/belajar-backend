@@ -1,0 +1,52 @@
+{
+  "id": "t1-adr56-pertanyaan-prd",
+  "judul": "Dua pertanyaan terbuka PRD v1, dua ADR",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · m4.txt, koreksi.txt"
+  },
+  "baris": [
+    {
+      "label": "Gagal di tengah",
+      "sub": "pertanyaan terbuka 1",
+      "simpul": [
+        {
+          "teks": "M4: Budi −Rp70.000",
+          "sub": "tanpa baris transaksi; total saldo Rp24.930.000",
+          "nada": "warn"
+        },
+        {
+          "teks": "ADR 5: transaction",
+          "sub": "dibuka di service lewat repo.DalamTx",
+          "nada": "system"
+        },
+        {
+          "teks": "Rollback",
+          "sub": "saldo Budi tetap Rp250.000",
+          "nada": "good"
+        }
+      ]
+    },
+    {
+      "label": "Saldo salah",
+      "sub": "pertanyaan terbuka 2",
+      "simpul": [
+        {
+          "teks": "Tanpa cara resmi",
+          "sub": "hanya UPDATE lewat psql",
+          "nada": "warn"
+        },
+        {
+          "teks": "ADR 6: koreksi",
+          "sub": "tabel koreksi; admin saja, alasan minimal 20 karakter",
+          "nada": "system"
+        },
+        {
+          "teks": "Total utuh lagi",
+          "sub": "Rp25.000.000; saldo dan baris koreksi dalam satu transaction",
+          "nada": "good"
+        }
+      ]
+    }
+  ]
+}

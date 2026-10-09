@@ -3,6 +3,8 @@ title: "1.24 ADR 5–6: Transaction di service; tabel koreksi"
 description: Dua keputusan setelah M4. Service membuka satu transaction untuk setiap perubahan uang lebih dari satu baris. Setiap perbaikan saldo dicatat di tabel koreksi dengan siapa, kapan, dan kenapa.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import pertanyaanPrd from "../../../../data/diagram/t1-adr56-pertanyaan-prd.json";
 import Snippet from "../../../components/Snippet.astro";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
@@ -11,9 +13,11 @@ import SkripLama from "../../../components/SkripLama.astro";
 
 <Blok nama="Kebutuhan" buka>
 
-PRD v1 menutup dengan dua pertanyaan terbuka. Apa yang terjadi kalau pembayaran gagal di tengah? Siapa yang memperbaiki saldo yang salah, dan bagaimana?
+PRD v1 menutup dengan dua pertanyaan terbuka: bagaimana kalau pembayaran gagal di tengah, dan siapa yang memperbaiki saldo yang salah?
 
-Di [[t1-m4]], keduanya terjawab dengan cara yang buruk. Pembayaran Rp70.000 gagal di tengah, dan saldo Budi terpotong tanpa baris transaksi. Lalu tidak ada cara resmi untuk mengembalikannya.
+<Rantai data={pertanyaanPrd} ringkas />
+
+Di [[t1-m4]], keduanya terjawab dengan cara yang buruk. Pembayaran Rp70.000 gagal di tengah, dan saldo Budi terpotong tanpa baris transaksi. Total saldo turun jadi Rp24.930.000, padahal top-up Rp25.000.000. Lalu tidak ada cara resmi untuk mengembalikannya.
 
 Aturan Pak Hadi di PRD berlaku untuk keduanya: tidak ada angka yang berubah tanpa catatan siapa, kapan, dan kenapa.
 
@@ -21,8 +25,8 @@ Dua fitur v1 mengubah lebih dari satu baris uang sekaligus. Bayar mengubah dua s
 
 Dari sini lahir dua keputusan:
 
-- **ADR 5**: di lapisan mana transaction dibuka.
-- **ADR 6**: bagaimana saldo yang salah diperbaiki.
+- **ADR 5**: di lapisan mana transaction dibuka. Hasilnya di rekaman lab: pembayaran yang gagal di-rollback, dan saldo Budi tetap Rp250.000.
+- **ADR 6**: bagaimana saldo yang salah diperbaiki. Hasilnya: admin mengoreksi saldo Budi lewat tabel koreksi, dan total saldo kembali Rp25.000.000.
 
 </Blok>
 
