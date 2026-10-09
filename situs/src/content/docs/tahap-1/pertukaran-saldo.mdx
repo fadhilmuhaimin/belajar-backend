@@ -63,13 +63,13 @@ Setiap hal yang harus benar punya penjaga sendiri di backend v1:
 
 | Yang harus benar | Penjaganya di v1 | Bukti |
 |---|---|---|
-| 1. Semua atau tidak sama sekali | Satu transaction di `repo/` membungkus dua `UPDATE` dan satu `INSERT` | Log PostgreSQL di [[t1-fitur-bayar]]; mekanismenya di [[B3.1]] |
+| 1. Semua atau tidak sama sekali | Satu transaction, dibuka di `service/`, membungkus dua `UPDATE` dan satu `INSERT` | Log PostgreSQL di [[t1-fitur-bayar]]; mekanismenya di [[B3.1]] |
 | 2. Tidak ada saldo di bawah nol | Service memeriksa saldo sebelum uang disentuh; constraint `saldo_tidak_negatif` menolak sisanya | Rekaman F dan G di bawah |
 | 3. Jumlah semua saldo tetap | Setiap pengurangan punya pasangan penambahan dengan jumlah yang sama | Query `SUM` di rekaman B, D, dan F |
 
-Kode repo di lab sudah menjalankan ketiga perubahan dalam satu transaction. Di server uji coba, transaction ini baru ditambahkan setelah [[t1-m4]] di minggu 3.
+Kode service di lab sudah menjalankan ketiga perubahan dalam satu transaction. Di server uji coba, transaction ini baru ditambahkan setelah [[t1-m4]] di minggu 3.
 
-<Snippet file="labs/api-t1/internal/repo/transaksi.go" region="pindahkan" lang="go" title="labs/api-t1/internal/repo/transaksi.go" />
+<Snippet file="labs/api-t1/internal/service/bayar.go" region="pindahkan" lang="go" title="labs/api-t1/internal/service/bayar.go" />
 
 Rekaman lab dari database bersih, setelah admin mengisi 100 karyawan dengan Rp250.000. Jumlah semua saldo sama dengan jumlah semua top-up:
 

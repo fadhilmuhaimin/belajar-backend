@@ -146,11 +146,11 @@ Satu hal yang sering terlewat: database tidak menutup transaction sendiri saat s
 
 Untuk satu perintah SQL saja, `BEGIN` tidak diperlukan. PostgreSQL membungkus setiap perintah dengan transaction implisit (sumber yang sama). Di M4, setiap `UPDATE` memang atomic sendiri-sendiri; yang tidak atomic adalah gabungan ketiganya.
 
-Di lab `api-t1` sekarang, transaction dibuka di repo, di fungsi yang menjalankan ketiga perubahan:
+Di lab `api-t1`, transaction untuk satu pembayaran dibuka di service, lewat `DalamTx` dari repo:
 
-<Snippet file="labs/api-t1/internal/repo/transaksi.go" region="pindahkan" lang="go" title="labs/api-t1/internal/repo/transaksi.go" />
+<Snippet file="labs/api-t1/internal/service/bayar.go" region="pindahkan" lang="go" title="labs/api-t1/internal/service/bayar.go" />
 
-Apakah transaction sebaiknya dibuka di repo atau di service diputuskan di [[t1-adr-transaction]].
+Kenapa di service, bukan di repo, diputuskan di [[t1-adr-transaction]].
 
 </Blok>
 

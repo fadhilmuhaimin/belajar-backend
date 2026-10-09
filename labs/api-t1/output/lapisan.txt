@@ -2,7 +2,7 @@
 # --- A. Import tiap lapisan, menurut go list ---
 $ go list -f '{{.ImportPath}}: {{join .Imports " "}}' ./internal/...
 internal/handler: context encoding/json errors fmt io internal/service log net/http strconv strings time
-internal/repo: context database/sql errors fmt time
+internal/repo: context database/sql errors time
 internal/service: context crypto/rand crypto/sha256 encoding/csv encoding/hex errors fmt golang.org/x/crypto/bcrypt internal/repo strconv strings time
 
 

@@ -33,6 +33,7 @@ func (s Server) Rute() *http.ServeMux {
 	mux.HandleFunc("POST /logout", s.wajibLogin(s.logout))
 	mux.HandleFunc("GET /akun/{id}", s.wajibLogin(s.lihatAkun))
 	mux.HandleFunc("POST /topup", s.wajibLogin(s.topup))
+	mux.HandleFunc("POST /koreksi", s.wajibLogin(s.koreksi))
 	mux.HandleFunc("POST /transfers", s.wajibLogin(s.bayar))
 	mux.HandleFunc("GET /transfers/{id}", s.wajibLogin(s.lihatTransaksi))
 	mux.HandleFunc("GET /akun/{id}/riwayat", s.wajibLogin(s.riwayat))
@@ -242,6 +243,39 @@ func (s Server) topup(w http.ResponseWriter, r *http.Request) {
 }
 
 // --8<-- [end:topup]
+
+// --8<-- [start:koreksi]
+// POST /koreksi  body JSON: akun, jumlah, alasan (ADR 6)
+func (s Server) koreksi(w http.ResponseWriter, r *http.Request) {
+	var in struct {
+		Akun   *int64  `json:"akun"`
+		Jumlah *int64  `json:"jumlah"`
+		Alasan *string `json:"alasan"`
+	}
+	if p := bacaJSON(r.Body, &in); p != nil {
+		tulisProblem(w, *p)
+		return
+	}
+	if p := wajibAda([]string{"akun", "jumlah", "alasan"}, in.Akun != nil, in.Jumlah != nil, in.Alasan != nil); p != nil {
+		tulisProblem(w, *p)
+		return
+	}
+	id, saldo, err := s.svc.Koreksi(r.Context(), peminta(r), *in.Akun, *in.Jumlah, *in.Alasan)
+	var errV service.ErrValidasi
+	switch {
+	case errors.Is(err, service.ErrDilarang):
+		tulisProblem(w, Problem{Type: "/problems/dilarang", Title: "Hanya admin tunjangan yang boleh mengoreksi saldo", Status: 403})
+	case errors.As(err, &errV):
+		tulisProblem(w, Problem{Type: "/problems/validasi", Title: "Input tidak memenuhi aturan", Status: 422,
+			Errors: []map[string]string{{"field": errV.Field, "pesan": errV.Pesan}}})
+	case err != nil:
+		s.errorInternal(w, err)
+	default:
+		tulisJSON(w, 201, map[string]int64{"id": id, "saldo": saldo})
+	}
+}
+
+// --8<-- [end:koreksi]
 
 // --8<-- [start:bayar]
 func (s Server) bayar(w http.ResponseWriter, r *http.Request) {

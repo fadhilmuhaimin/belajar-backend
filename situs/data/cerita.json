@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 228,
-        "halaman": 27
+        "menit": 241,
+        "halaman": 28
       },
       "bagian": [
         {
@@ -838,17 +838,21 @@
         6
       ],
       "masalah": "Pak Hadi bertanya: Rp70.000 ini ke mana, dan siapa yang memperbaikinya?",
-      "ada": false,
-      "nomor": "1.24"
+      "ada": true,
+      "prasyarat": [
+        "B3.1"
+      ],
+      "nomor": "1.24",
+      "menit": 11
     },
     {
       "id": "B4.1",
       "judul": "Migration: skema sebagai kode",
       "tahap": 1,
       "topik": "Data",
-      "path": "b-fondasi/b4-1-migration.md",
+      "path": "tahap-1/migration.md",
       "prasyarat": [
-        "B2.1"
+        "t1-m4"
       ],
       "inti": true,
       "masalah": "Skema database di laptop dan di server berbeda",
@@ -859,9 +863,8 @@
         "backend",
         "devops"
       ],
-      "lama": true,
       "nomor": "1.25",
-      "menit": 8
+      "menit": 10
     },
     {
       "id": "t1-m5",

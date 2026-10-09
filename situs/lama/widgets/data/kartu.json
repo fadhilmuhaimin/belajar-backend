@@ -313,28 +313,52 @@
   "jawab": "Kalau transaction di-rollback, uang di payment gateway sudah terlanjur ditarik, karena API luar tidak ikut rollback. Selain itu, koneksi dan lock tertahan selama menunggu respons yang bisa lambat."
  },
  {
+  "id": "t1-adr-transaction-1",
+  "halaman": "t1-adr-transaction",
+  "judul": "1.24 Transaction di service dan tabel koreksi",
+  "url": "tahap-1/adr-transaction-koreksi/",
+  "tanya": "Fitur baru: admin memindahkan saldo dari satu karyawan ke karyawan lain, dengan alasan. Di mana transaction dibuka, dan apa saja isinya?",
+  "jawab": "Di service, lewat `DalamTx`. Isinya tiga langkah: kurangi saldo karyawan pertama, tambah saldo karyawan kedua, dan tulis baris koreksi untuk keduanya. Repo hanya menyediakan method `Tx` untuk setiap langkah."
+ },
+ {
+  "id": "t1-adr-transaction-2",
+  "halaman": "t1-adr-transaction",
+  "judul": "1.24 Transaction di service dan tabel koreksi",
+  "url": "tahap-1/adr-transaction-koreksi/",
+  "tanya": "Kenapa `UPDATE akun SET saldo = 250000 WHERE id = 419` lewat `psql` melanggar aturan Pak Hadi, walaupun angkanya benar?",
+  "jawab": "Tidak ada baris yang mencatat siapa yang mengubah, kapan, dan kenapa. Bulan depan, saldo Budi terlihat normal, dan tidak ada yang tahu bahwa saldo itu pernah dikoreksi. Angka yang benar tanpa catatan tidak bisa diaudit."
+ },
+ {
+  "id": "t1-adr-transaction-3",
+  "halaman": "t1-adr-transaction",
+  "judul": "1.24 Transaction di service dan tabel koreksi",
+  "url": "tahap-1/adr-transaction-koreksi/",
+  "tanya": "Rekonsiliasi akun Budi menghitung Rp320.000, saldonya Rp250.000. Apa artinya, dan apakah koreksinya salah?",
+  "jawab": "Koreksinya benar. Selisih Rp70.000 adalah pemotongan di M4 yang terjadi tanpa baris di tabel mana pun. Data menunjukkan ada perubahan yang tidak tercatat, dan itu batas model kolom saldo yang di-`UPDATE`."
+ },
+ {
   "id": "B4.1-1",
   "halaman": "B4.1",
   "judul": "1.25 Migration: skema sebagai kode",
-  "url": "b-fondasi/b4-1-migration/",
-  "tanya": "Migration 2 sudah jalan di production. Raka sadar kolom `jumlah` seharusnya `bigint`, lalu mengedit file 2. Apa yang terjadi saat deploy?",
-  "jawab": "Tidak ada. Database sudah mencatat versi 2, jadi file 2 tidak dijalankan lagi. Production tetap memakai tipe lama, sementara database baru di laptop orang lain memakai tipe baru. Perbaikan yang benar adalah migration 4 yang mengubah tipe kolom."
+  "url": "tahap-1/migration/",
+  "tanya": "Migration 3 sudah jalan di server. Raka sadar kolom `jumlah` di tabel `transaksi` seharusnya punya batas maksimal, lalu mengedit file 3. Apa yang terjadi saat ia menjalankan `migrate up` di server?",
+  "jawab": "Tidak ada. Server sudah mencatat versi 3, jadi file 3 tidak dijalankan lagi. Server tetap tanpa batas, sementara mesin baru yang dibangun dari nol mendapat batas. Perbaikan yang benar adalah migration baru."
  },
  {
   "id": "B4.1-2",
   "halaman": "B4.1",
   "judul": "1.25 Migration: skema sebagai kode",
-  "url": "b-fondasi/b4-1-migration/",
-  "tanya": "Jelaskan kenapa alat migration menolak `migrate up` saat versinya dirty, padahal bisa saja mencoba lagi.",
-  "jawab": "Alat tidak tahu seberapa jauh migration yang gagal sempat berjalan. Mengulang bisa menjalankan statement yang sudah berhasil dua kali, atau melewati yang belum. Manusia harus memeriksa skema dulu, baru menandai versi yang benar dengan `force`."
+  "url": "tahap-1/migration/",
+  "tanya": "Di rekaman, laptop dan server sama-sama versi 3, padahal skemanya berbeda. Kenapa angka versi tidak menangkap perbedaan itu?",
+  "jawab": "Angka versi hanya dicatat oleh alat migration saat ia menjalankan file. `ALTER TABLE` lewat `psql` tidak melewati alat itu, jadi tidak tercatat. Versi hanya jujur kalau skema berubah lewat file saja."
  },
  {
   "id": "B4.1-3",
   "halaman": "B4.1",
   "judul": "1.25 Migration: skema sebagai kode",
-  "url": "b-fondasi/b4-1-migration/",
-  "tanya": "Di rekaman, kolom `telp` tidak ada setelah migration 3 gagal. Apa yang membuat PostgreSQL membatalkan `ADD COLUMN`?",
-  "jawab": "Isi file dikirim sebagai satu query berisi beberapa statement. PostgreSQL menjalankannya sebagai satu transaction implisit, jadi error di statement kedua membatalkan statement pertama juga."
+  "url": "tahap-1/migration/",
+  "tanya": "Server berstatus `5 (dirty)`. Kapan `migrate force 5` aman dijalankan, dan kapan tidak?",
+  "jawab": "Aman setelah kamu memeriksa skema dan memastikan isinya sudah sama dengan migration 5, seperti di rekaman. Tidak aman kalau migration 5 baru terpasang sebagian: `force` hanya mengubah catatan versi, jadi bagian yang belum terpasang tidak akan pernah dijalankan."
  },
  {
   "id": "B5.1-1",

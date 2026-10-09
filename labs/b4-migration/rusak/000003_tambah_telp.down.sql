@@ -1,1 +1,0 @@
-ALTER TABLE akun DROP COLUMN telp;

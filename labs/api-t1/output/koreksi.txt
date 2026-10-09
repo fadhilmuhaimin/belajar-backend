@@ -1,0 +1,77 @@
+
+# --- A. Insiden M4 diulang: server minggu 3 (mode rentan m4), batas saldo warung, 29 pembayaran, Budi Rp70.000 ---
+$ psql -c "ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000)"
+# server: ./api-t1 -rentan m4
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+# persiapan: 29 karyawan lain masing-masing membayar Rp50.000 ke Warung Ani
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+# Budi membayar Rp70.000: 500, saldo terpotong tanpa baris transaksi (rinciannya di m4.txt)
+$ psql -c "SELECT (SELECT sum(saldo) FROM akun) AS total_saldo, (SELECT sum(nominal) FROM topup) AS total_topup, (SELECT count(*) FROM transaksi) AS transaksi"
+ total_saldo | total_topup | transaksi 
+-------------+-------------+-----------
+    24930000 |    25000000 |        29
+(1 row)
+
+server log: PERINGATAN: mode rentan m4 menyala
+server log: error internal: ERROR: new row for relation "akun" violates check constraint "batas_saldo_warung" (SQLSTATE 23514)
+
+# --- B. Versi benar di-deploy (data tetap). Hanya admin yang boleh mengoreksi, dan alasan wajib ---
+# server: ./api-t1
+$ curl -i -X POST '/login' -d '{"email": "budi@lestari.example", "password": "sementara-419"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Budi>"}
+$ curl -i -X POST '/login' -d '{"email": "admin.tunjangan@lestari.example", "password": "sementara-400"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi admin>"}
+$ curl -i -X POST '/koreksi' -H 'Authorization: Bearer <token sesi Budi>' -d '{"akun": 419, "jumlah": 70000, "alasan": "saldo saya hilang, tolong kembalikan"}'
+HTTP/1.1 403 Forbidden
+Content-Type: application/problem+json
+
+{"type":"/problems/dilarang","title":"Hanya admin tunjangan yang boleh mengoreksi saldo","status":403}
+$ curl -i -X POST '/koreksi' -H 'Authorization: Bearer <token sesi admin>' -d '{"akun": 419, "jumlah": 70000, "alasan": "salah sistem"}'
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+
+{"type":"/problems/validasi","title":"Input tidak memenuhi aturan","status":422,"errors":[{"field":"alasan","pesan":"wajib, minimal 20 karakter: kenapa saldo ini diubah"}]}
+
+# --- C. Admin mengoreksi saldo Budi, dengan alasan yang bisa dibaca Keuangan ---
+$ curl -i -X POST '/koreksi' -H 'Authorization: Bearer <token sesi admin>' -d '{"akun": 419, "jumlah": 70000, "alasan": "Pembayaran Budi ke Warung Ani, Jumat minggu 3 pukul 12.15, gagal di tengah; saldo terpotong tanpa baris transaksi (M4)"}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{"id":1,"saldo":250000}
+# yang diterima PostgreSQL (log_statement=all):
+begin
+UPDATE akun SET saldo = saldo + $1 WHERE id = $2 RETURNING saldo
+INSERT INTO koreksi (akun_id, jumlah, alasan, admin_id) VALUES ($1, $2, $3, $4) RETURNING id
+commit
+
+$ psql -c "SELECT akun_id, jumlah, admin_id, alasan FROM koreksi"
+ akun_id | jumlah | admin_id |                                                         alasan                                                         
+---------+--------+----------+------------------------------------------------------------------------------------------------------------------------
+     419 |  70000 |      400 | Pembayaran Budi ke Warung Ani, Jumat minggu 3 pukul 12.15, gagal di tengah; saldo terpotong tanpa baris transaksi (M4)
+(1 row)
+
+$ psql -c "SELECT (SELECT sum(saldo) FROM akun) AS total_saldo, (SELECT sum(nominal) FROM topup) AS total_topup, (SELECT count(*) FROM transaksi) AS transaksi"
+ total_saldo | total_topup | transaksi 
+-------------+-------------+-----------
+    25000000 |    25000000 |        29
+(1 row)
+
+
+# --- D. Rekonsiliasi akun Budi dari catatan: top-up - keluar + masuk + koreksi ---
+$ psql -c "SELECT a.saldo, t.topup, k.keluar, m.masuk, x.koreksi, t.topup - k.keluar + m.masuk + x.koreksi AS dari_catatan FROM akun a, (SELECT coalesce(sum(nominal), 0) AS topup FROM topup WHERE akun_id = 419) t, (SELECT coalesce(sum(jumlah), 0) AS keluar FROM transaksi WHERE dari = 419) k, (SELECT coalesce(sum(jumlah), 0) AS masuk FROM transaksi WHERE ke = 419) m, (SELECT coalesce(sum(jumlah), 0) AS koreksi FROM koreksi WHERE akun_id = 419) x WHERE a.id = 419"
+ saldo  | topup  | keluar | masuk | koreksi | dari_catatan 
+--------+--------+--------+-------+---------+--------------
+ 250000 | 250000 |      0 |     0 |   70000 |       320000
+(1 row)
+
+# Saldo Rp250.000, catatan menghitung Rp320.000. Pemotongan Rp70.000 di M4 tidak punya baris di tabel mana pun.

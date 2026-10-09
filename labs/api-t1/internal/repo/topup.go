@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"fmt"
 )
 
 // AkunLewatEmailSemua: nomor dan jenis akun untuk setiap email, satu query.
@@ -39,24 +38,13 @@ type BarisTopup struct {
 }
 
 // --8<-- [start:topup]
-// Topup mengisi saldo semua baris dalam satu transaction: semua tersimpan, atau tidak ada sama sekali.
-func (r Repo) Topup(ctx context.Context, adminID int64, keterangan string, baris []BarisTopup) error {
-	tx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback() // tidak berpengaruh setelah Commit berhasil
-	for _, b := range baris {
-		if _, err := tx.ExecContext(ctx, `UPDATE akun SET saldo = saldo + $1 WHERE id = $2`, b.Nominal, b.AkunID); err != nil {
-			return fmt.Errorf("akun %d: %w", b.AkunID, err)
-		}
-		if _, err := tx.ExecContext(ctx,
-			`INSERT INTO topup (akun_id, nominal, admin_id, keterangan) VALUES ($1, $2, $3, $4)`,
-			b.AkunID, b.Nominal, adminID, keterangan); err != nil {
-			return fmt.Errorf("catatan akun %d: %w", b.AkunID, err)
-		}
-	}
-	return tx.Commit()
+// CatatTopup menulis satu baris catatan top-up: siapa, berapa, oleh admin mana, dan kenapa.
+// Saldo diubah lewat TambahSaldo di transaction yang sama (service/topup.go).
+func (t Tx) CatatTopup(ctx context.Context, b BarisTopup, adminID int64, keterangan string) error {
+	_, err := t.tx.ExecContext(ctx,
+		`INSERT INTO topup (akun_id, nominal, admin_id, keterangan) VALUES ($1, $2, $3, $4)`,
+		b.AkunID, b.Nominal, adminID, keterangan)
+	return err
 }
 
 // --8<-- [end:topup]

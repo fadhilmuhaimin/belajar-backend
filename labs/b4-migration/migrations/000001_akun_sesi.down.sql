@@ -1,1 +1,2 @@
+DROP TABLE sesi;
 DROP TABLE akun;

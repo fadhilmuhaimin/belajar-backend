@@ -27,7 +27,7 @@ func (s Service) BayarM1(ctx context.Context, peminta, ke, jumlah int64) (id, sa
 	if pembayar.Saldo < jumlah { // -5000 lolos: 250000 tidak lebih kecil dari -5000
 		return 0, 0, ErrSaldoKurang
 	}
-	return s.repo.Pindahkan(ctx, peminta, ke, jumlah)
+	return s.pindahkan(ctx, peminta, ke, jumlah)
 }
 
 // --8<-- [end:m1]
