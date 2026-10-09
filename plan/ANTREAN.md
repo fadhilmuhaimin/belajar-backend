@@ -47,11 +47,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K0b · Visual di blok Kebutuhan 1.24
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: blok Kebutuhan 1.24 punya diagram `Rantai` di layar pertama 375×667 dan 1366×657 (pola keputusan 214: satu baris per pertanyaan PRD, lalu ADR yang menjawabnya), isi dari halaman dan rekaman `koreksi.txt`; tes data diagram lolos.
-- catatan: Dari K0.
+- catatan: Dari K0. Selesai (keputusan 221): `t1-adr56-pertanyaan-prd.json` ringkas sesudah kalimat pertama; utuh di 375×667 (±40 px tersisa) dan 1366×657.
 
 ### K0c · Ilustrasi M4: teks keluar bingkai
 
