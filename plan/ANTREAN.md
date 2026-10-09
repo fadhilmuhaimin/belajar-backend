@@ -251,3 +251,191 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - selesai bila: bagian K2 di `plan/CROSSCHECK-KECIL.md` memuat 1.31–1.35 dengan bukti; temuan menjadi tugas perbaikan di bawah K2.
 - catatan: -
 
+### 1.36 · Tim dan infra Tahap 1
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: halaman `t1-tim-infra` dengan template tim-infra: satu orang, satu VPS, CI pertama, dengan file nyata dari repo lab; widget alur.
+- catatan: Jalur DevOps.
+
+### 1.37 · M8: Uji coba lolos, PRD v2 datang
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: halaman `t1-m8` (masalah, ★) dengan widget React baru kalkulator (logika murni di `.ts`, data divalidasi Zod, tes Vitest); puncak 0,14 RPS dihitung terbuka dari `tahap[0].asumsi`; tabel "Angka di tahap ini" ditulis ulang di sini atau di 1.38.
+- catatan: -
+
+### I5d · Angka berubah dengan tween
+
+- jenis: interaksi
+- status: antre
+- percobaan: 0
+- bergantung: I3
+- selesai bila: jumlah-total dan saldo di mockup HP berubah dengan tween singkat dari token gerak; tangkapan sebelum/sesudah; butir I6.
+- catatan: -
+
+### 1.38 · Kerangka berpikir dan estimasi
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: 1.37
+- selesai bila: D1 ditulis ulang ke `tahap-1/` dengan widget kalkulator; angka dari `tahap[0].asumsi`.
+- catatan: -
+
+### 1.39 · Spesifikasi untuk AI dan review kode AI
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: F1 ditulis ulang ke `tahap-1/` dan menyerap F2; halaman F2 dan entrinya dihapus di PR yang sama (pola keputusan 150, sudah direncanakan registry v2); tes registri disesuaikan; widget banding dan pilah; lab f2-review.
+- catatan: -
+
+### 1.40 · ADR 12: Sengaja belum dilakukan
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: halaman `t1-adr-12` (adr, ★): tanpa cache, queue, service kedua, k8s, masing-masing dengan alasan dan "kapan keputusan ini salah"; menyebut dua yang pecah di Tahap 2 (dua request bersamaan; retry dari app).
+- catatan: -
+
+### K3 · Crosscheck kecil 1.36–1.40
+
+- jenis: crosscheck
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: bagian K3 di `plan/CROSSCHECK-KECIL.md` memuat 1.36–1.40 dengan bukti; temuan menjadi tugas perbaikan di bawah K3.
+- catatan: -
+
+### I5e · Race: garis waktu dua client
+
+- jenis: interaksi
+- status: antre
+- percobaan: 0
+- bergantung: I3
+- selesai bila: widget race menampilkan garis waktu dua client; langkah yang lewat tetap terlihat; langkah baru masuk dengan gerak; tangkapan sebelum/sesudah; butir I6.
+- catatan: -
+
+### 1.41 · Yang dibawa keluar dari Tahap 1
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: halaman `t1-rekap` dengan 10 kalimat dari naskah bagian 5, masing-masing terikat ke kejadiannya, plus Cek diri gabungan; widget kartu.
+- catatan: -
+
+### 1.42 · Jembatan: pratinjau PRD v2
+
+- jenis: konten
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: halaman `t1-jembatan` (prd, ★) menampilkan pratinjau PRD v2 dari naskah bagian 6 dan widget tebak (`situs/src/widgets/tebak/`): dari 12 ADR, mana yang dibuka lagi; jawabannya ADR 6 dan ADR 5 dengan alasan naskah.
+- catatan: -
+
+### I5f · Diagram arsitektur di halaman tahap dan ADR
+
+- jenis: interaksi
+- status: antre
+- percobaan: 0
+- bergantung: I4
+- selesai bila: diagram kotak statis di halaman tahap dan halaman ADR (banding) diganti DiagramArsitektur; MEMORI mendapat bagian "Untuk halaman baru": cara memakai DiagramArsitektur dan token gerak; tangkapan sebelum/sesudah; butir I6.
+- catatan: Widget lain hanya bila jelas membantu pemahaman; alasannya dicatat di keputusan.
+
+### P3 · Halaman cara pakai untuk lima blok dan tiga pintu
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: `/cara-pakai/` menjelaskan lima blok dan tiga pintu (cerita, peran, masalah), bukan susunan lima bagian lama; audit bahasa 0 error.
+- catatan: Dari MEMORI "Catatan untuk penulisan ulang Tahap 1".
+
+### P4 · Ilustrasi latar perusahaan Grup Lestari
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: adegan latar perusahaan baru di `Ilustrasi.astro` (kampus tiga gedung, kantin, warung tenant; token gelap/terang, tanpa teks di SVG) dipakai di 1.1 PRD v1; `contrast.py` lolos.
+- catatan: Naskah meminta satu ilustrasi latar dan satu per masalah M3–M6.
+
+### R1 · Visual layar pertama: 1.3, 1.5, 1.6
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: di tiap halaman Inti = kalimat → visual → dua paragraf rinci, plus satu diagram di Paham (`Rantai.astro` atau `PetaFitur.astro`, data JSON + Zod); visual tampil di layar pertama 4 ukuran; satu commit per halaman.
+- catatan: Setengah jalan dari sesi redesain (MEMORI sesi 3, langkah 5): langkah 1–4 selesai di #120.
+
+### R2 · Visual layar pertama: 1.11, 1.12, 1.13
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: sama dengan R1 untuk 1.11, 1.12, 1.13.
+- catatan: -
+
+### R3 · Visual layar pertama: 1.15, 1.16, 1.18
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: sama dengan R1 untuk 1.15, 1.16, 1.18.
+- catatan: -
+
+### R4 · Visual layar pertama: 1.20, 1.21, 1.23
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: sama dengan R1 untuk 1.20, 1.21, 1.23.
+- catatan: -
+
+### R5 · Visual layar pertama: 1.24, 1.25
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: 1.24 (ADR: diagram di blok Kebutuhan seperti 1.4) dan 1.25 (konsep: seperti R1) punya visual di layar pertama.
+- catatan: Ditulis di main tanpa redesain.
+
+### R6 · Aturan layar: visual wajib di layar pertama
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: R1, R2, R3, R4, R5
+- selesai bila: `situs/tools/layar.mjs` gagal bila halaman berblok tidak menampilkan visual di layar pertama 4 ukuran; semua halaman Tahap 1 yang ada lolos.
+- catatan: Setengah jalan dari sesi redesain (MEMORI sesi 3, langkah 6).
+
+### X1 · Crosscheck penuh Tahap 1
+
+- jenis: crosscheck
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: isi `plan/PROMPT-CROSSCHECK.md` dijalankan; `plan/LAPORAN-TAHAP-1.md` ditulis; setiap perbaikan dari laporan menjadi tugas perbaikan baru sesudah X1 (satu tugas per perbaikan, bukan dikerjakan di iterasi X1).
+- catatan: -
+
+### X2 · Penutup Tahap 1
+
+- jenis: crosscheck
+- status: antre
+- percobaan: 0
+- bergantung: X1
+- selesai bila: semua tugas dari X1 selesai atau diparkir; tangkapan seluruh Tahap 1 dilihat; laporan di STATUS dan baris "Tahap 1: crosscheck selesai"; tidak ada tugas Tahap 2 yang dimulai.
+- catatan: Tahap 2 menunggu `plan/CERITA-TAHAP-2.md` dari pemilik.
