@@ -4,7 +4,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
-- Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (keputusan 223); sisa 174–199 dibiarkan kosong.
+- Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (keputusan 224); sisa 174–199 dibiarkan kosong.
+- 223: K0d, `p.meta` tanpa margin negatif; `ukur-judul.mjs` di gerbang; ruang HP diambil dari jarak meta ke blok.
 - 222: K0c, ilustrasi M4 saldo dicoret; `ukur-ilustrasi.mjs`; temuan M2 jadi K0e.
 - 221: K0b, Rantai ringkas di Kebutuhan 1.24 (dua pertanyaan PRD → ADR 5, ADR 6).
 - 220: K0a, Rantai prop `ringkas` untuk Inti (HP mendatar tanpa sub); Inti 1.21, 1.23, 1.25.
@@ -76,12 +77,15 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-10 · K0c selesai (keputusan 222), branch `perbaikan/k0c`: ilustrasi M4 memakai saldo lama dicoret di atas saldo baru (`Ilustrasi.astro`, kelas `il-coret` di `tema.css`); alat baru `situs/tools/ukur-ilustrasi.mjs` (jalankan dari root: `node situs/tools/ukur-ilustrasi.mjs --url http://127.0.0.1:4321`) mengukur luapan teks ilustrasi; M2 masih meluap, jadi K0e (perbaiki M2 lalu masukkan alat ke gerbang). Berikutnya: `python3 tools/antrean.py berikut` (K0d). Preview yang tertinggal dimatikan dengan `npm --prefix situs run preview -- stop` (`npx --prefix situs astro preview stop` dari root tidak menemukannya). `layar.mjs` tidak mengukur halaman ADR ("tanpa Inti"); cek layar pertama ADR dengan tangkapan. Rantai di Inti selalu pakai `ringkas` dan maksimal dua baris pendek; ukur dengan `npm --prefix situs run layar -- --url http://127.0.0.1:4321` (perlu build + preview ulang). Tangkapan dari root: `npm --prefix situs run tangkap -- --url http://127.0.0.1:4321 --path /<path>/` (menulis ke `situs/tangkapan/`); `cd` dan perintah majemuk ditolak mode dontAsk, jadi satu perintah per panggilan dengan path relatif.
+2026-10-10 · K0d selesai (keputusan 223), branch `perbaikan/k0d`: margin negatif `p.meta` dihapus (`tema.css` blok keputusan 210), di HP ruangnya diambil dari jarak meta ke blok pertama; alat `situs/tools/ukur-judul.mjs` (dari root: `node situs/tools/ukur-judul.mjs --url http://127.0.0.1:4321`) masuk `cek_situs.sh --layar`. Jangan tambah tinggi di atas Inti di HP: 1.23 hanya punya 28 px di 375×667. Berikutnya: `python3 tools/antrean.py berikut` (K0e; `ukur-ilustrasi.mjs` masuk gerbang sesudah M2 diperbaiki). Preview yang tertinggal dimatikan dengan `npm --prefix situs run preview -- stop` (`npx --prefix situs astro preview stop` dari root tidak menemukannya). `layar.mjs` tidak mengukur halaman ADR ("tanpa Inti"); cek layar pertama ADR dengan tangkapan. Rantai di Inti selalu pakai `ringkas` dan maksimal dua baris pendek; ukur dengan `npm --prefix situs run layar -- --url http://127.0.0.1:4321` (perlu build + preview ulang). Tangkapan dari root: `npm --prefix situs run tangkap -- --url http://127.0.0.1:4321 --path /<path>/` (menulis ke `situs/tangkapan/`); `cd` dan perintah majemuk ditolak mode dontAsk, jadi satu perintah per panggilan dengan path relatif.
 2026-10-09 · Sistem kerja otomatis siap (keputusan 216, 217). Satu-satunya pekerja: `tools/jalankan-otomatis.sh`; setiap iterasi membaca `plan/PROTOKOL-OTOMATIS.md` dan mengerjakan satu tugas dari `plan/ANTREAN.md` (berikutnya: `python3 tools/antrean.py berikut`). Tidak ada worktree lagi; kerja di folder utama, branch dari main, paling banyak satu PR terbuka, merge sendiri bila CI hijau. Lanjutkan: `caffeinate -dims bash tools/jalankan-otomatis.sh` di main bersih.
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran
+
+- Retrospektif K0–K0d (2026-10-10): keempat perbaikan tampilan lolos di percobaan pertama setelah diukur dengan alat kecil Playwright (`ukur-ilustrasi`, `ukur-judul`), bukan dengan melihat tangkapan saja. Tangkapan dan `layar.mjs` melewatkan luapan 1–5 px. Pola: ukur dulu, perbaiki, ukur ulang, masukkan alat ke gerbang.
+- Setiap piksel tambahan di atas Inti di HP harus diambil dari tempat lain di layar pertama; cek `layar.mjs` untuk 1.23 (paling sempit).
 
 - Di halaman konsep, visual pertama sesudah Inti mulai di y≈420 px pada 375×667; tersisa ±245 px. `node situs/tools/layar.mjs` dari root gagal (mencari `dist/` relatif cwd); pakai `npm --prefix situs run layar`.
 
