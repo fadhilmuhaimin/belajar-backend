@@ -626,10 +626,13 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
 }
 
 /* === Kepala dokumen PRD (keputusan 122) === */
-.sl-markdown-content dl.prd-kepala { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); gap: 0.6rem 1.2rem; margin: 1.2rem 0; padding: 0.9rem 1.1rem; border: 1px solid var(--garis); border-left: 3px solid var(--aksen); border-radius: 8px; background: var(--bg-2); }
-.sl-markdown-content dl.prd-kepala div { margin: 0; }
-.sl-markdown-content dl.prd-kepala dt { margin: 0; font-size: 0.75em; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--teks-2); }
-.sl-markdown-content dl.prd-kepala dd { margin: 0.1rem 0 0; margin-inline-start: 0; padding: 0; color: var(--judul); font-size: 0.92em; line-height: 1.4; }
+/* Redesain (keputusan 205): kepala PRD tiga baris ringan tanpa kotak; label sekunder, nilai teks biasa. */
+.sl-markdown-content .prd-kepala { margin: 1rem 0 1.4rem; font-size: var(--rk-ui); line-height: 1.55; color: var(--teks); }
+.sl-markdown-content .prd-kepala dl { margin: 0 0 0.25rem; }
+.sl-markdown-content .prd-kepala :is(dl > div, dt, dd) { display: inline; margin: 0; padding: 0; }
+.sl-markdown-content .prd-kepala dl > div + div::before { content: " · "; color: var(--teks-2); }
+.sl-markdown-content .prd-kepala dt { font-weight: 400; color: var(--teks-2); }
+.sl-markdown-content .prd-kepala dt::after { content: " "; }
 
 /* Tombol pilihan widget pilah: margin atas antar-saudara dari Starlight membuat tombol pertama lebih tinggi (keputusan 124). */
 .sl-markdown-content :is(.bb-pilah__opts, .bb-banding__features, .bb-banding__cols, .bb-fb__opts, .bb-predict__opts, .bb-alur__lanes, .bb-ba, .jt-cek, .jt-langkah) > * + * { margin-top: 0; }
