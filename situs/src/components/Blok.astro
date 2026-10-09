@@ -1,8 +1,10 @@
 ---
 /**
  * Satu blok lipat halaman (keputusan 118): judul h2 di dalam summary (ikut daftar isi dan penyorotnya),
- * "Blok n dari N · m menit", status selesai, dan tombol Berikutnya besar di akhir. Blok terakhir menunjuk halaman
- * berikutnya di urutan baca. Status selesai disimpan per halaman di localStorage; tanpa JavaScript blok tetap
+ * "Blok n dari N · m menit", status selesai, dan tombol Berikutnya di akhir. Blok terakhir menunjuk halaman
+ * berikutnya di urutan baca. Status selesai (keputusan 203) hanya diberikan setelah blok terbuka dan akhirnya
+ * benar-benar digulir ke layar, atau tombol Berikutnya ditekan; membuka saja belum berarti dibaca. Status disimpan
+ * per halaman di localStorage; tanpa JavaScript blok tetap
  * bisa dibuka dan ditutup. Tidak ada animasi yang jalan sendiri; scroll halus hanya bila reduced motion tidak aktif.
  *   <Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu ...">...</Blok>
  */
@@ -37,6 +39,7 @@ const id = slugBlok(nama);
   <div class="blok__isi">
     <slot />
     {aman && <p class="blok__aman">{aman}</p>}
+    <span class="blok__akhir" data-akhir-blok aria-hidden="true"></span>
     {next && (
       <button type="button" class="blok__lanjut" data-ke={slugBlok(next.nama)}>
         <span>Berikutnya</span>{next.nama}{menitNext ? ` · ${menitNext} menit` : ""} →
@@ -84,6 +87,7 @@ const id = slugBlok(nama);
     if (!kini) return;
     selesaikan(kini);
     if (t.dataset.ke) {
+      digulir = false;
       const lanjut = blok().find((x) => x.dataset.blok === t.dataset.ke);
       kini.open = false;
       if (lanjut) {
@@ -95,6 +99,26 @@ const id = slugBlok(nama);
     }
     tandai();
   });
+  // Selesai karena digulir: akhir blok yang terbuka masuk layar saat pembaca menggulir sendiri (roda, sentuh,
+  // atau tombol). Gulir otomatis dari Berikutnya atau tautan # tidak dihitung, jadi blok yang baru dibuka belum selesai.
+  let digulir = false, antre = false;
+  function cekAkhir() {
+    antre = false;
+    if (!digulir) return;
+    const selesai = new Set(baca());
+    let berubah = false;
+    for (const el of blok()) {
+      if (!el.open || selesai.has(el.dataset.blok!)) continue;
+      const akhir = el.querySelector("[data-akhir-blok]");
+      if (akhir && akhir.getBoundingClientRect().top < innerHeight) { selesaikan(el); berubah = true; }
+    }
+    if (berubah) tandai();
+  }
+  const olehPembaca = () => { digulir = true; };
+  addEventListener("wheel", olehPembaca, { passive: true });
+  addEventListener("touchmove", olehPembaca, { passive: true });
+  addEventListener("keydown", (e) => { if (["ArrowDown", "PageDown", "End", " "].includes(e.key)) digulir = true; });
+  addEventListener("scroll", () => { if (digulir && !antre) { antre = true; requestAnimationFrame(cekAkhir); } }, { passive: true });
   window.addEventListener("hashchange", bukaDariHash);
   bukaDariHash();
   tandai();
