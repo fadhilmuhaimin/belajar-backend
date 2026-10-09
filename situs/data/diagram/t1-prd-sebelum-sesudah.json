@@ -1,0 +1,28 @@
+{
+  "id": "t1-prd-sebelum-sesudah",
+  "judul": "Tunjangan makan: sekarang dan yang diminta PRD v1",
+  "sumber": { "jenis": "ilustrasi", "teks": "Ringkasan PRD v1" },
+  "baris": [
+    {
+      "label": "Sekarang",
+      "sub": "tunai dan kertas",
+      "simpul": [
+        { "teks": "Senin: antre di kasir", "sub": "1.200 karyawan, 3 jam" },
+        { "teks": "Bayar warung tunai", "sub": "kuitansi kertas" },
+        { "teks": "Keuangan mencocokkan kuitansi", "sub": "4 hari kerja tiap bulan" },
+        { "teks": "Selisih Rp38 juta", "sub": "tidak bisa dijelaskan", "nada": "warn" }
+      ]
+    },
+    {
+      "label": "Rekeningo v1",
+      "sub": "target uji coba Gedung A",
+      "simpul": [
+        { "teks": "Admin top-up sekali unggah", "sub": "saldo masuk ke 100 akun", "nada": "system" },
+        { "teks": "Budi bayar dari HP", "sub": "dalam 5 detik", "nada": "system" },
+        { "teks": "Warung lihat total hari ini", "sub": "di HP warung", "nada": "system" },
+        { "teks": "Rekonsiliasi < 1 hari", "sub": "0 selisih tak terjelaskan", "nada": "good" }
+      ]
+    }
+  ],
+  "catatan": "Setiap kotak biru adalah fitur P0 atau P1 di PRD. Kotak terakhir adalah metrik keberhasilan uji coba."
+}

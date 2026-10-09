@@ -3,6 +3,8 @@ title: "1.1 PRD v1: Rekeningo untuk Gedung A"
 description: Dokumen produk pertama Rekeningo. Sinta menulisnya, Pak Hadi menyetujuinya, dan Raka membangunnya sendirian dalam 6 minggu.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import prdDiagram from "../../../../data/diagram/t1-prd-sebelum-sesudah.json";
 
 <p class="meta">Baca 4 menit · Jalur inti</p>
 
@@ -20,6 +22,8 @@ Awal tahun, direksi memberi Sinta satu mandat kecil: hapus antrean kasir hari Se
 Setiap Senin, 1.200 karyawan mengantre di kasir untuk tunjangan makan. Nilainya Rp250.000 per minggu, yaitu Rp50.000 untuk tiap hari kerja. Kasir butuh 3 jam untuk melayani semuanya.
 
 Warung tenant memberi kuitansi kertas. Tiap bulan, Keuangan butuh 4 hari kerja untuk mencocokkan kuitansi dengan tunjangan yang dibayar. Tahun lalu selisihnya Rp38 juta, dan tidak ada yang bisa menjelaskannya.
+
+<Rantai data={prdDiagram} />
 
 </Blok>
 

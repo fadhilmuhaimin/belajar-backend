@@ -959,3 +959,32 @@ p.catatan-fiktif { margin-top: 1.6rem; color: var(--teks-2); font-size: var(--rk
   .peta-fitur__di { display: block; }
   .peta-fitur__langkah:not(:last-child)::after { content: "↓"; position: absolute; left: 1.05rem; bottom: -0.55rem; color: var(--teks-2); font-size: var(--rk-ui-kecil); line-height: 1; }
 }
+
+/* ==========================================================================
+   Diagram rantai (keputusan 212): baris berlabel, simpul berpanah, nada token.
+   ========================================================================== */
+.sl-markdown-content figure.rantai { margin-top: 1.2rem; font-size: 1rem; line-height: 1.4; display: grid; gap: 0.9rem; }
+.rantai__judul { display: flex; flex-wrap: wrap; gap: 0.3rem 0.7rem; align-items: center; margin: 0; color: var(--judul); font-size: 1rem; text-align: left; }
+.rantai__baris { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 0.4rem 1rem; align-items: center; }
+.sl-markdown-content .rantai__label { margin: 0; display: grid; gap: 0.1rem; }
+.rantai__label b { color: var(--judul); font-weight: 600; }
+.rantai__label span { color: var(--teks-2); font-size: var(--rk-ui); }
+.sl-markdown-content ol.rantai__simpul { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 1.6rem; }
+.sl-markdown-content ol.rantai__simpul > li { position: relative; margin: 0; display: grid; gap: 0.2rem; align-content: start; padding: 0.6rem 0.75rem; border: 1px solid var(--garis-2); border-radius: 8px; background: var(--bg); }
+.sl-markdown-content ol.rantai__simpul > li:not(:last-child)::after { content: "→"; position: absolute; right: -1.3rem; top: 50%; transform: translateY(-50%); color: var(--teks-2); }
+.rantai__simpul b { color: var(--judul); font-weight: 600; }
+.rantai__simpul span { color: var(--teks-2); font-size: var(--rk-ui); }
+.sl-markdown-content .rantai__simpul code { font-size: var(--rk-ui); white-space: pre-wrap; overflow-wrap: anywhere; background: transparent; padding: 0; color: var(--judul); }
+.sl-markdown-content ol.rantai__simpul > li.is-system { border-color: var(--k-system-edge); background: var(--k-system-fill); }
+.sl-markdown-content ol.rantai__simpul > li.is-good { border-color: var(--k-good-edge); background: var(--k-good-fill); }
+.sl-markdown-content ol.rantai__simpul > li.is-warn { border-color: var(--k-warn-edge); background: var(--k-warn-fill); }
+.sl-markdown-content ol.rantai__simpul > li.is-old { border-style: dashed; }
+.rantai__simpul .is-system b, .rantai__simpul .is-system code { color: var(--k-system-ink); }
+.rantai__simpul .is-good b { color: var(--k-good-ink); }
+.rantai__simpul .is-warn b { color: var(--k-warn-ink); }
+.sl-markdown-content .rantai__catatan { margin: 0; color: var(--teks-2); font-size: var(--rk-ui); }
+@media (max-width: 50em) {
+  .rantai__baris { grid-template-columns: 1fr; }
+  .sl-markdown-content ol.rantai__simpul { grid-auto-flow: row; grid-auto-columns: auto; gap: 1.1rem; }
+  .sl-markdown-content ol.rantai__simpul > li:not(:last-child)::after { content: "↓"; right: auto; left: 1rem; top: auto; bottom: -1.15rem; transform: none; }
+}
