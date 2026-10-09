@@ -284,7 +284,7 @@
   "halaman": "B7.1",
   "judul": "1.21 Lapisan dasar: handler tidak tahu SQL",
   "url": "tahap-1/lapisan-dasar/",
-  "tanya": "Kenapa saldo bisa bocor di M3 walaupun handler tidak mengimpor repo?",
+  "tanya": "Kenapa saldo bisa sampai ke app di M3 walaupun handler tidak mengimpor repo?",
   "jawab": "Handler menerima struct `repo.Akun` dari service dan mengirimnya apa adanya. Tag JSON di struct milik repo, termasuk `saldo`, ikut sampai ke app. Daftar import tidak menangkap tipe yang lewat, hanya paket yang diimpor."
  },
  {
