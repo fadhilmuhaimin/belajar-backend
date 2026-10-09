@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 205,
-        "halaman": 25
+        "menit": 216,
+        "halaman": 26
       },
       "bagian": [
         {
@@ -718,8 +718,12 @@
         4
       ],
       "masalah": "Input pencarian menampilkan semua akun beserta saldo",
-      "ada": false,
-      "nomor": "1.20"
+      "ada": true,
+      "prasyarat": [
+        "t1-m3"
+      ],
+      "nomor": "1.20",
+      "menit": 11
     },
     {
       "id": "B7.1",
