@@ -29,11 +29,38 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K0 · Crosscheck kecil 1.21–1.25 setelah redesain di-merge
 
 - jenis: crosscheck
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: bagian K0 di `plan/CROSSCHECK-KECIL.md` memuat 1.21–1.25 dengan bukti tangkapan; temuan menjadi tugas perbaikan di bawah K0.
-- catatan: Tugas uji kering sistem otomatis. 1.22–1.25 ditulis paralel dengan redesain (#120) dan baru tampil dengan tata letak baru sejak #120 di-merge; 1.24 dan 1.25 belum punya visual di layar pertama.
+- catatan: Selesai 2026-10-10 (keputusan 218). Kelima halaman cocok dengan naskah dan registry; empat temuan tampilan menjadi K0a–K0c.
+
+### K0a · Inti 1.21, 1.23, 1.25 dengan Rantai dan dua paragraf
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: Inti ketiga halaman dibuka satu kalimat, lalu diagram `Rantai` (data di `situs/data/diagram/`, divalidasi tes Zod yang ada), lalu dua paragraf rinci (standar keputusan 212–215); 1.21 tidak lagi memakai `bb-flow`; 1.23 tidak lagi bergantung pada potongan kode yang terpotong di 375 px (rekaman boleh tetap di bawah diagram); 1.25 menunjukkan laptop dan server dengan skema berbeda dari `migrate.txt`; semua angka dan teks simpul dari rekaman lab; layar pertama 4 ukuran lolos.
+- catatan: Dari K0 (`plan/CROSSCHECK-KECIL.md`). Satu commit per halaman.
+
+### K0b · Visual di blok Kebutuhan 1.24
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: blok Kebutuhan 1.24 punya diagram `Rantai` di layar pertama 375×667 dan 1366×657 (pola keputusan 214: satu baris per pertanyaan PRD, lalu ADR yang menjawabnya), isi dari halaman dan rekaman `koreksi.txt`; tes data diagram lolos.
+- catatan: Dari K0.
+
+### K0c · Ilustrasi M4: teks keluar bingkai
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: di ilustrasi Gejala 1.22, teks "bukan 250.000" tetap di dalam bingkai layar HP di 375×667 dan 1366×657, gelap dan terang; dicek dengan tangkapan; ilustrasi lain yang memakai komponen yang sama tidak berubah tampilannya.
+- catatan: Dari K0.
 
 ### I1 · Pindah ke bun
 
