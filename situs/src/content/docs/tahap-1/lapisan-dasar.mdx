@@ -3,6 +3,8 @@ title: "1.21 Lapisan dasar: handler tidak tahu SQL"
 description: Handler tahu HTTP, service tahu aturan uang, repo tahu SQL. Setelah M3, aturan arah ini diperiksa mesin lewat daftar import, karena compiler Go tidak memeriksanya.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import lapisanArah from "../../../../data/diagram/t1-lapisan-arah.json";
 import Snippet from "../../../components/Snippet.astro";
 import TabSet from "../../../components/TabSet.astro";
 import WidgetLama from "../../../components/WidgetLama.astro";
@@ -14,16 +16,13 @@ import SkripLama from "../../../components/SkripLama.astro";
 
 ## Inti
 
-Setiap lapisan hanya tahu satu hal: handler tahu HTTP, service tahu aturan uang, repo tahu SQL. Di lab, arah ini diperiksa mesin, bukan diingat.
+Setiap lapisan hanya tahu satu hal: handler tahu HTTP, service tahu aturan uang, repo tahu SQL.
 
-<figure class="bb-fig" role="img" aria-label="Request masuk ke handler, turun ke service, lalu ke repo. Handler tidak boleh mengimpor repo atau database/sql.">
-<ol class="bb-flow">
-<li><code>handler/</code> HTTP</li>
-<li><code>service/</code> aturan uang</li>
-<li><code>repo/</code> SQL</li>
-</ol>
-<figcaption>Panah hanya ke kanan. Handler yang mengimpor <code>database/sql</code> ditolak pemeriksa arah.</figcaption>
-</figure>
+<Rantai data={lapisanArah} ringkas />
+
+Arah ini dibaca dari daftar import tiap folder. Handler hanya mengimpor `service`, service hanya mengimpor `repo`, dan hanya repo yang mengimpor `database/sql`. Jadi input dari app hanya bisa menjadi SQL di satu folder, dan review injection cukup membaca folder itu.
+
+Compiler Go tidak memeriksa arah ini. Handler buatan AI yang menjalankan `SELECT` sendiri tetap lolos `go build`. Skrip `cek_arah.py` membaca import yang sama dan menolaknya dengan exit 1, sehingga aturan arah diperiksa mesin, bukan diingat.
 
 <details class="question">
 <summary>Sudah tahu? Cek 3 pertanyaan</summary>

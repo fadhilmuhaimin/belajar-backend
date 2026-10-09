@@ -1,0 +1,52 @@
+{
+  "id": "t1-migration-drift",
+  "judul": "Minggu 2: versi sama, skema berbeda",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab b4-migration · migrate.txt"
+  },
+  "baris": [
+    {
+      "label": "Laptop",
+      "simpul": [
+        {
+          "teks": "migrate up",
+          "kode": true,
+          "sub": "file 1–3"
+        },
+        {
+          "teks": "Versi 3"
+        },
+        {
+          "teks": "2 constraint",
+          "sub": "tanpa batas saldo warung",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Server",
+      "simpul": [
+        {
+          "teks": "migrate up",
+          "kode": true,
+          "sub": "file 1–3"
+        },
+        {
+          "teks": "ALTER TABLE lewat psql",
+          "sub": "ditambah tangan, tanpa file",
+          "nada": "warn"
+        },
+        {
+          "teks": "Versi 3"
+        },
+        {
+          "teks": "3 constraint",
+          "sub": "dengan batas_saldo_warung",
+          "nada": "warn"
+        }
+      ]
+    }
+  ],
+  "catatan": "Nomor versi hanya mencatat file yang sudah dijalankan. Perubahan tanpa file tidak terlihat di nomor itu."
+}

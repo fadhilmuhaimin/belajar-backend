@@ -38,11 +38,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K0a · Inti 1.21, 1.23, 1.25 dengan Rantai dan dua paragraf
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: Inti ketiga halaman dibuka satu kalimat, lalu diagram `Rantai` (data di `situs/data/diagram/`, divalidasi tes Zod yang ada), lalu dua paragraf rinci (standar keputusan 212–215); 1.21 tidak lagi memakai `bb-flow`; 1.23 tidak lagi bergantung pada potongan kode yang terpotong di 375 px (rekaman boleh tetap di bawah diagram); 1.25 menunjukkan laptop dan server dengan skema berbeda dari `migrate.txt`; semua angka dan teks simpul dari rekaman lab; layar pertama 4 ukuran lolos.
-- catatan: Dari K0 (`plan/CROSSCHECK-KECIL.md`). Satu commit per halaman.
+- catatan: Dari K0 (`plan/CROSSCHECK-KECIL.md`). Selesai 2026-10-10 (keputusan 220): Rantai biasa terpotong 450–830 px di 375×667, jadi dibuat varian `ringkas` (HP: simpul mengalir mendatar, tanpa sub dan catatan); data dua baris per halaman. Margin 375×667: 1.21 61 px, 1.23 28 px, 1.25 84 px.
 
 ### K0b · Visual di blok Kebutuhan 1.24
 

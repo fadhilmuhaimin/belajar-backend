@@ -58,7 +58,7 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.24 ADR 5–6: Transaction di service; tabel koreksi | Lab `DalamTx` + tabel koreksi (keputusan 170), halaman ADR + runsql `t1-adr6.json` (keputusan 171) |
 | 1.25 Migration: skema sebagai kode | Lab `b4-migration` ditulis ulang ke skema v1 (keputusan 172), halaman + alur `t1-migration.json` (keputusan 173) |
 
-Diperbarui 2026-10-10. 25 dari 42 halaman selesai. Crosscheck K0 (1.21–1.25, keputusan 218): isi cocok naskah, empat temuan tampilan jadi K0a–K0c; berikutnya K0a lewat loop otomatis (antrean di `plan/ANTREAN.md`).
+Diperbarui 2026-10-10. 25 dari 42 halaman selesai. Crosscheck K0 (1.21–1.25, keputusan 218): isi cocok naskah, empat temuan tampilan jadi K0a–K0c. K0a selesai (keputusan 220): Inti 1.21, 1.23, 1.25 memakai Rantai ringkas dari rekaman lab; berikutnya K0b (antrean di `plan/ANTREAN.md`).
 
 ## Sistem kerja otomatis (keputusan 216)
 

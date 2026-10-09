@@ -4,7 +4,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
-- Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (keputusan 218); sisa 174–199 dibiarkan kosong.
+- Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (keputusan 220); sisa 174–199 dibiarkan kosong.
+- 220: K0a, Rantai prop `ringkas` untuk Inti (HP mendatar tanpa sub); Inti 1.21, 1.23, 1.25.
 - 218: crosscheck K0 di `plan/CROSSCHECK-KECIL.md`; temuan K0a–K0c.
 - 219: hasil uji kering, tabel perintah yang ditolak di protokol, tugas K0d. 218: crosscheck K0 (dari loop).
 - 217: satu pekerja; #120 di-merge, worktree konten ditutup, lab m5 di branch `tahap-1/lab-m5`.
@@ -73,12 +74,14 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-10 · K0 selesai (keputusan 218): crosscheck 1.21–1.25 di `plan/CROSSCHECK-KECIL.md`, branch `crosscheck/k0`; temuan jadi K0a–K0c di ANTREAN (berikutnya K0a). Tangkapan dari root: `npm --prefix situs run tangkap -- --url http://127.0.0.1:4321 --path /<path>/` (menulis ke `situs/tangkapan/`); `cd` dan perintah majemuk ditolak mode dontAsk, jadi satu perintah per panggilan dengan path relatif.
+2026-10-10 · K0a selesai (keputusan 220), branch `perbaikan/k0a`: Inti 1.21, 1.23, 1.25 = kalimat → `<Rantai ringkas />` → dua paragraf; file: `Rantai.astro`, `tema.css`, tiga `situs/data/diagram/t1-*.json`, tiga mdx. Berikutnya K0b (`python3 tools/antrean.py berikut`). Rantai di Inti selalu pakai `ringkas` dan maksimal dua baris pendek; ukur dengan `npm --prefix situs run layar -- --url http://127.0.0.1:4321` (perlu build + preview ulang). Tangkapan dari root: `npm --prefix situs run tangkap -- --url http://127.0.0.1:4321 --path /<path>/` (menulis ke `situs/tangkapan/`); `cd` dan perintah majemuk ditolak mode dontAsk, jadi satu perintah per panggilan dengan path relatif.
 2026-10-09 · Sistem kerja otomatis siap (keputusan 216, 217). Satu-satunya pekerja: `tools/jalankan-otomatis.sh`; setiap iterasi membaca `plan/PROTOKOL-OTOMATIS.md` dan mengerjakan satu tugas dari `plan/ANTREAN.md` (berikutnya: `python3 tools/antrean.py berikut`). Tidak ada worktree lagi; kerja di folder utama, branch dari main, paling banyak satu PR terbuka, merge sendiri bila CI hijau. Lanjutkan: `caffeinate -dims bash tools/jalankan-otomatis.sh` di main bersih.
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran
+
+- Di halaman konsep, visual pertama sesudah Inti mulai di y≈420 px pada 375×667; tersisa ±245 px. `node situs/tools/layar.mjs` dari root gagal (mencari `dist/` relatif cwd); pakai `npm --prefix situs run layar`.
 
 - macOS di mesin ini tidak punya `timeout`/`gtimeout`; batasi lama perintah dengan timeout alat Bash atau `gh ... --watch`.
 - Mode auto menolak sesi mengubah izinnya sendiri (`.claude/settings.json`, label Self-Modification), lewat Bash maupun Edit; pemilik yang memasang perubahan izin.

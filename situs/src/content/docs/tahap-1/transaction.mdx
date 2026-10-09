@@ -3,6 +3,8 @@ title: "1.23 Transaction: semua atau tidak sama sekali"
 description: Transaction menjadikan beberapa perintah database satu unit. Berhasil semua, atau batal semua. Konsep yang lahir dari Rp70.000 yang hilang di M4.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import commitRollback from "../../../../data/diagram/t1-transaction-commit-rollback.json";
 import Snippet from "../../../components/Snippet.astro";
 import TabSet from "../../../components/TabSet.astro";
 import WidgetLama from "../../../components/WidgetLama.astro";
@@ -16,12 +18,16 @@ import SkripLama from "../../../components/SkripLama.astro";
 
 Transaction menjadikan beberapa perintah database satu unit: berhasil semua, atau batal semua.
 
+<Rantai data={commitRollback} ringkas />
+
+Setelah `begin`, setiap perintah mengubah data, tapi perubahannya belum permanen. Pembayaran Rp25.000 menjalankan dua `UPDATE` dan satu `INSERT`, lalu `commit` menyimpan ketiganya sekaligus. App menerima `201`, saldo Budi Rp225.000, dan saldo Ani Rp25.000.
+
+Pembayaran Rp70.000 di versi benar M4 berhenti di `UPDATE` kedua karena batas saldo warung. Server mengirim `rollback`, dan `UPDATE` pertama ikut batal. Saldo Budi tetap Rp250.000, dan total saldo tetap Rp25.000.000.
+
 <figure>
 <Snippet file="labs/api-t1/output/m4.txt" lines="76:79" />
-<figcaption>Rekaman lab M4, versi benar.</figcaption>
+<figcaption>Rekaman lab M4, versi benar: yang diterima PostgreSQL.</figcaption>
 </figure>
-
-`UPDATE` kedua gagal, dan `rollback` membatalkan `UPDATE` pertama. Saldo Budi kembali utuh.
 
 <details class="question">
 <summary>Sudah tahu? Cek 3 pertanyaan</summary>
