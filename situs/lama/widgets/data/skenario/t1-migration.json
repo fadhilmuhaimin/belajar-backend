@@ -1,0 +1,124 @@
+{
+  "versi": 2,
+  "judul": "Batas saldo warung: dari psql di server ke file migration",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/b4-migration/output/migrate.txt",
+    "fileVarian": "labs/b4-migration/output/migrate.txt",
+    "catatan": "golang-migrate v4.20.1 ke PostgreSQL 17.11 (labs/b4-migration/run.sh). Dua schema meniru laptop Raka dan server uji coba."
+  },
+  "pengantar": "Jalankan jalur yang benar-benar terjadi sampai selesai. Setelah itu centang 'Ubah satu hal': di minggu 2, Raka tidak menyentuh server dengan tangan.",
+  "komponen": [
+    {
+      "id": "git",
+      "label": "Repo (Git)"
+    },
+    {
+      "id": "laptop",
+      "label": "Laptop Raka"
+    },
+    {
+      "id": "server",
+      "label": "Server uji coba"
+    }
+  ],
+  "layarAwal": {},
+  "predict": {
+    "q": "Minggu 3, migration 5 menambah batas saldo warung. Laptop menjalankannya tanpa masalah. Apa yang terjadi di server, yang batasnya sudah ditambah lewat psql di minggu 2?",
+    "options": [
+      "Lancar juga, karena file-nya sama",
+      "Gagal: batas itu sudah ada, versi 5 ditandai dirty",
+      "Batas tercatat dua kali"
+    ],
+    "answer": 1,
+    "explain": "PostgreSQL menolak menambah constraint dengan nama yang sudah ada. golang-migrate berhenti dan menandai versi 5 dirty. Raka memeriksa skema server, melihat isinya sudah sama dengan migration 5, lalu menjalankan force 5."
+  },
+  "langkah": [
+    {
+      "dari": "git",
+      "judul": "Skema v1 ditulis sebagai file bernomor",
+      "kirim": "migrations/\n  000001_akun_sesi.up.sql\n  000002_topup.up.sql\n  000003_transaksi.up.sql",
+      "jelas": "Setiap perubahan skema adalah file di Git, direview seperti kode biasa."
+    },
+    {
+      "dari": "git",
+      "ke": "laptop",
+      "judul": "Minggu 1: migrate up di laptop",
+      "kirim": "$ migrate up\n1/u akun_sesi\n2/u topup\n3/u transaksi",
+      "jelas": "Alat migration menjalankan file yang belum pernah dijalankan, berurutan, lalu mencatat versinya."
+    },
+    {
+      "dari": "git",
+      "ke": "server",
+      "judul": "Minggu 1: migrate up di server",
+      "kirim": "$ migrate up\n1/u akun_sesi\n2/u topup\n3/u transaksi",
+      "jelas": "File yang sama, hasil yang sama. Kedua mesin di versi 3.",
+      "nada": "good"
+    },
+    {
+      "dari": "server",
+      "judul": "Minggu 2: batas warung ditambah lewat psql",
+      "kirim": "ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung\n  CHECK (jenis <> 'warung' OR saldo <= 1500000)",
+      "jelas": "Perubahan ini tidak punya file. Laptop Raka tidak pernah mendapatkannya.",
+      "nada": "warn"
+    },
+    {
+      "dari": "server",
+      "judul": "Versi sama, skema beda",
+      "kirim": "laptop: versi 3, 2 constraint di akun\nserver: versi 3, 3 constraint di akun",
+      "jelas": "Angka versi hanya tahu file yang dijalankan alat migration. Perubahan tangan tidak tercatat di mana pun. Inilah kenapa M4 tidak muncul saat Raka menguji di laptop.",
+      "nada": "warn"
+    },
+    {
+      "dari": "git",
+      "ke": "laptop",
+      "judul": "Minggu 3: migration 4 dan 5",
+      "kirim": "$ migrate up\n4/u koreksi\n5/u batas_saldo_warung",
+      "jelas": "Tabel koreksi (ADR 6) dan batas warung kini punya file. Laptop menjalankan keduanya.",
+      "nada": "good"
+    },
+    {
+      "dari": "git",
+      "ke": "server",
+      "judul": "Di server, migration 5 gagal",
+      "kirim": "4/u koreksi\nerror: constraint \"batas_saldo_warung\"\n  for relation \"akun\" already exists\n$ migrate version\n5 (dirty)",
+      "jelas": "Server sudah punya batas itu. Alat migration berhenti dan menolak menebak.",
+      "nada": "warn"
+    },
+    {
+      "dari": "server",
+      "judul": "Periksa, force 5, lalu sama",
+      "kirim": "(constraint server = isi migration 5)\n$ migrate force 5\n$ migrate up\nno change\nlaptop: 5 | f   server: 5 | f",
+      "jelas": "force hanya mengubah catatan versi. Ia aman setelah skema diperiksa dan cocok dengan file. Sekarang kedua mesin sama, dan versinya jujur.",
+      "nada": "good"
+    }
+  ],
+  "varian": {
+    "label": "di minggu 2, Raka tidak mengubah server dengan tangan",
+    "mulai": 3,
+    "langkah": [
+      {
+        "dari": "server",
+        "judul": "Minggu 2: server tetap dari file saja",
+        "kirim": "(tidak ada ALTER TABLE lewat psql)",
+        "jelas": "Laptop dan server di versi 3 dengan skema yang sama."
+      },
+      {
+        "dari": "git",
+        "ke": "laptop",
+        "judul": "Minggu 3: migration 4 dan 5 di laptop",
+        "kirim": "$ migrate up\n4/u koreksi\n5/u batas_saldo_warung",
+        "jelas": "Sama seperti jalur utama.",
+        "nada": "good"
+      },
+      {
+        "dari": "git",
+        "ke": "server",
+        "judul": "Minggu 3: server menjalankan file yang sama",
+        "kirim": "$ migrate up\n4/u koreksi\n5/u batas_saldo_warung",
+        "jelas": "Server mulai dari keadaan yang sama dengan laptop, jadi hasilnya sama dengan rekaman laptop. Tidak ada dirty, tidak ada force.",
+        "nada": "good"
+      }
+    ]
+  }
+}

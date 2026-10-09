@@ -1,0 +1,234 @@
+---
+title: "1.25 Migration: skema sebagai kode"
+description: Setiap perubahan skema adalah file bernomor di Git, dan database mencatat versi yang sudah dijalankan. Konsep yang lahir dari batas saldo warung yang ditambah tangan di server.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import TabSet from "../../../components/TabSet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 7 menit · coba 3 menit · Prasyarat: [[t1-m4]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Migration menulis setiap perubahan skema sebagai file bernomor di Git.
+
+<figure>
+<Snippet file="labs/b4-migration/output/migrate.txt" lines="4:7" />
+<figcaption>Rekaman lab: laptop Raka.</figcaption>
+</figure>
+
+Database mencatat versi yang sudah dijalankan. Mesin mana pun yang menjalankan file yang sama mendapat skema yang sama, dan bisa membuktikannya.
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Di mana database menyimpan "skema ini sudah sampai versi berapa"?
+2. Migration yang sudah jalan di server ternyata salah. Edit file-nya, atau buat file baru?
+3. Apa arti status "dirty", dan kapan `force` aman dijalankan?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: perubahan skema tanpa file membuat versi yang sama berarti skema yang berbeda.">
+
+Semua perintah dan output di widget ini direkam dari golang-migrate v4.20.1 dan PostgreSQL 17. Dua schema di lab meniru laptop Raka dan server uji coba.
+
+<WidgetLama nama="alur" src="data/skenario/t1-migration.json" />
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Di [[t1-m4]], batas saldo warung Rp1.500.000 ditambah Raka langsung di server, lewat `psql`. Laptopnya tidak pernah punya batas itu. Saat Raka menguji pembayaran di laptop, `UPDATE` kedua tidak pernah gagal.
+
+Tidak ada catatan apa saja yang pernah diubah di server. Raka baru tahu batas itu ada setelah membaca log error.
+
+Kalau kamu pernah memakai `openDatabase(version: 2, onUpgrade: ...)` di [sqflite](https://pub.dev/packages/sqflite), kamu sudah mengenal migration. App menyimpan versi skema di HP, lalu menjalankan langkah upgrade yang belum dijalankan. Di backend, idenya sama, hanya saja langkahnya berupa file dan berlaku untuk semua mesin.
+
+### Cara kerjanya
+
+**Satu perubahan, satu file bernomor.** Alat migration menjalankan file yang belum pernah dijalankan, berurutan, lalu mencatat versinya di tabel `schema_migrations`.
+
+**Versi hanya tahu file.** Perubahan lewat `psql` tidak tercatat di tabel itu. Rekaman lab di minggu 2:
+
+<Snippet file="labs/b4-migration/output/migrate.txt" lines="19:23" title="Rekaman lab: labs/b4-migration/output/migrate.txt" />
+
+Keduanya versi 3. Tapi skema server punya satu constraint lebih banyak:
+
+<Snippet file="labs/b4-migration/output/migrate.txt" lines="33:39" title="Rekaman lab: labs/b4-migration/output/migrate.txt, server" />
+
+**Perubahan tangan ditulis jadi file.** Di minggu 3, Raka menulis batas itu sebagai migration 5, setelah migration 4 untuk tabel koreksi dari ADR 6:
+
+<Snippet file="labs/b4-migration/baru/000005_batas_saldo_warung.up.sql" lang="sql" title="labs/b4-migration/baru/000005_batas_saldo_warung.up.sql" />
+
+Laptop menjalankannya tanpa masalah. Server menolak, karena batas itu sudah ada sejak minggu 2:
+
+<Snippet file="labs/b4-migration/output/migrate.txt" lines="59:68" title="Rekaman lab: labs/b4-migration/output/migrate.txt" />
+
+**Arti "dirty".** Saat migration gagal, golang-migrate menandai versinya dirty dan menolak menjalankan migration lain. Dokumentasinya meminta kamu memeriksa dulu apakah migration itu terpasang sebagian atau tidak sama sekali, baru `force` ke versi yang sesuai dengan keadaan sebenarnya ([golang-migrate: Getting started](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md)).
+
+Raka memeriksa skema server, melihat batasnya sama persis dengan isi migration 5, lalu menandai versi 5 bersih:
+
+<Snippet file="labs/b4-migration/output/migrate.txt" lines="80:84" title="Rekaman lab: labs/b4-migration/output/migrate.txt" />
+
+`force` hanya mengubah catatan versi, bukan skema. Setelah itu, laptop dan server sama-sama versi 5, dengan constraint yang sama.
+
+**Tiga aturan kerja.**
+
+1. **File yang sudah jalan di server tidak diubah.** Database tidak akan menjalankannya lagi, jadi perubahanmu tidak pernah sampai. Buat file baru.
+2. **Skema hanya berubah lewat file.** Perubahan lewat `psql` atau dashboard membuat versi berbohong, seperti di minggu 2.
+3. **`down` hanya untuk development.** Di server, mundur biasanya dengan migration baru, karena `down` yang menghapus kolom juga menghapus datanya.
+
+### Di stack lain
+
+**Skenario:** menambah batas saldo warung. Tab Go dijalankan di lab. Tab lain tidak dijalankan, hanya dicek ke dokumentasi.
+
+Yang sama di semua stack: file berurutan di Git, dan tabel riwayat di database. Yang berbeda: format file dan cara memperbaiki database yang menyimpang.
+
+<TabSet id="stack" labels={["Go (golang-migrate)","Laravel","Django","Dart (Serverpod)","Supabase"]}>
+<Fragment slot="t0">
+
+*Dijalankan: golang-migrate v4.20.1, PostgreSQL 17.11.*
+
+<Snippet file="labs/b4-migration/baru/000005_batas_saldo_warung.down.sql" lang="sql" title="000005_batas_saldo_warung.down.sql" />
+
+**Yang berbeda di stack ini:** SQL apa adanya, satu file `up` dan satu `down`. Riwayat di tabel `schema_migrations` (versi + dirty). Perbaikan setelah gagal: `migrate force <versi>` ([golang-migrate](https://github.com/golang-migrate/migrate)).
+
+</Fragment>
+<Fragment slot="t1">
+
+*Tidak dijalankan. Dicek ke [Laravel: Migrations](https://laravel.com/docs/13.x/migrations).*
+
+<Snippet lang="php" code={`// database/migrations/2026_10_09_000005_batas_saldo_warung.php
+return new class extends Migration {
+    public function up(): void {
+        DB::statement("ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000)");
+    }
+    public function down(): void {
+        DB::statement('ALTER TABLE akun DROP CONSTRAINT batas_saldo_warung');
+    }
+};`} />
+
+**Yang berbeda di stack ini:** migration ditulis dengan PHP, nomornya tanggal. `php artisan migrate` menjalankan, `migrate:rollback` membatalkan batch terakhir.
+
+</Fragment>
+<Fragment slot="t2">
+
+*Tidak dijalankan. Dicek ke [Django: Constraints](https://docs.djangoproject.com/en/5.2/ref/models/constraints/).*
+
+<Snippet lang="python" code={`# akun/models.py: tambah constraint di model, lalu jalankan makemigrations
+class Akun(models.Model):
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=~Q(jenis="warung") | Q(saldo__lte=1500000),
+                name="batas_saldo_warung",
+            ),
+        ]`} />
+
+**Yang berbeda di stack ini:** file migration dibuat otomatis oleh `makemigrations` dari perubahan model. Tetap baca file hasilnya sebelum commit. Sejak Django 5.1, argumennya `condition`, bukan `check`.
+
+</Fragment>
+<Fragment slot="t3">
+
+*Tidak dijalankan. Dicek ke [Serverpod: Migrations](https://docs.serverpod.dev/next/concepts/data-and-the-database/database/migrations).*
+
+<Snippet lang="sql" code={`-- migrations/<tag>/migration.sql, dibuat oleh: serverpod create-migration
+-- Baris ini ditambahkan tangan ke migration.sql hasil generator.
+ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000);`} />
+
+**Yang berbeda di stack ini:** `serverpod create-migration` membuat migration dari selisih model. Server menjalankannya saat start dengan flag `--apply-migrations`. Dokumentasinya meminta migration yang sudah dijalankan tidak diubah, dan menyediakan repair migration untuk database yang menyimpang dari file.
+
+</Fragment>
+<Fragment slot="t4">
+
+*Tidak dijalankan. Dicek ke [Supabase: Database migrations](https://supabase.com/docs/guides/deployment/database-migrations) dan [migration repair](https://supabase.com/docs/reference/cli/supabase-migration-repair).*
+
+<Snippet lang="sql" code={`-- supabase/migrations/20261009000005_batas_saldo_warung.sql   (dibuat: supabase migration new batas_saldo_warung)
+ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000);`} />
+
+**Yang berbeda di stack ini:** perubahan lewat dashboard tidak tercatat sebagai file, sama seperti `psql` di minggu 2. Disiplinnya sama: ubah skema lewat file migration, bukan klik.
+
+</Fragment>
+</TabSet>
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### Trade-off: cara mengubah skema
+
+| Cara | Kelebihan | Kekurangan |
+|---|---|---|
+| Manual lewat `psql` atau dashboard | Paling cepat untuk eksperimen | Tidak ada catatan; mesin berbeda-beda, dan versinya tetap terlihat sama |
+| Migration SQL (golang-migrate, Supabase CLI) | Persis yang dijalankan database, mudah direview | SQL ditulis sendiri, termasuk `down` |
+| Migration dari ORM (Laravel, Django, Serverpod) | Ditulis dalam bahasa yang sama dengan kode | SQL hasilnya perlu dicek; aturan seperti `CHECK` kadang harus ditulis tangan |
+| ORM "sync otomatis" saat start | Nol usaha di awal | Bisa menghapus kolom atau data tanpa review; tidak untuk server |
+
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| Migration dijalankan otomatis oleh pipeline deploy | Belum ada pipeline; Raka menjalankan `migrate up` sendiri | [[C3]] |
+| Mengganti nama kolom tanpa mematikan app lama | v1 belum pernah mengganti nama kolom | [[t1-m6]], [[E1]] |
+| Menghapus batas saldo warung | Keputusan produk, bukan teknis; batas itu kini setidaknya punya file | Migration baru bila Sinta dan Pak Hadi memutuskan |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Migration 3 sudah jalan di server. Raka sadar kolom `jumlah` di tabel `transaksi` seharusnya punya batas maksimal, lalu mengedit file 3. Apa yang terjadi saat ia menjalankan `migrate up` di server?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Tidak ada. Server sudah mencatat versi 3, jadi file 3 tidak dijalankan lagi. Server tetap tanpa batas, sementara mesin baru yang dibangun dari nol mendapat batas. Perbaikan yang benar adalah migration baru.
+
+</details>
+
+**2.** Di rekaman, laptop dan server sama-sama versi 3, padahal skemanya berbeda. Kenapa angka versi tidak menangkap perbedaan itu?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Angka versi hanya dicatat oleh alat migration saat ia menjalankan file. `ALTER TABLE` lewat `psql` tidak melewati alat itu, jadi tidak tercatat. Versi hanya jujur kalau skema berubah lewat file saja.
+
+</details>
+
+**3.** Server berstatus `5 (dirty)`. Kapan `migrate force 5` aman dijalankan, dan kapan tidak?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Aman setelah kamu memeriksa skema dan memastikan isinya sudah sama dengan migration 5, seperti di rekaman. Tidak aman kalau migration 5 baru terpasang sebagian: `force` hanya mengubah catatan versi, jadi bagian yang belum terpasang tidak akan pernah dijalankan.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Perubahan skema ada di file migration baru, bukan di file lama atau di kode start aplikasi.
+- [ ] Tidak ada "auto sync" skema ORM yang aktif di server.
+- [ ] Tidak ada instruksi "jalankan `ALTER TABLE` ini di server" tanpa file migration.
+- [ ] Ada `down`, atau ada catatan kenapa tidak bisa dibatalkan.
+- [ ] Migration tidak menghapus atau mengganti nama kolom yang masih dipakai app.
+
+### Bacaan lanjut
+
+- [golang-migrate: Getting started](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md)
+- [Laravel: Migrations](https://laravel.com/docs/13.x/migrations) · [Django: Migrations](https://docs.djangoproject.com/en/5.2/topics/migrations/)
+- [Serverpod: Migrations](https://docs.serverpod.dev/next/concepts/data-and-the-database/database/migrations) · [Supabase: Database migrations](https://supabase.com/docs/guides/deployment/database-migrations)
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
