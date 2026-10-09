@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 228,
-        "halaman": 27
+        "menit": 239,
+        "halaman": 28
       },
       "bagian": [
         {
@@ -803,8 +803,12 @@
         6
       ],
       "masalah": "Pak Hadi bertanya: Rp70.000 ini ke mana, dan siapa yang memperbaikinya?",
-      "ada": false,
-      "nomor": "1.24"
+      "ada": true,
+      "prasyarat": [
+        "B3.1"
+      ],
+      "nomor": "1.24",
+      "menit": 11
     },
     {
       "id": "B4.1",

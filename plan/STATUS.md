@@ -55,8 +55,9 @@ Urutan kerja dibalik: konten dulu, Tahap 1 sampai tuntas sesuai `plan/CERITA-TAH
 | 1.21 Lapisan dasar: handler tidak tahu SQL | Ditulis ulang dari B7.1, lab `lapisan.txt` + `cek_arah.py`, pilah dari baris lab (keputusan 165, 166) |
 | 1.22 M4: Rp70.000 yang hilang | Halaman masalah, mode rentan `m4` + rekaman `m4.txt`, runsql `t1-m4.json` (keputusan 167, 168) |
 | 1.23 Transaction | Ditulis ulang dari B3.1, Inti dari `m4.txt`, stackstep b3-stack dengan tab Dart (Serverpod) (keputusan 169) |
+| 1.24 ADR 5–6: Transaction di service; tabel koreksi | Lab `DalamTx` + tabel koreksi (keputusan 170), halaman ADR + runsql `t1-adr6.json` (keputusan 171) |
 
-Diperbarui 2026-10-08. 23 dari 42 halaman selesai; berikutnya 1.24. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
+Diperbarui 2026-10-08. 24 dari 42 halaman selesai; berikutnya 1.25. Loop headless siap: `bash tools/jalankan-tahap.sh` (keputusan 140); loop berhenti saat penanda selesai Tahap 1 (keputusan 140) ditulis di file ini, lalu menjalankan `plan/PROMPT-CROSSCHECK.md` sekali.
 
 ## Fase 0 · Fondasi (plan/PROPOSAL.md "Rencana migrasi")
 

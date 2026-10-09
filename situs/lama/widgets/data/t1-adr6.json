@@ -1,0 +1,56 @@
+{
+  "id": "t1-adr6",
+  "title": "Mengembalikan Rp70.000 Budi: UPDATE langsung atau tabel koreksi",
+  "setup": "CREATE TABLE akun (id INTEGER PRIMARY KEY, nama TEXT NOT NULL, saldo INTEGER NOT NULL CHECK (saldo >= 0));\nCREATE TABLE topup (id INTEGER PRIMARY KEY, akun_id INTEGER NOT NULL, nominal INTEGER NOT NULL);\nCREATE TABLE koreksi (id INTEGER PRIMARY KEY, akun_id INTEGER NOT NULL, jumlah INTEGER NOT NULL CHECK (jumlah <> 0), alasan TEXT NOT NULL CHECK (length(trim(alasan)) >= 20), admin_id INTEGER NOT NULL);\nINSERT INTO akun VALUES (419, 'Budi', 180000);\nINSERT INTO topup (akun_id, nominal) VALUES (419, 250000);",
+  "check": "SELECT 'Saldo Budi' AS apa, saldo AS rupiah FROM akun WHERE id = 419 UNION ALL SELECT 'BARIS KOREKSI', COUNT(*) FROM koreksi UNION ALL SELECT 'SALDO DARI CATATAN', (SELECT SUM(nominal) FROM topup WHERE akun_id = 419) + COALESCE((SELECT SUM(jumlah) FROM koreksi WHERE akun_id = 419), 0)",
+  "predict": {
+    "q": "Setelah M4, saldo Budi Rp180.000 dan top-up tercatat Rp250.000. Panel After mengembalikan Rp70.000 lewat tabel koreksi. Berapa SALDO DARI CATATAN (top-up + koreksi) di panel After?",
+    "options": [
+      "Rp250.000",
+      "Rp320.000",
+      "Rp180.000"
+    ],
+    "answer": 1,
+    "explain": "Before: UPDATE langsung membuat saldo dan catatan sama-sama Rp250.000. Angkanya cocok, tapi tidak ada baris yang menjelaskan bahwa saldo Budi pernah diubah, oleh siapa, dan kenapa. After: baris koreksi menjelaskan +Rp70.000, tapi catatan menghitung Rp320.000. Selisih Rp70.000 itu pemotongan di M4 yang tidak pernah punya baris."
+  },
+  "panels": {
+    "before": {
+      "label": "Before: UPDATE langsung lewat psql",
+      "onError": "stop",
+      "steps": [
+        {
+          "sql": "UPDATE akun SET saldo = saldo + 70000 WHERE id = 419"
+        }
+      ]
+    },
+    "after": {
+      "label": "After: ADR 6, koreksi dengan alasan dalam satu transaction",
+      "onError": "rollback",
+      "steps": [
+        {
+          "sql": "BEGIN"
+        },
+        {
+          "sql": "UPDATE akun SET saldo = saldo + 70000 WHERE id = 419"
+        },
+        {
+          "sql": "INSERT INTO koreksi (akun_id, jumlah, alasan, admin_id) VALUES (419, 70000, 'Pembayaran ke Warung Ani Jumat minggu 3 gagal di tengah (M4)', 400)"
+        },
+        {
+          "sql": "COMMIT"
+        }
+      ]
+    }
+  },
+  "toggles": [
+    {
+      "label": "Alasan diisi \"salah sistem\"",
+      "pairs": [
+        [
+          "'Pembayaran ke Warung Ani Jumat minggu 3 gagal di tengah (M4)'",
+          "'salah sistem'"
+        ]
+      ]
+    }
+  ]
+}

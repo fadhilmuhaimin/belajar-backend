@@ -313,6 +313,30 @@
   "jawab": "Kalau transaction di-rollback, uang di payment gateway sudah terlanjur ditarik, karena API luar tidak ikut rollback. Selain itu, koneksi dan lock tertahan selama menunggu respons yang bisa lambat."
  },
  {
+  "id": "t1-adr-transaction-1",
+  "halaman": "t1-adr-transaction",
+  "judul": "1.24 Transaction di service dan tabel koreksi",
+  "url": "tahap-1/adr-transaction-koreksi/",
+  "tanya": "Fitur baru: admin memindahkan saldo dari satu karyawan ke karyawan lain, dengan alasan. Di mana transaction dibuka, dan apa saja isinya?",
+  "jawab": "Di service, lewat `DalamTx`. Isinya tiga langkah: kurangi saldo karyawan pertama, tambah saldo karyawan kedua, dan tulis baris koreksi untuk keduanya. Repo hanya menyediakan method `Tx` untuk setiap langkah."
+ },
+ {
+  "id": "t1-adr-transaction-2",
+  "halaman": "t1-adr-transaction",
+  "judul": "1.24 Transaction di service dan tabel koreksi",
+  "url": "tahap-1/adr-transaction-koreksi/",
+  "tanya": "Kenapa `UPDATE akun SET saldo = 250000 WHERE id = 419` lewat `psql` melanggar aturan Pak Hadi, walaupun angkanya benar?",
+  "jawab": "Tidak ada baris yang mencatat siapa yang mengubah, kapan, dan kenapa. Bulan depan, saldo Budi terlihat normal, dan tidak ada yang tahu bahwa saldo itu pernah dikoreksi. Angka yang benar tanpa catatan tidak bisa diaudit."
+ },
+ {
+  "id": "t1-adr-transaction-3",
+  "halaman": "t1-adr-transaction",
+  "judul": "1.24 Transaction di service dan tabel koreksi",
+  "url": "tahap-1/adr-transaction-koreksi/",
+  "tanya": "Rekonsiliasi akun Budi menghitung Rp320.000, saldonya Rp250.000. Apa artinya, dan apakah koreksinya salah?",
+  "jawab": "Koreksinya benar. Selisih Rp70.000 adalah pemotongan di M4 yang terjadi tanpa baris di tabel mana pun. Data menunjukkan ada perubahan yang tidak tercatat, dan itu batas model kolom saldo yang di-`UPDATE`."
+ },
+ {
   "id": "B4.1-1",
   "halaman": "B4.1",
   "judul": "1.25 Migration: skema sebagai kode",

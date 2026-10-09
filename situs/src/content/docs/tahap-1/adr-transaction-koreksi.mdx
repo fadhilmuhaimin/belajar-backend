@@ -1,0 +1,169 @@
+---
+title: "1.24 ADR 5–6: Transaction di service; tabel koreksi"
+description: Dua keputusan setelah M4. Service membuka satu transaction untuk setiap perubahan uang lebih dari satu baris. Setiap perbaikan saldo dicatat di tabel koreksi dengan siapa, kapan, dan kenapa.
+---
+import Blok from "../../../components/Blok.astro";
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 8 menit · coba 3 menit · Prasyarat: [[B3.1]] · Jalur inti</p>
+
+<Blok nama="Kebutuhan" buka>
+
+PRD v1 menutup dengan dua pertanyaan terbuka. Apa yang terjadi kalau pembayaran gagal di tengah? Siapa yang memperbaiki saldo yang salah, dan bagaimana?
+
+Di [[t1-m4]], keduanya terjawab dengan cara yang buruk. Pembayaran Rp70.000 gagal di tengah, dan saldo Budi terpotong tanpa baris transaksi. Lalu tidak ada cara resmi untuk mengembalikannya.
+
+Aturan Pak Hadi di PRD berlaku untuk keduanya: tidak ada angka yang berubah tanpa catatan siapa, kapan, dan kenapa.
+
+Dua fitur v1 mengubah lebih dari satu baris uang sekaligus. Bayar mengubah dua saldo dan menulis satu transaksi. Top-up minggu 1 mengubah 100 saldo dan menulis 100 catatan.
+
+Dari sini lahir dua keputusan:
+
+- **ADR 5**: di lapisan mana transaction dibuka.
+- **ADR 6**: bagaimana saldo yang salah diperbaiki.
+
+</Blok>
+
+<Blok nama="Opsi" buka>
+
+### ADR 5: di mana transaction dibuka
+
+| Opsi | Kelebihan | Kekurangan |
+|---|---|---|
+| Di repo, satu fungsi per kombinasi perubahan | Sederhana; SQL dan transaction di satu tempat | Repo memutuskan langkah mana yang harus bersama, padahal itu aturan uang. Setiap fitur baru butuh fungsi repo baru |
+| Di handler atau middleware, satu transaction per request | Otomatis untuk semua endpoint | Handler jadi tahu database, melanggar [[B7.1]]. Transaction ikut terbuka selama validasi dan menulis response. Dokumentasi Django menyebut model ini tidak efisien saat lalu lintas naik ([Django: ATOMIC_REQUESTS](https://docs.djangoproject.com/en/5.2/topics/db/transactions/)) |
+| **Di service, lewat `DalamTx` dari repo** | Service yang tahu aturan memutuskan batas unit; repo tetap memegang SQL; service tetap tidak mengimpor `database/sql` | Satu fungsi `DalamTx` dan satu tipe `Tx` tambahan |
+
+Opsi ketiga adalah versi kecil dari pola Unit of Work: satu unit kerja bisnis mencatat perubahan, lalu menuliskannya ke database bersama ([Fowler: Unit of Work](https://martinfowler.com/eaaCatalog/unitOfWork.html)).
+
+### ADR 6: bagaimana saldo yang salah diperbaiki
+
+| Opsi | Kelebihan | Kekurangan |
+|---|---|---|
+| `UPDATE` langsung lewat `psql`, dicatat di spreadsheet | Cepat, tanpa kode baru | Catatan terpisah dari data; Pak Hadi tidak bisa membuktikan apa pun dari database |
+| **Tabel `koreksi` dan endpoint admin, dalam satu transaction** | Setiap perubahan punya baris: siapa, berapa, kenapa, kapan | Pemotongan yang terjadi tanpa catatan, seperti di M4, tetap tidak terlihat dari data |
+| Ledger double-entry sekarang: saldo dihitung dari entri | Tidak ada perubahan saldo tanpa baris, sama sekali | Mengganti model data di tengah uji coba 6 minggu, oleh satu engineer |
+
+</Blok>
+
+<Blok nama="Yang dipilih dan kenapa">
+
+**ADR 5.**
+
+1. Setiap perubahan yang menyentuh lebih dari satu baris uang berjalan dalam satu transaction.
+2. Service membukanya lewat `repo.DalamTx`, karena service yang tahu langkah mana harus terjadi bersama.
+3. Repo menyediakan SQL sebagai method `Tx`. Method itu tidak bisa dipanggil di luar transaction.
+
+**ADR 6.**
+
+1. Perubahan saldo di luar bayar dan top-up hanya lewat `POST /koreksi`.
+2. Endpoint ini hanya untuk admin, dan alasan minimal 20 karakter.
+3. Perubahan saldo dan baris koreksinya ditulis dalam satu transaction (ADR 5).
+4. Baris koreksi tidak pernah diubah atau dihapus. Kesalahan koreksi diperbaiki dengan koreksi baru.
+
+Ledger double-entry sengaja ditunda ke Tahap 2. Uji coba tinggal tiga minggu, dan tabel koreksi sudah menjawab pertanyaan Pak Hadi untuk setiap perbaikan berikutnya.
+
+</Blok>
+
+<Blok nama="Wujud di kode">
+
+**ADR 5.** Repo menyediakan cara membuka transaction:
+
+<Snippet file="labs/api-t1/internal/repo/tx.go" region="tx" lang="go" title="labs/api-t1/internal/repo/tx.go" />
+
+Service memakainya untuk satu pembayaran:
+
+<Snippet file="labs/api-t1/internal/service/bayar.go" region="pindahkan" lang="go" title="labs/api-t1/internal/service/bayar.go" />
+
+SQL yang dikirim ke PostgreSQL tidak berubah dibanding versi sebelumnya. Semua rekaman lab bayar dan top-up tetap sama persis sesudah transaction dipindah ke service.
+
+**ADR 6.** Tabel koreksi, dengan aturan yang dijaga database:
+
+<Snippet file="labs/api-t1/schema.sql" region="koreksi" lang="sql" title="labs/api-t1/schema.sql" />
+
+Service memeriksa admin dan alasan, lalu membuka satu transaction:
+
+<Snippet file="labs/api-t1/internal/service/koreksi.go" region="koreksi" lang="go" title="labs/api-t1/internal/service/koreksi.go" />
+
+Rekaman lab, setelah insiden M4 diulang di database bersih. Admin mengoreksi saldo Budi:
+
+<Snippet file="labs/api-t1/output/koreksi.txt" lines="46:61" title="Rekaman lab: labs/api-t1/output/koreksi.txt" />
+
+Karyawan yang mencoba endpoint ini dijawab `403`. Alasan "salah sistem" dijawab `422` dengan nama field `alasan`.
+
+</Blok>
+
+<Blok nama="Coba keduanya">
+
+Saldo Budi Rp180.000 setelah M4, dan top-up yang tercatat Rp250.000. Panel Before mengembalikan Rp70.000 dengan `UPDATE` langsung. Panel After memakai tabel koreksi.
+
+SQL-nya dijalankan sungguhan di browser dengan SQLite.
+
+<WidgetLama nama="runsql" src="data/t1-adr6.json" />
+
+Setelah itu, nyalakan "Ubah satu hal". Dengan alasan "salah sistem", database menolak baris koreksi, dan `ROLLBACK` membatalkan perubahan saldonya juga.
+
+</Blok>
+
+<Blok nama="Kapan keputusan ini salah">
+
+**Saldo dari catatan masih tidak cocok.** Rekonsiliasi akun Budi setelah koreksi:
+
+<Snippet file="labs/api-t1/output/koreksi.txt" lines="71:75" title="Rekaman lab: labs/api-t1/output/koreksi.txt" />
+
+Koreksi menjelaskan +Rp70.000. Pemotongan −Rp70.000 di M4 tidak pernah punya baris. Selama saldo adalah kolom yang bisa di-`UPDATE`, perubahan tanpa catatan tetap mungkin. Pertanyaan Pak Hadi, "dari baris mana saya tahu kenapa?", baru terjawab penuh dengan ledger di Tahap 2.
+
+**Dua request bersamaan.** Transaction membuat tiga langkah jadi satu unit. Ia tidak mencegah dua pembayaran Budi yang datang bersamaan membaca saldo yang sama. Itu masalah Tahap 2.
+
+**Koreksi menjadi kebiasaan.** Kalau koreksi dipakai untuk menutup bug yang berulang, tabelnya tumbuh dan bug-nya tetap ada. Satu admin juga bisa mengoreksi tanpa persetujuan orang kedua. Persetujuan dua orang masuk back office di Tahap 4.
+
+**Yang merevisinya nanti.** Di Tahap 2, ADR 6 diganti ledger double-entry: saldo dihitung dari entri, dan koreksi menjadi entri pembalik. ADR 5 ditambah lock saat transfer antar karyawan datang.
+
+### Cek diri
+
+**1.** Fitur baru: admin memindahkan saldo dari satu karyawan ke karyawan lain, dengan alasan. Di mana transaction dibuka, dan apa saja isinya?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Di service, lewat `DalamTx`. Isinya tiga langkah: kurangi saldo karyawan pertama, tambah saldo karyawan kedua, dan tulis baris koreksi untuk keduanya. Repo hanya menyediakan method `Tx` untuk setiap langkah.
+
+</details>
+
+**2.** Kenapa `UPDATE akun SET saldo = 250000 WHERE id = 419` lewat `psql` melanggar aturan Pak Hadi, walaupun angkanya benar?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Tidak ada baris yang mencatat siapa yang mengubah, kapan, dan kenapa. Bulan depan, saldo Budi terlihat normal, dan tidak ada yang tahu bahwa saldo itu pernah dikoreksi. Angka yang benar tanpa catatan tidak bisa diaudit.
+
+</details>
+
+**3.** Rekonsiliasi akun Budi menghitung Rp320.000, saldonya Rp250.000. Apa artinya, dan apakah koreksinya salah?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Koreksinya benar. Selisih Rp70.000 adalah pemotongan di M4 yang terjadi tanpa baris di tabel mana pun. Data menunjukkan ada perubahan yang tidak tercatat, dan itu batas model kolom saldo yang di-`UPDATE`.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Setiap perubahan uang yang menyentuh lebih dari satu baris memakai satu `DalamTx`.
+- [ ] Handler tidak membuka transaction, dan repo tidak memutuskan langkah mana yang harus bersama.
+- [ ] Tidak ada `UPDATE akun SET saldo` di luar method `Tx`.
+- [ ] Setiap perubahan saldo di luar bayar dan top-up menulis baris koreksi di transaction yang sama.
+- [ ] Baris koreksi tidak pernah di-`UPDATE` atau di-`DELETE`.
+
+### Bacaan lanjut
+
+- [Martin Fowler: Unit of Work](https://martinfowler.com/eaaCatalog/unitOfWork.html)
+- [Go: Executing transactions](https://go.dev/doc/database/execute-transactions)
+- [Django: Database transactions](https://docs.djangoproject.com/en/5.2/topics/db/transactions/), bagian ATOMIC_REQUESTS
+
+</Blok>
+
+<SkripLama daftar={["runsql-core","runsql"]} />
