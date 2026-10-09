@@ -4,13 +4,17 @@
  * "Rekeningo v1", atau tiga opsi berdampingan. Simpul diberi nada token (system = baru/aturan, good = hasil benar,
  * warn = masalah, old = lama). Desktop: label di kiri, simpul mendatar; HP: label di atas, simpul menurun.
  *   <Rantai data={json} />
+ * `ringkas` (K0a): untuk Inti, supaya diagram utuh di layar pertama 375×667. Di HP simpul mengalir mendatar dan
+ * keterangan kecil (sub, catatan) disembunyikan; teks simpul harus bisa dibaca tanpa sub. Rinciannya di paragraf.
+ *   <Rantai data={json} ringkas />
  */
 import { DataRantai } from "../lib/rantai";
 
 const d = DataRantai.parse(Astro.props.data);
+const ringkas = Boolean(Astro.props.ringkas);
 const CHIP: Record<string, string> = { rekaman: "is-system", ilustrasi: "is-warn", asumsi: "is-warn" };
 ---
-<figure class="rantai" aria-label={d.judul}>
+<figure class:list={["rantai", { "rantai--ringkas": ringkas }]} aria-label={d.judul}>
   <figcaption class="rantai__judul"><strong>{d.judul}</strong> <span class:list={["bb-chip", CHIP[d.sumber.jenis]]}>{d.sumber.teks}</span></figcaption>
   {d.baris.map((b) => (
     <div class="rantai__baris">
