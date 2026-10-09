@@ -291,24 +291,24 @@
   "id": "B3.1-1",
   "halaman": "B3.1",
   "judul": "1.23 Transaction",
-  "url": "b-fondasi/b3-1-transaction/",
-  "tanya": "Kode Go ini memakai `db.ExecContext` (bukan `tx.ExecContext`) untuk `UPDATE` pertama. `UPDATE` kedua lewat `tx` dan gagal. Berapa total saldo sesudahnya?",
-  "jawab": "Total jadi Rp1.010.000, sama seperti panel Before. `db.ExecContext` berjalan di luar transaction, jadi langsung permanen. `tx.Rollback()` hanya membatalkan perintah yang lewat `tx`. Dokumentasi Go memperingatkan hal ini secara khusus: jangan memanggil method `sql.DB` di dalam transaction (sumber).",
+  "url": "tahap-1/transaction/",
+  "tanya": "Kode Go ini memakai `db.ExecContext` (bukan `tx.ExecContext`) untuk `UPDATE` pertama. `UPDATE` kedua lewat `tx` dan gagal. Dengan angka lab `b3-stack`, berapa jumlah kedua saldo sesudahnya?",
+  "jawab": "Rp1.010.000, berkurang Rp70.000 seperti di M4. `db.ExecContext` berjalan di luar transaction, jadi langsung permanen. `tx.Rollback()` hanya membatalkan perintah yang lewat `tx`. Dokumentasi Go memperingatkan hal ini: jangan memanggil method `sql.DB` di dalam transaction (Go).",
   "kode": "tx, _ := db.BeginTx(ctx, nil)\ndefer tx.Rollback()\ndb.ExecContext(ctx, `UPDATE akun SET saldo = saldo - 70000 WHERE nama = 'budi'`)\n_, err := tx.ExecContext(ctx, `UPDATE akun SET saldo = saldo + 70000 WHERE nama = 'ani'`)"
  },
  {
   "id": "B3.1-2",
   "halaman": "B3.1",
   "judul": "1.23 Transaction",
-  "url": "b-fondasi/b3-1-transaction/",
+  "url": "tahap-1/transaction/",
   "tanya": "Di Django, kamu menangkap `IntegrityError` di dalam blok `atomic()`, lalu menjalankan query lain di blok yang sama. Apa risikonya?",
-  "jawab": "Setelah error database, transaction sudah dalam keadaan rusak. Query berikutnya bisa gagal dengan `TransactionManagementError`. Dokumentasi Django menyarankan membungkus bagian yang boleh gagal dengan `atomic()` sendiri, lalu menangkap error di luar blok itu (sumber)."
+  "jawab": "Setelah error database, transaction sudah dalam keadaan rusak. Query berikutnya bisa gagal dengan `TransactionManagementError`. Dokumentasi Django menyarankan membungkus bagian yang boleh gagal dengan `atomic()` sendiri, lalu menangkap error di luar blok itu (Django)."
  },
  {
   "id": "B3.1-3",
   "halaman": "B3.1",
   "judul": "1.23 Transaction",
-  "url": "b-fondasi/b3-1-transaction/",
+  "url": "tahap-1/transaction/",
   "tanya": "Jelaskan dalam satu kalimat: kenapa memanggil API payment gateway di dalam transaction itu ide buruk?",
   "jawab": "Kalau transaction di-rollback, uang di payment gateway sudah terlanjur ditarik, karena API luar tidak ikut rollback. Selain itu, koneksi dan lock tertahan selama menunggu respons yang bisa lambat."
  },
