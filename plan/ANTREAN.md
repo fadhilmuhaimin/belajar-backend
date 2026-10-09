@@ -74,11 +74,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K0e · Ilustrasi M2: chip amount dan jumlah lebih lebar dari kotaknya
 
 - jenis: perbaikan
-- status: antre
-- percobaan: 0
+- status: selesai
+- percobaan: 1
 - bergantung: -
 - selesai bila: `node situs/tools/ukur-ilustrasi.mjs --url <preview>` lolos (0 teks keluar bingkai, 5 halaman × 2 ukuran × 2 tema); teks chip M2 tetap `amount` dan `jumlah`; alat itu dijalankan oleh `tools/cek_situs.sh --layar` sesudah layar pertama; tangkapan 1.17 gelap dan terang dilihat.
-- catatan: Temuan alat K0c (keputusan 222): `amount` keluar 3,2 satuan (teks 10,8–61,2, kotak 12–60), `jumlah` keluar 1,2 (136,8–187,2, kotak 136–188).
+- catatan: Temuan alat K0c (keputusan 222): `amount` keluar 3,2 satuan (teks 10,8–61,2, kotak 12–60), `jumlah` keluar 1,2 (136,8–187,2, kotak 136–188). Selesai 2026-10-10 (keputusan 224): chip App 7–65, chip Server 132–192, teks tetap; ukur-ilustrasi lolos dan masuk `cek_situs.sh --layar`; tangkapan 1.17 HP gelap/terang dilihat.
 
 ### I1 · Pindah ke bun
 
