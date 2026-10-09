@@ -925,8 +925,16 @@ main > .content-panel:first-of-type > .sl-container { max-width: var(--rk-ukur);
 .content-panel + .content-panel { border-top: 0; padding-top: 0; }
 .content-panel:has(nav.kamu) { padding-bottom: 0.2rem; }
 .content-panel h1 { margin-top: 0.1rem; }
+/* Meta tanpa margin negatif: celah judul ke meta harus lebih besar dari celah antar baris judul, kalau tidak meta
+   terbaca sebagai baris berikutnya judul dua baris (K0d, keputusan 223; diukur tools/ukur-judul.mjs). */
+.sl-markdown-content.sl-markdown-content p.meta { margin-top: 0; }
 .sl-markdown-content p.meta:has(+ details.blok) { margin-bottom: 0.5rem; }
 .sl-markdown-content details.blok:first-of-type > summary.blok__kepala { padding-top: 1rem; }
+/* Di HP 9 px yang dipakai celah judul-meta diambil dari jarak meta ke blok pertama, supaya layar pertama tetap muat. */
+@media (max-width: 50em) {
+  .sl-markdown-content p.meta:has(+ details.blok) { margin-bottom: 0.3rem; }
+  .sl-markdown-content details.blok:first-of-type > summary.blok__kepala { padding-top: 0.6rem; }
+}
 .kamu__sr, .kamu__ini:not(.kamu__ini--jenis) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .kamu__jalur li.kamu__ini--jenis { color: var(--teks-2); font-weight: 400; }
 .kamu__toc { border-color: transparent; color: var(--teks-2); padding-inline: 0.4rem; }
