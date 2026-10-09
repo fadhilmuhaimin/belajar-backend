@@ -625,8 +625,91 @@ def rekam_m3():
     tulis("m3.txt")
 
 
+def diterima_db(posisi):
+    """Query pencarian warung yang diterima PostgreSQL sesudah penanda posisi, beserta baris parameternya."""
+    time.sleep(0.3)   # log container ditulis asinkron
+    out = []
+    for l in _log_db()[posisi:]:
+        if not l.startswith("api-t1|"):
+            continue
+        isi = l.split("|", 2)[2]
+        if "FROM akun WHERE" in isi or (out and isi.startswith("DETAIL:")):
+            out.append(re.sub(r"stmtcache_[0-9a-f]+", "stmtcache_…", isi))
+        elif out:
+            break
+    if not out:
+        gagal("query pencarian tidak ada di log PostgreSQL")
+    log.append("# yang diterima PostgreSQL (log_statement=all):\n" + "\n".join(out) + "\n\n")
+    return out
+
+
+GOSEC = "github.com/securego/gosec/v2/cmd/gosec@v2.29.0"
+
+
+def rekam_injection():
+    """1.20 Keamanan 1: SQL injection (keputusan 160). Teks SQL vs parameter di log PostgreSQL, lalu gosec."""
+    reset()
+    mulai("-rentan", "m3")
+    bagian("A. Mode rentan: isi pencarian masuk ke teks SQL")
+    dimas = login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+    p = posisi_log()
+    s, _ = curl("GET", "/warung?cari=%27%20OR%201%3D1%20--", token=dimas, tampil_path="/warung?cari=' OR 1=1 --",
+                resp_tampil="{\"warung\":[ ... semua akun, beserta saldo]}")
+    harap(s, 200, "rentan: 200")
+    st = diterima_db(p)
+    harap(any("LIKE '%' OR 1=1 --%'" in x for x in st) and not any(x.startswith("DETAIL:") for x in st), True,
+          "rentan: OR 1=1 ada di teks SQL, tanpa parameter")
+    stop()
+
+    reset()
+    mulai()
+    bagian("B. Versi benar: teks SQL tetap, isi pencarian dikirim terpisah sebagai $1")
+    dimas = login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+    p = posisi_log()
+    s, b = curl("GET", "/warung?cari=%27%20OR%201%3D1%20--", token=dimas, tampil_path="/warung?cari=' OR 1=1 --")
+    harap((s, json.loads(b)["warung"]), (200, []), "benar: 0 hasil")
+    st = diterima_db(p)
+    harap(any("|| $1 ||" in x for x in st) and any(x.startswith("DETAIL:  Parameters: $1 = ") for x in st), True,
+          "benar: SQL memakai $1, parameter di baris terpisah")
+    stop()
+
+    bagian("C. Linter: gosec aturan G201 dan G202 (SQL dibangun dari string)")
+    r = subprocess.run(["go", "run", GOSEC, "-fmt=text", "-include=G201,G202", "./..."], cwd=HERE,
+                       capture_output=True, text=True)
+    hasil = r.stdout.replace(str(HERE) + "/", "").replace("\n\n\n", "\n\n").strip()
+    harap(("G202" in hasil, "Issues : 1" in hasil, r.returncode != 0), (True, True, True),
+          "gosec: tepat satu temuan, di fungsi rentan")
+    hasil = "\n".join(l.rstrip() for l in hasil.splitlines())
+    log.append(f"$ go run {GOSEC} -include=G201,G202 ./...\n{hasil}\n# exit status {r.returncode}\n")
+
+    bagian("D. Batas parameter: nama kolom tidak bisa jadi $1")
+    log.append("# $1 selalu nilai. ORDER BY $1 memberi semua baris nilai yang sama, jadi teks nama DESC tidak berpengaruh.\n")
+    a = sql("PREPARE urut(text) AS SELECT id, nama FROM akun WHERE jenis = 'warung' ORDER BY $1; EXECUTE urut('nama DESC');")
+    b = sql("SELECT id, nama FROM akun WHERE jenis = 'warung' ORDER BY nama DESC;")
+    harap((a.split().index("418") < a.split().index("502"), b.split().index("502") < b.split().index("418")),
+          (True, True), "ORDER BY $1 tidak mengurutkan; ORDER BY nama DESC mengurutkan")
+
+    bagian("E. Latihan: draf AI laporan warung (latihan/laporan.go), dites ke database lalu di-lint")
+    reset()
+    t = subprocess.run(["go", "test", "-v", "-count=1", "./..."], cwd=HERE / "latihan", env=ENV,
+                       capture_output=True, text=True)
+    keluaran = re.sub(r" \(\d+\.\d+s\)", "", t.stdout)
+    keluaran = re.sub(r"(ok\s+lab/latihan)\s+\d+\.\d+s", r"\1", keluaran).strip()
+    harap((t.returncode, "division by zero" in keluaran, "urut tidak dikenal" in keluaran), (0, True, True),
+          "latihan: draf menjalankan urut sebagai SQL, versi benar menolaknya")
+    log.append(f"$ cd latihan && go test -v ./...\n{keluaran}\n")
+    r = subprocess.run(["go", "run", GOSEC, "-fmt=text", "-include=G201,G202", "./..."], cwd=HERE / "latihan",
+                       capture_output=True, text=True)
+    ringkas = "\n".join(l.rstrip() for l in r.stdout.splitlines() if l.strip() and not l.startswith("Results"))
+    harap(("Issues : 0" in ringkas, r.returncode), (True, 0), "gosec tidak menandai draf (query di return)")
+    log.append(f"$ cd latihan && go run {GOSEC} -include=G201,G202 ./...\n{ringkas}\n")
+    log.append("# Draf menjalankan urut sebagai SQL (tes pertama), tapi gosec tidak menandainya:\n"
+               "# aturan G202 memeriksa query di assignment (rows, err := ...), bukan yang langsung di return.\n")
+    tulis("injection.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()
