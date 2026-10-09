@@ -66,7 +66,14 @@
           "nama": "Jembatan ke Tahap 2"
         }
       ],
-      "naskah": "plan/CERITA-TAHAP-1.md"
+      "naskah": "plan/CERITA-TAHAP-1.md",
+      "skala": {
+        "lingkup": "Uji coba internal, satu gedung",
+        "user": "100 karyawan Gedung A, 3 warung",
+        "pembuat": "Raka sendiri",
+        "prd": "PRD v1: tunjangan makan tanpa tunai, Gedung A",
+        "pendek": "Satu gedung"
+      }
     },
     {
       "no": 2,
@@ -109,7 +116,14 @@
         "menit": 52,
         "halaman": 6
       },
-      "versi": "lama"
+      "versi": "lama",
+      "skala": {
+        "lingkup": "Seluruh kampus pusat",
+        "user": "1.000 karyawan, 12 warung, Keuangan",
+        "pembuat": "Raka + 1 engineer",
+        "prd": "PRD v2: transfer antar karyawan, tutup buku otomatis untuk Keuangan",
+        "pendek": "Seluruh kampus"
+      }
     },
     {
       "no": 3,
@@ -161,7 +175,14 @@
         "menit": 54,
         "halaman": 6
       },
-      "versi": "lama"
+      "versi": "lama",
+      "skala": {
+        "lingkup": "Semua cabang Lestari dan tenant mitra",
+        "user": "10.000 karyawan di 6 kota",
+        "pembuat": "4 orang: mobile, web, 2 backend",
+        "prd": "PRD v3: notifikasi push, katalog warung, dashboard web merchant",
+        "pendek": "Enam kota"
+      }
     },
     {
       "no": 4,
@@ -216,7 +237,14 @@
         "menit": 15,
         "halaman": 2
       },
-      "versi": "lama"
+      "versi": "lama",
+      "skala": {
+        "lingkup": "Dibuka ke publik sebagai uang elektronik (PT Rekeningo)",
+        "user": "100.000 user, merchant di luar kampus",
+        "pembuat": "3 tim",
+        "prd": "PRD v4: top-up dari bank lewat gateway, verifikasi identitas, QR",
+        "pendek": "Dibuka ke publik"
+      }
     },
     {
       "no": 5,
@@ -269,7 +297,14 @@
         "menit": 0,
         "halaman": 0
       },
-      "versi": "lama"
+      "versi": "lama",
+      "skala": {
+        "lingkup": "Nasional",
+        "user": "1 juta user, ratusan ribu merchant",
+        "pembuat": "5–7 tim + platform, SRE, security",
+        "prd": "PRD v5: laporan merchant real-time, notifikasi massal, cicilan",
+        "pendek": "Nasional"
+      }
     }
   ],
   "halaman": [
@@ -1635,7 +1670,14 @@
       "no": 6,
       "nama": "Regional",
       "user": "10 juta user, 3 negara",
-      "catatan": "Proyeksi konseptual tanpa lab penuh (PROPOSAL, System design final)."
+      "catatan": "Proyeksi konseptual tanpa lab penuh (PROPOSAL, System design final).",
+      "skala": {
+        "lingkup": "Regional, beberapa negara",
+        "user": "10 juta user, multi-mata uang",
+        "pembuat": "10+ tim",
+        "prd": "PRD v6 (proyeksi): multi-mata uang, aturan per negara",
+        "pendek": "Regional"
+      }
     }
   ]
 }

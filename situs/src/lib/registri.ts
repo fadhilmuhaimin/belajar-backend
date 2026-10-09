@@ -34,6 +34,9 @@ export const Halaman = z
   })
   .strict();
 
+// Skala tahap dari naskah (CERITA "Skala yang akan dilalui cerita" dan "Eskalasi"), dipakai peta beranda (keputusan 208).
+const Skala = z.object({ pendek: z.string(), lingkup: z.string(), user: z.string(), pembuat: z.string(), prd: z.string() }).strict();
+
 const Bagian = z.object({ no: z.number().int().min(1), nama: z.string().min(2) }).strict();
 
 export const Registry = z
@@ -54,10 +57,11 @@ export const Registry = z
           bagian: z.array(Bagian).optional(),
           naskah: z.string().optional(),
           versi: z.literal("lama").optional(),
+          skala: Skala.optional(),
         })
         .strict(),
     ),
-    proyeksi: z.array(z.object({ no: z.number(), nama: z.string(), user: z.string(), catatan: z.string() }).strict()),
+    proyeksi: z.array(z.object({ no: z.number(), nama: z.string(), user: z.string(), catatan: z.string(), skala: Skala.optional() }).strict()),
     halaman: z.array(Halaman),
   })
   .strict()

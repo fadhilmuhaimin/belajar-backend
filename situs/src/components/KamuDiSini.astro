@@ -17,7 +17,7 @@ const pembuka = t ? d.halaman.find((x: { tahap: unknown; ada: boolean }) => x.ta
 const adaToc = (Astro.locals.starlightRoute.toc?.items?.length ?? 0) > 0;
 ---
 {h && (
-  <nav class="kamu" aria-label="Kamu di sini">
+  <nav class="kamu" aria-label="Kamu di sini" data-judul-halaman={label(h)}>
     <ol class="kamu__jalur">
       <li><span class="kamu__tag">Kamu di sini</span></li>
       {t
@@ -56,5 +56,11 @@ const adaToc = (Astro.locals.starlightRoute.toc?.items?.length ?? 0) > 0;
     segarkan();
   });
   addEventListener("resize", segarkan);
+  // Halaman terakhir yang dibuka, untuk kartu Lanjutkan di beranda (keputusan 208).
+  const nav = document.querySelector<HTMLElement>("nav.kamu[data-judul-halaman]");
+  if (nav) {
+    const catat = { u: location.pathname, j: nav.dataset.judulHalaman, n: document.querySelectorAll("details.blok").length };
+    try { localStorage.setItem("rtj-terakhir", JSON.stringify(catat)); } catch { /* mode privat */ }
+  }
   segarkan();
 </script>
