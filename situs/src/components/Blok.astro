@@ -1,16 +1,21 @@
 ---
 /**
  * Satu blok lipat halaman (keputusan 118): judul h2 di dalam summary (ikut daftar isi dan penyorotnya),
- * "Blok n dari N · m menit", status selesai, dan tombol Berikutnya besar di akhir. Blok terakhir menunjuk halaman
- * berikutnya di urutan baca. Status selesai disimpan per halaman di localStorage; tanpa JavaScript blok tetap
+ * "Blok n dari N · m menit", status selesai, dan tombol Berikutnya di akhir. Blok terakhir menunjuk halaman
+ * berikutnya di urutan baca. Status selesai (keputusan 203) hanya diberikan setelah blok terbuka dan akhirnya
+ * benar-benar digulir ke layar, atau tombol Berikutnya ditekan; membuka saja belum berarti dibaca. Status disimpan
+ * per halaman di localStorage; tanpa JavaScript blok tetap
  * bisa dibuka dan ditutup. Tidak ada animasi yang jalan sendiri; scroll halus hanya bila reduced motion tidak aktif.
  *   <Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu ...">...</Blok>
+ * Blok cerita boleh membawa ilustrasi kecil di awalnya (keputusan 207): <Blok nama="Gejala" buka ilustrasi="m1">.
+ * Saat pembaca membuka blok, isinya muncul dengan transisi 180 ms (tidak saat dimuat, tidak bila reduced motion).
  */
 import { daftarBlok, slugBlok, menitBlok } from "../lib/blok";
+import Ilustrasi from "./Ilustrasi.astro";
 import { muat, urutanBaca, label, url, urlDariId, dariUrl } from "../../tools/registri.mjs";
 
-interface Props { nama: string; buka?: boolean; menit?: number; aman?: string }
-const { nama, buka = false, aman } = Astro.props;
+interface Props { nama: string; buka?: boolean; menit?: number; aman?: string; ilustrasi?: string }
+const { nama, buka = false, aman, ilustrasi } = Astro.props;
 const route = Astro.locals.starlightRoute;
 const bloks = daftarBlok(route.entry.body ?? "");
 const i = bloks.findIndex((b) => b.nama === nama);
@@ -20,7 +25,6 @@ const sini = urlDariId(route.entry.id);
 const h = dariUrl(d, sini);
 const menit = menitBlok(h?.jenis, bloks[i]!);
 const next = bloks[i + 1];
-const menitNext = next ? menitBlok(h?.jenis, next) : undefined;
 let halBerikut: { nomor?: string; judul: string; path: string } | null = null;
 if (!next) {
   const urut = urutanBaca(d);
@@ -35,17 +39,19 @@ const id = slugBlok(nama);
     <span class="blok__meta">Blok {i + 1} dari {bloks.length}{menit ? ` · ${menit} menit` : ""}<span class="blok__status" data-status></span></span>
   </summary>
   <div class="blok__isi">
+    {ilustrasi && <Ilustrasi nama={ilustrasi} />}
     <slot />
     {aman && <p class="blok__aman">{aman}</p>}
+    <span class="blok__akhir" data-akhir-blok aria-hidden="true"></span>
     {next && (
-      <button type="button" class="blok__lanjut" data-ke={slugBlok(next.nama)}>
-        <span>Berikutnya</span>{next.nama}{menitNext ? ` · ${menitNext} menit` : ""} →
-      </button>
+      <p class="blok__lanjut-baris">
+        <button type="button" class="blok__lanjut" data-ke={slugBlok(next.nama)}>Berikutnya: {next.nama} <span aria-hidden="true">→</span></button>
+      </p>
     )}
     {!next && halBerikut && (
-      <a class="blok__lanjut" href={url(halBerikut)} data-akhir>
-        <span>Halaman berikutnya</span>{label(halBerikut)} →
-      </a>
+      <p class="blok__lanjut-baris">
+        <a class="blok__lanjut" href={url(halBerikut)} data-akhir>Berikutnya: {label(halBerikut)} <span aria-hidden="true">→</span></a>
+      </p>
     )}
   </div>
 </details>
@@ -84,6 +90,7 @@ const id = slugBlok(nama);
     if (!kini) return;
     selesaikan(kini);
     if (t.dataset.ke) {
+      digulir = false;
       const lanjut = blok().find((x) => x.dataset.blok === t.dataset.ke);
       kini.open = false;
       if (lanjut) {
@@ -95,6 +102,37 @@ const id = slugBlok(nama);
     }
     tandai();
   });
+  // Selesai karena digulir: akhir blok yang terbuka masuk layar saat pembaca menggulir sendiri (roda, sentuh,
+  // atau tombol). Gulir otomatis dari Berikutnya atau tautan # tidak dihitung, jadi blok yang baru dibuka belum selesai.
+  let digulir = false, antre = false;
+  function cekAkhir() {
+    antre = false;
+    if (!digulir) return;
+    const selesai = new Set(baca());
+    let berubah = false;
+    for (const el of blok()) {
+      if (!el.open || selesai.has(el.dataset.blok!)) continue;
+      const akhir = el.querySelector("[data-akhir-blok]");
+      if (akhir && akhir.getBoundingClientRect().top < innerHeight) { selesaikan(el); berubah = true; }
+    }
+    if (berubah) tandai();
+  }
+  const olehPembaca = () => { digulir = true; };
+  addEventListener("wheel", olehPembaca, { passive: true });
+  addEventListener("touchmove", olehPembaca, { passive: true });
+  addEventListener("keydown", (e) => { if (["ArrowDown", "PageDown", "End", " "].includes(e.key)) digulir = true; });
+  addEventListener("scroll", () => { if (digulir && !antre) { antre = true; requestAnimationFrame(cekAkhir); } }, { passive: true });
+  // Transisi buka (keputusan 207): hanya untuk blok yang dibuka pembaca, bukan yang terbuka saat dimuat.
+  let interaksi = false;
+  addEventListener("pointerdown", () => { interaksi = true; }, { capture: true });
+  addEventListener("keydown", () => { interaksi = true; }, { capture: true });
+  document.addEventListener("toggle", (e) => {
+    const el = e.target as HTMLElement;
+    if (!interaksi || !el.matches?.("details.blok") || !(el as HTMLDetailsElement).open) return;
+    el.classList.remove("blok--muncul");
+    void el.offsetWidth;
+    el.classList.add("blok--muncul");
+  }, true);
   window.addEventListener("hashchange", bukaDariHash);
   bukaDariHash();
   tandai();

@@ -1,0 +1,68 @@
+{
+  "id": "t1-peta-topup",
+  "judul": "Senin pagi: 100 saldo terisi dari satu CSV",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · topup.txt"
+  },
+  "jalur": [
+    {
+      "id": "admin",
+      "nama": "Skrip admin",
+      "jenis": "app"
+    },
+    {
+      "id": "api",
+      "nama": "Backend",
+      "jenis": "backend"
+    },
+    {
+      "id": "db",
+      "nama": "PostgreSQL",
+      "jenis": "db"
+    }
+  ],
+  "langkah": [
+    {
+      "jalur": "admin",
+      "judul": "Admin mengunggah CSV dari sistem HR",
+      "kode": [
+        "POST /topup?keterangan=Tunjangan makan minggu 1",
+        "email,nominal",
+        "karyawan401@lestari.example,250000",
+        "... 100 baris"
+      ]
+    },
+    {
+      "jalur": "api",
+      "judul": "Hanya admin; setiap baris diperiksa sebelum saldo disentuh",
+      "rinci": [
+        "Email harus terdaftar",
+        "Nominal harus angka rupiah tanpa titik",
+        "Satu baris salah: seluruh CSV ditolak dengan 422"
+      ]
+    },
+    {
+      "jalur": "db",
+      "judul": "Satu transaction untuk 100 akun",
+      "kode": [
+        "begin",
+        "UPDATE akun SET saldo ... (100 kali)",
+        "INSERT INTO topup ... (100 kali)",
+        "commit"
+      ],
+      "rinci": [
+        "Setiap catatan topup menyimpan admin, nominal, dan keterangan"
+      ]
+    },
+    {
+      "jalur": "admin",
+      "judul": "Jawaban: 100 akun, total Rp25.000.000",
+      "kode": [
+        "200 OK",
+        "{\"akun\":100,\"total\":25000000}"
+      ]
+    }
+  ],
+  "catatan": "Minggu 2, CSV dengan dua baris salah ditolak utuh: tidak ada satu saldo pun yang berubah."
+}

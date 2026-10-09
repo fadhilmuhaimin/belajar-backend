@@ -3,27 +3,27 @@ title: "1.1 PRD v1: Rekeningo untuk Gedung A"
 description: Dokumen produk pertama Rekeningo. Sinta menulisnya, Pak Hadi menyetujuinya, dan Raka membangunnya sendirian dalam 6 minggu.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import prdDiagram from "../../../../data/diagram/t1-prd-sebelum-sesudah.json";
 
 <p class="meta">Baca 4 menit · Jalur inti</p>
 
 Sinta, product manager di **Grup Lestari** (fiktif), menulis dokumen ini. Raka, mobile engineer yang belum pernah memegang backend, membangunnya sendirian.
 
-<dl class="prd-kepala" aria-label="Kepala dokumen PRD v1">
-  <div><dt>Perusahaan</dt><dd>Grup Lestari: ±1.200 karyawan, belasan warung tenant</dd></div>
-  <div><dt>Penulis</dt><dd>Sinta, unit Inisiatif Digital</dd></div>
-  <div><dt>Disetujui</dt><dd>Pak Hadi, Kepala Divisi Keuangan</dd></div>
-  <div><dt>Lingkup</dt><dd>Gedung A: 100 karyawan, 3 warung</dd></div>
-  <div><dt>Pembuat</dt><dd>Raka, Divisi TI: 3 tahun Flutter, belum pernah backend</dd></div>
-  <div><dt>Waktu</dt><dd>6 minggu, 1 engineer</dd></div>
-</dl>
+<div class="prd-kepala" role="group" aria-label="Kepala dokumen PRD v1">
+  <dl><div><dt>Penulis</dt><dd>Sinta, unit Inisiatif Digital</dd></div><div><dt>Disetujui</dt><dd>Pak Hadi, Kepala Divisi Keuangan</dd></div></dl>
+  <dl><div><dt>Lingkup</dt><dd>Gedung A: 100 dari ±1.200 karyawan, 3 dari belasan warung</dd></div><div><dt>Waktu</dt><dd>6 minggu, 1 engineer</dd></div></dl>
+</div>
 
-<Blok nama="Latar masalah" buka>
+<Blok nama="Latar masalah" buka ilustrasi="prd">
 
 Awal tahun, direksi memberi Sinta satu mandat kecil: hapus antrean kasir hari Senin dan rekonsiliasi kuitansi yang dikerjakan dengan tangan.
 
 Setiap Senin, 1.200 karyawan mengantre di kasir untuk tunjangan makan. Nilainya Rp250.000 per minggu, yaitu Rp50.000 untuk tiap hari kerja. Kasir butuh 3 jam untuk melayani semuanya.
 
 Warung tenant memberi kuitansi kertas. Tiap bulan, Keuangan butuh 4 hari kerja untuk mencocokkan kuitansi dengan tunjangan yang dibayar. Tahun lalu selisihnya Rp38 juta, dan tidak ada yang bisa menjelaskannya.
+
+<Rantai data={prdDiagram} />
 
 </Blok>
 

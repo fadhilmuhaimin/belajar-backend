@@ -3,6 +3,8 @@ title: "1.19 M3: Tanda kutip di pencarian"
 description: Minggu 2. Budi mencari warung dengan tanda kutip dan mendapat Error 500. Dimas mencoba ' OR 1=1 -- dan melihat saldo semua akun.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import sambungString from "../../../../data/diagram/t1-m3-sambung-string.json";
 import Snippet from "../../../components/Snippet.astro";
 import CariBug from "../../../widgets/cari-bug/CariBug.tsx";
 import caribug from "../../../../data/widget/t1-m3-caribug.json";
@@ -10,7 +12,7 @@ import SkripLama from "../../../components/SkripLama.astro";
 
 <p class="meta">Baca 6 menit · coba 3 menit · Prasyarat: [[B1.4]] · Jalur inti</p>
 
-<Blok nama="Gejala" buka>
+<Blok nama="Gejala" buka ilustrasi="m3">
 
 Minggu 2, Raka menambahkan kotak pencarian warung di app. Budi mengetik nama warung langganannya, "Ani", dan daftarnya muncul. Lancar.
 
@@ -36,6 +38,8 @@ Tidak. Membuang satu karakter adalah tambal sulam; penyerang punya banyak cara l
 <Blok nama="Yang sebenarnya">
 
 Ada dua kesalahan di satu fungsi. Pertama, isi pencarian disambung langsung ke teks SQL, jadi tanda kutip dari Budi dan `' OR 1=1 --` dari Dimas menjadi bagian perintah, bukan data. Kedua, query mengambil saldo semua akun, bukan hanya nama warung.
+
+<Rantai data={sambungString} />
 
 Rekaman lab dari database bersih, mode rentan. Tanda kutip membuat SQL tidak valid, dan app menerima `500`:
 

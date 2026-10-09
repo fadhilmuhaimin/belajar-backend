@@ -1,0 +1,29 @@
+---
+/**
+ * Diagram rantai (keputusan 212): baris-baris langkah berpanah dengan label baris, mis. "Sekarang" lawan
+ * "Rekeningo v1", atau tiga opsi berdampingan. Simpul diberi nada token (system = baru/aturan, good = hasil benar,
+ * warn = masalah, old = lama). Desktop: label di kiri, simpul mendatar; HP: label di atas, simpul menurun.
+ *   <Rantai data={json} />
+ */
+import { DataRantai } from "../lib/rantai";
+
+const d = DataRantai.parse(Astro.props.data);
+const CHIP: Record<string, string> = { rekaman: "is-system", ilustrasi: "is-warn", asumsi: "is-warn" };
+---
+<figure class="rantai" aria-label={d.judul}>
+  <figcaption class="rantai__judul"><strong>{d.judul}</strong> <span class:list={["bb-chip", CHIP[d.sumber.jenis]]}>{d.sumber.teks}</span></figcaption>
+  {d.baris.map((b) => (
+    <div class="rantai__baris">
+      <p class="rantai__label"><b>{b.label}</b>{b.sub && <span>{b.sub}</span>}</p>
+      <ol class="rantai__simpul">
+        {b.simpul.map((s) => (
+          <li class:list={[`is-${s.nada}`]}>
+            {s.kode ? <code translate="no">{s.teks}</code> : <b>{s.teks}</b>}
+            {s.sub && <span>{s.sub}</span>}
+          </li>
+        ))}
+      </ol>
+    </div>
+  ))}
+  {d.catatan && <p class="rantai__catatan">{d.catatan}</p>}
+</figure>

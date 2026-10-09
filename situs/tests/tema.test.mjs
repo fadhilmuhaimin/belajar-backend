@@ -50,5 +50,6 @@ test("komponen, plugin, dan konten tanpa heksadesimal", () => {
   assert.deepEqual(salah, []);
 });
 test("nilai wajib spesifikasi ada di token gelap", () => {
-  for (const v of ["#0B0B0C", "#E6E6E6", "#FFFFFF", "#A3A3A8", "#7AB8FF"]) assert.ok(gelap.includes(v), `${v} hilang`);
+  // Redesain (keputusan 201): teks isi #EDEDED, sekunder #B4B4B9 (≥ 8:1 di semua latar).
+  for (const v of ["#0B0B0C", "#EDEDED", "#FFFFFF", "#B4B4B9", "#7AB8FF"]) assert.ok(gelap.includes(v), `${v} hilang`);
 });

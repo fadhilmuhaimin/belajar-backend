@@ -1,4 +1,6 @@
 // Sidebar Starlight dari cerita.json: satu grup per tahap, ★ untuk jalur inti (keputusan 117).
+// Redesain (keputusan 202): semua grup terlipat; Starlight membuka grup yang memuat halaman aktif, jadi
+// yang terlihat hanya jalur ke halaman ini.
 // Tahap 1 dikelompokkan per bagian naskah (PRD, fitur ke teknis, ...); tahap lain per kelompok lama dan ditandai
 // "versi lama". Halaman yang belum ditulis tetap tampil (urutan dan nomor tidak berubah) dengan kelas nav-menyusul
 // (keputusan 104). Peran yang ditonjolkan dibawa sebagai data-peran untuk pemilih peran.
@@ -25,11 +27,11 @@ function grupTahap(d, t, by) {
     const kel = t.bagian ? t.bagian.find((b) => b.no === h.bagian)?.nama : h.kelompok;
     if (/^T\d$/.test(h.id) || !kel) { items.push(item(h, by)); continue; }
     let g = items.find((x) => x.items && x.label === kel);
-    if (!g) { g = { label: kel, collapsed: false, items: [] }; items.push(g); }
+    if (!g) { g = { label: kel, collapsed: true, items: [] }; items.push(g); }
     g.items.push(item(h, by));
   }
   const versi = t.versi === "lama" ? " · versi lama" : "";
-  return { label: `Tahap ${t.no} · ${t.nama}${versi}`, collapsed: t.no !== 1, items };
+  return { label: `Tahap ${t.no} · ${t.nama}${versi}`, collapsed: true, items };
 }
 
 export function sidebar() {
@@ -37,7 +39,7 @@ export function sidebar() {
   const by = byId(d);
   const out = [];
   // Beranda sudah ditautkan judul situs; tidak diulang di sidebar.
-  out.push({ label: "Pembuka", collapsed: false, items: d.halaman.filter((h) => h.tahap === "pembuka" && h.id !== "Beranda").map((h) => item(h, by)) });
+  out.push({ label: "Pembuka", collapsed: true, items: d.halaman.filter((h) => h.tahap === "pembuka" && h.id !== "Beranda").map((h) => item(h, by)) });
   for (const t of d.tahap) out.push(grupTahap(d, t, by));
   const samping = d.halaman.filter((h) => h.tahap === "sampingan");
   if (samping.length) out.push({ label: "Studi sampingan", collapsed: true, items: samping.map((h) => item(h, by)) });

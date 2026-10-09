@@ -1,0 +1,90 @@
+---
+/**
+ * Ilustrasi kecil di awal blok cerita (keputusan 207): satu adegan yang dilihat tokoh, digambar dengan bentuk
+ * datar dan token warna (gelap dan terang benar tanpa dua set gambar). Angka di gambar diambil dari teks adegan
+ * di bawahnya, jadi gambar tidak membawa fakta baru. Label teks di gambar pendek; maknanya ada di aria-label.
+ *   <Blok nama="Gejala" buka ilustrasi="m1">...</Blok>
+ */
+interface Props { nama: string }
+const { nama } = Astro.props;
+const LABEL: Record<string, string> = {
+  prd: "Senin pagi: karyawan mengantre di kasir untuk tunjangan makan.",
+  m1: "Layar HP Budi: membayar -Rp5.000 membuat saldo naik dari Rp250.000 ke Rp255.000.",
+  m2: "App mengirim field amount, server membaca field jumlah.",
+  m3: "Kotak pencarian berisi tanda kutip, layar menampilkan Error 500.",
+  m4: "Layar HP Budi: pembayaran Rp70.000 gagal, tapi saldo turun dari Rp250.000 ke Rp180.000. Buku Warung Ani tidak mencatatnya.",
+};
+if (!LABEL[nama]) throw new Error(`Ilustrasi "${nama}" tidak dikenal`);
+---
+<figure class="blok__ilustrasi" role="img" aria-label={LABEL[nama]}>
+  {nama === "prd" && (
+    <svg viewBox="0 0 200 110" width="200" height="110" aria-hidden="true">
+      <rect class="il-isi il-garis" x="140" y="34" width="52" height="56" rx="4" />
+      <rect class="il-aksen-isi" x="146" y="42" width="40" height="14" rx="2" />
+      <text class="il-teks-aksen" x="166" y="52.5" text-anchor="middle">Kasir</text>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <g transform={`translate(${118 - i * 24} 0)`}>
+          <circle class="il-orang" cx="0" cy="52" r="7" />
+          <rect class="il-orang" x="-8" y="62" width="16" height="26" rx="6" />
+        </g>
+      ))}
+      <line class="il-garis" x1="4" y1="90" x2="196" y2="90" />
+      <text class="il-teks-2" x="4" y="106">Senin, 3 jam</text>
+    </svg>
+  )}
+  {nama === "m1" && (
+    <svg viewBox="0 0 200 110" width="200" height="110" aria-hidden="true">
+      <rect class="il-isi il-garis" x="8" y="4" width="76" height="102" rx="10" />
+      <text class="il-teks-2" x="46" y="24" text-anchor="middle">Bayar</text>
+      <rect class="il-warn" x="16" y="34" width="60" height="20" rx="4" />
+      <text class="il-teks-warn" x="46" y="48" text-anchor="middle">-5000</text>
+      <rect class="il-aksen-isi" x="16" y="66" width="60" height="18" rx="4" />
+      <text class="il-teks-aksen" x="46" y="79" text-anchor="middle">Bayar</text>
+      <text class="il-teks-2" x="104" y="34">Saldo Budi</text>
+      <text class="il-teks" x="104" y="56">Rp250.000</text>
+      <text class="il-teks-warn" x="104" y="80">Rp255.000 ↑</text>
+    </svg>
+  )}
+  {nama === "m2" && (
+    <svg viewBox="0 0 200 110" width="200" height="110" aria-hidden="true">
+      <rect class="il-isi il-garis" x="4" y="14" width="64" height="86" rx="10" />
+      <text class="il-teks-2" x="36" y="34" text-anchor="middle">App</text>
+      <rect class="il-aksen-isi" x="12" y="48" width="48" height="20" rx="4" />
+      <text class="il-teks-aksen il-mono" x="36" y="62" text-anchor="middle">amount</text>
+      <line class="il-garis" x1="72" y1="58" x2="124" y2="58" />
+      <text class="il-teks-warn" x="98" y="50" text-anchor="middle">≠</text>
+      <rect class="il-isi il-garis" x="128" y="14" width="68" height="86" rx="6" />
+      <text class="il-teks-2" x="162" y="34" text-anchor="middle">Server</text>
+      <rect class="il-warn" x="136" y="48" width="52" height="20" rx="4" />
+      <text class="il-teks-warn il-mono" x="162" y="62" text-anchor="middle">jumlah</text>
+    </svg>
+  )}
+  {nama === "m3" && (
+    <svg viewBox="0 0 200 110" width="200" height="110" aria-hidden="true">
+      <rect class="il-isi il-garis" x="8" y="4" width="92" height="102" rx="10" />
+      <rect class="il-garis il-latar" x="16" y="16" width="76" height="20" rx="10" />
+      <text class="il-teks il-mono" x="26" y="30">'nasi</text>
+      <rect class="il-warn" x="16" y="48" width="76" height="40" rx="6" />
+      <text class="il-teks-warn" x="54" y="73" text-anchor="middle">Error 500</text>
+      <text class="il-teks-2" x="114" y="40">Budi mencari</text>
+      <text class="il-teks-2" x="114" y="58">warung</text>
+      <text class="il-teks-2" x="114" y="76">nasi goreng</text>
+    </svg>
+  )}
+  {nama === "m4" && (
+    <svg viewBox="0 0 200 110" width="200" height="110" aria-hidden="true">
+      <rect class="il-isi il-garis" x="4" y="4" width="92" height="102" rx="10" />
+      <rect class="il-warn" x="12" y="14" width="76" height="22" rx="4" />
+      <text class="il-teks-warn" x="50" y="29.5" text-anchor="middle">Gagal</text>
+      <text class="il-teks-2" x="50" y="56" text-anchor="middle">Saldo</text>
+      <text class="il-teks" x="50" y="74" text-anchor="middle">Rp180.000</text>
+      <text class="il-teks-2" x="50" y="94" text-anchor="middle">bukan 250.000</text>
+      <rect class="il-isi il-garis" x="112" y="14" width="84" height="92" rx="4" />
+      <text class="il-teks-2" x="154" y="32" text-anchor="middle">Buku Ani</text>
+      <line class="il-garis" x1="120" y1="44" x2="188" y2="44" />
+      <line class="il-garis" x1="120" y1="60" x2="188" y2="60" />
+      <line class="il-garis" x1="120" y1="76" x2="188" y2="76" />
+      <text class="il-teks-warn" x="154" y="96" text-anchor="middle">Rp70.000?</text>
+    </svg>
+  )}
+</figure>

@@ -1,0 +1,84 @@
+{
+  "id": "t1-m3-sambung-string",
+  "judul": "Isi kotak pencarian: data atau perintah?",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · m3.txt"
+  },
+  "baris": [
+    {
+      "label": "Budi",
+      "sub": "mode rentan",
+      "simpul": [
+        {
+          "teks": "' nasi",
+          "kode": true
+        },
+        {
+          "teks": "Disambung ke teks SQL",
+          "sub": "tanda kutip menutup string",
+          "nada": "warn"
+        },
+        {
+          "teks": "syntax error at or near \"nasi\"",
+          "sub": "hanya di log server",
+          "nada": "warn"
+        },
+        {
+          "teks": "500 di layar Budi",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Dimas",
+      "sub": "mode rentan",
+      "simpul": [
+        {
+          "teks": "' OR 1=1 --",
+          "kode": true
+        },
+        {
+          "teks": "Disambung ke teks SQL",
+          "sub": "syarat selalu benar",
+          "nada": "warn"
+        },
+        {
+          "teks": "Semua akun ikut",
+          "sub": "admin, warung, 100 karyawan",
+          "nada": "warn"
+        },
+        {
+          "teks": "200 OK",
+          "sub": "lengkap dengan saldo",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Versi benar",
+      "simpul": [
+        {
+          "teks": "' OR 1=1 --",
+          "kode": true
+        },
+        {
+          "teks": "Dikirim sebagai parameter",
+          "sub": "selalu data, tidak pernah perintah",
+          "nada": "good"
+        },
+        {
+          "teks": "Hanya akun warung",
+          "sub": "hanya kolom yang dibutuhkan layar",
+          "nada": "good"
+        },
+        {
+          "teks": "200 OK",
+          "sub": "tidak ada warung bernama itu",
+          "nada": "good"
+        }
+      ]
+    }
+  ],
+  "catatan": "Dua kesalahan sekaligus: input jadi bagian perintah SQL, dan query mengambil lebih banyak kolom serta akun daripada yang dibutuhkan layar."
+}

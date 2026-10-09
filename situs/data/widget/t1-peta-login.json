@@ -1,0 +1,74 @@
+{
+  "id": "t1-peta-login",
+  "judul": "Budi masuk, lalu setiap request membawa sesinya",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · login.txt"
+  },
+  "jalur": [
+    {
+      "id": "budi",
+      "nama": "App Budi",
+      "jenis": "app"
+    },
+    {
+      "id": "api",
+      "nama": "Backend",
+      "jenis": "backend"
+    },
+    {
+      "id": "db",
+      "nama": "PostgreSQL",
+      "jenis": "db"
+    }
+  ],
+  "langkah": [
+    {
+      "jalur": "budi",
+      "judul": "Budi mengisi email perusahaan dan password sementara",
+      "kode": [
+        "POST /login",
+        "{\"email\": \"budi@lestari.example\", ...}"
+      ]
+    },
+    {
+      "jalur": "api",
+      "judul": "Service mencocokkan password dengan hash bcrypt",
+      "rinci": [
+        "Password salah dan email tak terdaftar dijawab sama: 401"
+      ]
+    },
+    {
+      "jalur": "db",
+      "judul": "Sesi baru disimpan, berlaku 8 jam",
+      "rinci": [
+        "Tabel sesi hanya menyimpan SHA-256 dari token, bukan tokennya"
+      ]
+    },
+    {
+      "jalur": "budi",
+      "judul": "App menyimpan token di penyimpanan aman HP",
+      "kode": [
+        "200 OK",
+        "{\"kedaluwarsa_detik\":28800,\"token\":\"…\"}"
+      ]
+    },
+    {
+      "jalur": "budi",
+      "judul": "Request berikutnya membawa token",
+      "kode": [
+        "GET /akun/419",
+        "Authorization: Bearer <token>"
+      ]
+    },
+    {
+      "jalur": "api",
+      "judul": "Backend mencari sesi dari hash token",
+      "rinci": [
+        "Ada: 200 dan data akun",
+        "Tidak ada atau sudah logout: 401"
+      ]
+    }
+  ],
+  "catatan": "Logout menghapus sesi di server, jadi token yang sama langsung ditolak walau HP masih menyimpannya."
+}

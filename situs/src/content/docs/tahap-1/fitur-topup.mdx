@@ -3,6 +3,8 @@ title: "1.8 Fitur: top-up oleh admin"
 description: Setiap Senin, admin mengisi saldo 100 karyawan dari satu file CSV. Satu baris salah menolak seluruh file, dan setiap perubahan saldo punya catatan siapa, kapan, kenapa.
 ---
 import Blok from "../../../components/Blok.astro";
+import PetaFitur from "../../../components/PetaFitur.astro";
+import petaTopup from "../../../../data/widget/t1-peta-topup.json";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
 import Snippet from "../../../components/Snippet.astro";
@@ -10,6 +12,8 @@ import Snippet from "../../../components/Snippet.astro";
 <p class="meta">Baca 4 menit · coba 2 menit · Prasyarat: [[t1-fitur-login]]</p>
 
 Senin pagi, admin tunjangan dari Keuangan mengisi Rp250.000 ke 100 akun karyawan. Di v1 belum ada layar admin. Admin mengunggah CSV dari sistem HR lewat skrip, dan backend yang memutuskan apakah file itu diterima.
+
+Dari sisi admin, top-up adalah satu file dan satu perintah. Di backend, file itu diperiksa baris demi baris dulu, baru 100 saldo diubah bersama-sama. Peta di bawah mengikuti satu unggahan Senin pagi dari rekaman lab.
 
 <Blok nama="Yang diminta PRD" buka>
 
@@ -19,9 +23,7 @@ Senin pagi, admin tunjangan dari Keuangan mengisi Rp250.000 ke 100 akun karyawan
 
 PRD juga menulis kebutuhan admin: "isi saldo 100 orang sekali klik tiap Senin". Aturan Pak Hadi berlaku di sini juga: tidak ada angka yang berubah tanpa catatan siapa, kapan, kenapa.
 
-| Di app | Di backend | Di database |
-|---|---|---|
-| Tidak ada di v1; admin memakai skrip dan CSV | `POST /topup`: hanya admin, periksa setiap baris, isi semua akun dalam satu operasi | Kolom `akun.saldo`, tabel catatan `topup` |
+<PetaFitur data={petaTopup} />
 
 </Blok>
 

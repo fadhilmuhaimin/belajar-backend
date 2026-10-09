@@ -3,13 +3,15 @@ title: "1.22 M4: Rp70.000 yang hilang"
 description: Minggu 3, Jumat siang. Budi membayar Rp70.000, layarnya menulis gagal, saldonya tetap berkurang, dan Warung Ani tidak menerima apa-apa. Pak Hadi bertanya uang itu ke mana.
 ---
 import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import tigaPerintah from "../../../../data/diagram/t1-m4-tiga-perintah.json";
 import Snippet from "../../../components/Snippet.astro";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
 
 <p class="meta">Baca 6 menit · coba 3 menit · Prasyarat: [[t1-pertukaran-saldo]] · Jalur inti</p>
 
-<Blok nama="Gejala" buka>
+<Blok nama="Gejala" buka ilustrasi="m4">
 
 Jumat minggu 3, pukul 12.15. Warung Ani ramai. Sejak pagi sudah 29 pembayaran masuk lewat Rekeningo.
 
@@ -43,6 +45,8 @@ Tidak. Batas itu hanya satu dari banyak alasan perintah kedua bisa gagal. Koneks
 <Blok nama="Yang sebenarnya">
 
 Bayar ke warung terdiri dari tiga perubahan: saldo Budi berkurang, saldo Ani bertambah, satu baris transaksi dicatat. Di server minggu 3, ketiganya dijalankan sebagai tiga perintah terpisah.
+
+<Rantai data={tigaPerintah} />
 
 <Snippet file="labs/api-t1/internal/repo/transaksi.go" region="m4" lang="go" title="labs/api-t1/internal/repo/transaksi.go" />
 

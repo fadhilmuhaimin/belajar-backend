@@ -24,6 +24,7 @@ def ratio(a, b):
 
 
 TXT, BIG = 4.5, 3.0
+SEKUNDER = 8.0  # redesain (keputusan 201): teks sekunder minimal 8:1 di latar halaman, kotak, dan header tabel
 rows = [
     ("Teks utama di halaman", TEXT, BG, TXT),
     ("Teks utama di blok kode / admonition", TEXT, BG_BLOCK, TXT),
@@ -63,8 +64,9 @@ for nama, m in MODE.items():
         (f"[{nama}] teks isi di kotak/kode", m["teks"], bg2, TXT),
         (f"[{nama}] teks isi di inline code / header tabel", m["teks"], bg3, TXT),
         (f"[{nama}] judul di halaman", m["judul"], bg, TXT),
-        (f"[{nama}] teks sekunder di halaman", m["teks_2"], bg, TXT),
-        (f"[{nama}] teks sekunder di kotak", m["teks_2"], bg2, TXT),
+        (f"[{nama}] teks sekunder di halaman", m["teks_2"], bg, SEKUNDER),
+        (f"[{nama}] teks sekunder di kotak", m["teks_2"], bg2, SEKUNDER),
+        (f"[{nama}] teks sekunder di inline code / header tabel", m["teks_2"], bg3, SEKUNDER),
         (f"[{nama}] link (aksen) di halaman", m["aksen"], bg, TXT),
         (f"[{nama}] link (aksen) di kotak", m["aksen"], bg2, TXT),
         (f"[{nama}] teks di atas blok aksen (tombol, aktor)", m["ink_di_aksen"], m["aksen"], TXT),

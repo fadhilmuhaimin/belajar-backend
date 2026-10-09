@@ -60,6 +60,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Perlu dicek pemilik
 
+- Redesain (PR #120): usulan perubahan PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` (beranda bukan lagi satu layar penuh; warna, ukuran, navigasi) ada di `plan/AUDIT-TAMPILAN.md` bagian 6. Belum diubah karena butuh persetujuan pemilik.
+
 - Cloudflare Pages (keputusan 115), belum ada; job deploy dilewati dan pekerjaan jalan terus. Yang dibutuhkan:
   1. Di dashboard Cloudflare: My Profile > API Tokens > Create Custom Token, izin **Account > Cloudflare Pages > Edit**, untuk akun yang memiliki project Pages.
   2. Account ID: dashboard Cloudflare, Workers & Pages, kolom kanan "Account ID".
@@ -69,11 +71,19 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 2026-10-09 · 1.25 selesai (lab #126 merged; halaman di branch `tahap-1/migration`). Berikutnya **1.26 "M5: Angka di URL"** (`t1-m5`, masalah, ★, widget alur, lab api-t1; naskah: Dimas mengganti 417 jadi 418 di URL, melihat saldo Ani, menyimpan 100 saldo ke spreadsheet; token tersimpan di tempat yang salah di app; mode rentan M5 yang direkam). Lab `api-t1` sudah punya cek pemilik di `service.LihatAkun` (404 untuk akun orang lain); M5 butuh mode rentan `-rentan m5` tanpa cek pemilik. Worktree `/Users/fadhilmuhaimin/Project/Web/rekeningo-konten`, gerbang `PORT_PREVIEW=4323 bash tools/cek_situs.sh --layar`. Batas file selama redesain (#120, draft) belum merge: konten, labs, registry, data widget, KEPUTUSAN 165–199, MEMORI/STATUS; jangan CSS, komponen layout, CLAUDE.md, PROPOSAL.md; MDX tanpa class/style tambahan. Ilustrasi M3-M6 belum (setelah #120: `<Blok ilustrasi="mN">`). 1.6 masih Snippet `api-t1-lama` (PR kecil terpisah).
 Aturan PR (pemilik, 2026-10-09): merge sendiri setiap PR begitu CI hijau, sebelum memulai halaman berikutnya; paling banyak satu PR terbuka. #120 (redesain) tidak boleh di-merge sesi ini.
+2026-10-09 (sesi 3) · Pemilik: visual + pembuka rinci di SEMUA halaman 1.1–1.23, langsung di PR #120 (keputusan 212+). Rencana: (1) komponen `Rantai.astro` (baris rantai simpul bertoken, data JSON + Zod) + diagram sebelum/sesudah di 1.1; (2) peta fitur 1.7, 1.8, 1.10 dari rekaman lab + pembuka; (3) 1.4 ADR: diagram "di mana aturan uang tinggal" di Kebutuhan; (4) masalah: ilustrasi M4 di 1.22, diagram "yang sebenarnya" 1.14/1.17/1.19/1.22; (5) konsep 1.3,1.5,1.6,1.11,1.12,1.13,1.15,1.16,1.18,1.20,1.21,1.23: Inti = kalimat → visual → 2 paragraf rinci, plus satu diagram di Paham; (6) `layar.mjs`: setiap halaman berblok wajib visual mulai di layar pertama; tangkapan, KEPUTUSAN, STATUS. Satu commit per kelompok, push tiap dua. Sudah: 211 peta fitur di 1.9 (068ec0b).
+
+2026-10-09 (sesi 2) · Redesain langkah 1–7 selesai di branch `redesain/tampilan` (sudah digabung dengan `main` sampai 1.23), PR #120 draft (JANGAN merge; pemilik memutuskan). Keputusan 201, 203–208 tercatat; 209–219 masih bebas untuk redesain. Menunggu pemilik: merge PR #120 dan usulan perubahan PROPOSAL + CLAUDE.md di `plan/AUDIT-TAMPILAN.md` bagian 6. Untuk sesi konten setelah #120 di-merge: halaman masalah memakai `<Blok ... ilustrasi="mN">` (adegan baru ditambah di `situs/src/components/Ilustrasi.astro`; M4–M6 belum ada), dan 1.42 memakai widget `tebak` (`situs/src/widgets/tebak/`).
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran
 
+- Token di `:root[data-theme="light"]` (mis. `--sl-content-width`) mengalahkan override splash Starlight; beranda harus menyetel lebarnya sendiri di `.content-panel:has(.beranda)`.
+- Build `main` di worktree: symlink `node_modules` membuat Vite gagal (path ganda); pakai `cp -cR` (clone APFS) dan salin `public/fonts` (di-.gitignore).
+- Audit bahasa menolak kata "pemakai" (juga di kunci JSON registry); pakai "user".
+- `tools/cek_situs.sh --layar` menyalakan preview di 127.0.0.1:4321; bila port itu dipakai dev server (yang mendengar di `localhost`), langkah layar gagal ECONNREFUSED. Jalankan `node tools/layar.mjs --url <preview lain>` dan `tangkap.mjs --url` manual; jangan mematikan dev server pemilik.
+- Starlight 0.42 menyetel ukuran artikel dari `--sl-text-base`, bukan `--sl-text-body`; aturan `details {font-size:0.92em}` mengenai `details.blok` (keputusan 200).
 - Merge berhenti sejak #115 (2026-10-09): `gh pr merge` ditolak pengaman mode otomatis satu kali, lalu sesi terus menumpuk PR (#116–#122) dan melapor "menunggu merge pemilik"; pemilik mengira sudah merge. Sekarang pemilik mengizinkan merge sendiri. Kalau merge ditolak lagi: berhenti, laporkan di baris pertama laporan, dan jangan memulai halaman berikutnya di atas PR yang belum di-merge.
 - Setelah gerbang lolos, perubahan teks apa pun (termasuk perbaikan audit di Cek diri) wajib diikuti `python3 tools/sinkron_cerita.py` dan gerbang ulang; CI #119 gagal karena `kartu.json` tertinggal.
 - gosec v2.29.0 G201/G202 hanya memeriksa query di assignment dan expression statement; query yang langsung di `return` tidak diperiksa (rekaman injection.txt E).

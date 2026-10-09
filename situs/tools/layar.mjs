@@ -50,15 +50,19 @@ for (const p of halaman()) {
     const page = await ctx.newPage();
     await page.goto(BASE + "/" + p, { waitUntil: "networkidle" });
     const r = await page.evaluate(UKUR);
-    // Beranda = satu layar (PROPOSAL): seluruh isi muat tanpa scroll vertikal maupun horizontal (keputusan 121).
-    const satu = p === "" ? await page.evaluate(() => [Math.round(document.querySelector(".beranda")?.getBoundingClientRect().bottom ?? 1e9),
-      innerHeight, document.documentElement.scrollWidth > document.documentElement.clientWidth]) : null;
+    // Beranda (keputusan 208): layar pertama = elemen [data-layar-pertama]. "semua" wajib utuh di 4 ukuran,
+    // "desktop" (teka-teki) wajib utuh di lebar ≥ 1000 px; sisanya (peta, peran, masalah) boleh di bawah lipatan.
+    const satu = p === "" ? await page.evaluate(() => {
+      const els = [...document.querySelectorAll("[data-layar-pertama]")].filter((e) => e.dataset.layarPertama === "semua" || innerWidth >= 1000);
+      const bawah = els.length ? Math.max(...els.map((e) => Math.round(e.getBoundingClientRect().bottom))) : 1e9;
+      return [bawah, innerHeight, document.documentElement.scrollWidth > document.documentElement.clientWidth];
+    }) : null;
     await ctx.close();
     if (satu) {
       const [bawah, layar, x] = satu, sisa = layar - bawah;
       if (sisa < 0 || x) { gagal++; baris.push(`  GAGAL ${v.name} beranda terpotong ${-sisa}px${x ? " + scroll horizontal" : ""}`); }
       else if (sisa < MIN) { tipis++; baris.push(`  tipis ${v.name} beranda sisa ${sisa}px`); }
-      else baris.push(`  ok    ${v.name} beranda satu layar, sisa ${sisa}px`);
+      else baris.push(`  ok    ${v.name} beranda layar pertama utuh, sisa ${sisa}px`);
       continue;
     }
     if (r.tanpaInti) { baris.push(`  info  ${v.name} tanpa Inti`); continue; }

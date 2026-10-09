@@ -1,0 +1,61 @@
+{
+  "id": "t1-m4-tiga-perintah",
+  "judul": "Rp70.000: tiga perubahan, dengan dan tanpa transaction",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · m4.txt"
+  },
+  "baris": [
+    {
+      "label": "Minggu 3",
+      "sub": "tiga perintah terpisah",
+      "simpul": [
+        {
+          "teks": "Saldo Budi −Rp70.000",
+          "sub": "langsung tersimpan",
+          "nada": "warn"
+        },
+        {
+          "teks": "Saldo Ani +Rp70.000",
+          "sub": "ditolak: batas Rp1.500.000",
+          "nada": "warn"
+        },
+        {
+          "teks": "Catatan transaksi",
+          "sub": "tidak pernah dikirim",
+          "nada": "warn"
+        },
+        {
+          "teks": "Total saldo turun Rp70.000",
+          "sub": "tanpa catatan apa pun",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Dengan transaction",
+      "sub": "versi benar, batas sama",
+      "simpul": [
+        {
+          "teks": "begin",
+          "kode": true
+        },
+        {
+          "teks": "Saldo Budi −Rp70.000",
+          "sub": "belum permanen"
+        },
+        {
+          "teks": "Saldo Ani +Rp70.000",
+          "sub": "ditolak: batas Rp1.500.000",
+          "nada": "warn"
+        },
+        {
+          "teks": "rollback",
+          "sub": "saldo Budi kembali, total utuh",
+          "nada": "good"
+        }
+      ]
+    }
+  ],
+  "catatan": "Pembayarannya tetap gagal di kedua versi. Bedanya: dengan transaction, kegagalan tidak meninggalkan setengah perubahan."
+}

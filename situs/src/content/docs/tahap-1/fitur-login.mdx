@@ -3,6 +3,8 @@ title: "1.7 Fitur: login karyawan"
 description: Karyawan masuk dengan email perusahaan dan password sementara. Backend membuat sesi acak yang berlaku 8 jam dan bisa dicabut saat logout.
 ---
 import Blok from "../../../components/Blok.astro";
+import PetaFitur from "../../../components/PetaFitur.astro";
+import petaLogin from "../../../../data/widget/t1-peta-login.json";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
 import Snippet from "../../../components/Snippet.astro";
@@ -10,6 +12,8 @@ import Snippet from "../../../components/Snippet.astro";
 <p class="meta">Baca 4 menit · coba 2 menit · Prasyarat: [[t1-struktur-folder]] · Jalur inti</p>
 
 Senin pagi, sebelum tunjangan diisi, setiap penguji harus bisa masuk ke Rekeningo. Ini fitur pertama yang Raka bangun, karena semua fitur lain bergantung pada pertanyaan "siapa yang mengirim request ini?".
+
+Login terlihat seperti satu layar. Di belakangnya ada dua pekerjaan: membuat sesi saat Budi masuk, lalu mengenali sesi itu di setiap request berikutnya. Peta di bawah mengikuti keduanya dari rekaman lab.
 
 <Blok nama="Yang diminta PRD" buka>
 
@@ -19,11 +23,9 @@ PRD v1 menulisnya dalam satu baris:
 |---|---|---|
 | P0 | Login karyawan | Memakai email perusahaan dan password sementara dari admin |
 
-Raka menurunkannya jadi pekerjaan di tiga tempat:
+Raka menurunkannya jadi pekerjaan di tiga tempat: app, backend, dan database.
 
-| Di app | Di backend | Di database |
-|---|---|---|
-| Layar login; simpan token di penyimpanan aman HP | `POST /login`, `POST /logout`; periksa sesi di setiap request | Tabel `akun` dengan hash password; tabel `sesi` |
+<PetaFitur data={petaLogin} />
 
 Di lab, ketiga warung juga diberi email agar bisa masuk dengan cara yang sama. Ini asumsi lab, karena PRD hanya menyebut karyawan.
 

@@ -6,10 +6,16 @@ import Blok from "../../../components/Blok.astro";
 import WidgetLama from "../../../components/WidgetLama.astro";
 import SkripLama from "../../../components/SkripLama.astro";
 import Snippet from "../../../components/Snippet.astro";
+import PetaFitur from "../../../components/PetaFitur.astro";
+import petaBayar from "../../../../data/widget/t1-peta-bayar.json";
 
 <p class="meta">Baca 5 menit · coba 2 menit · Prasyarat: [[t1-fitur-topup]] · Jalur inti</p>
 
 Ini fitur yang menentukan uji coba berhasil atau tidak. PRD menetapkan targetnya: Budi bisa membayar makan dalam 5 detik, dan Ani melihat bayarannya masuk.
+
+Dari layar Budi, membayar terlihat seperti satu tombol. Di belakangnya ada enam langkah di tiga tempat: app Budi, backend, dan database, lalu hasilnya muncul di app Warung Ani. Peta di bawah mengikuti satu pembayaran Rp25.000 dari rekaman lab.
+
+Bagian terpenting ada di langkah 3 dan 4. Backend memeriksa aturan uang sebelum menyentuh saldo. Setelah itu, dua saldo berubah dan satu catatan ditulis bersama-sama.
 
 <Blok nama="Yang diminta PRD" buka>
 
@@ -17,9 +23,7 @@ Ini fitur yang menentukan uji coba berhasil atau tidak. PRD menetapkan targetnya
 |---|---|---|
 | P0 | Bayar ke warung | Karyawan memilih warung, memasukkan nominal, lalu konfirmasi; warung melihat pembayaran masuk |
 
-| Di app | Di backend | Di database |
-|---|---|---|
-| Pilih warung, nominal, konfirmasi, tampilkan hasil | `POST /transfers`: periksa aturan, kurangi saldo, tambah ke warung, catat | Tabel `transaksi`; constraint saldo ≥ 0 |
+<PetaFitur data={petaBayar} />
 
 Di backend, bayar ke warung adalah transfer dari akun karyawan ke akun warung. Transfer antar karyawan juga diminta Budi, tapi PRD menundanya ke v2, jadi backend v1 menolaknya.
 

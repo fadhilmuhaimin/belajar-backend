@@ -1,0 +1,84 @@
+{
+  "id": "t1-m1-dua-lapis",
+  "judul": "Bayar -Rp5.000 di tiga versi server",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · m1.txt"
+  },
+  "baris": [
+    {
+      "label": "Minggu 1",
+      "sub": "tanpa pemeriksaan, tanpa constraint",
+      "simpul": [
+        {
+          "teks": "{\"jumlah\": -5000}",
+          "kode": true
+        },
+        {
+          "teks": "Service tidak memeriksa jumlah",
+          "nada": "warn"
+        },
+        {
+          "teks": "Database menerima",
+          "sub": "skema tanpa constraint uang",
+          "nada": "warn"
+        },
+        {
+          "teks": "201 Created",
+          "sub": "saldo Budi naik, Ani -Rp5.000",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Constraint saja",
+      "sub": "service masih tanpa pemeriksaan",
+      "simpul": [
+        {
+          "teks": "{\"jumlah\": -5000}",
+          "kode": true
+        },
+        {
+          "teks": "Service tidak memeriksa jumlah",
+          "nada": "warn"
+        },
+        {
+          "teks": "Database menolak",
+          "sub": "check saldo_tidak_negatif",
+          "nada": "good"
+        },
+        {
+          "teks": "500",
+          "sub": "uang aman, Budi tidak tahu salahnya",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Versi benar",
+      "sub": "dua lapis",
+      "simpul": [
+        {
+          "teks": "{\"jumlah\": -5000}",
+          "kode": true
+        },
+        {
+          "teks": "Service memeriksa jumlah",
+          "sub": "sebelum uang disentuh",
+          "nada": "good"
+        },
+        {
+          "teks": "Database tidak disentuh",
+          "sub": "constraint tetap jadi pagar terakhir",
+          "nada": "good"
+        },
+        {
+          "teks": "422",
+          "sub": "menyebut field jumlah",
+          "nada": "good"
+        }
+      ]
+    }
+  ],
+  "catatan": "App boleh memeriksa bentuk supaya cepat. Aturan uang diputuskan backend, dan database menjaga pagar terakhir."
+}

@@ -1,7 +1,7 @@
 ---
 /**
- * "Kamu di sini" (keputusan 120): satu baris jalur Tahap › Bagian › Halaman di atas judul, plus rekap satu kalimat
- * tahap ini. Dibuat otomatis dari registry untuk setiap halaman terdaftar (dipanggil JudulHalaman.astro), jadi
+ * "Kamu di sini" (keputusan 120, dirapikan 210): satu baris jalur Tahap › Bagian › jenis halaman di atas judul.
+ * Rekap tahap ada di tooltip tautan tahap; catatan fiktif ada di bawah halaman (Lanjut.astro). Dibuat otomatis dari registry untuk setiap halaman terdaftar (dipanggil JudulHalaman.astro), jadi
  * halaman tidak perlu menulis komponen ini sendiri. Di HP hanya jalur pendek yang tampil.
  */
 import { muat, label, url, urlDariId, dariUrl } from "../../tools/registri.mjs";
@@ -13,17 +13,80 @@ const t: Tahap | undefined = h && Number.isInteger(h.tahap) ? d.tahap.find((x: T
 const NAMA: Record<string, string> = { pembuka: "Pembuka", sampingan: "Studi sampingan", alat: "Alat" };
 const kelompok = h ? (t?.bagian?.find((b) => b.no === h.bagian)?.nama ?? h.kelompok) : undefined;
 const pembuka = t ? d.halaman.find((x: { tahap: unknown; ada: boolean }) => x.tahap === t.no && x.ada) : undefined;
+// Redesain (keputusan 202): daftar isi tersembunyi bawaan; tombol ini membukanya di semua ukuran layar.
+const adaToc = (Astro.locals.starlightRoute.toc?.items?.length ?? 0) > 0;
+// Butir terakhir jalur (keputusan 210): jenis halaman, tanpa bagian yang sudah tertulis di judul atau jalur.
+// Mis. "ADR 1" tetap; "Masalah 3" dibuang bila judul memuat "M3"; "PRD" dibuang di bagian PRD.
+const { jenis = "" } = Astro.props as { jenis?: string };
+const judul = String(Astro.locals.starlightRoute.entry.data.title ?? "").toLowerCase();
+const ulang = (x: string) => {
+  const k = x.toLowerCase(), m = /^masalah (\d+)$/.exec(k);
+  return judul.includes(k) || (m !== null && judul.includes(`m${m[1]}`)) || k === String(kelompok ?? "").toLowerCase();
+};
+const tanda = jenis.split(" · ").filter((x) => x && !ulang(x)).join(" · ");
 ---
 {h && (
-  <nav class="kamu" aria-label="Kamu di sini">
+  <div class="baca-progres" aria-hidden="true"><span data-progres></span></div>
+  <nav class="kamu" aria-label="Kamu di sini" data-judul-halaman={label(h)}>
     <ol class="kamu__jalur">
-      <li><span class="kamu__tag">Kamu di sini</span></li>
       {t
-        ? <li><a href={pembuka ? url(pembuka) : undefined}>Tahap {t.no}<span class="kamu__panjang"> · {t.nama}{t.versi === "lama" ? " (versi lama)" : ""}</span></a></li>
+        ? <li><a href={pembuka ? url(pembuka) : undefined} title={t.rekap}>Tahap {t.no}<span class="kamu__panjang"> · {t.nama}{t.versi === "lama" ? " (versi lama)" : ""}</span></a></li>
         : <li>{NAMA[h.tahap] ?? h.tahap}</li>}
       {kelompok && <li class="kamu__panjang">{kelompok}</li>}
-      <li aria-current="page">{label(h, true)}</li>
+      <li aria-current="page" class:list={["kamu__ini", { "kamu__ini--jenis": tanda }]}><span class="kamu__sr">{label(h, true)}</span>{tanda && <span aria-hidden="true">{tanda}</span>}</li>
     </ol>
-    {t && <p class="kamu__rekap"><strong>{d.app} (fiktif).</strong> {t.rekap}</p>}
+    {adaToc && (
+      <button type="button" class="kamu__toc" data-toc-tombol aria-expanded="false" aria-label="Isi halaman">
+        <svg class="kamu__toc-ikon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 3.5h1.5M5.5 3.5H14M2 8h1.5M5.5 8H14M2 12.5h1.5M5.5 12.5H14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
+        <span class="kamu__toc-teks">Isi halaman</span>
+      </button>
+    )}
   </nav>
 )}
+
+<script>
+  // Daftar isi: tersembunyi bawaan (terlihat otomatis di ≥ 1600 px). Pilihan pembaca disimpan per perangkat.
+  const KUNCI = "rtj-toc";
+  const html = document.documentElement;
+  // Desktop (≥ 72rem): kolom kanan; HP: bilah daftar isi Starlight.
+  const terlihat = () => {
+    const el = document.querySelector(matchMedia("(min-width: 72rem)").matches ? ".right-sidebar-container" : "mobile-starlight-toc");
+    return !!el && getComputedStyle(el).display !== "none";
+  };
+  const segarkan = () => document.querySelectorAll("[data-toc-tombol]").forEach((b) => b.setAttribute("aria-expanded", String(terlihat())));
+  try { const s = localStorage.getItem(KUNCI); if (s) html.dataset.toc = s; } catch { /* mode privat */ }
+  document.addEventListener("click", (e) => {
+    if (!(e.target as Element).closest("[data-toc-tombol]")) return;
+    const baru = terlihat() ? "tutup" : "buka";
+    html.dataset.toc = baru;
+    try { localStorage.setItem(KUNCI, baru); } catch { /* mode privat */ }
+    if (baru === "buka") document.querySelector<HTMLDetailsElement>("mobile-starlight-toc details")?.setAttribute("open", "");
+    segarkan();
+  });
+  addEventListener("resize", segarkan);
+  // Progres baca (keputusan 206): garis tipis di bawah header mengikuti posisi gulir di artikel. Bukan animasi:
+  // lebarnya berubah hanya saat pembaca menggulir.
+  const garis = document.querySelector<HTMLElement>("[data-progres]");
+  const artikel = document.querySelector<HTMLElement>(".sl-markdown-content");
+  if (garis && artikel) {
+    let antre = false;
+    const ukur = () => {
+      antre = false;
+      const r = artikel.getBoundingClientRect();
+      const jalan = r.height - innerHeight;
+      const p = jalan > 0 ? Math.min(1, Math.max(0, -r.top / jalan)) : 1;
+      garis.style.transform = `scaleX(${p})`;
+    };
+    addEventListener("scroll", () => { if (!antre) { antre = true; requestAnimationFrame(ukur); } }, { passive: true });
+    addEventListener("resize", ukur);
+    document.addEventListener("toggle", () => requestAnimationFrame(ukur), true);
+    ukur();
+  }
+  // Halaman terakhir yang dibuka, untuk kartu Lanjutkan di beranda (keputusan 208).
+  const nav = document.querySelector<HTMLElement>("nav.kamu[data-judul-halaman]");
+  if (nav) {
+    const catat = { u: location.pathname, j: nav.dataset.judulHalaman, n: document.querySelectorAll("details.blok").length };
+    try { localStorage.setItem("rtj-terakhir", JSON.stringify(catat)); } catch { /* mode privat */ }
+  }
+  segarkan();
+</script>

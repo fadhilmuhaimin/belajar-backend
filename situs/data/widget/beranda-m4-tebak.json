@@ -1,0 +1,55 @@
+{
+  "id": "beranda-m4-tebak",
+  "judul": "Rp70.000 yang hilang",
+  "sumber": {
+    "jenis": "ilustrasi",
+    "teks": "Adegan M4, minggu 3 uji coba"
+  },
+  "adegan": [
+    "Jumat siang, warung ramai. Budi membayar Rp70.000 ke Warung Ani, dan layarnya menulis \"gagal\".",
+    "Riwayat Budi tetap mencatat −Rp70.000. Ani membuka bukunya: tidak ada pembayaran itu."
+  ],
+  "layar": {
+    "judul": "Rekeningo",
+    "status": "Pembayaran gagal",
+    "baris": [
+      {
+        "kiri": "Warung Ani",
+        "kanan": "−Rp70.000",
+        "tanda": "minus"
+      },
+      {
+        "kiri": "Top-up tunjangan",
+        "kanan": "+Rp250.000",
+        "tanda": "plus"
+      }
+    ]
+  },
+  "pertanyaan": "Ke mana Rp70.000 itu?",
+  "pilihan": [
+    {
+      "teks": "Masih di server, dan akan dikirim ulang otomatis.",
+      "benar": false,
+      "alasan": "Backend v1 tidak punya retry atau antrean, jadi tidak ada yang mengirim ulang."
+    },
+    {
+      "teks": "Saldo Budi sudah berkurang, tapi penambahan ke Ani gagal, dan kedua perubahan itu tidak dibungkus satu unit.",
+      "benar": true,
+      "alasan": "Dua UPDATE berjalan terpisah: yang pertama tersimpan, yang kedua gagal. Yang mencegahnya adalah transaction."
+    },
+    {
+      "teks": "App Budi salah menampilkan; saldo di database tidak berubah.",
+      "benar": false,
+      "alasan": "Database memang berubah: saldo Budi turun Rp70.000. Layar \"gagal\" hanya melaporkan langkah kedua."
+    }
+  ],
+  "penutup": "Pertanyaan Pak Hadi, \"Rp70.000 ini ke mana?\", adalah masalah terbesar Tahap 1. Jawabannya dibangun dari PRD sampai transaction.",
+  "label": {
+    "sumber": "Ilustrasi · adegan M4",
+    "tebakDulu": "Tebak dulu:",
+    "benar": "Tepat",
+    "belum": "Belum tepat",
+    "ulang": "Coba pilihan lain",
+    "jawaban": "Jawaban yang tepat"
+  }
+}
