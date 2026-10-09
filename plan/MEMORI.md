@@ -4,7 +4,10 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
-- Nomor keputusan: sesi konten memakai 165–199; 163–164 dan 200–219 milik sesi layout/redesain (pesan sesi "Rekeningo Tech Journey planning", 2026-10-09).
+- Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (keputusan 216); sisa 174–199 dibiarkan kosong.
+- 217: satu pekerja; #120 di-merge, worktree konten ditutup, lab m5 di branch `tahap-1/lab-m5`.
+- 216: sistem otomatis (ANTREAN, PROTOKOL-OTOMATIS, `tools/antrean.py`, `tools/jalankan-otomatis.sh`, deny loop di `tools/otomatis.settings.json`).
+- 211–215: visual redesain (PetaFitur, Rantai, diagram ADR 1 dan halaman masalah, ilustrasi M4); 200–210: redesain tampilan (#120).
 - 173: 1.25 migration; 172: lab b4-migration v1 (drift laptop/server, dirty).
 - 171: 1.24 ADR 5–6; 170: lab DalamTx + koreksi.
 - 169: 1.23 transaction.
@@ -53,14 +56,13 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - Tombol beranda otomatis berubah ke "Mulai dari PRD" begitu `t1-prd` ada.
 - Audit bahasa menolak kata "kantor"; naskah menulis "email kantor", di halaman pakai "email perusahaan".
 
-## Untuk sesi redesain
+## Catatan tampilan
 
-- Sesi redesain mengubah `.mdx` konten di folder utama (mis. `m3-tanda-kutip.mdx`: prop `ilustrasi="m3"` di Blok); saat rebase setelah redesain merge, cek bentrok di halaman Tahap 1.
 - Widget lama stackstep (1.23 `tahap-1/transaction`): tombol langkah pertama lebih tinggi/turun dari tombol lain di 375 px dan desktop terang; kemungkinan margin saudara Starlight (`* + *`) seperti keputusan 124/128. Kontainer tombol stackstep perlu masuk aturan margin di tema.css.
 
 ## Perlu dicek pemilik
 
-- Redesain (PR #120): usulan perubahan PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` (beranda bukan lagi satu layar penuh; warna, ukuran, navigasi) ada di `plan/AUDIT-TAMPILAN.md` bagian 6. Belum diubah karena butuh persetujuan pemilik.
+- Redesain (PR #120, sudah di-merge 2026-10-09): usulan perubahan PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` (beranda bukan lagi satu layar penuh; warna, ukuran, navigasi) ada di `plan/AUDIT-TAMPILAN.md` bagian 6. Belum diubah karena butuh persetujuan pemilik; loop tidak menyentuhnya.
 
 - Cloudflare Pages (keputusan 115), belum ada; job deploy dilewati dan pekerjaan jalan terus. Yang dibutuhkan:
   1. Di dashboard Cloudflare: My Profile > API Tokens > Create Custom Token, izin **Account > Cloudflare Pages > Edit**, untuk akun yang memiliki project Pages.
@@ -69,16 +71,15 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-09 · 1.25 selesai (lab #126 merged; halaman di branch `tahap-1/migration`). Berikutnya **1.26 "M5: Angka di URL"** (`t1-m5`, masalah, ★, widget alur, lab api-t1; naskah: Dimas mengganti 417 jadi 418 di URL, melihat saldo Ani, menyimpan 100 saldo ke spreadsheet; token tersimpan di tempat yang salah di app; mode rentan M5 yang direkam). Lab `api-t1` sudah punya cek pemilik di `service.LihatAkun` (404 untuk akun orang lain); M5 butuh mode rentan `-rentan m5` tanpa cek pemilik. Worktree `/Users/fadhilmuhaimin/Project/Web/rekeningo-konten`, gerbang `PORT_PREVIEW=4323 bash tools/cek_situs.sh --layar`. Batas file selama redesain (#120, draft) belum merge: konten, labs, registry, data widget, KEPUTUSAN 165–199, MEMORI/STATUS; jangan CSS, komponen layout, CLAUDE.md, PROPOSAL.md; MDX tanpa class/style tambahan. Ilustrasi M3-M6 belum (setelah #120: `<Blok ilustrasi="mN">`). 1.6 masih Snippet `api-t1-lama` (PR kecil terpisah).
-Aturan PR (pemilik, 2026-10-09): merge sendiri setiap PR begitu CI hijau, sebelum memulai halaman berikutnya; paling banyak satu PR terbuka. #120 (redesain) tidak boleh di-merge sesi ini.
-2026-10-09 (sesi 3) · Pemilik: visual + pembuka rinci di SEMUA halaman 1.1–1.23, langsung di PR #120 (keputusan 212+). Rencana: (1) komponen `Rantai.astro` (baris rantai simpul bertoken, data JSON + Zod) + diagram sebelum/sesudah di 1.1; (2) peta fitur 1.7, 1.8, 1.10 dari rekaman lab + pembuka; (3) 1.4 ADR: diagram "di mana aturan uang tinggal" di Kebutuhan; (4) masalah: ilustrasi M4 di 1.22, diagram "yang sebenarnya" 1.14/1.17/1.19/1.22; (5) konsep 1.3,1.5,1.6,1.11,1.12,1.13,1.15,1.16,1.18,1.20,1.21,1.23: Inti = kalimat → visual → 2 paragraf rinci, plus satu diagram di Paham; (6) `layar.mjs`: setiap halaman berblok wajib visual mulai di layar pertama; tangkapan, KEPUTUSAN, STATUS. Satu commit per kelompok, push tiap dua. Sudah: 211 peta fitur di 1.9 (068ec0b).
-
-2026-10-09 (sesi 2) · Redesain langkah 1–7 selesai di branch `redesain/tampilan` (sudah digabung dengan `main` sampai 1.23), PR #120 draft (JANGAN merge; pemilik memutuskan). Keputusan 201, 203–208 tercatat; 209–219 masih bebas untuk redesain. Menunggu pemilik: merge PR #120 dan usulan perubahan PROPOSAL + CLAUDE.md di `plan/AUDIT-TAMPILAN.md` bagian 6. Untuk sesi konten setelah #120 di-merge: halaman masalah memakai `<Blok ... ilustrasi="mN">` (adegan baru ditambah di `situs/src/components/Ilustrasi.astro`; M4–M6 belum ada), dan 1.42 memakai widget `tebak` (`situs/src/widgets/tebak/`).
+2026-10-09 · Sistem kerja otomatis siap (keputusan 216, 217). Satu-satunya pekerja: `tools/jalankan-otomatis.sh`; setiap iterasi membaca `plan/PROTOKOL-OTOMATIS.md` dan mengerjakan satu tugas dari `plan/ANTREAN.md` (berikutnya: `python3 tools/antrean.py berikut`). Tidak ada worktree lagi; kerja di folder utama, branch dari main, paling banyak satu PR terbuka, merge sendiri bila CI hijau. Lanjutkan: `caffeinate -dims bash tools/jalankan-otomatis.sh` di main bersih.
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran
 
+- macOS di mesin ini tidak punya `timeout`/`gtimeout`; batasi lama perintah dengan timeout alat Bash atau `gh ... --watch`.
+- Mode auto menolak sesi mengubah izinnya sendiri (`.claude/settings.json`, label Self-Modification), lewat Bash maupun Edit; pemilik yang memasang perubahan izin.
+- `claude -p --output-format stream-json` selalu memancarkan `rate_limit_event` berstatus `allowed`; batas pemakaian dibaca dari field status, bukan dari teks "rate limit".
 - Token di `:root[data-theme="light"]` (mis. `--sl-content-width`) mengalahkan override splash Starlight; beranda harus menyetel lebarnya sendiri di `.content-panel:has(.beranda)`.
 - Build `main` di worktree: symlink `node_modules` membuat Vite gagal (path ganda); pakai `cp -cR` (clone APFS) dan salin `public/fonts` (di-.gitignore).
 - Audit bahasa menolak kata "pemakai" (juga di kunci JSON registry); pakai "user".
