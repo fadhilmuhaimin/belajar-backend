@@ -5,6 +5,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 ## Keputusan baru
 
 - Nomor keputusan: sesi konten memakai 165–199; 163–164 dan 200–219 milik sesi layout/redesain (pesan sesi "Rekeningo Tech Journey planning", 2026-10-09).
+- 168: 1.22 M4; 167: mode rentan m4 + `m4.txt`, PORT_PREVIEW di cek_situs.sh.
 - 166: 1.21 lapisan dasar; 165: `cek_arah.py` + rekaman `lapisan.txt`.
 - 162: 1.20 SQL injection + ADR 4; 161: cari-bug field `aman` + CSS baris; 160: rekaman injection (log PG, gosec, latihan/).
 - 159: 1.19 M3 (injection); 158: widget React cari-bug; 157: lab pencarian + mode rentan m3.
@@ -48,6 +49,10 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - Tombol beranda otomatis berubah ke "Mulai dari PRD" begitu `t1-prd` ada.
 - Audit bahasa menolak kata "kantor"; naskah menulis "email kantor", di halaman pakai "email perusahaan".
 
+## Untuk sesi redesain
+
+- (kosong)
+
 ## Perlu dicek pemilik
 
 - Cloudflare Pages (keputusan 115), belum ada; job deploy dilewati dan pekerjaan jalan terus. Yang dibutuhkan:
@@ -57,8 +62,9 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-09 · Halaman 1.21 selesai di worktree `../rekeningo-wt-1-20`, branch `tahap-1/lapisan-dasar`, gerbang lolos. PR bertumpuk: #115 (lab 1.20) → #116 (halaman 1.20) → #118 (lab 1.21, base `tahap-1/sql-injection`) → PR halaman 1.21 (base `tahap-1/lab-lapisan`); semua menunggu merge pemilik, urut dari #115. Working tree utama dipakai sesi redesain (jangan ganti branch di sana).
-Halaman berikutnya: **1.22 "M4: Rp70.000 yang hilang"** (`t1-m4`, masalah, ★, widget runsql, lab b3-stack). Lab `api-t1` sudah membungkus `Pindahkan` dalam transaction; M4 butuh mode rentan (dua UPDATE tanpa transaction + constraint warung yang ditambah tangan) atau lab b3-stack. Ilustrasi M3-M6 belum dibuat. 1.6 masih memakai Snippet `api-t1-lama` (tiga komentar file); ganti dengan folder nyata `api-t1` di PR kecil terpisah.
+2026-10-09 · Worktree konten: `/Users/fadhilmuhaimin/Project/Web/rekeningo-konten` (folder utama milik sesi redesain: jangan checkout/stash/reset/commit di sana). Preview dan gerbang di port 4323: `PORT_PREVIEW=4323 bash tools/cek_situs.sh --layar`. Batas file selama redesain belum merge: hanya `situs/src/content/docs/**`, `labs/**`, `situs/data/cerita.json`, data widget, KEPUTUSAN 165–199, MEMORI/STATUS bagian konten; jangan CSS, komponen layout, CLAUDE.md, PROPOSAL.md. Konten tanpa class/style tambahan di MDX, paragraf pendek. Setelah redesain di-merge: rebase branch terbuka ke main, cek ulang tangkapan halaman yang ditulis paralel (1.22 dst.), hapus worktree.
+PR bertumpuk, semua OPEN per 2026-10-09 (pemilik mengira sudah merge; `main` masih a2084bd): #115 → #116 → #118 → #119 → #121 (lab m4) → PR halaman 1.22. Merge urut; sebelum merge cek base sudah `main`.
+Halaman berikutnya: **1.23 "Transaction"** (`B3.1`, konsep, ★, runsql + stackstep, lab b3-stack; isi lama `b-fondasi/b3-1-transaction.mdx`). Buka dari M4 (Rp70.000, `m4.txt`). Catatan: ADR 5 (1.24) menaruh transaction di `service/`, sedangkan lab `api-t1` membukanya di `repo.Pindahkan`; 1.24 perlu memindahkan atau menjelaskan. Ilustrasi M3-M6 belum dibuat. 1.6 masih memakai Snippet `api-t1-lama` (PR kecil terpisah).
 Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 

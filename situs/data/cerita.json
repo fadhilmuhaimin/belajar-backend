@@ -37,8 +37,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 217,
-        "halaman": 26
+        "menit": 226,
+        "halaman": 27
       },
       "bagian": [
         {
@@ -759,8 +759,12 @@
       ],
       "label": "Masalah 4 · minggu 3",
       "masalah": "Saldo pembeli berkurang, saldo warung tidak bertambah",
-      "ada": false,
-      "nomor": "1.22"
+      "ada": true,
+      "prasyarat": [
+        "t1-pertukaran-saldo"
+      ],
+      "nomor": "1.22",
+      "menit": 9
     },
     {
       "id": "B3.1",

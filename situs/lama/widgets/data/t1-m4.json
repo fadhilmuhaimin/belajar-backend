@@ -1,0 +1,73 @@
+{
+  "id": "t1-m4",
+  "title": "Rp70.000 ke Warung Ani, dengan batas saldo warung Rp1.500.000",
+  "setup": "CREATE TABLE akun (id INTEGER PRIMARY KEY, nama TEXT NOT NULL, jenis TEXT NOT NULL, saldo INTEGER NOT NULL CHECK (saldo >= 0), CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000));\nCREATE TABLE transaksi (id INTEGER PRIMARY KEY, dari INTEGER NOT NULL, ke INTEGER NOT NULL, jumlah INTEGER NOT NULL CHECK (jumlah > 0));\nINSERT INTO akun VALUES (418, 'Warung Ani', 'warung', 1450000), (419, 'Budi', 'karyawan', 250000);",
+  "check": "SELECT nama, saldo FROM akun UNION ALL SELECT 'BARIS TRANSAKSI', COUNT(*) FROM transaksi UNION ALL SELECT 'JUMLAH SALDO', SUM(saldo) FROM akun",
+  "predict": {
+    "q": "Saldo Ani Rp1.450.000, batasnya Rp1.500.000. Budi membayar Rp70.000. Di panel Before, tiga perintah dijalankan satu per satu tanpa transaction, dan perintah kedua ditolak. Berapa saldo Budi sesudahnya?",
+    "options": [
+      "Rp250.000, tidak berubah",
+      "Rp180.000",
+      "Rp320.000"
+    ],
+    "answer": 1,
+    "explain": "Before: UPDATE pertama sudah tersimpan saat UPDATE kedua ditolak, jadi saldo Budi Rp180.000, saldo Ani tetap, tidak ada baris transaksi, dan jumlah saldo turun Rp70.000. After: perintah yang sama di dalam BEGIN, dan ROLLBACK membatalkan UPDATE pertama. Saldo Budi kembali Rp250.000 dan jumlah saldo tetap."
+  },
+  "panels": {
+    "before": {
+      "label": "Before: minggu 3, tanpa transaction",
+      "onError": "stop",
+      "steps": [
+        {
+          "sql": "UPDATE akun SET saldo = saldo - 70000 WHERE id = 419"
+        },
+        {
+          "sql": "UPDATE akun SET saldo = saldo + 70000 WHERE id = 418"
+        },
+        {
+          "sql": "INSERT INTO transaksi (dari, ke, jumlah) VALUES (419, 418, 70000)"
+        }
+      ]
+    },
+    "after": {
+      "label": "After: tiga perintah dalam satu transaction",
+      "onError": "rollback",
+      "steps": [
+        {
+          "sql": "BEGIN"
+        },
+        {
+          "sql": "UPDATE akun SET saldo = saldo - 70000 WHERE id = 419"
+        },
+        {
+          "sql": "UPDATE akun SET saldo = saldo + 70000 WHERE id = 418"
+        },
+        {
+          "sql": "INSERT INTO transaksi (dari, ke, jumlah) VALUES (419, 418, 70000)"
+        },
+        {
+          "sql": "COMMIT"
+        }
+      ]
+    }
+  },
+  "toggles": [
+    {
+      "label": "Budi membayar Rp50.000, bukan Rp70.000",
+      "pairs": [
+        [
+          "saldo - 70000",
+          "saldo - 50000"
+        ],
+        [
+          "saldo + 70000",
+          "saldo + 50000"
+        ],
+        [
+          "418, 70000)",
+          "418, 50000)"
+        ]
+      ]
+    }
+  ]
+}
