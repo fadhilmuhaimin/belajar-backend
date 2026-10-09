@@ -48,5 +48,7 @@ if [ "${1:-}" = "--layar" ]; then
   (cd situs && node tools/layar.mjs --url "http://127.0.0.1:$PORT" && node tools/tangkap.mjs --url "http://127.0.0.1:$PORT")
   echo "== jarak judul ke meta (K0d)"
   (cd situs && node tools/ukur-judul.mjs --url "http://127.0.0.1:$PORT" | grep -v "^ok ")
+  echo "== teks ilustrasi di dalam bingkai (K0c, K0e)"
+  (cd situs && node tools/ukur-ilustrasi.mjs --url "http://127.0.0.1:$PORT")
 fi
 echo "== semua pemeriksaan lolos"
