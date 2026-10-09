@@ -1,57 +1,118 @@
 # golang-migrate v4.20.1 · PostgreSQL 17.11
-$ migrate up
-1/u buat_akun (9.022625ms)
-2/u buat_transfer (13.8915ms)
 
-$ migrate version
-2
+# --- A. Minggu 1: laptop dan server dibangun dari file migration yang sama ---
+$ migrate up   # laptop
+1/u akun_sesi (…)
+2/u topup (…)
+3/u transaksi (…)
 
-$ psql -c "SELECT * FROM schema_migrations"
- version | dirty 
----------+-------
-       2 | f
-(1 row)
+$ migrate up   # server
+1/u akun_sesi (…)
+2/u topup (…)
+3/u transaksi (…)
+
+# --- B. Minggu 2: batas saldo warung ditambah tangan di server, lewat psql ---
+$ psql -c "ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000)"   # server
+ALTER TABLE
+
+# --- C. Versi sama, skema berbeda ---
+$ migrate version   # laptop
+3
+
+$ migrate version   # server
+3
+
+$ psql -c "SELECT conname, pg_get_constraintdef(oid) AS aturan FROM pg_constraint WHERE conrelid = 'akun'::regclass AND contype = 'c' ORDER BY 1"   # laptop
+       conname       |                                     aturan                                     
+---------------------+--------------------------------------------------------------------------------
+ akun_jenis_check    | CHECK ((jenis = ANY (ARRAY['karyawan'::text, 'warung'::text, 'admin'::text])))
+ saldo_tidak_negatif | CHECK ((saldo >= 0))
+(2 rows)
 
 
-# Migration 3 ditambahkan, dengan salah ketik di statement kedua.
-$ migrate up
-error: migration failed: relation "akuns" does not exist in line 0: ALTER TABLE akun ADD COLUMN telp text;
--- Salah ketik: tabelnya "akun", bukan "akuns".
-CREATE INDEX akun_telp_idx ON akuns (telp);
- (details: pq: relation "akuns" does not exist)
-exit status 1
-
-$ migrate version
-3 (dirty)
-
-$ psql -c "SELECT * FROM schema_migrations"
- version | dirty 
----------+-------
-       3 | t
-(1 row)
-
-
-$ psql -c "SELECT column_name FROM information_schema.columns WHERE table_schema = 'b4m' AND table_name = 'akun' ORDER BY ordinal_position"
- column_name 
--------------
- id
- nama
- saldo
+$ psql -c "SELECT conname, pg_get_constraintdef(oid) AS aturan FROM pg_constraint WHERE conrelid = 'akun'::regclass AND contype = 'c' ORDER BY 1"   # server
+       conname       |                                     aturan                                     
+---------------------+--------------------------------------------------------------------------------
+ akun_jenis_check    | CHECK ((jenis = ANY (ARRAY['karyawan'::text, 'warung'::text, 'admin'::text])))
+ batas_saldo_warung  | CHECK (((jenis <> 'warung'::text) OR (saldo <= 1500000)))
+ saldo_tidak_negatif | CHECK ((saldo >= 0))
 (3 rows)
 
 
-$ migrate up
-error: Dirty database version 3. Fix and force version.
+# --- D. Minggu 3, setelah M4: tabel koreksi (ADR 6) dan batas warung ditulis sebagai file ---
+$ ls migrations
+000001_akun_sesi.down.sql
+000001_akun_sesi.up.sql
+000002_topup.down.sql
+000002_topup.up.sql
+000003_transaksi.down.sql
+000003_transaksi.up.sql
+000004_koreksi.down.sql
+000004_koreksi.up.sql
+000005_batas_saldo_warung.down.sql
+000005_batas_saldo_warung.up.sql
+
+$ migrate up   # laptop
+4/u koreksi (…)
+5/u batas_saldo_warung (…)
+
+$ migrate up   # server
+4/u koreksi (…)
+error: migration failed: constraint "batas_saldo_warung" for relation "akun" already exists in line 0: -- Minggu 3: batas yang di minggu 2 ditambah tangan di server, kini ditulis sebagai file.
+-- Laptop dan server baru mendapatkannya dari sini. Server lama sudah punya batas ini.
+ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000);
+ (details: pq: constraint "batas_saldo_warung" for relation "akun" already exists)
 exit status 1
 
-# Kolom telp TIDAK ada: PostgreSQL menjalankan isi file ini sebagai satu transaction implisit,
-# jadi ALTER TABLE ikut dibatalkan. Yang tertinggal hanya tanda dirty. Tandai versi 2 sebagai bersih:
-$ migrate force 2
+$ migrate version   # server
+5 (dirty)
 
-# Salah ketik di file migration 3 diperbaiki.
-$ migrate up
-3/u tambah_telp (6.26ms)
+# Server menolak migration 5 karena batas itu sudah ada sejak minggu 2. Periksa dulu skemanya:
+$ psql -c "SELECT conname, pg_get_constraintdef(oid) AS aturan FROM pg_constraint WHERE conrelid = 'akun'::regclass AND contype = 'c' ORDER BY 1"   # server
+       conname       |                                     aturan                                     
+---------------------+--------------------------------------------------------------------------------
+ akun_jenis_check    | CHECK ((jenis = ANY (ARRAY['karyawan'::text, 'warung'::text, 'admin'::text])))
+ batas_saldo_warung  | CHECK (((jenis <> 'warung'::text) OR (saldo <= 1500000)))
+ saldo_tidak_negatif | CHECK ((saldo >= 0))
+(3 rows)
 
-$ migrate version
-3
+
+# Isi server sudah sama dengan migration 5. Tandai versi 5 sebagai bersih, lalu periksa:
+$ migrate force 5   # server
+
+$ migrate up   # server
+no change
+
+# --- E. Laptop dan server sekarang sama, dan versinya jujur ---
+$ psql -c "SELECT * FROM schema_migrations"   # laptop
+ version | dirty 
+---------+-------
+       5 | f
+(1 row)
+
+
+$ psql -c "SELECT * FROM schema_migrations"   # server
+ version | dirty 
+---------+-------
+       5 | f
+(1 row)
+
+
+$ psql -c "SELECT conname, pg_get_constraintdef(oid) AS aturan FROM pg_constraint WHERE conrelid = 'akun'::regclass AND contype = 'c' ORDER BY 1"   # laptop
+       conname       |                                     aturan                                     
+---------------------+--------------------------------------------------------------------------------
+ akun_jenis_check    | CHECK ((jenis = ANY (ARRAY['karyawan'::text, 'warung'::text, 'admin'::text])))
+ batas_saldo_warung  | CHECK (((jenis <> 'warung'::text) OR (saldo <= 1500000)))
+ saldo_tidak_negatif | CHECK ((saldo >= 0))
+(3 rows)
+
+
+$ psql -c "SELECT conname, pg_get_constraintdef(oid) AS aturan FROM pg_constraint WHERE conrelid = 'akun'::regclass AND contype = 'c' ORDER BY 1"   # server
+       conname       |                                     aturan                                     
+---------------------+--------------------------------------------------------------------------------
+ akun_jenis_check    | CHECK ((jenis = ANY (ARRAY['karyawan'::text, 'warung'::text, 'admin'::text])))
+ batas_saldo_warung  | CHECK (((jenis <> 'warung'::text) OR (saldo <= 1500000)))
+ saldo_tidak_negatif | CHECK ((saldo >= 0))
+(3 rows)
+
 
