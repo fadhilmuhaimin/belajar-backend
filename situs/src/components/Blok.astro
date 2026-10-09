@@ -22,7 +22,6 @@ const sini = urlDariId(route.entry.id);
 const h = dariUrl(d, sini);
 const menit = menitBlok(h?.jenis, bloks[i]!);
 const next = bloks[i + 1];
-const menitNext = next ? menitBlok(h?.jenis, next) : undefined;
 let halBerikut: { nomor?: string; judul: string; path: string } | null = null;
 if (!next) {
   const urut = urutanBaca(d);
@@ -41,14 +40,14 @@ const id = slugBlok(nama);
     {aman && <p class="blok__aman">{aman}</p>}
     <span class="blok__akhir" data-akhir-blok aria-hidden="true"></span>
     {next && (
-      <button type="button" class="blok__lanjut" data-ke={slugBlok(next.nama)}>
-        <span>Berikutnya</span>{next.nama}{menitNext ? ` · ${menitNext} menit` : ""} →
-      </button>
+      <p class="blok__lanjut-baris">
+        <button type="button" class="blok__lanjut" data-ke={slugBlok(next.nama)}>Berikutnya: {next.nama} <span aria-hidden="true">→</span></button>
+      </p>
     )}
     {!next && halBerikut && (
-      <a class="blok__lanjut" href={url(halBerikut)} data-akhir>
-        <span>Halaman berikutnya</span>{label(halBerikut)} →
-      </a>
+      <p class="blok__lanjut-baris">
+        <a class="blok__lanjut" href={url(halBerikut)} data-akhir>Berikutnya: {label(halBerikut)} <span aria-hidden="true">→</span></a>
+      </p>
     )}
   </div>
 </details>

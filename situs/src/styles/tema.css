@@ -534,9 +534,10 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 /* Redesain (keputusan 203): blok tanpa kotak. Garis tipis di atas tiap blok memisahkan; judul blok besar; ruang lega. */
 .sl-markdown-content details.blok { border: 0; border-top: 1px solid var(--garis); border-radius: 0; background: transparent; margin: 0; padding: 0; }
 .sl-markdown-content details.blok:last-of-type { border-bottom: 1px solid var(--garis); }
-.sl-markdown-content details.blok > summary.blok__kepala { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.2rem 1rem; padding: 1.1rem 0; cursor: pointer; list-style: none; }
+.sl-markdown-content details.blok > summary.blok__kepala { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.2rem 1rem; margin-inline: 0; padding: 1.1rem 0; cursor: pointer; list-style: none; }
 .sl-markdown-content details.blok > summary.blok__kepala::-webkit-details-marker { display: none; }
-.sl-markdown-content details.blok > summary.blok__kepala::before { content: "›"; color: var(--teks-2); width: 1.1rem; margin-right: 0.35rem; display: inline-block; text-align: center; }
+/* Tanda buka di kanan, supaya judul blok sejajar dengan teks isi. */
+.sl-markdown-content details.blok > summary.blok__kepala::before { content: "›"; order: 3; color: var(--teks-2); width: 1rem; margin-left: -0.6rem; display: inline-block; text-align: center; }
 .sl-markdown-content details.blok[open] > summary.blok__kepala::before { transform: rotate(90deg); }
 .sl-markdown-content details.blok h2.blok__judul { display: inline; margin: 0; font-size: 1.5em; line-height: 1.2; color: var(--judul); flex: 1 1 auto; }
 .sl-markdown-content details.blok > summary.blok__kepala:hover h2.blok__judul { color: var(--aksen); }
@@ -545,9 +546,11 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 .sl-markdown-content .blok__isi { padding: 0 0 2rem; }
 .sl-markdown-content .blok__isi > :first-child { margin-top: 0; }
 .sl-markdown-content p.blok__aman { border-left: 3px solid var(--k-good-edge); padding: 0.4rem 0.8rem; color: var(--teks); background: var(--k-good-fill); border-radius: 0 6px 6px 0; }
-.sl-markdown-content .blok__lanjut { display: block; width: 100%; margin-top: 1.4rem; padding: 0.9rem 1.1rem; text-align: left; font: inherit; font-weight: 600; color: var(--ink-di-aksen); background: var(--aksen); border: 0; border-radius: 8px; cursor: pointer; text-decoration: none; }
-.sl-markdown-content .blok__lanjut span { display: block; font-size: 0.75em; font-weight: 400; }
-.sl-markdown-content .blok__lanjut:focus-visible { outline: 3px solid var(--judul); outline-offset: 2px; }
+/* Redesain (keputusan 204): Berikutnya kecil, rata kanan, teks beraksen tanpa latar penuh. */
+.sl-markdown-content p.blok__lanjut-baris { margin: 1.4rem 0 0; text-align: right; }
+.sl-markdown-content .blok__lanjut { display: inline-block; min-height: 2.75rem; padding: 0.6rem 0 0.6rem 0.75rem; font: inherit; font-size: 1rem; line-height: 1.5; font-weight: 600; color: var(--aksen); background: transparent; border: 0; border-radius: 6px; cursor: pointer; text-decoration: none; text-align: right; }
+.sl-markdown-content .blok__lanjut:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+.sl-markdown-content .blok__lanjut:focus-visible { outline: 2px solid var(--aksen); outline-offset: 2px; }
 .sl-markdown-content details.blok > summary:focus-visible { outline: 2px solid var(--aksen); outline-offset: 2px; border-radius: 4px; }
 starlight-toc a.toc-selesai::after, mobile-starlight-toc a.toc-selesai::after { content: " ✓"; color: var(--k-good-ink); }
 
@@ -726,7 +729,7 @@ details.peran .peran__pilihan { margin-top: 0.5rem; }
 .sl-markdown-content details.blok { font-size: 1em; }
 .sl-markdown-content p.meta { font-size: var(--rk-ui); line-height: 1.5; }
 nav.kamu, .content-panel p.kicker { font-size: var(--rk-ui); }
-.sl-markdown-content .blok__meta, .sl-markdown-content .blok__lanjut span { font-size: var(--rk-ui); }
+.sl-markdown-content .blok__meta { font-size: var(--rk-ui); }
 .peran__judul, .peran__chip, .peran__kosong, .fokus { font-size: var(--rk-ui); }
 .sidebar-content a, .sidebar-content summary, .sidebar-content .large { font-size: var(--rk-ui); }
 starlight-toc a, .right-sidebar a, starlight-toc h2 { font-size: var(--rk-ui); }
