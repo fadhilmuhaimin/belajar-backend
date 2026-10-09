@@ -6,7 +6,7 @@
       "no": 1,
       "nama": "Uji coba Gedung A",
       "user": "100 karyawan Gedung A, 3 warung",
-      "rekap": "Grup Lestari menguji Rekeningo, dompet tunjangan makan, di Gedung A: 100 karyawan, 3 warung, 6 minggu. Raka membangun backend pertamanya sendirian.",
+      "rekap": "Grup Lestari (fiktif) menguji Rekeningo di Gedung A: 100 karyawan, 3 warung, 6 minggu.",
       "sebelumnya": "Belum ada. Ini awal cerita.",
       "arsitektur": {
         "baris": [
@@ -72,7 +72,7 @@
       "no": 2,
       "nama": "Saldo salah dan dobel bayar",
       "user": "100–1.000 user",
-      "rekap": "Rekeningo dibuka untuk tiga kompleks. Budi menarik saldo dari HP dan tablet bersamaan, dan keduanya sukses.",
+      "rekap": "Rekeningo (fiktif) dibuka untuk tiga kompleks. Budi menarik saldo dari HP dan tablet bersamaan, dan keduanya sukses.",
       "sebelumnya": "Tahap 1: transfer sudah aman dari kegagalan di tengah jalan berkat transaction.",
       "arsitektur": {
         "baris": [
@@ -115,7 +115,7 @@
       "no": 3,
       "nama": "Lambat di jam sibuk",
       "user": "1.000–10.000 user",
-      "rekap": "Rekeningo dipakai di satu kota, dan app lambat di jam makan siang.",
+      "rekap": "Rekeningo (fiktif) dipakai di satu kota, dan app lambat di jam makan siang.",
       "sebelumnya": "Tahap 2: saldo dan pembayaran sudah aman dari race condition dan request ganda.",
       "arsitektur": {
         "baris": [
@@ -167,7 +167,7 @@
       "no": 4,
       "nama": "Integrasi pihak ketiga",
       "user": "10.000–100.000 user",
-      "rekap": "Rekeningo bekerja sama dengan payment gateway dan layanan verifikasi identitas, dan tim jadi delapan orang.",
+      "rekap": "Rekeningo (fiktif) bekerja sama dengan payment gateway dan layanan verifikasi identitas, dan tim jadi delapan orang.",
       "sebelumnya": "Tahap 3: jam sibuk sudah lancar setelah pekerjaan lambat dipindah ke worker.",
       "arsitektur": {
         "baris": [
@@ -222,7 +222,7 @@
       "no": 5,
       "nama": "Satu database tidak cukup",
       "user": "100.000–1.000.000+ user",
-      "rekap": "Rekeningo dipakai di banyak kota, dan database utama penuh oleh query baca.",
+      "rekap": "Rekeningo (fiktif) dipakai di banyak kota, dan database utama penuh oleh query baca.",
       "sebelumnya": "Tahap 4: integrasi pihak ketiga dan pemecahan layanan pembayaran sudah berjalan.",
       "arsitektur": {
         "baris": [

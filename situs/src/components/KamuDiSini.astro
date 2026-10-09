@@ -1,7 +1,7 @@
 ---
 /**
  * "Kamu di sini" (keputusan 120): satu baris jalur Tahap › Bagian › Halaman di atas judul, plus rekap satu kalimat
- * tahap ini. Dibuat otomatis dari registry untuk setiap halaman terdaftar (dipanggil JudulHalaman.astro), jadi
+ * tahap ini (rekap di registry sudah memuat tanda fiktif). Dibuat otomatis dari registry untuk setiap halaman terdaftar (dipanggil JudulHalaman.astro), jadi
  * halaman tidak perlu menulis komponen ini sendiri. Di HP hanya jalur pendek yang tampil.
  */
 import { muat, label, url, urlDariId, dariUrl } from "../../tools/registri.mjs";
@@ -26,8 +26,13 @@ const adaToc = (Astro.locals.starlightRoute.toc?.items?.length ?? 0) > 0;
       {kelompok && <li class="kamu__panjang">{kelompok}</li>}
       <li aria-current="page">{label(h, true)}</li>
     </ol>
-    {adaToc && <button type="button" class="kamu__toc" data-toc-tombol aria-expanded="false">Isi halaman</button>}
-    {t && <p class="kamu__rekap"><strong>{d.app} (fiktif).</strong> {t.rekap}</p>}
+    {adaToc && (
+      <button type="button" class="kamu__toc" data-toc-tombol aria-expanded="false" aria-label="Isi halaman" title="Isi halaman">
+        <svg class="kamu__toc-ikon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 3.5h1.5M5.5 3.5H14M2 8h1.5M5.5 8H14M2 12.5h1.5M5.5 12.5H14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
+        <span class="kamu__toc-teks">Isi halaman</span>
+      </button>
+    )}
+    {t && <p class="kamu__rekap">{t.rekap}</p>}
   </nav>
 )}
 

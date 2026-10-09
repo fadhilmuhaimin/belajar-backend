@@ -72,6 +72,21 @@ for (const tema of ["dark", "light"]) {
           return { label, ada: true, px: parseFloat(cs.fontSize), berat: cs.fontWeight, warna: rgb(cs.color).slice(0, 3), latar: latar(el), contoh: el.textContent.trim().replace(/\s+/g, " ").slice(0, 40) };
         });
       }, JENIS);
+      const kecil = await p.evaluate(() => {
+        const out = new Map();
+        for (const el of document.querySelectorAll("body *")) {
+          if (!el.getClientRects().length || ["SCRIPT", "STYLE", "SVG", "PATH"].includes(el.tagName)) continue;
+          const langsung = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+          if (!langsung) continue;
+          const px = parseFloat(getComputedStyle(el).fontSize);
+          if (px >= 14) continue;
+          const kunci = `${el.tagName.toLowerCase()}.${[...el.classList].slice(0, 2).join(".")} ${px}px`;
+          if (!out.has(kunci)) out.set(kunci, el.textContent.trim().replace(/\s+/g, " ").slice(0, 30));
+        }
+        return [...out].map(([k, v]) => `${k} "${v}"`);
+      });
+      hasil.kecil = hasil.kecil || [];
+      hasil.kecil.push({ halaman: nama, ukuran: uk, daftar: kecil });
       for (const u of ukur) {
         if (u.ada) u.kontras = Math.round(rasio(u.warna, u.latar) * 100) / 100;
         hasil.teks.push({ halaman: nama, ukuran: uk, ...u });
@@ -92,5 +107,6 @@ await b.close();
 
 const hex = (c) => "#" + c.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("").toUpperCase();
 for (const t of hasil.teks.filter((t) => t.ada)) console.log(`${t.halaman.padEnd(8)} ${t.ukuran.padEnd(7)} ${t.label.padEnd(30)} ${String(t.px).padStart(5)}px ${t.berat} ${hex(t.warna)} / ${hex(t.latar)} = ${t.kontras}:1`);
+for (const k of hasil.kecil || []) console.log(`<14px ${k.halaman} ${k.ukuran}: ${k.daftar.length ? k.daftar.join(" | ") : "tidak ada"}`);
 for (const a of hasil.axe) console.log(`axe ${a.halaman} ${a.ukuran}: ${a.pelanggaran.length ? a.pelanggaran.map((v) => `${v.id}(${v.dampak},${v.jumlah})`).join(", ") : "0 pelanggaran"}`);
 if (OUT) fs.writeFileSync(OUT, JSON.stringify(hasil, null, 1));
