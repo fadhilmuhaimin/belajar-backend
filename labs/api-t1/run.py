@@ -943,8 +943,71 @@ def rekam_m5():
     tulis("m5.txt")
 
 
+def status_saja(method, path, token=None):
+    cmd = ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", "-X", method, URL + path]
+    if token:
+        cmd += ["-H", f"Authorization: Bearer {token}"]
+    return int(subprocess.run(cmd, capture_output=True, text=True).stdout)
+
+
+def rekam_authz():
+    """1.28 Authorization (keputusan 237): sesudah login, setiap request ditanya pemilik atau peran."""
+    reset()
+    mulai()
+    samarkan_hari_ini()
+    bagian("A. Persiapan: versi benar, Budi membayar Rp25.000 ke Warung Ani (transaksi 1)")
+    topup_awal()
+    k = len(log)
+    admin = login("admin.tunjangan@lestari.example", "sementara-400", "<token sesi admin>")
+    dimas = login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+    ani = login("warung.ani@lestari.example", "sementara-418", "<token sesi Warung Ani>")
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 25000}', token=budi)
+    harap(s, 201, "Budi bayar Ani")
+    del log[k:]
+    log.append("# persiapan: login admin tunjangan (400), Dimas (417), Warung Ani (418), Budi (419)\n"
+               "# persiapan: Budi membayar Rp25.000 ke Warung Ani, transaksi 1 (rinciannya di bayar.txt)\n")
+
+    bagian("B. Satu transaksi, tiga peminta: pembayar, penerima, orang lain")
+    s1, b1 = curl("GET", "/transfers/1", token=budi)
+    s2, b2 = curl("GET", "/transfers/1", token=ani)
+    s3, _ = curl("GET", "/transfers/1", token=dimas)
+    harap((s1, s2, s3, b1 == b2), (200, 200, 404, True), "pembayar dan penerima 200, orang lain 404")
+
+    bagian("C. Peran: hanya admin tunjangan yang boleh top-up")
+    isi = "email,nominal\nbudi@lestari.example,10000"
+    s1, _ = curl("POST", "/topup?keterangan=Uji%20peran", isi, token=budi, jenis="text/csv",
+                 tampil_body="'email,nominal\\nbudi@lestari.example,10000'")
+    s2, _ = curl("POST", "/topup?keterangan=Uji%20peran", isi, token=admin, jenis="text/csv",
+                 tampil_body="'email,nominal\\nbudi@lestari.example,10000'")
+    harap((s1, s2), (403, 200), "karyawan 403, admin 200")
+    sql("SELECT akun_id, nominal, admin_id, keterangan FROM topup WHERE akun_id = 419 ORDER BY id")
+    sql("SELECT saldo FROM akun WHERE id = 419")
+
+    bagian("D. Urutan: login diperiksa sebelum izin")
+    s, _ = curl("POST", "/topup?keterangan=Uji%20peran", isi, jenis="text/csv",
+                tampil_body="'email,nominal\\nbudi@lestari.example,10000'")
+    harap(s, 401, "tanpa token: 401, bukan 403")
+
+    bagian("E. Ringkasan: empat request yang sama dari lima peminta, status saja")
+    hari_ini = next(k for k, v in samaran.items() if v == "<hari ini>")
+    peminta = [("Budi", budi), ("Ani", ani), ("Dimas", dimas), ("admin", admin), ("tanpa-token", None)]
+    request = [("/akun/419", "/akun/419"), ("/akun/419/riwayat", "/akun/419/riwayat"), ("/transfers/1", "/transfers/1"),
+               (f"/warung/418/laporan?dari={hari_ini}&sampai={hari_ini}", "/warung/418/laporan")]
+    harus = {"/akun/419": [200, 404, 404, 404, 401], "/akun/419/riwayat": [200, 404, 404, 404, 401],
+             "/transfers/1": [200, 200, 404, 404, 401], "/warung/418/laporan": [404, 200, 404, 404, 401]}
+    log.append("$ for p in Budi Ani Dimas admin tanpa; do curl -s -o /dev/null -w '%{http_code}' ...; done\n"
+               "# tanpa = tanpa header Authorization; laporan memakai ?dari=<hari ini>&sampai=<hari ini>\n")
+    log.append(f"{'GET':<22}" + "".join(f"{n:>7}" for n in ["Budi", "Ani", "Dimas", "admin", "tanpa"]) + "\n")
+    for asli, tampil in request:
+        hasil = [status_saja("GET", asli, t) for _, t in peminta]
+        harap(hasil, harus[tampil], f"matriks {tampil}")
+        log.append(f"{tampil:<22}" + "".join(f"{h:>7}" for h in hasil) + "\n")
+    tulis("authz.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5", "authz"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()

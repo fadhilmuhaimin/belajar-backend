@@ -138,7 +138,7 @@ Lab yang punya `Makefile` dijalankan dengan `make -C labs/<nama> run`. Sisanya d
 | `b2-model` | 1.8 | `make -C labs/b2-model run` |
 | `b4-migration` | 1.10 | `make -C labs/b4-migration run` |
 | `b3-stack` | 1.11, 2.1 | `make -C labs/b3-stack run` (butuh Go, Node, PHP + Composer; gagal bila hasil satu stack tidak sesuai skenario) |
-| `b5-rls` | 1.13 | `make -C labs/b5-rls run` |
+| `b5-rls` | 1.28, 1.29 | `make -C labs/b5-rls run` (gagal bila hasil RLS tidak sesuai) |
 | `f2-review` | 1.19 | `make -C labs/f2-review run` |
 | `b3-race` | 2.1 | `make -C labs/b3-race run` |
 | `b3-isolasi` | 2.2 | `make -C labs/b3-isolasi run` |
