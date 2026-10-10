@@ -27,7 +27,8 @@
       ]
     },
     {
-      "label": "Pagar 2 · RLS",
+      "label": "Pagar 2 · RLS (lab)",
+      "sub": "lab b5-rls; Rekeningo: Tahap 2",
       "simpul": [
         {
           "teks": "WHERE id = 418",
@@ -47,5 +48,5 @@
       ]
     }
   ],
-  "catatan": "Kalau satu pagar lupa bertanya, pagar lain tetap menyaring. Keduanya hanya berguna bila token Dimas tidak bisa diambil orang lain dari HP-nya."
+  "catatan": "Kalau satu pagar lupa bertanya, pagar lain tetap menyaring. Di Rekeningo, pagar kedua direncanakan untuk tabel ledger Tahap 2. Kedua pagar hanya berguna bila token Dimas tidak bisa diambil orang lain dari HP-nya."
 }
