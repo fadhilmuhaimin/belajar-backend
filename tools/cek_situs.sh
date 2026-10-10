@@ -54,5 +54,7 @@ if [ "${1:-}" = "--layar" ]; then
   (cd situs && node tools/ukur-ilustrasi.mjs --url "http://127.0.0.1:$PORT")
   echo "== reduced motion mematikan gerak (I3)"
   (cd situs && node tools/ukur-gerak.mjs --url "http://127.0.0.1:$PORT")
+  echo "== diagram: versi statis, scroll, keyboard (I4)"
+  (cd situs && node tools/ukur-diagram.mjs --url "http://127.0.0.1:$PORT")
 fi
 echo "== semua pemeriksaan lolos"
