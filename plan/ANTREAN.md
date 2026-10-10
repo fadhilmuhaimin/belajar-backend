@@ -191,11 +191,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.30 · M6: Deploy hari Senin
 
 - jenis: konten
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: 1.30-lab
 - selesai bila: halaman `t1-m6` (masalah, ★, peran devops) dengan template masalah dari rekaman prober; widget alur; ilustrasi adegan M6 baru lewat `<Blok ilustrasi="m6">`.
-- catatan: -
+- catatan: Selesai (keputusan 242): `tahap-1/m6-deploy-hari-senin.mdx`, Rantai `t1-m6-deploy`, alur `t1-m6.json` (dua HP, varian F–G), ilustrasi m6 di `ukur-ilustrasi.mjs`. Angka 5 menit dan 11 HP berlabel cerita.
 
 ### 1.27-lab · Lab: 401 tanpa header Authorization tanpa kode error
 
