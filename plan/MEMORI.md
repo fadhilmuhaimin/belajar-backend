@@ -42,9 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · K1 crosscheck 1.26–1.30 selesai di branch `crosscheck/k1` (keputusan 244, PR menunggu tinjauan pengatur, belum di-merge): alur Berikutnya 1.25 → 1.31 dan tautan bersih; 1.27 bcrypt dan 1.29 "103 akun" diperbaiki langsung.
-Temuan jadi K1a (favicon 404 + `title`/`class` tautan menyusul), K1b (batas percobaan login Tahap 2 vs 1.29 "Tahap 3"), K1c (ADR 7 butir 4 vs RLS ledger); pertentangan C3 lama dengan 1.30 ada di catatan 1.31. Enam usulan proses di `plan/USULAN-PERBAIKAN.md`.
-Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-10 · K1a favicon 404 dan sisa HTML tautan menyusul, branch `perbaikan/k1a-favicon`. File: `situs/public/favicon.svg` (baru), `situs/astro.config.mjs`, `situs/tools/sidebar.mjs`, `situs/tools/registri.mjs`, `situs/src/plugins/remark-rujukan.mjs`, `situs/src/components/SidebarPeran.astro`, `situs/src/styles/tema.css`. Rencana: simpan `layar.mjs` dan sidik `dist/` sebelum; ikon aksen di latar gelap; `title` menyusul satu konstanta di registri; kelas sidebar pindah ke `data-nav` (Starlight 0.42.5 menyebar `attrs` sesudah `class:list`, jadi `class` tercetak dua kali); periksa `dist/` dengan `tmp/k1a_cek.py`; bandingkan layar sesudah.
 
 ## Pelajaran
 
