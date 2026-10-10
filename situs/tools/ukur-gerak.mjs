@@ -2,6 +2,9 @@
 // - tanpa reduced motion, catatan muncul dengan gerak (frame pertama sesudah klik: opacity < 1 atau masih tergeser);
 // - dengan prefers-reduced-motion: reduce, catatan langsung tampil penuh di frame pertama (tanpa gerak), fungsi tetap.
 // Juga memeriksa bahwa halaman tanpa gerak memuat 0 animasi saat dibuka (aturan: tidak ada animasi yang berjalan sendiri).
+// Blok lipat (I5a, keputusan 238) di halaman konsep: klik kepala membuka/menutup dengan gerak (frame pertama belum penuh),
+// dengan reduced motion langsung penuh/tertutup tanpa animasi, klik kedua di tengah gerak membalik arah, dan tanpa
+// JavaScript <details> tetap bisa dibuka.
 //   node tools/ukur-gerak.mjs --url http://127.0.0.1:4321
 //   node tools/ukur-gerak.mjs --url ... --axe /path/axe.min.js   # + axe-core di halaman uji, gelap dan terang
 import { chromium } from "@playwright/test";
@@ -78,6 +81,82 @@ for (const reducedMotion of ["no-preference", "reduce"]) {
   }
   await page.close();
 }
+// Blok lipat: klik sungguhan di kepala blok yang tertutup, lalu rekam dua frame berikutnya.
+const HAL_BLOK = "/tahap-1/transaction/";
+const BLOK = 'details.blok[data-blok="blok-paham"]';
+async function klikBlok(page) {
+  await page.evaluate(() => {
+    window.__frame = [];
+    let mulai = false;
+    document.addEventListener("click", () => { mulai = true; }, { capture: true, once: true });
+    const ambil = () => {
+      const el = document.querySelector('details.blok[data-blok="blok-paham"]');
+      if (mulai) window.__frame.push({ open: el.open, tinggi: el.querySelector(".blok__isi").getBoundingClientRect().height, opacity: Number(getComputedStyle(el.querySelector(".blok__isi")).opacity), animasi: document.getAnimations().length });
+      if (window.__frame.length < 2) requestAnimationFrame(ambil);
+    };
+    requestAnimationFrame(ambil);
+  });
+  await page.click(BLOK + " > summary");
+  await page.waitForFunction(() => window.__frame.length >= 2);
+  return page.evaluate(() => window.__frame[0]);
+}
+const keadaanBlok = (page) =>
+  page.evaluate((s) => { const el = document.querySelector(s); return { open: el.open, gaya: el.querySelector(".blok__isi").getAttribute("style"), tinggi: Math.round(el.querySelector(".blok__isi").getBoundingClientRect().height) }; }, BLOK);
+for (const reducedMotion of ["no-preference", "reduce"]) {
+  const page = await browser.newPage({ viewport: { width: 375, height: 667 }, reducedMotion });
+  await page.goto(url + HAL_BLOK, { waitUntil: "networkidle" });
+  await page.locator(BLOK + " > summary").scrollIntoViewIfNeeded();
+  const animasiAwal = await page.evaluate(() => document.getAnimations().length);
+  const buka = await klikBlok(page);
+  await page.waitForTimeout(600);
+  const terbuka = await keadaanBlok(page);
+  const tutup = await klikBlok(page);
+  await page.waitForTimeout(600);
+  const tertutup = await keadaanBlok(page);
+  const bersih = terbuka.open && terbuka.gaya === null && !tertutup.open && tertutup.gaya === null;
+  const ok = reducedMotion === "reduce"
+    ? bersih && animasiAwal === 0 && buka.open && buka.opacity === 1 && Math.round(buka.tinggi) === terbuka.tinggi && buka.animasi === 0 && !tutup.open && tutup.animasi === 0
+    : bersih && animasiAwal === 0 && buka.open && buka.tinggi < terbuka.tinggi && buka.opacity < 1 && tutup.open && tutup.opacity <= 1;
+  console.log(`${ok ? "ok" : "GAGAL"} blok ${reducedMotion}: frame pertama buka ${Math.round(buka.tinggi)}/${terbuka.tinggi} px opacity ${buka.opacity.toFixed(2)} animasi ${buka.animasi}; frame pertama tutup open=${tutup.open}; akhir gaya sementara ${bersih ? "bersih" : "TERSISA"}`);
+  if (!ok) gagal++;
+  if (reducedMotion === "no-preference") {
+    // Disela: buka lalu klik lagi di tengah gerak; hasil akhirnya tertutup dan bersih.
+    await page.click(BLOK + " > summary");
+    await page.waitForTimeout(60);
+    await page.click(BLOK + " > summary");
+    await page.waitForTimeout(600);
+    const s = await keadaanBlok(page);
+    const okS = !s.open && s.gaya === null;
+    console.log(`${okS ? "ok" : "GAGAL"} blok disela: akhir open=${s.open}, gaya sementara ${s.gaya === null ? "bersih" : s.gaya}`);
+    if (!okS) gagal++;
+  }
+  if (AXE && reducedMotion === "no-preference") {
+    await page.click(BLOK + " > summary");
+    await page.waitForTimeout(600);
+    for (const tema of ["dark", "light"]) {
+      await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), tema);
+      await page.addScriptTag({ path: AXE });
+      const v = await page.evaluate(async () => {
+        const x = await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"] } });
+        return x.violations.map((p) => `${p.id}(${p.nodes.length})`);
+      });
+      console.log(`${v.length ? "GAGAL" : "ok"} axe blok ${tema}: ${v.length ? v.join(", ") : "0 pelanggaran"}`);
+      if (v.length) gagal++;
+    }
+  }
+  await page.close();
+}
+{
+  // Tanpa JavaScript: <details> bawaan browser tetap bisa dibuka.
+  const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 375, height: 667 } });
+  const page = await ctx.newPage();
+  await page.goto(url + HAL_BLOK);
+  await page.click(BLOK + " > summary");
+  const open = await page.locator(BLOK).evaluate((el) => el.open);
+  console.log(`${open ? "ok" : "GAGAL"} blok tanpa JavaScript: klik kepala membuka blok`);
+  if (!open) gagal++;
+  await ctx.close();
+}
 await browser.close();
-console.log(gagal ? "Fondasi gerak GAGAL" : "Reduced motion mematikan gerak; tanpa itu gerak berjalan");
+console.log(gagal ? "Fondasi gerak GAGAL" : "Reduced motion mematikan gerak (contoh dan blok); tanpa itu gerak berjalan");
 process.exit(gagal ? 1 : 0);
