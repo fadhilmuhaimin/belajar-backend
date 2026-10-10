@@ -15,6 +15,8 @@ $PY tools/sinkron_cerita.py --check | grep -v "^PERINGATAN" || true
 $PY tools/sinkron_cerita.py --check >/dev/null
 
 echo "== antrean loop otomatis"; $PY tools/antrean.py --check
+echo "== batas baris file yang diimpor CLAUDE.md (keputusan 235)"
+$PY tools/ukur_konteks.py --cek-baris plan/MEMORI.md:80 plan/RINGKAS.md:60
 echo "== istilah";              $PY tools/build_istilah.py --check
 echo "== audit bahasa";         $PY tools/audit_bahasa.py --check | tail -1
 $PY tools/audit_bahasa.py --check >/dev/null

@@ -1,0 +1,129 @@
+# Arsip pelajaran dan catatan MEMORI
+
+Dipindah dari plan/MEMORI.md saat MEMORI dipangkas ke 80 baris (keputusan 235, 2026-10-10). Tidak diimpor; cari dengan `grep -n <kata> plan/PELAJARAN-ARSIP.md`.
+
+## Pelajaran (sampai 2026-10-10)
+
+- Retrospektif K0e–I3 (2026-10-10): kelima tugas lolos tanpa percobaan ulang. Yang menyelamatkan tetap alat ukur kecil (I3: `ukur-gerak.mjs` menemukan `initial` di frame pertama yang tidak tertulis di dokumentasi). Penolakan dontAsk berulang untuk awalan env (`AXE=... node`) dan pipa ke `gzip`/`wc`; pakai argumen skrip dan skrip Python di `tmp/`.
+
+- Motion `reducedMotion="user"` hanya mematikan transform dan layout; opacity tetap beranimasi, dan durasi 0 masih menggambar `initial` di frame pertama. Ukur frame pertama sesudah klik (`ukur-gerak.mjs`), jangan percaya konfigurasi.
+- Menambah route di `src/pages/` atau `import()` lazy mengubah chunk bersama Vite: semua halaman berganti hash dan ukuran JS. Bandingkan sidik `tmp/sidik_dist.py` dan pastikan bedanya hanya pemindahan chunk.
+
+- Perubahan CSS global di atas Inti (mis. meta K0d) menggeser layar pertama semua halaman; simpan keluaran `layar.mjs` sebelum dan bandingkan sesudahnya, jangan hanya halaman yang diubah. Diff shell `<(...)` ditolak mode dontAsk; pakai `tmp/banding_layar.py`.
+
+- bun: `bun --cwd <dir> run <skrip>` mencetak bantuan dan keluar 0 (build "lolos" tanpa build); pakai `bun run --cwd <dir> <skrip>`. Gerbang build sekarang menuntut `Complete!` di log.
+
+- Retrospektif K0–K0d (2026-10-10): keempat perbaikan tampilan lolos di percobaan pertama setelah diukur dengan alat kecil Playwright (`ukur-ilustrasi`, `ukur-judul`), bukan dengan melihat tangkapan saja. Tangkapan dan `layar.mjs` melewatkan luapan 1–5 px. Pola: ukur dulu, perbaiki, ukur ulang, masukkan alat ke gerbang.
+- Setiap piksel tambahan di atas Inti di HP harus diambil dari tempat lain di layar pertama; cek `layar.mjs` untuk 1.23 (paling sempit).
+
+- Di halaman konsep, visual pertama sesudah Inti mulai di y≈420 px pada 375×667; tersisa ±245 px. `node situs/tools/layar.mjs` dari root gagal (mencari `dist/` relatif cwd); pakai `npm --prefix situs run layar`.
+
+- macOS di mesin ini tidak punya `timeout`/`gtimeout`; batasi lama perintah dengan timeout alat Bash atau `gh ... --watch`.
+- Mode auto menolak sesi mengubah izinnya sendiri (`.claude/settings.json`, label Self-Modification), lewat Bash maupun Edit; pemilik yang memasang perubahan izin.
+- `claude -p --output-format stream-json` selalu memancarkan `rate_limit_event` berstatus `allowed`; batas pemakaian dibaca dari field status, bukan dari teks "rate limit".
+- Token di `:root[data-theme="light"]` (mis. `--sl-content-width`) mengalahkan override splash Starlight; beranda harus menyetel lebarnya sendiri di `.content-panel:has(.beranda)`.
+- Build `main` di worktree: symlink `node_modules` membuat Vite gagal (path ganda); pakai `cp -cR` (clone APFS) dan salin `public/fonts` (di-.gitignore).
+- Audit bahasa menolak kata "pemakai" (juga di kunci JSON registry); pakai "user".
+- `tools/cek_situs.sh --layar` menyalakan preview di 127.0.0.1:4321; bila port itu dipakai dev server (yang mendengar di `localhost`), langkah layar gagal ECONNREFUSED. Jalankan `node tools/layar.mjs --url <preview lain>` dan `tangkap.mjs --url` manual; jangan mematikan dev server pemilik.
+- Starlight 0.42 menyetel ukuran artikel dari `--sl-text-base`, bukan `--sl-text-body`; aturan `details {font-size:0.92em}` mengenai `details.blok` (keputusan 200).
+- Merge berhenti sejak #115 (2026-10-09): `gh pr merge` ditolak pengaman mode otomatis satu kali, lalu sesi terus menumpuk PR (#116–#122) dan melapor "menunggu merge pemilik"; pemilik mengira sudah merge. Sekarang pemilik mengizinkan merge sendiri. Kalau merge ditolak lagi: berhenti, laporkan di baris pertama laporan, dan jangan memulai halaman berikutnya di atas PR yang belum di-merge.
+- Setelah gerbang lolos, perubahan teks apa pun (termasuk perbaikan audit di Cek diri) wajib diikuti `python3 tools/sinkron_cerita.py` dan gerbang ulang; CI #119 gagal karena `kartu.json` tertinggal.
+- gosec v2.29.0 G201/G202 hanya memeriksa query di assignment dan expression statement; query yang langsung di `return` tidak diperiksa (rekaman injection.txt E).
+- Aturan Starlight `:is(ol,ul):has(> li > :not(...)) > li > :last-child` memberi margin-bottom 1.25rem; list berisi tombol (cari-bug) perlu override.
+- Astro 7 `astro preview` berjalan di latar dan singleton; setelah build ulang, `astro preview stop` lalu jalankan lagi, kalau tidak halaman lama tersaji. Port bisa pindah ke 4322 (cek `astro preview status`).
+- Beberapa sesi Claude bisa memakai working tree yang sama; cek `git branch --show-current` sebelum commit, dan pakai `git worktree add` untuk pekerjaan panjang. Worktree butuh `situs/node_modules`, `labs/.venv` (symlink) dan `situs/public/fonts` (salin, diabaikan git).
+- `node tools/tangkap.mjs` menulis ke `tangkapan/` relatif cwd; jalankan dari `situs/` (di-.gitignore di sana), bukan dari root.
+- Hook PreCompact: stdout dan stderr dengan exit 0 hanya masuk debug log, tidak terlihat model; exit 2 memblokir compaction. Stdout SessionStart masuk konteks (docs hooks resmi).
+- Di dalam blok, Cek diri ditulis `### Cek diri`; sinkron membacanya sejak keputusan 127 dan menolak halaman konsep baru dengan kurang dari 3 kartu.
+- Widget lama dengan baris horizontal (flex) kena margin saudara Starlight; tambahkan kontainernya ke aturan `:is(...) > * + *` di tema.css (keputusan 124, 128).
+- ThemeSelect bawaan Starlight memilih "auto" bila belum ada pilihan dan menimpa default gelap; diganti `PilihTema.astro` (keputusan 119). `tangkap.mjs` kini memeriksa kunjungan pertama dengan sistem terang.
+- Komponen di dalam MDX bisa membaca `Astro.locals.starlightRoute.entry.body` (teks MDX halaman) untuk tahu posisinya.
+- File `.js` di bawah `situs/` dibaca sebagai ES module (`situs/package.json` type module); widget UMD lama butuh `situs/lama/package.json` type commonjs.
+- Di zsh, `for f in $VAR` tidak memecah kata; pakai `xargs` atau `${=VAR}`.
+- Gerbang situs sekarang: `bash tools/cek_situs.sh --layar` (±3 menit lokal). Python di alat cukup `python3` sistem (pustaka standar).
+- Di zsh, `grep -c` tanpa hasil keluar 1 dan memutus rantai `&&`; `PIPESTATUS` tidak ada (pakai `pipestatus`).
+- `tools/cek_batch.sh` lokal (2026-10-08, sebelum perubahan apa pun): lolos; 60/60 halaman, 103 tes widget, layar pertama 0 gagal; 52 peringatan audit bahasa (bukan error) dan 19 peringatan "Inti > 175 karakter" adalah keadaan normal, bukan regresi. Lama ±3 menit.
+- `make -C labs/b3-race run` dari nol (venv dihapus, container `down -v`): `make lab` 13 detik, `run` 3 detik. Satu-satunya diff adalah baris tanggal `direkam`/`recorded`; dikembalikan sesuai keputusan 82.
+- Workflow `on: pull_request` + `push: [main]` tidak jalan saat branch percobaan didorong; branch `percobaan/**` ditambahkan ke pemicu push supaya pembuktian CI tidak butuh PR.
+- `act` tidak terpasang di mesin ini; pembuktian CI memakai branch percobaan di GitHub.
+- Foreground `sleep` diblokir di lingkungan Claude Code; pakai `gh run watch` di background.
+- Di runner `ubuntu-latest` (24.04) Chrome headless mati dengan `ENOENT DevToolsActivePort`: penyebabnya AppArmor membatasi user namespace. Perbaikan lingkungan: `sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` sebelum `cek_batch.sh`; kode `tools/lib/chrome.mjs` tidak diubah.
+- Astro 7 memakai pemroses Markdown "Sätteri"; `markdown.remarkPlugins` hanya jalan dengan `processor: unified({...})` dari `@astrojs/markdown-remark` (harus dipasang eksplisit). `smartypants: false` supaya tanda kutip sama dengan situs lama.
+- Starlight 0.42 + Astro 7: route 404 bawaan memanggil `getEntry("docs","404")` dan Astro mencetak WARN bila tidak ada; dengan `404.md` route `[...slug]` bentrok. Solusi: `disable404Route: true` + `src/content/docs/404.md`.
+- Modul yang diimpor komponen Astro dipindah ke `dist/.prerender/chunks/` saat build, jadi `import.meta.url` tidak bisa dipakai untuk mencari root repo; `tools/registri.mjs` mencari `mkdocs.yml` dari `process.cwd()` ke atas.
+- Starlight memerlukan koleksi `i18n` (bisa berisi `{}`) bila `locales` diisi; tanpa itu ada WARN "collection i18n does not exist".
+- Blok kode Shiki tanpa `overflow-x: auto` membuat scroll horizontal di 375 px; `tools/tangkap.mjs` memeriksa `scrollWidth` di tiap tangkapan.
+- Widget `stackstep.js` bergantung pada DOM Material (`.tabbed-set`, `span[id^=__span]`); kontrak itu dibuat ulang oleh `Snippet.astro` + `TabSet.astro` (keputusan 103), bukan dengan mengubah widget.
+- Starlight membungkus heading jadi `div.sl-heading-wrapper > h2 + a.sl-anchor-link`; pemeriksa yang berjalan dari `h2.nextElementSibling` harus mulai dari pembungkusnya (bug pertama `tools/layar.mjs` melaporkan lolos palsu).
+- Tipe 19 px + header Starlight + bar "Di halaman ini" di HP membuat layar pertama sempit: `.content-panel` padding 0.75rem (0.6rem di HP), H1 2.2rem/1.6rem, pretest rapat ke Inti. Margin 1.11 di 375×667 tinggal 9 px; halaman dengan judul dua baris perlu dicek dulu dengan `npm run layar`.
+- Konverter: link Markdown relatif ke `.md` lain (`../cerita/tahap-1.md`) harus diubah ke URL absolut lewat registry; `</details>` dan `</TabSet>` butuh baris kosong sesudahnya supaya heading berikutnya tidak tertelan MDX.
+- Chromium di runner Linux merender ±25 px lebih tinggi daripada di Mac untuk bagian atas halaman HP; margin layar pertama lokal harus ≥ 20 px (ambang `tipis`), bukan sekadar > 0.
+- Panggilan Bash paralel berbagi direktori kerja; selalu pakai path absolut untuk `node tools/...`.
+- Halaman lama dengan judul pendek di H1 (keputusan 68/74) berbeda dari `title` frontmatter; Starlight memakai satu `title`, jadi konverter mengambil H1 badan. `banding.mjs` menangkapnya sebagai "urutan heading BERBEDA".
+- pymdownx.snippets punya dua pola selain region: beberapa baris `--8<--` dalam satu fence (digabung) dan rentang baris `file:1:13`; Snippet mendukung `files={[...]}` dan `lines="1:13"`.
+
+## Sedang dikerjakan (sampai 2026-10-10)
+
+2026-10-10 · 1.26 M5 selesai (keputusan 234), branch `tahap-1/m5-angka-di-url`. Halaman `tahap-1/m5-angka-di-url.mdx`, Rantai `t1-m5-pemilik.json`, alur `lama/widgets/data/skenario/t1-m5.json`, ilustrasi `m5` (tanpa teks di SVG). Token di app hanya berlabel Ilustrasi dan merujuk 1.29; 1.29 harus memuat ADR 8 dengan sumber shared_preferences 2.5.6 dan flutter_secure_storage 11.2.0. Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-10 · I4 selesai (keputusan 232), branch `interaksi/i4`. Diagram arsitektur: `<DiagramArsitektur client:visible id="..." judul="Arsitektur Tahap N" data={Arsitektur.parse(t.arsitektur)} />` dari `situs/src/diagram/` (data registry `tahap[].arsitektur`, skema di `skema.ts`, tata di `tata.ts`). Contoh: `src/pages/uji/diagram.astro`. Diagram baru wajib lolos `ukur-diagram.mjs` (path uji di alat itu). Ukuran JS per halaman: `python3 tmp/ukur_diagram_js.py` (penutupan impor; siapa yang memuat React Flow). Berikutnya: `python3 tools/antrean.py berikut`.
+I3 selesai (keputusan 231), branch `interaksi/i3`. Komponen yang memakai gerak: bungkus island dengan `MotionProvider` (`situs/src/gerak/`), pakai `import * as m from "motion/react-m"`, `transition` dari `useGerak("cepat"|"sedang", "masuk"|"keluar")`, `initial` dari `useAwal(...)`; jangan tulis `duration: <angka>` (Vitest gagal). Contoh: `ContohGerak.tsx` di `/uji/gerak/` (StarlightPage, di luar registry). `ukur-gerak.mjs --axe tmp/axe/axe.min.js` menjalankan axe juga (axe-core 4.10.3 dari unpkg; env `AXE=` di depan perintah ditolak dontAsk). Berikutnya: `python3 tools/antrean.py berikut`.
+I2 selesai (keputusan 229, 230): `motion` 14.1.0 dan `@xyflow/react` 12.12.0 dipin persis; ukuran paket diukur `python3 tmp/ukur-paket/ukur.py`.
+I1 selesai (keputusan 225), branch `interaksi/i1`: situs memakai bun 1.4.2 (`situs/bun.lock`, CI `oven-sh/setup-bun@v2`). Perintah situs sekarang: `bun run --cwd situs build|preview|test|cek-tipe|tangkap|layar` (urutan ini; `bun --cwd situs run x` mencetak bantuan dengan exit 0). bun lokal masih 1.2.19; versi CI dijalankan dengan `npx --yes bun@1.4.2 ...`. Ukuran JS per halaman dicatat di `plan/AUDIT-TAMPILAN.md` bagian 7 (alat sementara `tmp/sidik_dist.py`, `tmp/banding_dist.py`). Berikutnya: `python3 tools/antrean.py berikut` (I2: `bun add` motion dan @xyflow/react).
+K0e selesai (keputusan 224): chip `amount`/`jumlah` di `situs/src/components/Ilustrasi.astro` dilebarkan; `ukur-ilustrasi.mjs` dan `ukur-judul.mjs` kini sama-sama di `cek_situs.sh --layar`. Ilustrasi baru (M5, M6, latar) wajib lolos `ukur-ilustrasi` (tambahkan path halamannya ke daftar di alat itu). Jangan tambah tinggi di atas Inti di HP: 1.23 hanya punya 28 px di 375×667. Berikutnya: `python3 tools/antrean.py berikut` (I1). Preview yang tertinggal dimatikan dengan `npm --prefix situs run preview -- stop` (`npx --prefix situs astro preview stop` dari root tidak menemukannya). `layar.mjs` tidak mengukur halaman ADR ("tanpa Inti"); cek layar pertama ADR dengan tangkapan. Rantai di Inti selalu pakai `ringkas` dan maksimal dua baris pendek; ukur dengan `npm --prefix situs run layar -- --url http://127.0.0.1:4321` (perlu build + preview ulang). Tangkapan dari root: `npm --prefix situs run tangkap -- --url http://127.0.0.1:4321 --path /<path>/` (menulis ke `situs/tangkapan/`); `cd` dan perintah majemuk ditolak mode dontAsk, jadi satu perintah per panggilan dengan path relatif.
+2026-10-09 · Sistem kerja otomatis siap (keputusan 216, 217). Satu-satunya pekerja: `tools/jalankan-otomatis.sh`; setiap iterasi membaca `plan/PROTOKOL-OTOMATIS.md` dan mengerjakan satu tugas dari `plan/ANTREAN.md` (berikutnya: `python3 tools/antrean.py berikut`). Tidak ada worktree lagi; kerja di folder utama, branch dari main, paling banyak satu PR terbuka, merge sendiri bila CI hijau. Lanjutkan: `caffeinate -dims bash tools/jalankan-otomatis.sh` di main bersih.
+Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh disesuaikan dengan PRD v1 (tanpa katalog/pesanan), hapus file lama + data widget lama yang tidak dipakai, perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
+Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
+
+## Keputusan baru (sampai 2026-10-10)
+
+- Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (aturan dari keputusan 216); sisa 174–199 dibiarkan kosong.
+- 234: 1.26 M5 (halaman masalah, alur `t1-m5.json`, ilustrasi m5 tanpa teks).
+- 233: 1.26-lab, mode rentan m5 + `m5.txt`; `run.py` membuang warna ANSI gosec.
+- 232: I4, fondasi diagram `situs/src/diagram/` (skema Zod registry arsitektur + zona, tata mendatar/tegak, React Flow terkunci), `/uji/diagram/`, `ukur-diagram.mjs`.
+- 231: I3, fondasi gerak `situs/src/gerak/` (token, MotionProvider, `useGerak`, `useAwal`), halaman uji `/uji/gerak/`, `ukur-gerak.mjs`.
+- 229–230: I2, motion 14.1.0 dan @xyflow/react 12.12.0 (ADR dependency).
+- 228: K0f, kartu Peta cerita dirapikan (margin desktop 14 → 32 px; penyebab meta K0d).
+- 227: `.devcontainer/postCreate.sh` memasang bun 1.4.2 dan `bun install --frozen-lockfile` (diizinkan pemilik).
+- 226: skrip loop menunggu batas pemakaian pulih (`resetsAt` + 2 menit), laporan pagi ikut menunggu (tenggang 180 menit), nomor log berlanjut.
+- 225: I1, situs pindah ke bun 1.4.2 (`bun.lock`, setup-bun di CI); gerbang build menuntut `Complete!`.
+- 224: K0e, chip ilustrasi M2 dilebarkan; `ukur-ilustrasi.mjs` di gerbang `--layar`.
+- 223: K0d, `p.meta` tanpa margin negatif; `ukur-judul.mjs` di gerbang; ruang HP diambil dari jarak meta ke blok.
+- 222: K0c, ilustrasi M4 saldo dicoret; `ukur-ilustrasi.mjs`; temuan M2 jadi K0e.
+- 221: K0b, Rantai ringkas di Kebutuhan 1.24 (dua pertanyaan PRD → ADR 5, ADR 6).
+- 220: K0a, Rantai prop `ringkas` untuk Inti (HP mendatar tanpa sub); Inti 1.21, 1.23, 1.25.
+- 218: crosscheck K0 di `plan/CROSSCHECK-KECIL.md`; temuan K0a–K0c.
+- 219: hasil uji kering, tabel perintah yang ditolak di protokol, tugas K0d. 218: crosscheck K0 (dari loop).
+- 217: satu pekerja; #120 di-merge, worktree konten ditutup, lab m5 di branch `tahap-1/lab-m5`.
+- 216: sistem otomatis (ANTREAN, PROTOKOL-OTOMATIS, `tools/antrean.py`, `tools/jalankan-otomatis.sh`, deny loop di `tools/otomatis.settings.json`).
+- 211–215: visual redesain (PetaFitur, Rantai, diagram ADR 1 dan halaman masalah, ilustrasi M4); 200–210: redesain tampilan (#120).
+- 173: 1.25 migration; 172: lab b4-migration v1 (drift laptop/server, dirty).
+- 171: 1.24 ADR 5–6; 170: lab DalamTx + koreksi.
+- 169: 1.23 transaction.
+- 168: 1.22 M4; 167: mode rentan m4 + `m4.txt`, PORT_PREVIEW di cek_situs.sh.
+- 166: 1.21 lapisan dasar; 165: `cek_arah.py` + rekaman `lapisan.txt`.
+- 162: 1.20 SQL injection + ADR 4; 161: cari-bug field `aman` + CSS baris; 160: rekaman injection (log PG, gosec, latihan/).
+- 159: 1.19 M3 (injection); 158: widget React cari-bug; 157: lab pencarian + mode rentan m3.
+- 156: 1.18 + ADR 3; 155: kontrak b1-openapi v1, bacaJSON/wajibAda, -rentan m2.
+- 154: 1.17 M2; 153: lab m2 (field asing diabaikan, judul 400 menyesatkan).
+- 152: 1.16 HTTP dari http.txt; 151: GET /transfers/{id} supaya Location jujur.
+- 150: 1.15 + ADR 2; B1.2 dihapus, rujukan ke B6; penamaan resource pindah ke 1.18.
+- 149: 1.14 M1 (masalah pertama); 148: mode rentan -rentan m1, runsql setup per panel.
+- 147: 1.13 ditulis ulang (Sinta bertanya, banding fitur v1).
+- 146: 1.12 ditulis ulang ke tabel v1; lab relasi (145).
+- 144: halaman 1.11 + widget React pertama jumlah-total (src/widgets/, data/widget/).
+- 143: lab api-t1 bagian pertukaran (SUM saldo = SUM top-up).
+- 142: pengaman loop (tree bersih + main), log stream-json.
+- 141: halaman 1.10 (laporan per tanggal WIB vs UTC).
+- 140: hooks PreCompact/SessionStart, `tools/jalankan-tahap.sh` (loop headless + crosscheck akhir), CLAUDE.md butir 7.
+- 109: konten dulu, satu tahap sampai tuntas; CERITA jadi sumber tertinggi; tiga skill wajib.
+- 110: job CI `pesan_commit` menolak Co-Authored-By/Claude di pesan commit PR.
+- 111: gerbang situs `tools/cek_situs.sh` (registry, istilah, audit, build, ID, kontras, tes; `--layar`).
+- 112–114: MkDocs, halaman Markdown lama, dan `docs/` dihapus; registry di `situs/data/cerita.json`, widget lama di `situs/lama/`.
+- 115: Cloudflare Pages Direct Upload dari CI; menunggu secret pemilik.
+- 116: React 19.3, TS 6.0.3 (bukan 7: peer @astrojs/check), Zod 4.6, Vitest 5; `astro check` strict di gerbang.
+- 121: beranda satu layar (splash); A0 pindah ke /cara-pakai/ (lama); layar.mjs memeriksa beranda.
+- 120: breadcrumb otomatis di atas judul (jangan tulis `<KamuDiSini>` di halaman), pemilih peran, mode fokus.
+- 119: tema hanya Gelap/Terang; kunjungan pertama selalu gelap.
+- 118: `Blok.astro` + `data/templat.json`; kerangka di `situs/templat/`; daftar isi = blok (route middleware).
+- 117: registry v2, Tahap 1 = 42 halaman 1.1–1.42; ID lama dipakai ulang; B1.2/F2 lebur, T1 lama diganti PRD.
+
