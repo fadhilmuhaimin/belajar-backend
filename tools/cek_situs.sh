@@ -45,10 +45,25 @@ node --test tests/widgets/*.cjs >/dev/null 2>&1
 if [ "${1:-}" = "--layar" ]; then
   echo "== layar pertama 4 ukuran + tangkapan"
   PORT="${PORT_PREVIEW:-4321}"   # worktree paralel memakai port lain, mis. PORT_PREVIEW=4323
-  bun run --cwd situs preview --port "$PORT" --host 127.0.0.1 >/dev/null 2>&1 &
-  PID=$!
-  trap 'kill $PID 2>/dev/null || true' EXIT
-  for _ in $(seq 1 30); do curl -sf "http://127.0.0.1:$PORT/" >/dev/null && break; sleep 1; done
+  # Astro 7 menjalankan preview sebagai daemon (otomatis bila dijalankan agen), dicatat di lock
+  # situs/.astro/preview.json milik worktree ini. `preview stop` hanya menghentikan daemon itu,
+  # bukan server worktree lain. Penanda acak di dist membuktikan server di $PORT melayani
+  # build ini, bukan daemon lama atau server lain di port yang sama (keputusan 249).
+  henti_preview() { bun run --cwd situs preview stop >/dev/null 2>&1 || true; rm -f situs/dist/gerbang-tanda.txt; }
+  henti_preview
+  TANDA="$$-$RANDOM-$(date +%s)"
+  echo "$TANDA" > situs/dist/gerbang-tanda.txt
+  trap henti_preview EXIT
+  bun run --cwd situs preview --background --port "$PORT" --host 127.0.0.1 >/dev/null 2>&1 || true
+  SIAP=0; BATAS=$((SECONDS + 30))
+  while [ "$SECONDS" -lt "$BATAS" ]; do
+    if [ "$(curl -sf --max-time 2 "http://127.0.0.1:$PORT/gerbang-tanda.txt" 2>/dev/null)" = "$TANDA" ]; then SIAP=1; break; fi
+    sleep 1
+  done
+  if [ "$SIAP" != 1 ]; then
+    echo "GAGAL: http://127.0.0.1:$PORT tidak melayani situs/dist worktree ini dalam 30 detik (preview tidak menyala, tidak menjawab, atau port dipegang server lain). Log daemon: situs/.astro/preview.log. Cek: lsof -nP -iTCP:$PORT -sTCP:LISTEN; worktree lain pakai PORT_PREVIEW=4323."
+    exit 1
+  fi
   (cd situs && node tools/layar.mjs --url "http://127.0.0.1:$PORT" && node tools/tangkap.mjs --url "http://127.0.0.1:$PORT")
   echo "== jarak judul ke meta (K0d)"
   (cd situs && node tools/ukur-judul.mjs --url "http://127.0.0.1:$PORT" | grep -v "^ok ")

@@ -263,11 +263,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### G1 · Gerbang menghentikan daemon preview
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: `tools/cek_situs.sh` menjalankan `bun run --cwd situs preview stop` (atau padanan yang benar) sebelum mulai dan di trap; gagal keras bila loop `curl` tidak pernah berhasil; memastikan server yang dilayani adalah `situs/dist` worktree ini (mis. bandingkan `index.html` yang dilayani dengan `situs/dist/index.html`); sesudah gerbang LOLOS tidak ada proses yang memegang port 4321.
-- catatan: ditemukan peninjau PR #161; `astro preview` Astro 7 berjalan sebagai daemon, `trap kill $PID` hanya membunuh `bun run`, dan saat daemon lama hidup Astro mencetak "Preview server already running" sehingga gerbang memakai server lama (bisa dari worktree lain).
+- catatan: ditemukan peninjau PR #161; `astro preview` Astro 7 berjalan sebagai daemon, `trap kill $PID` hanya membunuh `bun run`, dan saat daemon lama hidup Astro mencetak "Preview server already running" sehingga gerbang memakai server lama (bisa dari worktree lain). Selesai: keputusan 249.
 
 ### 1.32 · Testing: apa dites di level mana
 
