@@ -44,7 +44,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · 1.31 perbaikan review PR #160 (keputusan 247): tag CI 7 karakter, login GHCR `read:packages`, checklist tag rilis, `500` + log server, kode lab dari commit `f128167` dengan `harap` hash, baris Serverpod bersumber. PR menunggu tinjauan pengatur, belum di-merge. Berikutnya: python3 tools/antrean.py berikut
+2026-10-11 · I5b beranda: peta tahap memakai DiagramArsitektur (branch `interaksi/i5b`). Rencana: satu island `PetaDiagram.tsx` di bagian peta menerima diagram Tahap 1–5 dari registry (Tahap 6 proyeksi: tanpa diagram, tidak dikarang), tab vanilla mengirim tahap terpilih; ganti tahap = ReactFlow dipasang ulang (fitView) + gerak masuk `motion/mini` dari token; jawaban teka-teki muncul dengan gerak singkat yang sama; reduced motion tanpa gerak. File: `Beranda.astro`, `src/diagram/`, `src/gerak/`, `widgets/tebak/Tebak.tsx`, `tema.css`, `ukur-diagram.mjs`, `ukur-gerak.mjs`, AUDIT-TAMPILAN bagian 7. Ukur sebelum/sesudah: sidik JS, `layar.mjs`, tangkapan beranda.
 
 ## Pelajaran
 
