@@ -16,6 +16,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 ## Catatan untuk halaman Tahap 1 berikutnya
 
 - 1.29 harus memuat ADR 8 dengan sumber shared_preferences 2.5.6 dan flutter_secure_storage 11.2.0 (1.26 merujuknya).
+- 1.29 (ADR 7): policy RLS membaca `app.akun_id`; isi dengan `SET LOCAL` atau `set_config(..., true)` di dalam transaction, bukan `SET` biasa (sesudah COMMIT nilainya bertahan sampai akhir sesi, jadi terbawa ke request berikutnya di connection pool; docs PostgreSQL sql-set dan functions-admin). Masukkan ke checklist review.
 - 1.33 (E1): prasyarat B4.2 dibuang; ADR 10 (expand lalu contract) harus berdiri sendiri, tanpa rekaman crash B4.2.
 - 1.39 (F1) menyerap F2: hapus halaman F2 dan entrinya di PR yang sama (pola keputusan 150).
 - Ilustrasi latar Grup Lestari dan M6 belum ada; ilustrasi baru wajib lolos `ukur-ilustrasi.mjs` (tambahkan path halamannya ke alat itu). `situs/lama/assets/cerita/tahap-1.svg` tidak dipakai lagi.
