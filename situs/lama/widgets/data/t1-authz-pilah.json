@@ -40,7 +40,7 @@
     {
       "teks": "Admin tunjangan: GET /akun/419",
       "jawab": 2,
-      "kenapa": "Peran admin memberi satu aksi, yaitu top-up. Membaca saldo Budi tidak termasuk, jadi akun 419 dijawab seperti akun orang lain. Rekaman bagian E."
+      "kenapa": "Peran admin hanya memberi aksi admin: top-up dan koreksi. Membaca saldo Budi tidak termasuk, jadi akun 419 dijawab seperti akun orang lain. Rekaman bagian E."
     },
     {
       "teks": "Budi: GET /warung/418/laporan",

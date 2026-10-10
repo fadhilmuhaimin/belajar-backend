@@ -87,7 +87,7 @@ Ani menerima uang Budi, jadi ia boleh membuka transaksi 1. Riwayat Budi tetap te
 
 <Snippet file="labs/api-t1/output/authz.txt" lines="26:46" title="Rekaman lab: labs/api-t1/output/authz.txt" />
 
-Peran admin hanya memberi aksi top-up. Di ringkasan rekaman, admin mendapat `404` untuk akun 419, sama dengan Ani dan Dimas. OWASP menyebut prinsip ini least privilege: setiap peran hanya mendapat akses yang ia butuhkan ([OWASP: Authorization](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)).
+Peran admin hanya memberi aksi admin: top-up dan koreksi (ADR 6 di [[t1-adr-transaction]]). Membaca akun orang lain tidak termasuk. Di ringkasan rekaman, admin mendapat `404` untuk akun 419, sama dengan Ani dan Dimas. OWASP menyebut prinsip ini least privilege: setiap peran hanya mendapat akses yang ia butuhkan ([OWASP: Authorization](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)).
 
 **5. Login diperiksa lebih dulu.** Tanpa token, `wajibLogin` menjawab `401` dan service tidak pernah jalan. Karena itu request top-up tanpa token mendapat `401`, bukan `403`:
 
@@ -233,7 +233,7 @@ create policy "pembayar atau penerima" on transaksi for select
 | Filter di query (`WHERE id = $1 AND pemilik = $2`) | Lupa cek berarti tidak ditemukan, bukan bocor | Aturan bisnis tersebar di banyak query di repo | Banyak query baca per pemilik |
 | RLS di database | Berlaku untuk setiap query, termasuk yang lupa | Gagal diam-diam (`UPDATE 0`); superuser dan pemilik tabel melewatinya | App membaca database langsung, atau sebagai pagar kedua |
 
-Rekeningo v1 punya tiga jenis akun dan lima endpoint ber-ID. Pertanyaan di service cukup terbaca untuk satu orang, dan test bisa memanggilnya tanpa HTTP. Keputusan lengkapnya, termasuk RLS sebagai pagar kedua, ada di ADR 7 di [[t1-idor]].
+Rekeningo v1 punya tiga jenis akun dan empat endpoint dengan ID di path. Pertanyaan di service cukup terbaca untuk satu orang, dan test bisa memanggilnya tanpa HTTP. Keputusan lengkapnya, termasuk RLS sebagai pagar kedua, ada di ADR 7 di [[t1-idor]].
 
 ### Sengaja belum dilakukan
 
