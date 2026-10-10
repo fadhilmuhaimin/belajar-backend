@@ -23,10 +23,11 @@ SELECT id, nama, saldo FROM akun WHERE id = 418;
 UPDATE akun SET saldo = 0 WHERE id = 418;
 UPDATE 0
 -- 3. Request tanpa identitas akun
-SELECT current_setting('app.akun_id', true) = '' AS kosong_sesudah_reset;
- kosong_sesudah_reset 
-----------------------
- t
+SELECT current_setting('app.akun_id', true) = '' AS kosong_sesudah_reset,
+       pg_input_is_valid(current_setting('app.akun_id', true), 'bigint') AS bisa_jadi_bigint;
+ kosong_sesudah_reset | bisa_jadi_bigint 
+----------------------+------------------
+ t                    | f
 (1 row)
 
 SELECT id, nama, saldo FROM akun ORDER BY id;

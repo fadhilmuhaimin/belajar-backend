@@ -32,7 +32,8 @@ UPDATE akun SET saldo = 0 WHERE id = 418;
 
 \echo '-- 3. Request tanpa identitas akun'
 RESET app.akun_id;
-SELECT current_setting('app.akun_id', true) = '' AS kosong_sesudah_reset;
+SELECT current_setting('app.akun_id', true) = '' AS kosong_sesudah_reset,
+       pg_input_is_valid(current_setting('app.akun_id', true), 'bigint') AS bisa_jadi_bigint;
 SELECT id, nama, saldo FROM akun ORDER BY id;
 RESET ROLE;
 

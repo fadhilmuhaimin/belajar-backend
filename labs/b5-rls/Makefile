@@ -8,4 +8,5 @@ run:
 	@grep -q '^ app_rekeningo | 417 | Dimas | 250000$$' output/rls.txt || { echo "GAGAL: Dimas harus hanya melihat akun 417"; exit 1; }
 	@test "$$(grep -c '^ pemilik_b5' output/rls.txt)" = 2 && grep -q '^ pemilik_b5   |        3$$' output/rls.txt && grep -q '^ pemilik_b5   |        0$$' output/rls.txt || { echo "GAGAL: pemilik tabel harus 3 baris tanpa FORCE, 0 sesudahnya"; exit 1; }
 	@test "$$(grep -c '^ 418 | Warung Ani |  25000$$' output/rls.txt)" = 1 || { echo "GAGAL: saldo Ani di akhir harus tetap 25000"; exit 1; }
+	@grep -q '^ t                    | f$$' output/rls.txt || { echo "GAGAL: sesudah RESET, setting harus kosong dan tidak bisa jadi bigint"; exit 1; }
 	@echo "rls.txt: hasil sesuai"
