@@ -272,11 +272,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.32 · Testing: apa dites di level mana
 
 - jenis: konten
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: C1 ditulis ulang ke `tahap-1/` dengan lima blok, widget pilah dan stackstep, lab api-t1; tanpa Snippet `api-t1-lama`.
-- catatan: -
+- catatan: keputusan 250, 251; PR menunggu tinjauan pemilik
 
 ### 1.33 · App versi lama + ADR 10
 

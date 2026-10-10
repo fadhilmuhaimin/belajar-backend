@@ -42,10 +42,11 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - Redesain #120: usulan perubahan PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` di `plan/AUDIT-TAMPILAN.md` bagian 6, belum diubah.
 - ADR 7 (keputusan 240): RLS sebagai pagar kedua dipasang di tabel ledger Tahap 2, tidak di tabel v1 `api-t1` (rekaman `b5-rls` bagian 5: policy pemilik membuat bayar ke warung `UPDATE 0`). Kalau RLS harus sudah berjalan di Tahap 1, perlu tugas lab `api-t1` sendiri.
 - Cloudflare Pages (keputusan 115): butuh API token (Account > Cloudflare Pages > Edit) dan Account ID, lalu `gh secret set CLOUDFLARE_API_TOKEN` dan `gh secret set CLOUDFLARE_ACCOUNT_ID`.
+- Serverpod 4 (1.32): apakah exception buatan sendiri sampai ke tes `withServerpod` dengan tipe aslinya [perlu verifikasi].
 
 ## Sedang dikerjakan
 
-2026-10-11 · Tahap 1 · 1.32 Testing (C1 ditulis ulang ke tahap-1/testing.mdx). Rencana: tes Go nyata di labs/api-t1 (unit service tanpa database, integration service + PostgreSQL untuk M4 dan riwayat f5ea0b4, HTTP di cmd/api), bagian rekam testing.txt (tanpa DATABASE_URL seperti CI 1.31, dengan PostgreSQL, bug M4 dan BUG_RIWAYAT dikembalikan ke salinan kode); halaman lima blok dengan pilah dan stackstep (Go dari lab, tab lain dicek ke dokumentasi, termasuk Dart Serverpod); hapus C1 lama dan data widget c1 lama; registry, indeks-topik, sinkron_cerita. File: labs/api-t1/{internal/service,cmd/api}/*_test.go, labs/api-t1/run.py, situs/src/content/docs/tahap-1/testing.mdx, situs/data/cerita.json, situs/public/widgets/data/t1-testing-*.json.
+2026-10-11 · 1.32 Testing selesai di branch `tahap-1/testing` (keputusan 250, 251), PR menunggu tinjauan: tes Go nyata di `labs/api-t1` (unit, integration PostgreSQL, HTTP), rekaman `testing.txt`, halaman `tahap-1/testing.mdx`. Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
@@ -73,3 +74,4 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - Animasi CSS yang dipicu event `toggle` (async) mulai satu sampai dua frame sesudah `<details>` terbuka: isi penuh sempat berkedip. Ukur frame per rAF sesudah klik sungguhan (`page.click`, bukan `el.click()`, yang tidak mengirim pointerdown).
 - Penanda selesai di `tmp/` bisa tertinggal dari sesi lama (K1: `tmp/cek-hasil.txt` membuat Monitor menyala saat gerbang masih jalan); hapus penanda sebelum gerbang mulai, atau tunggu prosesnya (`pgrep -f cek_situs`).
 - `tmp/sidik_dist.py` hanya menghitung file yang dirujuk HTML; chunk yang diimpor island (React Flow) terlihat lewat `tmp/ukur_diagram_js.py` atau byte jaringan (`situs/tangkapan/i5b-jaringan.mjs`). React Flow `fitView` hanya untuk node awal: data baru = ReactFlow baru (`key`).
+- layar.mjs tidak menghitung Snippet sebagai visual Inti; Inti butuh Rantai atau widget (1.32 gagal 4 ukuran sebelum Rantai).

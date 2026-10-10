@@ -468,25 +468,25 @@
   "id": "C1-1",
   "halaman": "C1",
   "judul": "1.32 Testing: apa dites di level mana",
-  "url": "c-operasional/c1-testing/",
-  "tanya": "AI menulis test transfer dengan mock repository yang selalu mengembalikan \"sukses\". Test lolos. Apa yang belum terbukti?",
-  "jawab": "Semua yang dikerjakan database: SQL-nya benar, constraint berlaku, transaction rollback saat gagal, dan lock mencegah race. Mock hanya membuktikan logika bisnis memanggil method yang benar."
+  "url": "tahap-1/testing/",
+  "tanya": "Aturan \"jumlah paling banyak Rp200.000\" baru ditambah ke service. Tes level mana yang paling tepat, dan nilai apa yang dicoba?",
+  "jawab": "Unit test tanpa database, karena aturan itu diperiksa sebelum repo dipanggil. Nilai yang dicoba berada di sekitar batas: minus, nol, dan Rp200.001, seperti rekaman lab. Bahwa Rp200.000 diterima baru terlihat sesudah repo dipanggil, jadi kasus itu butuh database."
  },
  {
   "id": "C1-2",
   "halaman": "C1",
   "judul": "1.32 Testing: apa dites di level mana",
-  "url": "c-operasional/c1-testing/",
-  "tanya": "Jelaskan kenapa regression test race di rekaman memeriksa total saldo, bukan saldo Budi saja.",
-  "jawab": "Urutan dua request paralel tidak bisa ditebak, jadi saldo akhir Budi bisa Rp30.000 atau Rp50.000, dan keduanya sah. Yang selalu benar adalah invarian: total uang Budi + Ani tetap Rp350.000. Di mode naif, total juga bergantung urutan: rekaman ini Rp400.000 (Rp50.000 tercipta), dan run lain bisa Rp420.000 (Rp70.000 tercipta)."
+  "url": "tahap-1/testing/",
+  "tanya": "`go test ./...` di CI menulis `ok` untuk semua paket. Di log, empat tes tertulis `SKIP`. Apa yang sudah terbukti?",
+  "jawab": "Hanya unit test. `t.Skip` menghentikan tes tanpa menandainya gagal, jadi paketnya tetap `ok`. Constraint, transaction, query riwayat, dan format HTTP belum dijalankan sama sekali (rekaman bagian A)."
  },
  {
   "id": "C1-3",
   "halaman": "C1",
   "judul": "1.32 Testing: apa dites di level mana",
-  "url": "c-operasional/c1-testing/",
-  "tanya": "`go test -race ./...` lolos tanpa peringatan. Apakah endpoint transfer aman dari race condition?",
-  "jawab": "Belum tentu. Race detector hanya melihat akses memori di dalam proses Go. Race di 2.1 Race condition terjadi di antara dua transaction di PostgreSQL, di luar pengamatannya. Yang membuktikan adalah test dengan request paralel ke database sungguhan."
+  "url": "tahap-1/testing/",
+  "tanya": "AI menulis tes riwayat dengan mock repo yang selalu mengembalikan satu baris. Tes lolos. Apakah bug `f5ea0b4` tertangkap?",
+  "jawab": "Tidak. Bug itu ada di klausa `WHERE`, dan mock tidak pernah menjalankan SQL. Tes yang menangkapnya memanggil service dengan PostgreSQL sungguhan, lalu memeriksa isi riwayat (rekaman bagian D)."
  },
  {
   "id": "E1-1",

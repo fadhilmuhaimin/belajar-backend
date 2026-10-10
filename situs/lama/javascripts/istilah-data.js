@@ -358,7 +358,7 @@ window.ISTILAH = {
   "n": "1.32 Testing",
   "s": "istilah-invarian",
   "t": "Invarian",
-  "u": "c-operasional/c1-testing/"
+  "u": "tahap-1/testing/"
  },
  "Isolation level": {
   "b": "B3.3",
@@ -1262,7 +1262,7 @@ window.ISTILAH = {
   "n": "1.32 Testing",
   "s": "istilah-invarian",
   "t": "Invarian",
-  "u": "c-operasional/c1-testing/"
+  "u": "tahap-1/testing/"
  },
  "isolation level": {
   "b": "B3.3",

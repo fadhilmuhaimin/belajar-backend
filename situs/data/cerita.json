@@ -50,7 +50,7 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 274,
+        "menit": 276,
         "halaman": 31
       },
       "bagian": [
@@ -1021,9 +1021,9 @@
       "judul": "Testing: apa dites di level mana",
       "tahap": 1,
       "topik": "Operasional",
-      "path": "c-operasional/c1-testing.md",
+      "path": "tahap-1/testing.md",
       "prasyarat": [
-        "B7.1"
+        "C3"
       ],
       "inti": true,
       "masalah": "Bug lama muncul lagi setelah perubahan",
@@ -1033,9 +1033,8 @@
       "peran": [
         "backend"
       ],
-      "lama": true,
       "nomor": "1.32",
-      "menit": 10
+      "menit": 12
     },
     {
       "id": "E1",

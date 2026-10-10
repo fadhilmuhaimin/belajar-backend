@@ -1,0 +1,286 @@
+---
+title: "1.32 Testing: apa dites di level mana"
+description: Aturan di service dites tanpa database, yang dijalankan PostgreSQL dites ke PostgreSQL, dan yang dibaca app dites lewat HTTP. Setiap bug yang pernah lolos mendapat tes yang terbukti gagal untuk bug itu.
+---
+import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import regresi from "../../../../data/diagram/t1-testing-regresi.json";
+import Snippet from "../../../components/Snippet.astro";
+import TabSet from "../../../components/TabSet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 9 menit · coba 3 menit · Prasyarat: [[C3]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Aturan di service dites tanpa database. Yang dijalankan PostgreSQL dites ke PostgreSQL sungguhan, dan setiap bug yang lolos mendapat tes yang gagal untuk bug itu.
+
+<Rantai data={regresi} ringkas />
+
+Ini regression test M4 dari [[t1-m4]], dijalankan ke kode sekarang lalu ke salinan kode yang bug-nya dikembalikan. Saat bug kembali, tes menangkap Rp70.000 yang hilang dari saldo Budi.
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Aturan "jumlah paling banyak Rp200.000": dites dengan atau tanpa database?
+2. `go test ./...` di CI menulis `ok`, tapi tes database tertulis `SKIP`. Apa yang sudah terbukti?
+3. Kenapa regression test M4 memeriksa saldo di database, bukan hanya error dari `Bayar`?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: aturan murni dites tanpa database, sedangkan constraint, transaction, query, dan format HTTP dites ke yang sungguhan.">
+
+Tebak dulu level tes yang paling tepat untuk tiap hal, lalu cek. Empat dari enam hal ini punya tes di lab `api-t1`, dan hasilnya ada di rekaman.
+
+<WidgetLama nama="pilah" src="data/t1-testing-pilah.json" />
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Di [[t1-m6]], belum ada tes yang mengirim request app 1.0 ke server baru sebelum deploy. CI pertama dari ADR 9 di [[C3]] menjalankan `go test ./...`. Tapi `go test` hanya menjalankan tes yang sudah ditulis, dan sampai halaman itu lab `api-t1` belum punya satu pun. Karena itu commit latihan `f5ea0b4` di [[C3]] bisa lolos CI dengan riwayat kosong.
+
+Di Flutter, kamu mengenal tiga jenis tes: unit, widget, dan integration ([docs.flutter.dev](https://docs.flutter.dev/testing/overview)). Backend punya pembagian serupa. Bedanya, banyak bug backend baru terlihat saat SQL dijalankan PostgreSQL.
+
+### Cara kerjanya
+
+Lab `api-t1` sekarang punya tes di tiga level. Semua hasil di halaman ini diambil dari rekaman `testing.txt`, dengan database dibuat ulang dari nol.
+
+| Level | Yang dijalankan | Di lab `api-t1` |
+|---|---|---|
+| Unit | Satu fungsi, tanpa database | `TestBayarMenolakJumlahDiLuarBatas` |
+| Integration | Service atau server HTTP dengan PostgreSQL sungguhan | `TestBayarGagalTidakMengubahSaldo`, `TestRiwayatMemuatPembayaran`, `TestBayarDitolakDenganNamaField`, `TestAkunOrangLainDijawab404` |
+| End-to-end | App, API, dan database bersama | Belum ditulis |
+
+Ham Vocke menyarankan banyak unit test kecil yang cepat, lebih sedikit tes yang lebih besar, dan sangat sedikit tes end-to-end ([martinfowler.com](https://martinfowler.com/articles/practical-test-pyramid.html)).
+
+**Unit: aturan tanpa database.** Aturan jumlah di `Bayar` diperiksa sebelum repo dipanggil ([[B6]]). Karena itu tesnya memakai `repo.Repo{}` tanpa koneksi:
+
+<Snippet file="labs/api-t1/internal/service/bayar_test.go" region="unit" lang="go" title="labs/api-t1/internal/service/bayar_test.go" />
+
+`t.Run` menjalankan satu subtest per nilai, jadi nilai yang gagal langsung terlihat namanya ([pkg.go.dev](https://pkg.go.dev/testing)). Ketiga nilai berada di sekitar batas: angka minus dari [[t1-m1]], nol, dan satu rupiah di atas Rp200.000. Kalau suatu hari `Bayar` membaca database sebelum memeriksa jumlah, tes ini panic.
+
+**Integration: yang dijalankan PostgreSQL.** Batas saldo warung adalah constraint, dan ROLLBACK dikerjakan PostgreSQL ([[B3.1]]). Data palsu di memori tidak menjalankan keduanya. Karena itu tes M4 memakai database sungguhan, dan setiap tes menulis keadaan awalnya sendiri:
+
+<Snippet file="labs/api-t1/internal/service/db_test.go" region="siapkan" lang="go" title="labs/api-t1/internal/service/db_test.go" />
+
+<Snippet file="labs/api-t1/internal/service/db_test.go" region="m4" lang="go" title="labs/api-t1/internal/service/db_test.go" />
+
+Saldo awal Budi Rp250.000 dan Warung Ani Rp1.450.000 sama dengan Jumat siang di cerita [[t1-m4]]. Tes memeriksa dua hal: saldo Budi tidak berubah, dan total saldo semua akun tetap Rp1.700.000. Total ini invarian dari [[t1-pertukaran-saldo]]: pembayaran tidak boleh membuat atau menghilangkan uang.
+
+**Regression test harus gagal untuk bug-nya.** Tes yang lolos belum membuktikan apa-apa sebelum terlihat gagal untuk bug yang ingin dicegahnya. Lab menyalin kode ke folder sementara, mengembalikan `Bayar` tanpa transaction, lalu menjalankan tes yang sama:
+
+<Snippet file="labs/api-t1/output/testing.txt" lines="59:69" title="Rekaman lab: labs/api-t1/output/testing.txt" />
+
+Saldo Budi Rp180.000 dan total kurang Rp70.000, sama dengan rekaman [[t1-m4]]. Cara yang sama dipakai untuk commit latihan `f5ea0b4` dari [[C3]], yang mengganti satu `OR` dengan `AND` di query riwayat:
+
+<Snippet file="labs/api-t1/internal/service/db_test.go" region="riwayat" lang="go" title="labs/api-t1/internal/service/db_test.go" />
+
+<Snippet file="labs/api-t1/output/testing.txt" lines="71:81" title="Rekaman lab: labs/api-t1/output/testing.txt" />
+
+Query itu tetap menjawab tanpa error, jadi hanya tes yang memeriksa isi riwayat yang menangkapnya. Mock repo yang mengembalikan satu baris akan lolos, karena SQL-nya tidak pernah dijalankan.
+
+**Integration lewat HTTP: yang dibaca app.** App membaca status code, `Content-Type`, dan nama field di body error. `httptest.NewServer` menjalankan router sungguhan di port loopback yang dipilih sistem ([pkg.go.dev](https://pkg.go.dev/net/http/httptest#NewServer)):
+
+<Snippet file="labs/api-t1/cmd/api/api_test.go" region="http" lang="go" title="labs/api-t1/cmd/api/api_test.go" />
+
+Kedua body diambil dari halaman masalah. Jumlah minus dari [[t1-m1]] dijawab `422` oleh aturan di service. Field `amount` dari [[t1-m2]] dijawab `400` oleh handler, dengan nama field `jumlah` dari kontrak di [[B1.4]].
+
+Tes kedua di file yang sama menjawab janji di [[B5.3]]: token Budi yang meminta akun Dimas dijawab `404`, sama dengan akun yang tidak ada.
+
+<Snippet file="labs/api-t1/cmd/api/api_test.go" region="pemilik" lang="go" title="labs/api-t1/cmd/api/api_test.go" />
+
+**`SKIP` bukan lolos.** Tes database memanggil `t.Skip` saat `DATABASE_URL` kosong. Tanpa database, seperti job CI di [[C3]], paketnya tetap ditulis `ok`:
+
+<Snippet file="labs/api-t1/output/testing.txt" lines="22:30" title="Rekaman lab: labs/api-t1/output/testing.txt" />
+
+Di sini `ok` hanya membuktikan unit test. Keempat tes database tidak dijalankan. Dengan `DATABASE_URL` terisi, kelima tes beserta tiga subtest lolos tanpa `SKIP` (bagian B di rekaman).
+
+Flag `-p 1` di bagian B membuat `go test` menjalankan test binary satu per satu. Bawaannya, `go test` menjalankan beberapa paket paralel sebanyak GOMAXPROCS ([pkg.go.dev](https://pkg.go.dev/cmd/go)). Tes database di dua paket memakai database yang sama, jadi keduanya tidak boleh jalan bersamaan.
+
+**Yang tidak dilihat `go test -race`.** Race detector hanya menemukan race yang benar-benar terjadi saat kode berjalan, pada variabel di memori proses Go ([go.dev](https://go.dev/doc/articles/race_detector)). Dua pembayaran yang bersamaan bertemu di PostgreSQL, di luar pengamatannya. Tes untuk itu ditulis di Tahap 2, saat transfer antar karyawan dan retry dari app datang.
+
+### Di stack lain
+
+**Skenario:** tes HTTP yang sama dengan lab. Budi mengirim jumlah `-70000`, dan app harus menerima `422` dengan field `jumlah`. Tab Go dijalankan di lab. Tab lain tidak dijalankan, hanya dicek ke dokumentasi pada 2026-10-11.
+
+Yang sama di semua stack: siapkan server dan database, kirim request, cek status, lalu cek body. Yang berbeda: cara mengirim request tanpa jaringan sungguhan, dan cara database kembali ke keadaan awal.
+
+<WidgetLama nama="stackstep" src="data/t1-testing-stackstep.json" />
+
+<TabSet id="stack" labels={["Go", "Node.js (Express)", "Laravel", "Django", "Dart (Serverpod)"]}>
+<Fragment slot="t0">
+
+*Dijalankan: Go 1.27.1 `testing` dan `net/http/httptest` di lab `api-t1`, PostgreSQL 17.*
+
+<Snippet file="labs/api-t1/cmd/api/api_test.go" region="http" lang="go" title="labs/api-t1/cmd/api/api_test.go" />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** database tidak dikembalikan otomatis. Lab membuat ulang database sebelum `go test`, dan tes service menulis keadaan awalnya sendiri di `siapkan`.</p>
+
+</Fragment>
+<Fragment slot="t1">
+
+*Tidak dijalankan. Dicek ke [supertest 7.3.1](https://www.npmjs.com/package/supertest).*
+
+<Snippet lang="js" code={`beforeEach(async () => {
+  await db.query("UPDATE akun SET saldo = 250000 WHERE id = 419");
+});
+
+test("jumlah minus ditolak dengan nama field", async () => {
+  const res = await request(app).post("/transfers")
+    .set("Authorization", "Bearer " + tokenBudi)
+    .send({ ke: 418, jumlah: -70000 })
+    .expect(422).expect("Content-Type", /problem\\+json/);
+  expect(res.body.errors[0].field).toBe("jumlah");
+});`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** supertest menerima app Express dan mengikatnya ke port sementara kalau app belum listen. Keadaan awal database ditulis sendiri di `beforeEach`.</p>
+
+</Fragment>
+<Fragment slot="t2">
+
+*Tidak dijalankan. Dicek ke [Laravel 13: HTTP Tests](https://laravel.com/docs/13.x/http-tests) dan [Database Testing](https://laravel.com/docs/13.x/database-testing).*
+
+<Snippet lang="php" code={`use RefreshDatabase;
+
+public function test_jumlah_minus_ditolak(): void
+{
+    $this->withToken($this->tokenBudi)
+        ->postJson('/transfers', ['ke' => 418, 'jumlah' => -70000])
+        ->assertStatus(422)
+        ->assertJsonPath('errors.0.field', 'jumlah');
+    $this->assertDatabaseHas('akun', ['id' => 419, 'saldo' => 250000]);
+}`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** trait `RefreshDatabase` menjalankan migration kalau skema belum mutakhir, lalu membungkus tiap tes dalam transaction. Bawaannya, Laravel menulis `errors` sebagai objek per field ([Validation](https://laravel.com/docs/13.x/validation)). Kode ini mengandaikan renderer error problem+json seperti lab.</p>
+
+</Fragment>
+<Fragment slot="t3">
+
+*Tidak dijalankan. Dicek ke [Django 6.1: Testing tools](https://docs.djangoproject.com/en/6.1/topics/testing/tools/).*
+
+<Snippet lang="python" code={`class BayarTest(TestCase):
+    def setUp(self):
+        Akun.objects.filter(id=419).update(saldo=250000)
+
+    def test_jumlah_minus_ditolak(self):
+        res = self.client.post("/transfers", {"ke": 418, "jumlah": -70000},
+                               content_type="application/json",
+                               headers={"Authorization": f"Bearer {self.token_budi}"})
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(res.json()["errors"][0]["field"], "jumlah")`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** `TestCase` membungkus tiap tes dalam blok `atomic()`, jadi perubahannya dibatalkan sesudah tes. Tes yang butuh commit sungguhan, misalnya `select_for_update()`, memakai `TransactionTestCase`.</p>
+
+</Fragment>
+<Fragment slot="t4">
+
+*Tidak dijalankan. Dicek ke [Serverpod 4: Testing](https://docs.serverpod.dev/concepts/testing/get-started) dan [Writing tests](https://docs.serverpod.dev/concepts/testing/writing-tests).*
+
+<Snippet lang="dart" code={`withServerpod('Given endpoint transfer', (sessionBuilder, endpoints) {
+  test('jumlah minus ditolak, saldo Budi tetap', () async {
+    final budi = sessionBuilder.copyWith(
+        authentication: AuthenticationOverride.authenticationInfo('419', <Scope>{}));
+    await expectLater(endpoints.transfer.bayar(budi, 418, -70000),
+        throwsA(isA<JumlahTidakValid>()));
+    expect(await endpoints.transfer.saldo(budi), 250000);
+  });
+});`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** tes tidak lewat HTTP. Test tools hasil `serverpod generate` memanggil method endpoint langsung, dan database di-rollback sesudah tiap tes secara bawaan. Apakah exception buatan sendiri seperti `JumlahTidakValid` sampai ke tes dengan tipe aslinya belum tertulis di dokumentasi [perlu verifikasi].</p>
+
+</Fragment>
+</TabSet>
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### Tes apa di level mana
+
+| Pilihan | Kelebihan | Kekurangan |
+|---|---|---|
+| Unit test dengan mock repo untuk semua hal | Cepat, tanpa Docker | Lolos walau SQL salah; bug `f5ea0b4` tidak tertangkap |
+| **Unit test untuk aturan, integration test ke PostgreSQL untuk yang dijalankan database dan HTTP** | Menangkap bug M4 dan `f5ea0b4` di rekaman | Butuh PostgreSQL saat tes; tes database berbagi satu database |
+| Banyak tes end-to-end lewat app | Paling mirip yang dilihat Budi | Lambat; saat gagal, penyebabnya harus dicari di app, API, dan database |
+
+**Yang dipilih untuk Tahap 1.**
+
+1. Setiap aturan di service punya unit test dengan nilai di sekitar batas: minus, nol, dan satu di atas batas.
+2. Constraint, transaction, dan query dites ke PostgreSQL sungguhan. Repo tidak di-mock.
+3. Setiap bug yang lolos mendapat regression test, dan tes itu terbukti gagal saat bug-nya dikembalikan.
+4. Tes HTTP memeriksa yang dibaca app: status code, `Content-Type`, dan nama field. Setiap endpoint ber-ID dites dengan token pemilik lain.
+5. Sebelum deploy, Raka menjalankan `go test -p 1 ./...` dengan `DATABASE_URL` ke database lokal, dan hasilnya tanpa `SKIP`.
+
+**Kapan pilihan ini salah.** Saat tes database berjalan begitu lama sampai dilewati sebelum deploy. Juga saat dua orang menjalankan tes ke database yang sama pada waktu yang sama.
+
+### Sengaja belum dilakukan
+
+| Yang belum | Kenapa sekarang tidak | Dibahas di |
+|---|---|---|
+| PostgreSQL di job CI, supaya tes database tidak `SKIP` | Rencana pipeline menaruh integration test dengan PostgreSQL nyata di CI Tahap 3 | Tahap 3 |
+| Interface repo dan fake untuk service | Aturan yang dites tanpa database diperiksa sebelum repo dipanggil; sisanya perilaku PostgreSQL | Saat ada aturan yang butuh data tapi tidak butuh SQL |
+| Tes request app versi lama ke server baru | Butuh aturan perubahan API dulu | [[E1]] |
+| Tes dua pembayaran bersamaan | Tahap 1 belum punya transfer antar karyawan dan retry dari app | Tahap 2 |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Aturan "jumlah paling banyak Rp200.000" baru ditambah ke service. Tes level mana yang paling tepat, dan nilai apa yang dicoba?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Unit test tanpa database, karena aturan itu diperiksa sebelum repo dipanggil. Nilai yang dicoba berada di sekitar batas: minus, nol, dan Rp200.001, seperti rekaman lab. Bahwa Rp200.000 diterima baru terlihat sesudah repo dipanggil, jadi kasus itu butuh database.
+
+</details>
+
+**2.** `go test ./...` di CI menulis `ok` untuk semua paket. Di log, empat tes tertulis `SKIP`. Apa yang sudah terbukti?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Hanya unit test. `t.Skip` menghentikan tes tanpa menandainya gagal, jadi paketnya tetap `ok`. Constraint, transaction, query riwayat, dan format HTTP belum dijalankan sama sekali (rekaman bagian A).
+
+</details>
+
+**3.** AI menulis tes riwayat dengan mock repo yang selalu mengembalikan satu baris. Tes lolos. Apakah bug `f5ea0b4` tertangkap?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Tidak. Bug itu ada di klausa `WHERE`, dan mock tidak pernah menjalankan SQL. Tes yang menangkapnya memanggil service dengan PostgreSQL sungguhan, lalu memeriksa isi riwayat (rekaman bagian D).
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Aturan di service punya tes untuk nilai minus, nol, dan satu di atas batas.
+- [ ] Tes untuk query, constraint, dan transaction berjalan ke PostgreSQL, bukan ke mock repo.
+- [ ] Tes uang memeriksa saldo dan total di database, bukan hanya error atau status code.
+- [ ] Perbaikan bug disertai tes yang gagal tanpa perbaikan itu.
+- [ ] Endpoint ber-ID punya tes "token A meminta data B" ([[B5.3]]).
+- [ ] Hasil tes dibaca sampai baris `SKIP`, bukan hanya `ok`.
+
+### Bacaan lanjut
+
+- [Ham Vocke: The Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html)
+- [Go: testing](https://pkg.go.dev/testing) · [net/http/httptest](https://pkg.go.dev/net/http/httptest) · [Data Race Detector](https://go.dev/doc/articles/race_detector)
+- [Flutter: Testing Flutter apps](https://docs.flutter.dev/testing/overview)
+- [Serverpod: Testing](https://docs.serverpod.dev/concepts/testing/get-started)
+
+</Blok>
+
+<SkripLama daftar={["cerita","pilah","stackstep"]} />
