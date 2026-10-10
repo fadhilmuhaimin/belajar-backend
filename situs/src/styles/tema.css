@@ -895,10 +895,6 @@ html[data-fokus="ya"] .baca-progres { top: 0; }
 .blok__ilustrasi .il-coret { text-decoration: line-through; }
 .blok__ilustrasi .il-teks-aksen { fill: var(--k-system-ink); }
 .blok__ilustrasi .il-teks-warn { fill: var(--k-warn-ink); }
-/* Transisi buka: 180 ms, hanya setelah pembaca membuka blok (Blok.astro menambah kelasnya). */
-@keyframes blok-muncul { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-.sl-markdown-content details.blok.blok--muncul > .blok__isi { animation: blok-muncul 180ms ease-out; }
-@media (prefers-reduced-motion: reduce) { .sl-markdown-content details.blok.blok--muncul > .blok__isi { animation: none; } }
 
 /* ==========================================================================
    Redesain · lebar kolom (keputusan 209). Teks 48rem (±73 karakter per baris; Baymard 50–75, WCAG 1.4.8 ≤ 80);

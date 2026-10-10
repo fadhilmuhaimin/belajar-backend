@@ -8,7 +8,8 @@
  * bisa dibuka dan ditutup. Tidak ada animasi yang jalan sendiri; scroll halus hanya bila reduced motion tidak aktif.
  *   <Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu ...">...</Blok>
  * Blok cerita boleh membawa ilustrasi kecil di awalnya (keputusan 207): <Blok nama="Gejala" buka ilustrasi="m1">.
- * Saat pembaca membuka blok, isinya muncul dengan transisi 180 ms (tidak saat dimuat, tidak bila reduced motion).
+ * Saat pembaca membuka atau menutup blok dengan klik atau keyboard, isinya tumbuh dari kepala atau kembali ke kepala
+ * (src/gerak/lipat.ts, keputusan 238); tidak saat dimuat, tidak lewat tautan #, tidak bila reduced motion.
  */
 import { daftarBlok, slugBlok, menitBlok } from "../lib/blok";
 import Ilustrasi from "./Ilustrasi.astro";
@@ -57,6 +58,7 @@ const id = slugBlok(nama);
 </details>
 
 <script>
+  import { alihkan, hentikan, lipat } from "../gerak/lipat";
   const kunci = "rtj-blok:" + location.pathname;
   const baca = (): string[] => { try { return JSON.parse(localStorage.getItem(kunci) || "[]"); } catch { return []; } };
   const simpan = (a: string[]) => { try { localStorage.setItem(kunci, JSON.stringify(a)); } catch { /* mode privat */ } };
@@ -80,7 +82,7 @@ const id = slugBlok(nama);
   function bukaDariHash() {
     const id = decodeURIComponent(location.hash.slice(1));
     const el = blok().find((x) => x.dataset.blok === id);
-    if (el) el.open = true;
+    if (el) { hentikan(el); el.open = true; }
   }
 
   document.addEventListener("click", (e) => {
@@ -92,9 +94,11 @@ const id = slugBlok(nama);
     if (t.dataset.ke) {
       digulir = false;
       const lanjut = blok().find((x) => x.dataset.blok === t.dataset.ke);
+      // Blok yang selesai langsung tertutup (sudah di atas layar); blok berikutnya terbuka dengan gerak.
+      hentikan(kini);
       kini.open = false;
       if (lanjut) {
-        lanjut.open = true;
+        lipat(lanjut, true);
         const halus = !matchMedia("(prefers-reduced-motion: reduce)").matches;
         lanjut.scrollIntoView({ behavior: halus ? "smooth" : "auto", block: "start" });
         lanjut.querySelector("summary")?.focus({ preventScroll: true });
@@ -122,17 +126,14 @@ const id = slugBlok(nama);
   addEventListener("touchmove", olehPembaca, { passive: true });
   addEventListener("keydown", (e) => { if (["ArrowDown", "PageDown", "End", " "].includes(e.key)) digulir = true; });
   addEventListener("scroll", () => { if (digulir && !antre) { antre = true; requestAnimationFrame(cekAkhir); } }, { passive: true });
-  // Transisi buka (keputusan 207): hanya untuk blok yang dibuka pembaca, bukan yang terbuka saat dimuat.
-  let interaksi = false;
-  addEventListener("pointerdown", () => { interaksi = true; }, { capture: true });
-  addEventListener("keydown", () => { interaksi = true; }, { capture: true });
-  document.addEventListener("toggle", (e) => {
-    const el = e.target as HTMLElement;
-    if (!interaksi || !el.matches?.("details.blok") || !(el as HTMLDetailsElement).open) return;
-    el.classList.remove("blok--muncul");
-    void el.offsetWidth;
-    el.classList.add("blok--muncul");
-  }, true);
+  // Klik atau Enter/Spasi di kepala blok: buka/tutup dengan gerak (keputusan 238), menggantikan transisi CSS 207.
+  document.addEventListener("click", (e) => {
+    const kepala = (e.target as Element).closest?.("summary.blok__kepala");
+    const el = kepala?.parentElement;
+    if (!(el instanceof HTMLDetailsElement) || !el.matches("details.blok")) return;
+    e.preventDefault();
+    alihkan(el);
+  });
   window.addEventListener("hashchange", bukaDariHash);
   bukaDariHash();
   tandai();
