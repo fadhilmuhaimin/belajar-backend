@@ -107,3 +107,75 @@ SELECT id, nama, saldo FROM akun ORDER BY id;
  419 | Budi       | 225000
 (3 rows)
 
+-- 9. Sketsa ledger Tahap 2: tabel entri dengan policy pemilik untuk semua perintah
+-- request Dimas: bayar Rp5.000 ke Warung Ani menulis dua entri
+BEGIN;
+BEGIN
+SELECT set_config('app.akun_id', '417', true);
+ set_config 
+------------
+ 417
+(1 row)
+
+INSERT INTO entri (akun_id, jumlah) VALUES (417, -5000), (418, 5000);
+ERROR:  new row violates row-level security policy for table "entri"
+ROLLBACK;
+ROLLBACK
+-- 10. Policy per perintah: role aplikasi hanya membaca; entri ditulis fungsi bayar
+-- request Dimas: bayar Rp5.000 ke Warung Ani lewat fungsi bayar
+BEGIN;
+BEGIN
+SELECT set_config('app.akun_id', '417', true);
+ set_config 
+------------
+ 417
+(1 row)
+
+SELECT bayar(418, 5000);
+ bayar 
+-------
+     2
+(1 row)
+
+SELECT akun_id, jumlah FROM entri ORDER BY id;
+ akun_id | jumlah 
+---------+--------
+     417 |  -5000
+(1 row)
+
+COMMIT;
+COMMIT
+-- request Warung Ani membaca entri miliknya
+BEGIN;
+BEGIN
+SELECT set_config('app.akun_id', '418', true);
+ set_config 
+------------
+ 418
+(1 row)
+
+SELECT akun_id, jumlah FROM entri ORDER BY id;
+ akun_id | jumlah 
+---------+--------
+     418 |   5000
+(1 row)
+
+COMMIT;
+COMMIT
+-- request Dimas menulis entri +5.000 untuk dirinya sendiri, langsung ke tabel
+BEGIN;
+BEGIN
+SELECT set_config('app.akun_id', '417', true);
+ set_config 
+------------
+ 417
+(1 row)
+
+INSERT INTO entri (akun_id, jumlah) VALUES (417, 5000);
+ERROR:  permission denied for table entri
+ROLLBACK;
+ROLLBACK
+-- request tanpa identitas memanggil bayar
+SELECT bayar(418, 5000);
+ERROR:  pembayaran ditolak
+CONTEXT:  PL/pgSQL function bayar(bigint,bigint) line 6 at RAISE
