@@ -101,11 +101,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### I2 · Pasang motion dan @xyflow/react
 
 - jenis: interaksi
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: `bun add motion @xyflow/react` (atau npm bila I1 diparkir), versi dicek ke npm hari itu dan dipin persis; ADR per paket menyebut untuk apa, ukuran gzip, lisensi (keduanya MIT), dan alternatif yang ditolak (mis. GSAP, CSS saja; Mermaid, SVG tangan); build hijau; belum ada halaman yang berubah; butir I6.
-- catatan: -
+- catatan: Selesai 2026-10-10 (keputusan 229, 230). motion 14.1.0, @xyflow/react 12.12.0; `dist/` identik byte per byte dengan build main; ukuran di AUDIT-TAMPILAN bagian 7.
 
 ### I3 · Fondasi gerak
 
