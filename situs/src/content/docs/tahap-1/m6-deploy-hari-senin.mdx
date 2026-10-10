@@ -1,0 +1,92 @@
+---
+title: "1.30 M6: Deploy hari Senin"
+description: Minggu 5, makan siang. Raka mengganti nama kolom dan menyalin binary baru ke VPS. App mati 5 menit, 11 HP yang belum update tetap error, dan binary lama sudah tidak ada.
+---
+import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import deploy from "../../../../data/diagram/t1-m6-deploy.json";
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 6 menit · coba 3 menit · Prasyarat: [[B4.1]] · Jalur inti</p>
+
+<Blok nama="Gejala" buka ilustrasi="m6">
+
+Senin minggu 5, pukul 12.10. Budi berdiri di depan Warung Ani dan membuka Rekeningo untuk membayar makan siang. Layarnya berputar, lalu menulis "Tidak bisa terhubung". Pembeli lain di warung melihat hal yang sama.
+
+Pada menit yang sama, Raka sedang memperbarui server dari laptopnya. Ia mematikan server lama dan mengganti nama kolom `jumlah` jadi `nominal`, supaya sama dengan label "Nominal" di layar Bayar. Lalu ia menyalin binary baru ke VPS dengan `scp` dan menyalakannya.
+
+Lima menit kemudian app bisa dibuka lagi. HP Dimas normal setelah ia memperbarui app ke versi 1.1, yang dirilis Raka siang itu. HP Budi tidak: layar riwayatnya menulis "Riwayat tidak bisa dimuat", dan pembayarannya ke Ani gagal.
+
+Sore harinya Sinta menghitung 11 HP yang masih error. Semuanya belum diperbarui ke app 1.1.
+
+Raka ingin mengembalikan server ke versi minggu lalu. Di VPS hanya ada satu binary, dan isinya versi baru. Binary lama tertimpa saat versi baru disalin ke path yang sama.
+
+</Blok>
+
+<Blok nama="Yang Raka kira" buka>
+
+Raka melihat jam di catatannya: 12.10, saat warung paling ramai. Kesimpulannya, deploy dijalankan di jam yang salah.
+
+Rencananya, deploy berikutnya pukul 23.00, saat tidak ada yang membayar. Kalau server mati beberapa menit, tidak ada yang melihatnya.
+
+<details class="question">
+<summary>Tebak dulu: kalau deploy yang sama dijalankan pukul 23.00, apakah HP Budi normal besok pagi?</summary>
+
+Tidak. Jam deploy hanya menyembunyikan menit-menit tanpa jawaban. Besok pagi app 1.0 di HP Budi tetap mencari field `jumlah`, yang sudah tidak dikirim server, dan binary lama tetap tertimpa. Blok berikutnya menunjukkan rekamannya.
+
+</details>
+
+</Blok>
+
+<Blok nama="Yang sebenarnya">
+
+Deploy itu menghapus dua hal yang tidak bergantung pada jam: jalan kembali ke server lama, dan nama field yang dibaca app lama. Keduanya baru ketahuan sesudah v2 menyala, karena belum ada tes yang mengirim request app 1.0 ke v2.
+
+<Rantai data={deploy} />
+
+Rekaman lab dari database bersih. Prober memanggil riwayat dari HP Budi dan HP Dimas tiap detik, dan perintah deploy dijalankan di antara dua putaran:
+
+<Snippet file="labs/api-t1/output/m6.txt" lines="25:51" title="Rekaman lab: labs/api-t1/output/m6.txt" />
+
+Putaran 3 sampai 5 kosong karena tiga perintah dijalankan satu per satu sesudah v1 mati. Baris `pg_locks` adalah pengukuran lab, bukan bagian dari deploy Raka. Di cerita, jeda yang sama berlangsung 5 menit dan 11 HP tetap error; kedua angka itu dari cerita, bukan dari lab.
+
+Di putaran 6 server menjawab `200` ke HP Budi, tanpa field `jumlah`. *Ilustrasi, tidak direkam di lab:* kalau app 1.0 membaca angka itu dengan `json['jumlah'] as int`, nilai yang hilang adalah `null`, dan `as` melempar exception ([dart.dev](https://dart.dev/language/operators)). Server sendiri tidak melihat masalah apa pun, karena jawabannya `200`.
+
+Membayar dari app 1.0 juga gagal. App lama mengirim `jumlah`, sedangkan v2 mewajibkan `nominal`:
+
+<Snippet file="labs/api-t1/output/m6.txt" lines="53:64" title="Rekaman lab: labs/api-t1/output/m6.txt" />
+
+Raka ingin kembali ke v1. Binary v1 tertimpa `cp` (di cerita `scp`) ke path yang sama. Kalaupun v1 dibangun ulang dari kode lama, kolom di database sudah bernama `nominal`:
+
+<Snippet file="labs/api-t1/output/m6.txt" lines="74:92" title="Rekaman lab: labs/api-t1/output/m6.txt" />
+
+Bagian G mengembalikan kolom ke `jumlah` lewat migration baru dan menjalankan v1 lagi. HP Budi normal, tapi HP Dimas dengan app 1.1 kehilangan field `nominal`:
+
+<Snippet file="labs/api-t1/output/m6.txt" lines="94:102" title="Rekaman lab: labs/api-t1/output/m6.txt" />
+
+Dari dua versi server yang ada, tidak satu pun melayani app 1.0 dan app 1.1 sekaligus. Panduan kompatibilitas API Google (AIP-180) menyebut mengganti nama field sama dengan menghapus lalu menambah: dalam satu versi mayor, field baru boleh ditambah, field lama tidak boleh dihapus ([AIP-180](https://google.aip.dev/180)).
+
+Jalan kembali juga punya aturan tertulis. The Twelve-Factor App menulis bahwa setiap release punya ID unik dan tidak pernah diubah sesudah dibuat; perubahan apa pun menjadi release baru ([12factor.net](https://12factor.net/build-release-run)). Release lama tetap ada, jadi kembali berarti menjalankan release itu lagi.
+
+</Blok>
+
+<Blok nama="Coba sendiri">
+
+Ikuti deploy Raka detik demi detik dari dua HP. Status dan field diambil dari rekaman lab.
+
+<WidgetLama nama="alur" src="data/skenario/t1-m6.json" />
+
+</Blok>
+
+<Blok nama="Konsep yang lahir">
+
+- [[C3]]: deployment dan rollback. Setiap commit menghasilkan image bertag, jadi kembali berarti menjalankan tag lama. Halaman itu memuat ADR 9 (image per commit, rollback = tag lama, CI pertama).
+- [[C1]]: testing. Di minggu 5 belum ada tes yang mengirim request app 1.0 ke server baru sebelum deploy.
+- [[E1]]: app versi lama. Server harus melayani app lama selama masih ada HP yang memakainya. Halaman itu memuat ADR 10 (field tidak pernah diganti nama; expand lalu contract).
+- [[t1-tim-infra]]: satu VPS, Compose, dan CI pertama untuk satu orang.
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />
