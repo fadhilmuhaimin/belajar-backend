@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · K1a selesai di branch `perbaikan/k1a-favicon` (keputusan 245, PR menunggu tinjauan pengatur, belum di-merge): `situs/public/favicon.svg`, `JUDUL_MENYUSUL` di `tools/registri.mjs` dipakai sidebar dan `remark-rujukan`, penanda sidebar `data-nav` (CSS dan `SidebarPeran.astro` ikut). Periksa ulang dengan `python3 tmp/k1a_cek.py` sesudah build. Berikutnya: python3 tools/antrean.py berikut
+2026-10-10 · K1b selesai di branch `perbaikan/k1b-batas-login` (keputusan 244, PR menunggu tinjauan pengatur, belum di-merge): 1.29 `tahap-1/idor-token-app.mdx` baris 67, 176, 184 kini menulis batas percobaan login di Tahap 2, bersama brute force (PROPOSAL baris 686); 1.7 dan 1.27 tidak berubah; rujukan C4 dilepas. Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
