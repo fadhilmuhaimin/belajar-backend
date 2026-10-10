@@ -76,7 +76,7 @@ TENGGANG_LAPORAN_MENIT="${TENGGANG_LAPORAN_MENIT:-180}"
 
 MULAI_EPOCH=$(date +%s)
 MULAI="$(date '+%Y-%m-%d %H:%M')"
-LOGDIR="$ROOT/log/otomatis-$(date +%Y-%m-%d)"
+LOGDIR="${LOGDIR_OTOMATIS:-$ROOT/log/otomatis-$(date +%Y-%m-%d)}"   # LOGDIR_OTOMATIS hanya untuk uji skrip
 KEJADIAN="$LOGDIR/kejadian.txt"
 KUNCI="$ROOT/tmp/otomatis.lock"
 
