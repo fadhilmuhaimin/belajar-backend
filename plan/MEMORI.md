@@ -45,7 +45,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · I5b selesai (keputusan 248), PR dari `interaksi/i5b` menunggu tinjauan pengatur, belum di-merge: peta tahap beranda memakai `PetaDiagram.tsx` (DiagramArsitektur dengan `kunci`), gerak masuk `src/gerak/muncul.ts` di diagram dan teka-teki; `ukur-diagram.mjs` dan `ukur-gerak.mjs` memeriksa beranda. Perbaikan review #161 (keputusan 248): diagram disembunyikan CSS sampai mengikuti tab terpilih, `ukur-diagram.mjs` bagian 6 merekam per frame; tugas G1 (gerbang menghentikan daemon preview) ditambahkan sesudah I5b. Review putaran 2 (keputusan 248): SSR memesan tinggi React Flow (`varPesan` di `tata.ts`, `100cqw` di `diagram.css`), CLS diukur `ukur-diagram.mjs` bagian 6–7 (HP 0,2653 → 0,0000). PR #161 menunggu tinjauan pengatur. Berikutnya: python3 tools/antrean.py berikut (G1)
+2026-10-11 · G1 gerbang menghentikan daemon preview, branch `perbaikan/g1-preview-daemon`. File: `tools/cek_situs.sh` (bagian `--layar`), `plan/KEPUTUSAN.md`, `plan/ANTREAN.md`, `plan/USULAN-PERBAIKAN.md`, MEMORI. Rencana: hentikan preview worktree ini (`preview stop`, lock `situs/.astro/preview.json`) sebelum mulai dan di trap; nyalakan dengan `--background` di laptop dan CI; penanda unik per jalan di `situs/dist` dibaca lewat curl (gagal keras bila tidak cocok dalam 30 detik); bukti a–c di PR. I5b (#161) sudah di-merge.
 
 ## Pelajaran
 
