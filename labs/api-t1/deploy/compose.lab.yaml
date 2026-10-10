@@ -1,0 +1,6 @@
+# Hanya untuk lab: container API ikut jaringan PostgreSQL lab (labs/b3-race), jadi DATABASE_URL memakai host db.
+# run.py memakai COMPOSE_FILE=compose.yaml:compose.lab.yaml. Di VPS berkas ini tidak ada.
+networks:
+  default:
+    name: b3-race_default
+    external: true

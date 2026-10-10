@@ -248,7 +248,7 @@
         "dari": "vps",
         "ke": "budi",
         "judul": "v1 dibangun ulang: 500",
-        "kirim": "$ go build -o api-t1 ./cmd/api && ./api-t1 &\nGET /akun/419/riwayat\n500 Internal Server Error\nERROR: column t.jumlah does not exist",
+        "kirim": "$ go build -o api-t1 ./cmd/api && ./api-t1 &\nGET /akun/419/riwayat\n500 Internal Server Error\nlog server: ERROR: column t.jumlah does not exist",
         "jelas": "Rekaman bagian F. Binary lama saja tidak cukup: kolom di database sudah bernama nominal.",
         "nada": "warn",
         "layar": {
