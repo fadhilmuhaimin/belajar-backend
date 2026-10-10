@@ -1210,6 +1210,8 @@ GIT_ENV = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1"
                GIT_COMMITTER_NAME="Raka", GIT_COMMITTER_EMAIL="raka@lestari.example",
                GIT_AUTHOR_DATE="2026-02-09T09:00:00+07:00", GIT_COMMITTER_DATE="2026-02-09T09:00:00+07:00")
 IMAGE = "ghcr.io/grup-lestari/rekeningo-api"   # nama fiktif; di lab image hanya dibangun lokal, tidak di-push
+KODE_V1 = "f128167"   # main sesudah 1.30 dan K1c; kode api-t1 di commit ini = kode v1 rekaman deploy.txt
+HASH_V1, HASH_V2 = "390ff47", "f5ea0b4"   # ditulis di halaman 1.31, t1-deploy.json, t1-deploy-tag.json (keputusan 247)
 BUG_RIWAYAT = ("internal/repo/riwayat.go", "WHERE t.dari = $1 OR t.ke = $1", "WHERE t.dari = $1 AND t.ke = $1")
 
 
@@ -1291,11 +1293,15 @@ def _rekam_deploy(tmp):
     pastikan_bebas(PORT)
     repo = tmp / "rekeningo"
     repo.mkdir()
-    for nama in ("go.mod", "go.sum", "Dockerfile"):
-        shutil.copy2(HERE / nama, repo / nama)
-    for nama in ("cmd", "internal"):
-        shutil.copytree(HERE / nama, repo / nama)
-    log.append("# repo: salinan kode api-t1 di repo git sementara. Nama dan tanggal commit tetap, jadi hash commit sama di setiap rekaman.\n"
+    # Kode diambil dari commit main yang tetap (keputusan 247), jadi perubahan api-t1 sesudah 1.31 tidak menggeser hash.
+    # Dockerfile tetap dari folder lab; kalau ia berubah, harap() di bawah gagal keras.
+    arsip = subprocess.run(["git", "archive", "--format=tar", f"{KODE_V1}:labs/api-t1", "go.mod", "go.sum", "cmd", "internal"],
+                           cwd=HERE.parents[1], capture_output=True)   # dari root repo: path relatif ke tree labs/api-t1
+    if arsip.returncode:
+        gagal(f"git archive {KODE_V1}: {arsip.stderr.decode()[-500:]} (clone dangkal? jalankan git fetch --unshallow)")
+    subprocess.run(["tar", "-x", "-C", str(repo)], input=arsip.stdout, check=True)
+    shutil.copy2(HERE / "Dockerfile", repo / "Dockerfile")
+    log.append(f"# repo: kode api-t1 dari commit main {KODE_V1} di repo git sementara. Nama dan tanggal commit tetap, jadi hash sama di setiap rekaman.\n"
                "# Kode v1 = keadaan sesudah 1.30: kolom jumlah, field jumlah. vps: Docker di mesin lab.\n"
                "# lab: COMPOSE_FILE=compose.yaml:compose.lab.yaml; berkas kedua hanya menyambungkan container ke jaringan database lab.\n")
 
@@ -1310,6 +1316,7 @@ def _rekam_deploy(tmp):
     (repo / f).write_text(teks.replace(lama, baru))
     git(repo, "commit", "-q", "-am", "Saring riwayat per akun")
     v2 = git(repo, "rev-parse", "--short", "HEAD").strip()
+    harap((v1, v2), (HASH_V1, HASH_V2), "hash commit sama dengan yang ditulis di halaman 1.31 dan widgetnya")
     log.append(f"$ git log --oneline\n{git(repo, 'log', '--oneline')}")
     log.append(f"# commit {v2} adalah latihan lab dengan bug buatan, bukan kejadian di cerita:\n#   {f}  {lama}  ->  {baru}\n")
     for tag in (v1, v2):

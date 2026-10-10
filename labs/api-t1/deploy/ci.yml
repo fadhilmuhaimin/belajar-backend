@@ -24,8 +24,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      # github.sha = hash commit penuh; context github tidak punya versi pendek. Tag = 7 karakter pertama, sama dengan lab.
+      - run: echo "TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
       - uses: docker/build-push-action@v7
         with:
           push: true
-          # Nama image wajib huruf kecil. github.sha = hash commit penuh yang di-push.
-          tags: ghcr.io/grup-lestari/rekeningo-api:${{ github.sha }}
+          # Nama image wajib huruf kecil.
+          tags: ghcr.io/grup-lestari/rekeningo-api:${{ env.TAG }}
