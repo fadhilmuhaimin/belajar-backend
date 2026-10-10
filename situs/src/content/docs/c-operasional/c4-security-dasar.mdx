@@ -68,7 +68,7 @@ Lab ini meniru IP lewat header `X-Lab-IP`, khusus lab.
 
 Batas 5 jadi 10. Perbaikannya: simpan bucket di tempat bersama, mis. Redis yang sudah ada di arsitektur Tahap 3 (tidak dijalankan di lab ini).
 
-**Security dasar lain** sudah dibahas di halaman sebelumnya. Password di-hash dan token berumur pendek ([[B5.1]]). Pemilik data dicek ([[B5.3]]), input divalidasi di server ([[B6]]), dan secret dibaca dari environment ([[C3]]). Daftar risiko API yang lebih lengkap ada di [OWASP API Security Top 10](https://owasp.org/API-Security/editions/2023/en/0x11-t10/).
+**Security dasar lain** sudah dibahas di halaman sebelumnya. Password di-hash, dan sesi berakhir saat Keluar atau sesudah masa berlakunya ([[B5.1]], ADR 8 di [[t1-idor]]). Pemilik data dicek ([[B5.3]]), input divalidasi di server ([[B6]]), dan secret dibaca dari environment ([[C3]]). Daftar risiko API yang lebih lengkap ada di [OWASP API Security Top 10](https://owasp.org/API-Security/editions/2023/en/0x11-t10/).
 
 ## Di stack lain
 

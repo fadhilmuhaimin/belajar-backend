@@ -417,6 +417,30 @@
   "jawab": "Pemiliknya berbeda. Transaksi dimiliki pembayar dan penerimanya, sedangkan riwayat dimiliki pemilik akun. Riwayat Budi juga berisi pembayaran Budi ke warung lain, yang bukan urusan Ani."
  },
  {
+  "id": "t1-idor-1",
+  "halaman": "t1-idor",
+  "judul": "1.29 IDOR, enumerasi, dan token di app",
+  "url": "tahap-1/idor-token-app/",
+  "tanya": "Raka mengganti semua ID dengan UUID, lalu menghapus pertanyaan pemilik karena \"sudah tidak bisa ditebak\". Budi mengirim tangkapan layar struknya, lengkap dengan ID transaksi, ke grup chat divisinya. Apa akibatnya?",
+  "jawab": "Siapa pun di grup itu yang login bisa membuka transaksi Budi dengan ID tersebut. UUID hanya membuat ID sulit ditebak, tidak membuatnya rahasia. Yang menolak permintaan itu adalah pertanyaan pemilik di service."
+ },
+ {
+  "id": "t1-idor-2",
+  "halaman": "t1-idor",
+  "judul": "1.29 IDOR, enumerasi, dan token di app",
+  "url": "tahap-1/idor-token-app/",
+  "tanya": "Rekaman bagian 5 menunjukkan `UPDATE 1` lalu `UPDATE 0`. Apa yang terjadi kalau service tidak memeriksa jumlah baris, lalu transaction di-COMMIT?",
+  "jawab": "Saldo Dimas berkurang Rp5.000 dan saldo Warung Ani tidak bertambah. Tidak ada error, jadi layar Dimas bisa menampilkan \"berhasil\". Itu M4 lagi, kali ini karena policy, bukan constraint. Karena itu RLS tidak dipasang di tabel `akun`, dan kode yang menulis ke tabel ber-RLS memeriksa jumlah baris."
+ },
+ {
+  "id": "t1-idor-3",
+  "halaman": "t1-idor",
+  "judul": "1.29 IDOR, enumerasi, dan token di app",
+  "url": "tahap-1/idor-token-app/",
+  "tanya": "Kode baru mengisi identitas dengan `SET app.akun_id` di awal setiap request, lalu menjalankan query tanpa transaction. Semua endpoint selalu mengisinya. Apakah masih berbahaya?",
+  "jawab": "Ya. Satu jalur yang melewatkan `SET` sudah membuka celah, misalnya error sebelum baris itu atau endpoint baru. Request itu memakai identitas request sebelumnya di koneksi yang sama (rekaman bagian 6). `set_config(..., true)` di dalam transaction membuat kelalaian itu berakhir dengan 0 baris, bukan data orang lain."
+ },
+ {
   "id": "C3-1",
   "halaman": "C3",
   "judul": "1.31 Deployment dan rollback",

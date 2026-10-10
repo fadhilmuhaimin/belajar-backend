@@ -1,0 +1,238 @@
+---
+title: "1.29 Keamanan 2: IDOR, enumerasi, token di app, dan ADR 7–8"
+description: Kenapa setiap ID dari request harus diikuti pertanyaan pemilik, kenapa RLS hanya pagar kedua, dan di mana token sesi disimpan di HP. Memuat ADR 7 dan ADR 8.
+---
+import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import duaPagar from "../../../../data/diagram/t1-idor-dua-pagar.json";
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 9 menit · coba 3 menit · Prasyarat: [[B5.3]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+IDOR terjadi saat server memakai ID dari request tanpa bertanya apakah peminta boleh menyentuh data itu.
+
+<Rantai data={duaPagar} ringkas />
+
+Enumerasi adalah IDOR yang diulang: Dimas mencoba akun 401 sampai 503 dan membaca 103 saldo di [[t1-m5]]. Rekeningo menutupnya dengan dua pagar. Service bertanya pemilik, dan RLS di database menyaring baris untuk kode yang lupa bertanya. Token yang membuktikan siapa peminta disimpan di secure storage HP, bukan di preferences biasa.
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Kenapa mengganti ID berurutan dengan UUID tidak menutup IDOR?
+2. Koneksi database bekas request Dimas dipakai request Budi. Kenapa `SET app.akun_id` berbahaya di sini?
+3. Kenapa token sesi tidak disimpan dengan `shared_preferences`?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: identitas untuk RLS harus hidup sepanjang satu transaction, bukan sepanjang umur koneksi.">
+
+Pagar kedua hanya sekuat caranya mengetahui siapa peminta. Ikuti satu koneksi database yang dipakai dua request berurutan. Setiap baris diambil dari rekaman lab `b5-rls`.
+
+<WidgetLama nama="alur" src="data/skenario/t1-idor.json" />
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Di [[t1-m5]], token Dimas sah dan login bekerja benar. Server tidak pernah bertanya apakah akun 418 milik Dimas. Dimas mengulang permintaan itu untuk setiap nomor, menyimpan 103 saldo ke spreadsheet, lalu mengirimnya ke Sinta: "ini bocor".
+
+OWASP menaruh celah ini di urutan pertama [API Security Top 10 2023](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/), dengan nama Broken Object Level Authorization (BOLA). Saat memeriksa app, Raka juga menemukan token sesi tersimpan di `shared_preferences`. Halaman ini menjawab keduanya, lalu mencatat jawabannya sebagai ADR 7 dan ADR 8.
+
+### Cara kerjanya
+
+**1. IDOR: bentuk ID tidak menentukan.** OWASP menulis bahwa ID objek bisa berupa angka berurutan, UUID, atau teks apa pun. Celahnya adalah pertanyaan yang tidak ditanyakan. ID acak hanya membuat tebakan lebih sulit; pemeriksaan akses tetap wajib di setiap fungsi yang menerima ID dari client ([OWASP IDOR Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html)).
+
+Pertanyaannya juga tidak selalu "apakah ID ini sama dengan ID peminta". OWASP mencatat perbandingan itu hanya menutup sebagian kasus. Transaksi punya dua pemilik, pembayar dan penerima:
+
+<Snippet file="labs/api-t1/internal/service/akun.go" lines="23:30" lang="go" title="labs/api-t1/internal/service/akun.go" />
+
+**2. Enumerasi: dua pintu.** Pintu pertama adalah ID berurutan. Di versi benar, akun orang lain dan akun yang tidak ada sama-sama dijawab `404`, jadi mencoba 401 sampai 503 hanya membuka akun Dimas sendiri ([[t1-m5]]).
+
+Pintu kedua adalah login. Kalau server menjawab "email tidak terdaftar", Dimas bisa menyusun daftar email karyawan. Rekeningo menjawab dua kasus itu dengan kalimat yang sama:
+
+<Snippet file="labs/api-t1/output/login.txt" lines="10:21" title="Rekaman lab: labs/api-t1/output/login.txt" />
+
+Waktu jawabannya juga dijaga. Untuk email yang tidak terdaftar, `Login` tetap menjalankan bcrypt pada hash palsu, supaya tidak lebih cepat dari password yang salah ([[B5.1]]). OWASP menyebut perbedaan pesan dan waktu ini sebagai sumber enumerasi user ([OWASP Authentication](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)). Pembatasan jumlah percobaan login menyusul di [[C4]].
+
+**3. RLS sebagai pagar kedua: tiga syarat.** Di [[B5.3]], policy `pemilik_saja` menyaring baris berdasarkan `app.akun_id`. Policy itu baru menjadi pagar bila tiga syarat terpenuhi.
+
+- **Role aplikasi bukan superuser dan bukan pemilik tabel.** Keduanya melewati RLS tanpa peringatan, kecuali tabel diberi `FORCE ROW LEVEL SECURITY` (rekaman di [[B5.3]]).
+- **Identitas hidup sepanjang satu transaction.** Menurut [dokumentasi `SET`](https://www.postgresql.org/docs/17/sql-set.html), nilai `SET` biasa bertahan sampai sesi berakhir setelah transaction-nya di-COMMIT. Connection pool memakai ulang sesi itu untuk request berikutnya, seperti di blok Coba. `set_config(..., true)` hanya berlaku di transaction yang sedang berjalan ([functions-admin](https://www.postgresql.org/docs/17/functions-admin.html)).
+- **Tabelnya tidak diubah atas nama orang lain.** Bayar ke warung mengubah baris milik Ani. Di bawah policy pemilik, perintah itu tidak gagal; ia tidak menemukan baris:
+
+<Snippet file="labs/b5-rls/output/rls.txt" lines="52:60" title="Rekaman lab: labs/b5-rls/output/rls.txt" />
+
+Saldo Dimas berkurang Rp5.000, saldo Ani tidak bertambah. Lab membatalkannya dengan `ROLLBACK`, tapi kode yang tidak memeriksa jumlah baris akan meng-COMMIT-nya, dan M4 terulang. Dokumentasi PostgreSQL menjelaskan sebabnya: `UPDATE` yang membaca kolom di `WHERE` juga tunduk pada policy `SELECT`, dan baris yang tersaring dilewati diam-diam ([CREATE POLICY](https://www.postgresql.org/docs/17/sql-createpolicy.html)).
+
+Pola identitas yang aman, dari lab yang sama:
+
+<Snippet file="labs/b5-rls/rls.sql" region="pool-lokal" lang="sql" title="labs/b5-rls/rls.sql" />
+
+**4. Token di app: siapa pun yang memegangnya adalah Budi.** Token sesi dari [[B5.1]] berisi 32 byte acak dan berlaku 8 jam. Server hanya menyimpan hash-nya. Selama token itu berlaku, siapa pun yang membacanya dari HP Budi bisa memakai saldo Budi.
+
+`shared_preferences` 2.5.6 membungkus NSUserDefaults di iOS dan SharedPreferences atau DataStore di Android ([pub.dev](https://pub.dev/packages/shared_preferences)). Di Android, SharedPreferences menulis isinya tanpa enkripsi ke file XML milik app. Batas akses file itu tidak melindungi dari backup yang diekstrak atau HP yang sudah di-root ([MASTG-TEST-0287](https://mas.owasp.org/MASTG/tests/android/MASVS-STORAGE/MASTG-TEST-0287/)).
+
+`flutter_secure_storage` 11.2.0 memakai Keychain di iOS. Di Android, defaultnya RSA OAEP untuk membungkus key dan AES-GCM untuk isinya, dengan key di Android Keystore ([pub.dev](https://pub.dev/packages/flutter_secure_storage)). *Ilustrasi, tidak dijalankan di lab:*
+
+```dart
+const storage = FlutterSecureStorage();
+await storage.write(key: 'token_sesi', value: token); // sesudah login
+final token = await storage.read(key: 'token_sesi'); // sebelum request
+await storage.delete(key: 'token_sesi'); // saat Keluar atau saat server menjawab 401
+```
+
+### Di stack lain
+
+| Stack | Tempat token sesi | Yang perlu diketahui | Sumber |
+|---|---|---|---|
+| Flutter | `flutter_secure_storage` 11.2.0 | Keychain di iOS; RSA OAEP + AES-GCM di Android; auto backup Android bisa membuat key gagal dibuka | [pub.dev](https://pub.dev/packages/flutter_secure_storage) |
+| iOS native | Keychain services | Database terenkripsi untuk rahasia kecil milik user | [Apple: Keychain services](https://developer.apple.com/documentation/security/keychain-services) |
+| Android native | Data terenkripsi dengan key di Android Keystore | Material key tidak pernah masuk ke proses app | [Android Keystore](https://developer.android.com/privacy-and-security/keystore) |
+| React Native (Expo) | `expo-secure-store` | Keychain di iOS; SharedPreferences terenkripsi dengan Keystore di Android; isi Keychain bertahan sesudah app dihapus | [Expo SecureStore](https://docs.expo.dev/versions/latest/sdk/securestore/) |
+| Web (pembanding) | Cookie `HttpOnly; Secure; SameSite` | OWASP melarang token di `localStorage` | [OWASP Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) |
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### ADR 7: pemilik ditanya di service, RLS sebagai pagar kedua, 404 bukan 403
+
+**Kebutuhan.** M5 membocorkan 103 saldo lewat satu token sah. v1 punya empat endpoint dengan ID di path, dan endpoint baru akan terus datang. Engineer-nya satu, dan sebagian kode ditulis bersama AI. Satu method yang lupa bertanya mengulang M5.
+
+| Opsi | Kelebihan | Kekurangan |
+|---|---|---|
+| UUID untuk semua ID (yang Raka kira) | Enumerasi berurutan tidak bisa lagi | OWASP: pemeriksaan tetap wajib; UUID ikut tersebar di struk, log, dan tangkapan layar |
+| Pertanyaan pemilik hanya di service | Terbaca, dites tanpa HTTP, status dan pesan bebas dipilih | Satu method baru yang lupa bertanya membuka data lagi |
+| RLS saja | Berlaku untuk setiap query, termasuk yang lupa | Bayar ke warung jadi `UPDATE 0` (rekaman); login dan admin butuh jalan pintas |
+| **Service sebagai pagar pertama, RLS untuk baca sebagai pagar kedua** | Lupa di satu lapis disaring lapis lain | Aturan ditulis di dua tempat; RLS punya tiga syarat yang harus dijaga |
+
+**Yang dipilih.**
+
+1. Setiap method service yang menerima ID bertanya pemilik atau peran sebelum data keluar. Sudah berjalan di `api-t1` (rekaman `authz.txt`, [[B5.3]]).
+2. Data orang lain dijawab `404`, sama persis dengan data yang tidak ada. `403` hanya untuk aksi yang tidak boleh bagi perannya. Request tanpa token dijawab `401` lebih dulu.
+3. RLS dipakai untuk baca di tabel yang setiap barisnya punya pemilik jelas. Syaratnya: role aplikasi bukan pemilik tabel, dan identitas diisi `set_config('app.akun_id', $1, true)` di dalam transaction request.
+4. RLS tidak dipasang di tabel `akun`, karena bayar mengubah baris warung. Kode yang menulis ke tabel ber-RLS wajib memeriksa jumlah baris yang berubah.
+5. Setiap endpoint ber-ID punya test "token A meminta data B".
+
+**Pre-mortem.** Enam bulan lagi, keputusan ini gagal. Tiga penyebab yang paling mungkin:
+
+- Endpoint struk baru memanggil repo langsung, tanpa lewat service. Pencegahnya butir 5.
+- Identitas RLS diisi `SET` biasa, dan request Budi membaca akun Dimas lewat koneksi bekas (rekaman bagian 6). Pencegahnya butir 3 dan checklist review di bawah.
+- Policy pemilik dipasang di tabel `akun`, lalu pembayaran ke warung hilang tanpa error (rekaman bagian 5). Pencegahnya butir 4.
+
+**Kapan keputusan ini salah.** Saat ada client yang membaca database langsung, misalnya tool laporan untuk Pak Hadi, service tidak lagi satu-satunya pintu, dan RLS harus menjadi pagar pertama. Keputusan ini juga mulai salah saat aturan izin bertambah, misalnya kepala bagian melihat transaksi timnya. Pertanyaan `peminta != id` yang tersebar di banyak method sulit diperiksa satu per satu.
+
+**Yang merevisinya nanti.** Tahap 2 mengganti model uang v1 dengan ledger double-entry, jadi policy RLS dipasang sekali di tabel ledger saat tabel itu dibuat. Di Tahap 2 juga, test "token A meminta data B" menjadi syarat merge untuk engineer kedua.
+
+### ADR 8: sesi acak di server, token di secure storage, JWT ditunda
+
+**Kebutuhan.** PRD v1 meminta login karyawan dengan sesi yang tersimpan di app. Satu backend melayani 103 akun, dengan puncak 0,14 request per detik. Keluar harus langsung berlaku, termasuk untuk salinan token. Token v1 tersimpan di `shared_preferences`.
+
+Bentuk token:
+
+| Opsi | Kelebihan | Kekurangan |
+|---|---|---|
+| **Token acak di server: 32 byte, hash di tabel `sesi`, 8 jam** | Keluar langsung mematikan token; token tidak berisi data | Satu query per request; server menyimpan state |
+| JWT 15 menit tanpa daftar cabut | Diperiksa tanpa query | Token tetap diterima sampai `exp` walau sudah Keluar ([RFC 7519 §4.1.4](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.4)); signing key menjadi secret baru |
+| JWT + refresh token + daftar cabut | Access token pendek, refresh bisa dicabut | Daftar cabut adalah query lagi; dua token dan rotasi di app; [RFC 8725](https://www.rfc-editor.org/rfc/rfc8725) mendaftar banyak kesalahan implementasi |
+
+Tempat token di app:
+
+| Opsi | Kelebihan | Kekurangan |
+|---|---|---|
+| `shared_preferences` (v1) | Sudah terpasang, dibaca sinkron dari cache | Tanpa enkripsi di Android (MASTG); README-nya melarang data penting karena tulisan ke disk tidak dijamin |
+| **`flutter_secure_storage`** | Keychain dan Keystore milik sistem | Auto backup Android dan isi Keychain sesudah instal ulang perlu ditangani |
+| Hanya di memori | Tidak ada yang tersimpan di HP | Budi login setiap kali app dibuka, juga saat warung ramai |
+
+<WidgetLama nama="banding" src="data/t1-idor-banding.json" />
+
+**Yang dipilih.**
+
+1. Token sesi acak 32 byte dari CSPRNG, jauh di atas batas minimum 64 bit dari [OWASP Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html). Database hanya menyimpan SHA-256-nya.
+2. Masa berlaku 8 jam sejak login (asumsi: satu hari kerja), tanpa perpanjangan otomatis. Keluar menghapus baris sesi.
+3. Di app, token hanya dibaca dan ditulis lewat `flutter_secure_storage`. Jawaban `401` menghapus token dan membuka layar login.
+4. JWT ditunda ke Tahap 4, saat service kedua harus memeriksa token tanpa bertanya ke monolith.
+
+**Pre-mortem.** Enam bulan lagi, keputusan ini gagal. Tiga penyebab yang paling mungkin:
+
+- Budi menghapus app di iPhone-nya lalu memasangnya lagi. Token lama masih di Keychain, karena isi Keychain bertahan sesudah app dihapus (dokumentasi Expo SecureStore). Pencegahnya: app menghapus token lama saat pertama kali dijalankan sesudah instal.
+- Android memulihkan backup ke HP baru tanpa key Keystore-nya, dan membaca token melempar exception saat app dibuka. README `flutter_secure_storage` mencatat masalah ini. Pencegahnya: auto backup dimatikan untuk data itu, dan kegagalan membaca token dianggap belum login.
+- Interceptor HTTP versi debug mencetak header `Authorization` ke log atau crash report. OWASP MAS mencatatnya sebagai kelemahan tersendiri ([MASWE-0005](https://mas.owasp.org/MASWE/MASVS-STORAGE/MASWE-0005/)). Pencegahnya: header itu disamarkan sebelum dicetak.
+
+**Kapan keputusan ini salah.** Saat service kedua harus memeriksa token di setiap request, setiap pemeriksaan berarti query ke tabel sesi milik monolith. Saat itu access token pendek yang bisa diperiksa sendiri lebih masuk akal, dengan sesi atau refresh token tetap di server untuk Keluar.
+
+**Yang merevisinya nanti.** Tahap 3 menambah pembatasan percobaan login ([[C4]]). Tahap 4 menambah access token pendek dan refresh token untuk service kedua.
+
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Muncul lagi di |
+|---|---|---|
+| RLS di tabel v1 lab `api-t1` | Model uang v1 diganti ledger; policy dipasang sekali di tabel baru | Tahap 2 |
+| UUID untuk ID akun dan transaksi | Pertanyaan pemilik sudah menutup M5; UUID hanya lapisan tambahan | Tahap 2, bersama skema ledger |
+| Pembatasan percobaan login | 103 akun, penguji internal, satu gedung | [[C4]], Tahap 3 |
+| JWT dan refresh token | Satu backend, tidak ada service kedua | Tahap 4 |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Raka mengganti semua ID dengan UUID, lalu menghapus pertanyaan pemilik karena "sudah tidak bisa ditebak". Budi mengirim tangkapan layar struknya, lengkap dengan ID transaksi, ke grup chat divisinya. Apa akibatnya?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Siapa pun di grup itu yang login bisa membuka transaksi Budi dengan ID tersebut. UUID hanya membuat ID sulit ditebak, tidak membuatnya rahasia. Yang menolak permintaan itu adalah pertanyaan pemilik di service.
+
+</details>
+
+**2.** Rekaman bagian 5 menunjukkan `UPDATE 1` lalu `UPDATE 0`. Apa yang terjadi kalau service tidak memeriksa jumlah baris, lalu transaction di-COMMIT?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Saldo Dimas berkurang Rp5.000 dan saldo Warung Ani tidak bertambah. Tidak ada error, jadi layar Dimas bisa menampilkan "berhasil". Itu M4 lagi, kali ini karena policy, bukan constraint. Karena itu RLS tidak dipasang di tabel `akun`, dan kode yang menulis ke tabel ber-RLS memeriksa jumlah baris.
+
+</details>
+
+**3.** Kode baru mengisi identitas dengan `SET app.akun_id` di awal setiap request, lalu menjalankan query tanpa transaction. Semua endpoint selalu mengisinya. Apakah masih berbahaya?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Ya. Satu jalur yang melewatkan `SET` sudah membuka celah, misalnya error sebelum baris itu atau endpoint baru. Request itu memakai identitas request sebelumnya di koneksi yang sama (rekaman bagian 6). `set_config(..., true)` di dalam transaction membuat kelalaian itu berakhir dengan 0 baris, bukan data orang lain.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Setiap method service yang menerima ID bertanya pemilik atau peran sebelum data keluar.
+- [ ] Data orang lain dijawab sama persis dengan data yang tidak ada: status `404` dan body yang sama.
+- [ ] Identitas untuk RLS diisi `set_config('app.akun_id', $1, true)` atau `SET LOCAL` di dalam transaction request, tidak pernah `SET` biasa.
+- [ ] Role database aplikasi bukan superuser dan bukan pemilik tabel, atau tabelnya diberi `FORCE ROW LEVEL SECURITY`.
+- [ ] `UPDATE` ke tabel ber-RLS memeriksa jumlah baris yang berubah; `UPDATE 0` bukan sukses.
+- [ ] Token hanya lewat `flutter_secure_storage`; tidak ada token di `shared_preferences`, log, atau crash report.
+- [ ] Endpoint ber-ID yang baru punya test "token A meminta data B".
+
+### Bacaan lanjut
+
+- [OWASP API1:2023 Broken Object Level Authorization](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/) · [OWASP IDOR Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html)
+- [PostgreSQL 17: CREATE POLICY](https://www.postgresql.org/docs/17/sql-createpolicy.html) · [SET](https://www.postgresql.org/docs/17/sql-set.html)
+- [OWASP MASWE-0001: data sensitif tanpa enkripsi di penyimpanan app](https://mas.owasp.org/MASWE/MASVS-STORAGE/MASWE-0001/)
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur","banding"]} />
