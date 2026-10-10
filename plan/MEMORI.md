@@ -17,6 +17,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 - 1.33 (E1): prasyarat B4.2 dibuang; ADR 10 (expand lalu contract) harus berdiri sendiri, tanpa rekaman crash B4.2.
 - 1.39 (F1) menyerap F2: hapus halaman F2 dan entrinya di PR yang sama (pola keputusan 150).
+- 1.36 (Tim-infra) memakai ulang `labs/api-t1/deploy/compose.yaml` dan `ci.yml` dari 1.31; jeda ganti container belum diukur, jangan tulis angkanya tanpa rekaman.
 - Ilustrasi latar Grup Lestari belum ada; ilustrasi baru wajib lolos `ukur-ilustrasi.mjs` (tambahkan path halamannya ke alat itu). `situs/lama/assets/cerita/tahap-1.svg` tidak dipakai lagi.
 - Tabel "Angka di tahap ini" ditulis ulang di 1.37/1.38, angka dari `tahap[0].asumsi`.
 - `/cara-pakai/` (A0) masih menjelaskan susunan lama; tulis ulang untuk lima blok dan tiga pintu.
@@ -36,16 +37,18 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Perlu dicek pemilik
 
+- 1.31 Di stack lain: baris Dart (Serverpod) "server Dart di image container" berlabel [perlu verifikasi]; halaman docs.serverpod.dev dirender JS dan tidak terbaca alat.
 - Redesain #120: usulan perubahan PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` di `plan/AUDIT-TAMPILAN.md` bagian 6, belum diubah.
 - ADR 7 (keputusan 240): RLS sebagai pagar kedua dipasang di tabel ledger Tahap 2, tidak di tabel v1 `api-t1` (rekaman `b5-rls` bagian 5: policy pemilik membuat bayar ke warung `UPDATE 0`). Kalau RLS harus sudah berjalan di Tahap 1, perlu tugas lab `api-t1` sendiri.
 - Cloudflare Pages (keputusan 115): butuh API token (Account > Cloudflare Pages > Edit) dan Account ID, lalu `gh secret set CLOUDFLARE_API_TOKEN` dan `gh secret set CLOUDFLARE_ACCOUNT_ID`.
 
 ## Sedang dikerjakan
 
-2026-10-11 · 1.31 Deployment dan rollback + ADR 9, branch `tahap-1/deployment-rollback`. Rencana: (1) lab `api-t1`: Dockerfile + `deploy/compose.yaml` + `rekam_deploy` (dua commit di repo git sementara, image bertag commit, deploy commit latihan dengan bug riwayat, rollback = tag lama), rekaman `output/deploy.txt`, contoh workflow CI `deploy/ci.yml`; (2) halaman `tahap-1/deployment-rollback.mdx` lima blok, Rantai ringkas, alur `t1-deploy.json`, ADR 9; hapus C3 lama + `c3-deploy.json`; registry, indeks-topik, sinkron; (3) KEPUTUSAN, STATUS, ANTREAN, MEMORI; gerbang; PR tanpa merge.
+2026-10-11 · 1.31 selesai di branch `tahap-1/deployment-rollback` (keputusan 247, PR menunggu tinjauan pengatur, belum di-merge): halaman `tahap-1/deployment-rollback.mdx`, lab `api-t1` Dockerfile + `deploy/` + rekaman `deploy.txt`; C3 lama dan `c3-deploy.json` dihapus. Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
+- Widget alur hanya menerima nada `warn` dan `good` (`alur-core.js` NADA, diperiksa `tools/validasi_skenario.mjs` saat build); Rantai menerima juga `system`.
 - ADR 7: policy RLS yang menyaring `UPDATE` membuat kredit ke baris orang lain jadi `UPDATE 0` tanpa error (`b5-rls` bagian 5); RLS di Rekeningo hanya untuk baca, di tabel ledger Tahap 2.
 - Konteks awal tiap iterasi loop 94–103k token, puncak 127–209k; 46% token yang diproses berasal dari panggilan dengan konteks > 150k. Penyumbang hasil alat terbesar: gambar (22%), grep (17%), PROTOKOL dibaca ulang (10%), `tail` KEPUTUSAN (baris ribuan karakter).
 - Retrospektif I4–1.28: halaman lama yang ditulis ulang membawa data lab lama yang bertentangan dengan naskah (JWT 15 menit di B5.1, ID teks `budi`/`ani` di b5-rls); cocokkan rekaman lama dengan skema v1 dan ADR naskah sebelum dipakai ulang. Satu rekaman khusus per halaman (`authz.txt`) lebih jelas daripada potongan dari lima file rekaman.

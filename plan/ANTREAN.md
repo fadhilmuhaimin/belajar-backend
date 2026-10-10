@@ -245,8 +245,8 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.31 · Deployment dan rollback + ADR 9
 
 - jenis: konten
-- status: antre
-- percobaan: 0
+- status: selesai
+- percobaan: 1
 - bergantung: 1.30
 - selesai bila: C3 ditulis ulang ke `tahap-1/` dengan ADR 9 (image per commit, rollback = tag lama, CI pertama); Infra 1 (satu VPS, Compose, kenapa cukup); widget alur; tanpa Snippet `api-t1-lama`.
 - catatan: Jalur DevOps. Dari K1: C3 lama bertentangan dengan 1.30 (deploy `ssh` + `git pull` + build di server vs build di laptop lalu `scp`; "suatu malam", mati 40 menit, pulih dari Git vs Senin 12.10, mati 5 menit, v1 hasil build ulang menjawab 500 di `m6.txt` baris 87); prasyarat C3 kosong (harus 1.30); kolom `telp` tidak ada di skema v1; `TOKEN_SECRET` ikut di `kartu.json`. Semuanya hilang saat ditulis ulang.
