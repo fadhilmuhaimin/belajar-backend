@@ -45,10 +45,11 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · I5b selesai (keputusan 248), PR dari `interaksi/i5b` menunggu tinjauan pengatur, belum di-merge: peta tahap beranda memakai `PetaDiagram.tsx` (DiagramArsitektur dengan `kunci`), gerak masuk `src/gerak/muncul.ts` di diagram dan teka-teki; `ukur-diagram.mjs` dan `ukur-gerak.mjs` memeriksa beranda. Perbaikan review #161 (keputusan 248): diagram disembunyikan CSS sampai mengikuti tab terpilih, `ukur-diagram.mjs` bagian 6 merekam per frame; tugas G1 (gerbang menghentikan daemon preview) ditambahkan sesudah I5b. Berikutnya: python3 tools/antrean.py berikut (G1)
+2026-10-11 · I5b selesai (keputusan 248), PR dari `interaksi/i5b` menunggu tinjauan pengatur, belum di-merge: peta tahap beranda memakai `PetaDiagram.tsx` (DiagramArsitektur dengan `kunci`), gerak masuk `src/gerak/muncul.ts` di diagram dan teka-teki; `ukur-diagram.mjs` dan `ukur-gerak.mjs` memeriksa beranda. Perbaikan review #161 (keputusan 248): diagram disembunyikan CSS sampai mengikuti tab terpilih, `ukur-diagram.mjs` bagian 6 merekam per frame; tugas G1 (gerbang menghentikan daemon preview) ditambahkan sesudah I5b. Review putaran 2 (keputusan 248): SSR memesan tinggi React Flow (`varPesan` di `tata.ts`, `100cqw` di `diagram.css`), CLS diukur `ukur-diagram.mjs` bagian 6–7 (HP 0,2653 → 0,0000). PR #161 menunggu tinjauan pengatur. Berikutnya: python3 tools/antrean.py berikut (G1)
 
 ## Pelajaran
 
+- Island yang mengganti versi statis wajib memesan tinggi akhirnya di SSR; ukur CLS dengan modul JS ditunda dan gulir tanpa input (`ukur-diagram.mjs` bagian 7), karena tangkapan dan `layar.mjs` tidak melihat geser.
 - Island React Astro di-hydrate di `startTransition` dan atribut `ssr` dilepas sebelum React selesai; keadaan yang dibaca dari DOM di efek butuh CSS yang menyembunyikan isi SSR sampai cocok, bukan selektor `[ssr]`.
 - Widget alur hanya menerima nada `warn` dan `good` (`alur-core.js` NADA, diperiksa `tools/validasi_skenario.mjs` saat build); Rantai menerima juga `system`.
 - ADR 7: policy RLS yang menyaring `UPDATE` membuat kredit ke baris orang lain jadi `UPDATE 0` tanpa error (`b5-rls` bagian 5); RLS di Rekeningo hanya untuk baca, di tabel ledger Tahap 2.
