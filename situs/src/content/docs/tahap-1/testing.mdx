@@ -95,17 +95,25 @@ Query itu tetap menjawab tanpa error, jadi hanya tes yang memeriksa isi riwayat 
 
 Kedua body diambil dari halaman masalah. Jumlah minus dari [[t1-m1]] dijawab `422` oleh aturan di service. Field `amount` dari [[t1-m2]] dijawab `400` oleh handler, dengan nama field `jumlah` dari kontrak di [[B1.4]].
 
-Tes kedua di file yang sama menjawab janji di [[B5.3]]: token Budi yang meminta akun Dimas dijawab `404`, sama dengan akun yang tidak ada.
+Tes kedua di file yang sama menjawab janji di [[B5.3]]. Token Budi meminta data orang lain di keempat endpoint ber-ID: akun dan riwayat Dimas, laporan Warung Ani, dan satu transaksi Dimas. Semuanya dijawab `404`, sama dengan akun yang tidak ada.
 
 <Snippet file="labs/api-t1/cmd/api/api_test.go" region="pemilik" lang="go" title="labs/api-t1/cmd/api/api_test.go" />
 
-**`SKIP` bukan lolos.** Tes database memanggil `t.Skip` saat `DATABASE_URL` kosong. Tanpa database, seperti job CI di [[C3]], paketnya tetap ditulis `ok`:
+**`SKIP` bukan lolos.** Tes database membaca alamat PostgreSQL dari `TEST_DATABASE_URL` dan memanggil `t.Skip` saat variabel itu kosong. Tanpa database, seperti job CI di [[C3]], paketnya tetap ditulis `ok`:
 
-<Snippet file="labs/api-t1/output/testing.txt" lines="22:30" title="Rekaman lab: labs/api-t1/output/testing.txt" />
+<Snippet file="labs/api-t1/output/testing.txt" lines="18:29" title="Rekaman lab: labs/api-t1/output/testing.txt" />
 
-Di sini `ok` hanya membuktikan unit test. Keempat tes database tidak dijalankan. Dengan `DATABASE_URL` terisi, kelima tes beserta tiga subtest lolos tanpa `SKIP` (bagian B di rekaman).
+Di sini `ok` hanya membuktikan unit test. Keempat tes database tidak dijalankan: dua `SKIP` di atas, dan dua `SKIP` lain untuk tes HTTP di paket `cmd/api`. Dengan `TEST_DATABASE_URL` terisi, kelima tes beserta tiga subtest lolos tanpa `SKIP` (bagian B di rekaman).
+
+Job CI dari ADR 9 di [[C3]] tidak mengisi `TEST_DATABASE_URL`. Karena itu commit seperti `f5ea0b4` tetap lolos CI [[C3]]. Yang menangkapnya adalah butir 5 di Putuskan, sampai PostgreSQL masuk job CI di Tahap 3.
 
 Flag `-p 1` di bagian B membuat `go test` menjalankan test binary satu per satu. Bawaannya, `go test` menjalankan beberapa paket paralel sebanyak GOMAXPROCS ([pkg.go.dev](https://pkg.go.dev/cmd/go)). Tes database di dua paket memakai database yang sama, jadi keduanya tidak boleh jalan bersamaan.
+
+**Tes tidak memakai alamat server.** `siapkan` menghapus semua transaksi dan koreksi, lalu membuat semua saldo nol. Karena itu tes membaca `TEST_DATABASE_URL`, bukan `DATABASE_URL` yang dipakai server dan deploy di [[C3]]. Sebelum menghapus apa pun, `siapkan` memeriksa database dan schema-nya: hanya `lab` dengan schema `tahap1` yang dibuat ulang lab dari nol. Alamat ke database lain langsung `FAIL`:
+
+<Snippet file="labs/api-t1/output/testing.txt" lines="84:90" title="Rekaman lab: labs/api-t1/output/testing.txt" />
+
+`batasWarung` di tes M4 memasang constraint batas saldo warung hanya bila constraint itu belum ada, lalu melepasnya lagi sesudah tes. Constraint yang sudah ada sebelum tes tidak disentuh.
 
 **Yang tidak dilihat `go test -race`.** Race detector hanya menemukan race yang benar-benar terjadi saat kode berjalan, pada variabel di memori proses Go ([go.dev](https://go.dev/doc/articles/race_detector)). Dua pembayaran yang bersamaan bertemu di PostgreSQL, di luar pengamatannya. Tes untuk itu ditulis di Tahap 2, saat transfer antar karyawan dan retry dari app datang.
 
@@ -179,7 +187,7 @@ public function test_jumlah_minus_ditolak(): void
         self.assertEqual(res.status_code, 422)
         self.assertEqual(res.json()["errors"][0]["field"], "jumlah")`} />
 
-<p class="bb-beda">**Yang berbeda di stack ini:** `TestCase` membungkus tiap tes dalam blok `atomic()`, jadi perubahannya dibatalkan sesudah tes. Tes yang butuh commit sungguhan, misalnya `select_for_update()`, memakai `TransactionTestCase`.</p>
+<p class="bb-beda">**Yang berbeda di stack ini:** `TestCase` membungkus tiap tes dalam blok `atomic()`, jadi perubahannya dibatalkan sesudah tes. Tes yang memeriksa perilaku transaction, misalnya bahwa `select_for_update()` berjalan di dalam transaction, memakai `TransactionTestCase`.</p>
 
 </Fragment>
 <Fragment slot="t4">
@@ -218,10 +226,10 @@ public function test_jumlah_minus_ditolak(): void
 1. Setiap aturan di service punya unit test dengan nilai di sekitar batas: minus, nol, dan satu di atas batas.
 2. Constraint, transaction, dan query dites ke PostgreSQL sungguhan. Repo tidak di-mock.
 3. Setiap bug yang lolos mendapat regression test, dan tes itu terbukti gagal saat bug-nya dikembalikan.
-4. Tes HTTP memeriksa yang dibaca app: status code, `Content-Type`, dan nama field. Setiap endpoint ber-ID dites dengan token pemilik lain.
-5. Sebelum deploy, Raka menjalankan `go test -p 1 ./...` dengan `DATABASE_URL` ke database lokal, dan hasilnya tanpa `SKIP`.
+4. Tes HTTP memeriksa yang dibaca app: status code, `Content-Type`, dan nama field. Keempat endpoint ber-ID dites dengan token orang lain dan harus dijawab `404`.
+5. Sebelum deploy, Raka menjalankan `go test -p 1 ./...` dengan `TEST_DATABASE_URL` ke database tes lokal, dan hasilnya tanpa `SKIP`. Tes tidak pernah membaca `DATABASE_URL` server.
 
-**Kapan pilihan ini salah.** Saat tes database berjalan begitu lama sampai dilewati sebelum deploy. Juga saat dua orang menjalankan tes ke database yang sama pada waktu yang sama.
+**Kapan pilihan ini salah.** Saat tes database berjalan begitu lama sampai dilewati sebelum deploy. Juga saat dua orang menjalankan tes ke database yang sama pada waktu yang sama. Juga saat tes yang menulis ke database memakai variabel atau database yang sama dengan server: satu `go test` di VPS menghapus transaksi sungguhan.
 
 ### Sengaja belum dilakukan
 
@@ -252,7 +260,7 @@ Unit test tanpa database, karena aturan itu diperiksa sebelum repo dipanggil. Ni
 <details class="success">
 <summary>Jawaban</summary>
 
-Hanya unit test. `t.Skip` menghentikan tes tanpa menandainya gagal, jadi paketnya tetap `ok`. Constraint, transaction, query riwayat, dan format HTTP belum dijalankan sama sekali (rekaman bagian A).
+Hanya unit test. Job itu tidak mengisi `TEST_DATABASE_URL`, dan `t.Skip` menghentikan tes tanpa menandainya gagal, jadi paketnya tetap `ok`. Constraint, transaction, query riwayat, dan format HTTP belum dijalankan sama sekali (rekaman bagian A).
 
 </details>
 
@@ -269,6 +277,7 @@ Tidak. Bug itu ada di klausa `WHERE`, dan mock tidak pernah menjalankan SQL. Tes
 
 - [ ] Aturan di service punya tes untuk nilai minus, nol, dan satu di atas batas.
 - [ ] Tes untuk query, constraint, dan transaction berjalan ke PostgreSQL, bukan ke mock repo.
+- [ ] Tes yang menulis ke database membaca variabel sendiri, bukan `DATABASE_URL` server, dan berhenti bila database-nya bukan database tes.
 - [ ] Tes uang memeriksa saldo dan total di database, bukan hanya error atau status code.
 - [ ] Perbaikan bug disertai tes yang gagal tanpa perbaikan itu.
 - [ ] Endpoint ber-ID punya tes "token A meminta data B" ([[B5.3]]).

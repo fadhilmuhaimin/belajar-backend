@@ -46,7 +46,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · 1.32 Testing selesai di branch `tahap-1/testing` (keputusan 250, 251), PR menunggu tinjauan: tes Go nyata di `labs/api-t1` (unit, integration PostgreSQL, HTTP), rekaman `testing.txt`, halaman `tahap-1/testing.mdx`. Berikutnya: python3 tools/antrean.py berikut
+2026-10-11 · 1.32 Testing di branch `tahap-1/testing` (keputusan 250, 251), PR #163: perbaikan review diterapkan (tes membaca `TEST_DATABASE_URL` dengan penjaga `lab`/`tahap1`, keempat endpoint ber-ID dites 404, Snippet bagian A dan E, tab Django, catatan Dart). Menunggu tinjauan ulang; jangan merge sebelum disetujui. Berikutnya sesudah merge: python3 tools/antrean.py berikut
 
 ## Pelajaran
 

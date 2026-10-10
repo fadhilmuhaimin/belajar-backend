@@ -478,7 +478,7 @@
   "judul": "1.32 Testing: apa dites di level mana",
   "url": "tahap-1/testing/",
   "tanya": "`go test ./...` di CI menulis `ok` untuk semua paket. Di log, empat tes tertulis `SKIP`. Apa yang sudah terbukti?",
-  "jawab": "Hanya unit test. `t.Skip` menghentikan tes tanpa menandainya gagal, jadi paketnya tetap `ok`. Constraint, transaction, query riwayat, dan format HTTP belum dijalankan sama sekali (rekaman bagian A)."
+  "jawab": "Hanya unit test. Job itu tidak mengisi `TEST_DATABASE_URL`, dan `t.Skip` menghentikan tes tanpa menandainya gagal, jadi paketnya tetap `ok`. Constraint, transaction, query riwayat, dan format HTTP belum dijalankan sama sekali (rekaman bagian A)."
  },
  {
   "id": "C1-3",
