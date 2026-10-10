@@ -164,7 +164,7 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### I5a · Blok: buka/tutup dengan layout animation
 
 - jenis: interaksi
-- status: antre
+- status: dikerjakan
 - percobaan: 0
 - bergantung: I3
 - selesai bila: buka/tutup blok memakai layout animation dari fondasi gerak, menggantikan transisi CSS; tangkapan sebelum/sesudah; butir I6.

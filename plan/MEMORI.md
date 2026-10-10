@@ -43,7 +43,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.28 Authorization selesai di PR (keputusan 237): `tahap-1/authorization.mdx`, rekaman `labs/api-t1/output/authz.txt`, lab `b5-rls` ditulis ulang ke akun v1 (417/418/419). 1.29 memakai `rls.txt` yang sama (policy `app.akun_id` + `nullif`, FORCE, pemilik tabel) untuk ADR 7. Uji pilah tanpa gambar: `node situs/tangkapan/uji-pilah.mjs <url>`. Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-10 · I5a Blok buka/tutup dengan gerak (branch `interaksi/i5a`). Rencana: (1) ukur sebelum di build main: `layar.mjs`, sidik JS (`tmp/sidik_dist.py`), tangkapan frame sesudah klik; (2) `situs/src/gerak/lipat.ts` (Motion `animate` dari token, rentang tinggi murni + Vitest), `Blok.astro` memakainya, transisi CSS `blok-muncul` di `tema.css` dihapus; (3) `ukur-gerak.mjs` memeriksa Blok (gerak tanpa reduced, frame pertama penuh dengan reduced, tanpa JS tetap lipat); (4) ukur sesudah, AUDIT-TAMPILAN bagian 7, KEPUTUSAN 238, ANTREAN, STATUS. Berikutnya: lanjutkan langkah yang belum dari daftar ini.
 
 ## Pelajaran
 
