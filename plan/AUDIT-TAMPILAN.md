@@ -130,3 +130,5 @@ Diukur dari `situs/dist`: jumlah byte file JS yang dirujuk tiap `index.html` (`<
 | I1 | Beranda | 286.058 B (80.779 gzip), 6 file | sama | React + tebak |
 | I1 | Semua 73 halaman | - | sama | 280 file `dist/`, HTML/JS/CSS identik byte per byte; React Flow belum terpasang |
 | I2 (keputusan 229, 230) | Semua 73 halaman | build dengan `package.json` main | sama | `motion` 14.1.0 dan `@xyflow/react` 12.12.0 terpasang tapi belum diimpor; 280 file `dist/` identik byte per byte, tidak ada `xyflow`/`framer-motion` di `dist/`. Ukuran paket sendiri (gzip, esbuild): motion lazy 28,8 KB, motion penuh 40,6 KB, React Flow 57,9 KB + `base.css` 2,4 KB |
+| I3 (keputusan 231) | Halaman uji `/uji/gerak/` (baru) | - | 295.344 B (84.537 gzip), 6 file saat dimuat + `fitur` (domMax) 85.969 B (28.144 gzip) lazy | Satu-satunya halaman yang memuat motion: contoh 5,6 KB + chunk motion 11,3 KB gzip di atas React |
+| I3 | 73 halaman lain | sidik I2 | 560–597 B gzip lebih kecil, jumlah file sama | Helper preload Vite pindah dari skrip pencarian ke chunk bersama karena `import()` lazy di MotionProvider; tidak ada `framer-motion` atau `ContohGerak` di HTML halaman lain |

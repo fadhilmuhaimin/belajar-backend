@@ -5,6 +5,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 ## Keputusan baru
 
 - Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (aturan dari keputusan 216); sisa 174–199 dibiarkan kosong.
+- 231: I3, fondasi gerak `situs/src/gerak/` (token, MotionProvider, `useGerak`, `useAwal`), halaman uji `/uji/gerak/`, `ukur-gerak.mjs`.
 - 229–230: I2, motion 14.1.0 dan @xyflow/react 12.12.0 (ADR dependency).
 - 228: K0f, kartu Peta cerita dirapikan (margin desktop 14 → 32 px; penyebab meta K0d).
 - 227: `.devcontainer/postCreate.sh` memasang bun 1.4.2 dan `bun install --frozen-lockfile` (diizinkan pemilik).
@@ -83,7 +84,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
-2026-10-10 · I2 selesai (keputusan 229, 230), branch `interaksi/i2`: `motion` 14.1.0 dan `@xyflow/react` 12.12.0 dipin persis di `situs/package.json` (`npx --yes bun@1.4.2 add --cwd situs --exact ...`); belum diimpor, `dist/` identik dengan main. Ukuran paket diukur `python3 tmp/ukur-paket/ukur.py` (esbuild, NODE_PATH ke `situs/node_modules`): motion lazy 28,8 KB gzip (dokumentasi 4,6 + 15 KB; ukur ulang di halaman nyata saat I3), React Flow 57,9 KB. Berikutnya: `python3 tools/antrean.py berikut` (I3 fondasi gerak).
+2026-10-10 · I3 selesai (keputusan 231), branch `interaksi/i3`. Komponen yang memakai gerak: bungkus island dengan `MotionProvider` (`situs/src/gerak/`), pakai `import * as m from "motion/react-m"`, `transition` dari `useGerak("cepat"|"sedang", "masuk"|"keluar")`, `initial` dari `useAwal(...)`; jangan tulis `duration: <angka>` (Vitest gagal). Contoh: `ContohGerak.tsx` di `/uji/gerak/` (StarlightPage, di luar registry). `ukur-gerak.mjs --axe tmp/axe/axe.min.js` menjalankan axe juga (axe-core 4.10.3 dari unpkg; env `AXE=` di depan perintah ditolak dontAsk). Berikutnya: `python3 tools/antrean.py berikut`.
+I2 selesai (keputusan 229, 230): `motion` 14.1.0 dan `@xyflow/react` 12.12.0 dipin persis; ukuran paket diukur `python3 tmp/ukur-paket/ukur.py`.
 I1 selesai (keputusan 225), branch `interaksi/i1`: situs memakai bun 1.4.2 (`situs/bun.lock`, CI `oven-sh/setup-bun@v2`). Perintah situs sekarang: `bun run --cwd situs build|preview|test|cek-tipe|tangkap|layar` (urutan ini; `bun --cwd situs run x` mencetak bantuan dengan exit 0). bun lokal masih 1.2.19; versi CI dijalankan dengan `npx --yes bun@1.4.2 ...`. Ukuran JS per halaman dicatat di `plan/AUDIT-TAMPILAN.md` bagian 7 (alat sementara `tmp/sidik_dist.py`, `tmp/banding_dist.py`). Berikutnya: `python3 tools/antrean.py berikut` (I2: `bun add` motion dan @xyflow/react).
 K0e selesai (keputusan 224): chip `amount`/`jumlah` di `situs/src/components/Ilustrasi.astro` dilebarkan; `ukur-ilustrasi.mjs` dan `ukur-judul.mjs` kini sama-sama di `cek_situs.sh --layar`. Ilustrasi baru (M5, M6, latar) wajib lolos `ukur-ilustrasi` (tambahkan path halamannya ke daftar di alat itu). Jangan tambah tinggi di atas Inti di HP: 1.23 hanya punya 28 px di 375×667. Berikutnya: `python3 tools/antrean.py berikut` (I1). Preview yang tertinggal dimatikan dengan `npm --prefix situs run preview -- stop` (`npx --prefix situs astro preview stop` dari root tidak menemukannya). `layar.mjs` tidak mengukur halaman ADR ("tanpa Inti"); cek layar pertama ADR dengan tangkapan. Rantai di Inti selalu pakai `ringkas` dan maksimal dua baris pendek; ukur dengan `npm --prefix situs run layar -- --url http://127.0.0.1:4321` (perlu build + preview ulang). Tangkapan dari root: `npm --prefix situs run tangkap -- --url http://127.0.0.1:4321 --path /<path>/` (menulis ke `situs/tangkapan/`); `cd` dan perintah majemuk ditolak mode dontAsk, jadi satu perintah per panggilan dengan path relatif.
 2026-10-09 · Sistem kerja otomatis siap (keputusan 216, 217). Satu-satunya pekerja: `tools/jalankan-otomatis.sh`; setiap iterasi membaca `plan/PROTOKOL-OTOMATIS.md` dan mengerjakan satu tugas dari `plan/ANTREAN.md` (berikutnya: `python3 tools/antrean.py berikut`). Tidak ada worktree lagi; kerja di folder utama, branch dari main, paling banyak satu PR terbuka, merge sendiri bila CI hijau. Lanjutkan: `caffeinate -dims bash tools/jalankan-otomatis.sh` di main bersih.
@@ -91,6 +93,11 @@ Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh
 Pola per halaman: branch `tahap-1/<slug>` dari `main`; lab dulu bila perlu (PR sendiri); halaman (PR sendiri); gerbang `bash tools/cek_situs.sh --layar > tmp/cek.txt; tail -30`; tangkapan `cd situs && npm run preview` lalu `node tools/tangkap.mjs --path /tahap-1/<slug>/` (dari `situs/`); lihat sendiri; KEPUTUSAN + STATUS + MEMORI; merge bila CI hijau; akhiri dengan "Siap dilanjutkan dari <halaman>". Setelah 1.42: jalankan isi `plan/PROMPT-CROSSCHECK.md`, tulis `plan/LAPORAN-TAHAP-1.md`.
 
 ## Pelajaran
+
+- Retrospektif K0e–I3 (2026-10-10): kelima tugas lolos tanpa percobaan ulang. Yang menyelamatkan tetap alat ukur kecil (I3: `ukur-gerak.mjs` menemukan `initial` di frame pertama yang tidak tertulis di dokumentasi). Penolakan dontAsk berulang untuk awalan env (`AXE=... node`) dan pipa ke `gzip`/`wc`; pakai argumen skrip dan skrip Python di `tmp/`.
+
+- Motion `reducedMotion="user"` hanya mematikan transform dan layout; opacity tetap beranimasi, dan durasi 0 masih menggambar `initial` di frame pertama. Ukur frame pertama sesudah klik (`ukur-gerak.mjs`), jangan percaya konfigurasi.
+- Menambah route di `src/pages/` atau `import()` lazy mengubah chunk bersama Vite: semua halaman berganti hash dan ukuran JS. Bandingkan sidik `tmp/sidik_dist.py` dan pastikan bedanya hanya pemindahan chunk.
 
 - Perubahan CSS global di atas Inti (mis. meta K0d) menggeser layar pertama semua halaman; simpan keluaran `layar.mjs` sebelum dan bandingkan sesudahnya, jangan hanya halaman yang diubah. Diff shell `<(...)` ditolak mode dontAsk; pakai `tmp/banding_layar.py`.
 

@@ -1,0 +1,19 @@
+---
+// Halaman uji fondasi gerak (I3, keputusan 231). Bukan halaman cerita: tidak di registry, tidak di sidebar,
+// tidak diindeks. Dipakai situs/tools/ukur-gerak.mjs untuk memeriksa bahwa reduced motion mematikan gerak.
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import ContohGerak from "../../gerak/ContohGerak";
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "Uji gerak",
+    description: "Halaman uji fondasi gerak.",
+    pagefind: false,
+    tableOfContents: false,
+    head: [{ tag: "meta", attrs: { name: "robots", content: "noindex" } }],
+  }}
+>
+  <p>Halaman uji untuk komponen gerak. Tekan tombol: catatan muncul dengan gerak singkat, atau tanpa gerak bila perangkat meminta gerak dikurangi.</p>
+  <ContohGerak client:visible />
+</StarlightPage>
