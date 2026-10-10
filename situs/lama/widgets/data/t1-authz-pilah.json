@@ -1,0 +1,52 @@
+{
+  "judul": "Server menjawab apa untuk request ini?",
+  "kelompok": [
+    "401 belum login",
+    "403 peran tidak boleh",
+    "404 bukan pemiliknya",
+    "200 boleh"
+  ],
+  "item": [
+    {
+      "teks": "Tanpa header Authorization: POST /topup",
+      "jawab": 0,
+      "kenapa": "wajibLogin menolak sebelum service jalan, jadi pertanyaan peran tidak pernah diajukan. Rekaman bagian D: 401, bukan 403."
+    },
+    {
+      "teks": "Budi: POST /topup Rp10.000 untuk dirinya sendiri",
+      "jawab": 1,
+      "kenapa": "Endpoint top-up bukan rahasia, karena semua app tahu alamatnya. Yang tidak boleh adalah peran Budi: karyawan. Rekaman bagian C."
+    },
+    {
+      "teks": "Admin tunjangan: POST /topup Rp10.000 untuk Budi",
+      "jawab": 3,
+      "kenapa": "Jenis akunnya admin. Top-up tercatat dengan admin_id 400 dan keterangan, sesuai aturan Pak Hadi. Rekaman bagian C."
+    },
+    {
+      "teks": "Dimas: GET /transfers/1, pembayaran Budi ke Warung Ani",
+      "jawab": 2,
+      "kenapa": "Dimas bukan pembayar dan bukan penerima. Jawabannya sama dengan transaksi yang tidak ada. Rekaman bagian B."
+    },
+    {
+      "teks": "Ani: GET /transfers/1",
+      "jawab": 3,
+      "kenapa": "Ani penerima transaksi itu. Aturan transaksi mengizinkan pembayar dan penerimanya. Rekaman bagian B."
+    },
+    {
+      "teks": "Ani: GET /akun/419/riwayat, riwayat Budi",
+      "jawab": 2,
+      "kenapa": "Ani pernah menerima uang Budi, tapi riwayat milik akun 419 saja. Setiap jenis data punya aturan pemilik sendiri. Rekaman bagian E."
+    },
+    {
+      "teks": "Admin tunjangan: GET /akun/419",
+      "jawab": 2,
+      "kenapa": "Peran admin memberi satu aksi, yaitu top-up. Membaca saldo Budi tidak termasuk, jadi akun 419 dijawab seperti akun orang lain. Rekaman bagian E."
+    },
+    {
+      "teks": "Budi: GET /warung/418/laporan",
+      "jawab": 2,
+      "kenapa": "Laporan hanya untuk warung itu sendiri. Budi pernah membayar ke Ani, tapi tidak memiliki laporannya. Rekaman bagian E."
+    }
+  ],
+  "penutup": "Login selalu diperiksa lebih dulu (401). Sesudah itu service bertanya peran untuk aksi khusus (403), atau pemilik untuk data ber-ID (404). Tombol yang disembunyikan di app tidak ada di daftar ini, karena server tidak pernah melihat tombol."
+}
