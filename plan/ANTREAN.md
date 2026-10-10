@@ -146,11 +146,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.27 · Authentication
 
 - jenis: konten
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: B5.1 ditulis ulang dari `b-fondasi/b5-1-authentication.mdx` ke `tahap-1/` dengan lima blok, contoh dari login PRD v1 (`login.txt` lab api-t1), widget alur; tanpa Snippet `api-t1-lama`; registry tanpa `lama`.
-- catatan: Jalur Mobile menonjolkan halaman ini.
+- catatan: Selesai 2026-10-10 (keputusan 236). `tahap-1/authentication.mdx`, Rantai `t1-authn`, alur baru `t1-authn.json` (varian sesudah logout). JWT 15 menit dari halaman lama dibuang karena bertentangan dengan ADR 8 naskah; JWT tinggal sebagai pembanding.
 
 ### 1.28 · Authorization
 

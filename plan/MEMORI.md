@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · Hemat konteks (keputusan 235), branch `otomatis/hemat-konteks`: `plan/RINGKAS.md`, CLAUDE.md (impor), MEMORI ≤ 80 baris + `plan/PELAJARAN-ARSIP.md`, PROTOKOL bagian k, `tools/ukur_konteks.py`, batas baris di gerbang. Sesudah merge: mode pengatur (satu subagent per tugas), mulai dari 1.27; ukur tugas pertama dengan `python3 tools/ukur_konteks.py <transcript subagent>`.
+2026-10-10 · 1.27 Authentication selesai (keputusan 236): `tahap-1/authentication.mdx`, Rantai + alur `t1-authn`. Halaman lama B5.3/C4/F2 masih merujuk JWT 15 menit dari B5.1 lama; saat 1.28/1.29 ditulis, pakai sesi acak (ADR 8). Berikutnya: `python3 tools/antrean.py berikut` (1.28).
 
 ## Pelajaran
 
@@ -52,5 +52,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - Route baru di `src/pages/` atau `import()` lazy mengubah chunk bersama Vite: semua halaman berganti hash; bandingkan sidik `tmp/sidik_dist.py`.
 - Perubahan CSS global di atas Inti menggeser layar pertama semua halaman; simpan keluaran `layar.mjs` sebelum dan bandingkan sesudahnya (`tmp/banding_layar.py`).
 - Setelah gerbang lolos, perubahan teks apa pun wajib diikuti `python3 tools/sinkron_cerita.py` dan gerbang ulang (CI #119 gagal karena `kartu.json` tertinggal).
+- `git rm` langsung men-stage penghapusan; `git add <file baru> && git commit` ikut membawanya. Hapus file lama di commit yang sama dengan perubahan registry, supaya setiap commit tetap bisa dibangun.
+- Widget lama alur diuji tanpa melihat gambar: `node situs/tangkapan/uji-alur.mjs <url>` (tangkapan/ di-.gitignore, jadi skrip ditulis ulang bila hilang) menekan tebakan, Berikutnya, dan varian, lalu menghitung error konsol.
 - Merge ditolak pengaman: berhenti, laporkan di baris pertama, jangan memulai halaman berikutnya di atas PR yang belum di-merge.
 - Mode dontAsk/auto menolak: perintah majemuk dengan `cd`, heredoc, loop shell, awalan env (`AXE=...`), diff `<(...)`, pipa ke `gzip`/`wc`, mengubah `.claude/settings.json`; pakai skrip di `tmp/` dan path relatif.
