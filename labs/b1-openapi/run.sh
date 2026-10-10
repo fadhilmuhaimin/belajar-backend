@@ -15,3 +15,13 @@ OASDIFF="tufin/oasdiff@sha256:64c510d2535e1aa2332e864d696ecdecd2c652b3da5e97d4c3
   echo "(exit code $?)"
 } > output/kontrak.txt
 cat output/kontrak.txt
+# Lab 1.33 (ADR 10, keputusan 252) · kontrak expand: nominal ditambah di samping jumlah. Keluaran: output/expand.txt
+{
+  echo "\$ npx @redocly/cli@2.58.2 lint openapi-expand.yaml"
+  npx -y @redocly/cli@2.58.2 lint openapi-expand.yaml 2>&1 | sed -E 's/in [0-9]+ms/in …ms/; s/\x1b\[[0-9;]*m//g' | grep -v "^$" | grep -v "Woohoo\|run with --" | grep -vF -e "╔" -e "║" -e "╚"
+  echo
+  echo "\$ oasdiff breaking openapi.yaml openapi-expand.yaml --fail-on ERR   # expand: nominal di samping jumlah"
+  docker run --rm -v "$PWD:/s" "$OASDIFF" breaking /s/openapi.yaml /s/openapi-expand.yaml --fail-on ERR 2>&1
+  echo "(exit code $?)"
+} > output/expand.txt
+cat output/expand.txt

@@ -1,0 +1,9 @@
+$ npx @redocly/cli@2.58.2 lint openapi-expand.yaml
+No configurations were provided -- using built in recommended configuration by default.
+validating openapi-expand.yaml...
+openapi-expand.yaml: validated in …ms
+
+$ oasdiff breaking openapi.yaml openapi-expand.yaml --fail-on ERR   # expand: nominal di samping jumlah
+No breaking changes to report, but the specs are different.
+Run 'oasdiff diff' to see structural differences.
+(exit code 0)
