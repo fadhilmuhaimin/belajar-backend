@@ -15,7 +15,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Catatan untuk halaman Tahap 1 berikutnya
 
-- 1.30 memakai `labs/api-t1/output/m6.txt` (keputusan 241): 8 putaran prober per detik; Budi (app 1.0) 2 berhasil, 3 tidak ada jawaban, 3 field `jumlah` tidak ada; Dimas update ke app 1.1 sesudah v2 menyala; bayar app 1.0 400 `nominal` wajib, app 1.1 201; VPS hanya punya v2; v1 dibangun ulang di skema baru 500. Angka cerita (5 menit, 11 HP) bukan dari lab. Kode lab utama tetap `jumlah` (sejalan ADR 10).
+- 1.30 memakai `labs/api-t1/output/m6.txt` (keputusan 241): 8 putaran prober per detik; Budi (app 1.0) 2 berhasil, 3 tidak ada jawaban, 3 field `jumlah` tidak ada; Dimas update ke app 1.1 sesudah v2 menyala; bayar app 1.0 400 `nominal` wajib, app 1.1 201; VPS hanya punya v2; v1 dibangun ulang di skema baru 500; G: kolom kembali ke `jumlah`, v1 melayani app 1.0, app 1.1 200 tanpa field `nominal` (jembatan ke ADR 10, yang tetap berdiri sendiri). Lock ACCESS EXCLUSIVE dipegang saat v1 sudah mati: jeda 3 putaran berasal dari jumlah perintah, bukan dari lock; halaman 1.30 jangan mengaitkan jeda dengan lock. Ganti nama kolom di cerita lewat `migrate up` file 000006 (komentar di rekaman). Angka cerita (5 menit, 11 HP) bukan dari lab. Kode lab utama tetap `jumlah`.
 - 1.33 (E1): prasyarat B4.2 dibuang; ADR 10 (expand lalu contract) harus berdiri sendiri, tanpa rekaman crash B4.2.
 - 1.39 (F1) menyerap F2: hapus halaman F2 dan entrinya di PR yang sama (pola keputusan 150).
 - Ilustrasi latar Grup Lestari dan M6 belum ada; ilustrasi baru wajib lolos `ukur-ilustrasi.mjs` (tambahkan path halamannya ke alat itu). `situs/lama/assets/cerita/tahap-1.svg` tidak dipakai lagi.
@@ -43,7 +43,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.30-lab selesai di PR (keputusan 241), branch `tahap-1/m6-lab`, belum di-merge: bagian `m6` di `labs/api-t1/run.py` (`V2_UBAH`, `Prober`, `rekam_m6`), rekaman `labs/api-t1/output/m6.txt`, README "Rekaman deploy M6". Rekam ulang: `make -C labs/api-t1 run BAGIAN=m6`. Berikutnya: `python3 tools/antrean.py berikut` (1.30).
+2026-10-10 · 1.30-lab selesai di PR (keputusan 241), branch `tahap-1/m6-lab`, belum di-merge: bagian `m6` di `labs/api-t1/run.py` (`V2_UBAH`, `Prober`, `rekam_m6`), rekaman `labs/api-t1/output/m6.txt`, README "Rekaman deploy M6"; perbaikan review: bagian G (jalan kembali), komentar migrate 000006, README tanpa `scp`. Rekam ulang: `make -C labs/api-t1 run BAGIAN=m6`. Berikutnya: `python3 tools/antrean.py berikut` (1.30).
 
 ## Pelajaran
 
