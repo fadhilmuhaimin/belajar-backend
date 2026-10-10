@@ -42,11 +42,14 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.28 Authorization dikerjakan di branch `tahap-1/authorization`. Langkah: baca naskah 1.28 dan B5.3 lama; cek rekaman lab api-t1 (cek pemilik di service, sesi acak dari `login.txt`, bukan JWT) dan b5-rls dari database bersih; tulis `tahap-1/authorization.mdx` lima blok dengan alur dan pilah; hapus `b-fondasi/b5-3-authorization.mdx` dan data widget lamanya; registry tanpa `lama`, `alat/indeks-topik.mdx`, `sinkron_cerita.py`. File: `situs/src/content/docs/tahap-1/authorization.mdx`, `situs/data/cerita.json`, data widget alur/pilah, KEPUTUSAN, STATUS, ANTREAN, MEMORI.
+2026-10-10 · 1.28 Authorization selesai di PR (keputusan 237): `tahap-1/authorization.mdx`, rekaman `labs/api-t1/output/authz.txt`, lab `b5-rls` ditulis ulang ke akun v1 (417/418/419). 1.29 memakai `rls.txt` yang sama (policy `app.akun_id` + `nullif`, FORCE, pemilik tabel) untuk ADR 7. Uji pilah tanpa gambar: `node situs/tangkapan/uji-pilah.mjs <url>`. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 
 - Konteks awal tiap iterasi loop 94–103k token, puncak 127–209k; 46% token yang diproses berasal dari panggilan dengan konteks > 150k. Penyumbang hasil alat terbesar: gambar (22%), grep (17%), PROTOKOL dibaca ulang (10%), `tail` KEPUTUSAN (baris ribuan karakter).
+- Retrospektif I4–1.28: halaman lama yang ditulis ulang membawa data lab lama yang bertentangan dengan naskah (JWT 15 menit di B5.1, ID teks `budi`/`ani` di b5-rls); cocokkan rekaman lama dengan skema v1 dan ADR naskah sebelum dipakai ulang. Satu rekaman khusus per halaman (`authz.txt`) lebih jelas daripada potongan dari lima file rekaman.
+- Lab SQL yang di-pipe ke `grep` kehilangan exit status psql; tambahkan pemeriksaan hasil di Makefile (pola `labs/b5-rls/Makefile`).
+- OWASP API Security pindah ke `api-security.owasp.org` (308 dari `owasp.org/API-Security/...`); link baru memakai alamat baru.
 - Retrospektif K0e–I3: alat ukur kecil (ukur-gerak, ukur-ilustrasi, ukur-judul) menangkap yang tidak terlihat di tangkapan. Pola: ukur dulu, perbaiki, ukur ulang, masukkan alat ke gerbang.
 - Motion `reducedMotion="user"` hanya mematikan transform dan layout; ukur frame pertama sesudah klik.
 - Route baru di `src/pages/` atau `import()` lazy mengubah chunk bersama Vite: semua halaman berganti hash; bandingkan sidik `tmp/sidik_dist.py`.

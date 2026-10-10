@@ -155,11 +155,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.28 · Authorization
 
 - jenis: konten
-- status: dikerjakan
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: B5.3 ditulis ulang ke `tahap-1/` dengan lima blok, widget alur dan pilah, lab api-t1 (cek pemilik di service) dan b5-rls; tanpa Snippet `api-t1-lama`; registry tanpa `lama`.
-- catatan: -
+- catatan: Selesai 2026-10-10 (keputusan 237). `tahap-1/authorization.mdx`; rekaman baru `authz.txt` (pemilik 404, peran 403, tanpa token 401); `b5-rls` ditulis ulang ke akun v1 dan gagal keras bila hasil beda. Alur `t1-authz` di Coba, pilah di Paham.
 
 ### I5a · Blok: buka/tutup dengan layout animation
 
