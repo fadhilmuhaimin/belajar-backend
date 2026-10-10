@@ -46,7 +46,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · 1.32 Testing di branch `tahap-1/testing` (keputusan 250, 251), PR #163: perbaikan review diterapkan (tes membaca `TEST_DATABASE_URL` dengan penjaga `lab`/`tahap1`, keempat endpoint ber-ID dites 404, Snippet bagian A dan E, tab Django, catatan Dart). Menunggu tinjauan ulang; jangan merge sebelum disetujui. Berikutnya sesudah merge: python3 tools/antrean.py berikut
+2026-10-11 · Tahap 1 · 1.33 App versi lama + ADR 10 di branch `tahap-1/app-versi-lama`. Rencana: rekaman kecil `versi.txt` di `labs/api-t1/run.py` (mulai dari akhir m6 bagian G; server expand mengirim `jumlah` dan `nominal`, app 1.0 dan 1.1 sama-sama 200; contract sesudah semua app 1.1); halaman `tahap-1/app-versi-lama.mdx` lima blok + ADR 10 + alur `t1-versi.json`; hapus E1 lama dan `e1-versi.json`; registry, indeks-topik, sinkron; KEPUTUSAN, STATUS, ANTREAN. File: `labs/api-t1/run.py`, `labs/api-t1/output/versi.txt`, `situs/data/cerita.json`, `situs/src/content/docs/tahap-1/app-versi-lama.mdx`, `situs/public/widgets/data/skenario/`.
 
 ## Pelajaran
 
