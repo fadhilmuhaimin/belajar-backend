@@ -154,6 +154,76 @@ for (const [lebar, tinggi, arahHarus] of [
     await ctx.close();
   }
 }
+
+// 5. Peta tahap di beranda (I5b, keputusan 248): satu diagram yang berganti mengikuti tab.
+// Tahap 1 tegak di HP dan mendatar di desktop; Tahap 3 enam kotak; Tahap 6 (proyeksi) tanpa React Flow;
+// berganti tahap = gerak masuk (0 animasi saat reduced); roda di atas diagram tetap menggulir halaman di HP.
+const beranda = url.replace(/\/uji\/diagram\/$/, "/");
+for (const [lebar, tinggi, arahHarus] of [
+  [375, 667, "tegak"],
+  [1366, 657, "mendatar"],
+]) {
+  for (const reducedMotion of ["no-preference", "reduce"]) {
+    const ctx = await browser.newContext({ viewport: { width: lebar, height: tinggi }, reducedMotion, hasTouch: lebar < 500 });
+    const page = await ctx.newPage();
+    const tag = `beranda ${lebar}×${tinggi} ${reducedMotion}`;
+    await page.goto(beranda, { waitUntil: "networkidle" });
+    await page.locator("[data-peta-diagram]").scrollIntoViewIfNeeded();
+    await page.waitForSelector("[data-peta-diagram] .react-flow__node .diagram__kotak");
+    const satu = await page.evaluate(() => ({ arah: document.querySelector("[data-peta-diagram] figure.diagram")?.dataset.arah, kotak: document.querySelectorAll("[data-peta-diagram] .diagram__kotak").length, anim: document.getAnimations().length }));
+    lapor(satu.arah === arahHarus && satu.kotak === 3 && satu.anim === 0, `${tag}: Tahap 1 ${satu.arah}, ${satu.kotak} kotak, ${satu.anim} animasi sebelum memilih`);
+    // Klik, lalu tunggu frame pertama yang sudah berisi Tahap 3 (render React sesudah event tab bisa satu task kemudian).
+    const awal = await page.evaluate(async () => {
+      document.getElementById("tab-tahap-3").click();
+      const isi = () => document.querySelector("[data-peta-diagram]");
+      for (let i = 0; i < 60 && isi().dataset.petaDiagram !== "3"; i++) await new Promise((s) => requestAnimationFrame(() => s()));
+      return { opacity: Number(getComputedStyle(isi()).opacity), anim: document.getAnimations().length };
+    });
+    await page.waitForFunction(() => document.querySelector("[data-peta-diagram]")?.dataset.petaDiagram === "3" && document.querySelectorAll("[data-peta-diagram] .react-flow__node .diagram__kotak").length === 6);
+    await page.waitForTimeout(400);
+    const tiga = await page.evaluate(() => {
+      const f = document.querySelector("[data-peta-diagram] figure.diagram");
+      const w = f.querySelector(".diagram__wadah").getBoundingClientRect();
+      const luar = [...f.querySelectorAll(".react-flow__node")].filter((n) => {
+        const b = n.getBoundingClientRect();
+        return b.left < w.left - 1 || b.right > w.right + 1 || b.top < w.top - 1 || b.bottom > w.bottom + 1;
+      }).length;
+      return { label: f.querySelector('[role="img"]').getAttribute("aria-label"), luar, opacity: Number(getComputedStyle(f.parentElement).opacity) };
+    });
+    const gerakOk = reducedMotion === "reduce" ? awal.anim === 0 && awal.opacity === 1 : awal.anim > 0 && awal.opacity < 1;
+    lapor(gerakOk && tiga.luar === 0 && tiga.opacity === 1 && tiga.label.includes("Tahap 3"), `${tag}: pilih Tahap 3 → frame pertama opacity ${awal.opacity.toFixed(2)}, ${awal.anim} animasi, ${tiga.luar} kotak di luar wadah, akhir opacity ${tiga.opacity}`);
+    if (lebar < 500 && reducedMotion === "no-preference") {
+      const pane = page.locator("[data-peta-diagram] .react-flow__pane").first();
+      await pane.scrollIntoViewIfNeeded();
+      const b = await pane.boundingBox();
+      const y0 = await page.evaluate(() => window.scrollY);
+      await page.mouse.move(b.x + b.width / 2, b.y + Math.min(b.height / 2, 200));
+      await page.mouse.wheel(0, 300);
+      await page.waitForTimeout(300);
+      const y1 = await page.evaluate(() => window.scrollY);
+      lapor(y1 > y0, `${tag}: roda di atas diagram ${y0}→${y1}`);
+    }
+    await page.click("#tab-tahap-6");
+    await page.waitForFunction(() => document.querySelector("[data-peta-diagram]")?.dataset.petaDiagram === "6");
+    const enam = await page.evaluate(() => ({ flow: !!document.querySelector("[data-peta-diagram] .react-flow"), teks: document.querySelector("[data-peta-diagram]").textContent }));
+    lapor(!enam.flow && enam.teks.includes("proyeksi"), `${tag}: Tahap 6 "${enam.teks}"`);
+    if (AXE && reducedMotion === "no-preference") {
+      await page.click("#tab-tahap-1");
+      await page.waitForSelector("[data-peta-diagram] .react-flow__node .diagram__kotak");
+      await page.waitForTimeout(400);
+      for (const tema of ["dark", "light"]) {
+        await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), tema);
+        await page.addScriptTag({ path: AXE });
+        const v = await page.evaluate(async () => {
+          const x = await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"] } });
+          return x.violations.map((p) => `${p.id}(${p.nodes.length})`);
+        });
+        lapor(v.length === 0, `axe ${tag} ${tema}: ${v.length ? v.join(", ") : "0 pelanggaran"}`);
+      }
+    }
+    await ctx.close();
+  }
+}
 await browser.close();
 console.log(gagal ? `Fondasi diagram GAGAL (${gagal})` : "Diagram: statis tanpa JS, scroll tidak tertangkap, keyboard jalan, tanpa animasi saat reduced");
 process.exit(gagal ? 1 : 0);

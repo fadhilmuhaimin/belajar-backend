@@ -4,11 +4,14 @@
  * (dari localStorage), tiga pintu (Cerita, Peran, Masalah) sebagai tautan ke bagiannya, dan teka-teki Rp70.000
  * (widget tebak) yang mengajak pembaca berpikir sebelum membaca. Di bawahnya tiga pintu itu sendiri: peta enam
  * tahap yang bisa dipilih, peran sebagai pertanyaan dengan lima halaman saran, dan pencarian masalah dengan saran.
- * Semua data dari registry; tanpa server.
+ * Semua data dari registry; tanpa server. Diagram peta adalah satu island DiagramArsitektur (I5b, keputusan 248):
+ * tab mengirim tahap terpilih, diagram berganti dengan gerak singkat; Tahap 6 (proyeksi) tanpa diagram.
  */
 import { muat, label, url, urutanBaca } from "../../tools/registri.mjs";
 import Tebak from "../widgets/tebak/Tebak.tsx";
 import tebakM4 from "../../data/widget/beranda-m4-tebak.json";
+import PetaDiagram from "../diagram/PetaDiagram";
+import { Arsitektur } from "../diagram/skema";
 
 type H = { id: string; judul: string; tahap: unknown; path: string; ada?: boolean; masalah?: string; nomor?: string; peran?: string[]; inti?: boolean; menit?: number };
 type Node = { label: string; baru?: boolean; berubah?: boolean; catatan?: string; lepas?: boolean };
@@ -39,6 +42,8 @@ const tahap: Peta[] = [
   })),
   ...d.proyeksi.map((t: T) => ({ no: t.no, nama: t.nama, skala: t.skala, diagram: undefined, status: "Proyeksi, belum ditulis", lama: false, href: undefined })),
 ];
+
+const diagramTahap = tahap.map((t) => ({ no: t.no, data: t.diagram ? Arsitektur.parse(t.diagram) : null, lama: t.lama }));
 
 // Peran sebagai pertanyaan: lima halaman pertama yang menonjolkan peran itu, menurut urutan baca.
 const PERAN: [string, string][] = [
@@ -84,9 +89,9 @@ const cara = hs.find((h) => h.id === "A0");
   <section id="peta" class="beranda__bagian" aria-labelledby="judul-peta">
     <h2 id="judul-peta">Cerita: enam tahap, satu PRD demi satu PRD</h2>
     <p class="beranda__sub">Pilih satu tahap untuk melihat user-nya, siapa yang membuat, dan bentuk sistemnya.</p>
-    <div class="peta__tab" role="tablist" aria-label="Enam tahap">
+    <div class="peta__tab" role="tablist" aria-label="Enam tahap" data-tahap={tahap[0]!.no}>
       {tahap.map((t, i) => (
-        <button type="button" role="tab" id={`tab-tahap-${t.no}`} aria-controls={`panel-tahap-${t.no}`} aria-selected={i === 0 ? "true" : "false"} tabindex={i === 0 ? 0 : -1}
+        <button type="button" role="tab" data-no={t.no} id={`tab-tahap-${t.no}`} aria-controls={`panel-tahap-${t.no}`} aria-selected={i === 0 ? "true" : "false"} tabindex={i === 0 ? 0 : -1}
           class:list={["peta__pilih", { "is-lama": t.lama, "is-proyeksi": !t.href }]}>
           <span class="peta__no">{t.no}</span>
           <span class="peta__nama">{t.skala?.pendek ?? t.nama}</span>
@@ -94,34 +99,27 @@ const cara = hs.find((h) => h.id === "A0");
         </button>
       ))}
     </div>
-    {tahap.map((t, i) => (
-      <div role="tabpanel" id={`panel-tahap-${t.no}`} aria-labelledby={`tab-tahap-${t.no}`} class="peta__panel" data-panel hidden={i !== 0}>
-        <div class="peta__info">
-          <h3>Tahap {t.no} · {t.skala?.lingkup ?? t.nama}</h3>
-          {t.skala && (
-            <dl>
-              <div><dt>PRD</dt><dd>{t.skala.prd.replace(/^PRD v\d+( \(proyeksi\))?: /, "")}</dd></div>
-              <div><dt>User</dt><dd>{t.skala.user}</dd></div>
-              <div><dt>Yang membuat</dt><dd>{t.skala.pembuat}</dd></div>
-            </dl>
-          )}
-          <p class="peta__status">{t.status}</p>
-          {t.href && <a class="peta__buka" href={t.href}>{t.no === 1 && prd ? "Mulai dari PRD v1" : `Buka Tahap ${t.no}`} →</a>}
-        </div>
-        <figure class="peta__diagram">
-          {t.diagram ? (
-            <>
-              {t.diagram.baris.map((baris) => (
-                <ol class="peta__baris">
-                  {baris.map((n) => <li class:list={{ "is-baru": n.baru || n.berubah }}>{n.label}{n.catatan && <small>{n.catatan}</small>}</li>)}
-                </ol>
-              ))}
-              <figcaption>{t.lama ? "Diagram versi lama. " : ""}Biru: baru atau berubah di tahap ini.</figcaption>
-            </>
-          ) : <figcaption>Bentuk sistem tahap ini belum digambar.</figcaption>}
-        </figure>
+    <div class="peta__isi">
+      <div class="peta__daftar">
+        {tahap.map((t, i) => (
+          <div role="tabpanel" id={`panel-tahap-${t.no}`} aria-labelledby={`tab-tahap-${t.no}`} class="peta__panel" data-panel hidden={i !== 0}>
+            <div class="peta__info">
+              <h3>Tahap {t.no} · {t.skala?.lingkup ?? t.nama}</h3>
+              {t.skala && (
+                <dl>
+                  <div><dt>PRD</dt><dd>{t.skala.prd.replace(/^PRD v\d+( \(proyeksi\))?: /, "")}</dd></div>
+                  <div><dt>User</dt><dd>{t.skala.user}</dd></div>
+                  <div><dt>Yang membuat</dt><dd>{t.skala.pembuat}</dd></div>
+                </dl>
+              )}
+              <p class="peta__status">{t.status}</p>
+              {t.href && <a class="peta__buka" href={t.href}>{t.no === 1 && prd ? "Mulai dari PRD v1" : `Buka Tahap ${t.no}`} →</a>}
+            </div>
+          </div>
+        ))}
       </div>
-    ))}
+      <PetaDiagram client:visible tahap={diagramTahap} />
+    </div>
   </section>
 
   <section id="peran" class="beranda__bagian" aria-labelledby="judul-peran">
@@ -174,6 +172,8 @@ const cara = hs.find((h) => h.id === "A0");
 
   // Peta tahap: tab dengan panah kiri/kanan.
   const tabs = [...document.querySelectorAll<HTMLButtonElement>(".peta__pilih")];
+  // Diagram (PetaDiagram.tsx) mengikuti tab lewat event; data-tahap untuk island yang di-hydrate sesudah tab dipilih.
+  const daftarTab = document.querySelector<HTMLElement>(".peta__tab");
   const pilihTab = (b: HTMLButtonElement, fokus = false) => {
     for (const x of tabs) {
       const aktif = x === b;
@@ -182,6 +182,8 @@ const cara = hs.find((h) => h.id === "A0");
       document.getElementById(x.getAttribute("aria-controls")!)!.hidden = !aktif;
     }
     if (fokus) b.focus();
+    if (daftarTab) daftarTab.dataset.tahap = b.dataset.no;
+    document.dispatchEvent(new CustomEvent("rtj:peta-tahap", { detail: Number(b.dataset.no) }));
   };
   tabs.forEach((b, i) => {
     b.addEventListener("click", () => pilihTab(b));

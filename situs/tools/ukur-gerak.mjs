@@ -157,6 +157,28 @@ for (const reducedMotion of ["no-preference", "reduce"]) {
   if (!open) gagal++;
   await ctx.close();
 }
+
+// Jawaban teka-teki di beranda (I5b, keputusan 248): tanpa gerak saat dimuat; sesudah pilihan ditekan jawaban
+// masuk dengan gerak (frame pertama belum opacity 1); dengan reduced motion frame pertama sudah keadaan akhir.
+for (const reducedMotion of ["no-preference", "reduce"]) {
+  const page = await browser.newPage({ viewport: { width: 1366, height: 657 }, reducedMotion });
+  await page.goto(url + "/", { waitUntil: "networkidle" });
+  await page.waitForSelector(".tb-pilih:not([disabled])");
+  const r = await page.evaluate(async () => {
+    const animasiAwal = document.getAnimations().length;
+    document.querySelector(".tb-pilih").click();
+    await new Promise((s) => requestAnimationFrame(() => s()));
+    const el = document.querySelector(".tb-hasil");
+    const awal = el ? Number(getComputedStyle(el).opacity) : -1;
+    const anim = document.getAnimations().length;
+    await new Promise((s) => setTimeout(s, 600));
+    return { animasiAwal, awal, anim, akhir: el ? Number(getComputedStyle(el).opacity) : -1 };
+  });
+  const ok = r.animasiAwal === 0 && r.akhir === 1 && (reducedMotion === "reduce" ? r.awal === 1 && r.anim === 0 : r.awal < 1 && r.anim > 0);
+  console.log(`${ok ? "ok" : "GAGAL"} teka-teki ${reducedMotion}: animasi saat dimuat ${r.animasiAwal}, frame pertama opacity ${r.awal.toFixed(2)}, animasi ${r.anim}, akhir opacity ${r.akhir}`);
+  if (!ok) gagal++;
+  await page.close();
+}
 await browser.close();
-console.log(gagal ? "Fondasi gerak GAGAL" : "Reduced motion mematikan gerak (contoh dan blok); tanpa itu gerak berjalan");
+console.log(gagal ? "Fondasi gerak GAGAL" : "Reduced motion mematikan gerak (contoh, blok, teka-teki); tanpa itu gerak berjalan");
 process.exit(gagal ? 1 : 0);

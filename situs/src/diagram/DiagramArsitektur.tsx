@@ -2,6 +2,8 @@
 // - Sebelum JS dimuat dan untuk pembaca layar selalu ada versi statis (role="img" + aria-label).
 // - Diagram tidak bisa digeser, di-zoom, atau menangkap scroll halaman; ukurannya dari fitView (zoom paling besar 1).
 // - Kotak adalah tombol: klik atau Enter membuka catatannya di bawah diagram, bukan tooltip.
+// - `kunci` berganti (peta tahap di beranda, I5b): React Flow dipasang ulang supaya fitView mengukur data baru
+//   (fitView hanya berlaku untuk node awal), dan kotak yang dipilih dilepas.
 // Dimuat hanya di halaman yang memakainya, dengan client:visible.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Handle, MarkerType, Position, ReactFlow, type Edge, type Node, type NodeProps } from "@xyflow/react";
@@ -47,12 +49,17 @@ const KALIMAT_STATUS: Record<Status, string> = {
   lama: "Sudah ada sejak tahap sebelumnya.",
 };
 
-type Props = { data: Arsitektur; judul: string; id: string };
+type Props = { data: Arsitektur; judul: string; id: string; kunci?: string };
 
-export default function DiagramArsitektur({ data, judul, id }: Props) {
+export default function DiagramArsitektur({ data, judul, id, kunci = "" }: Props) {
   const wadah = useRef<HTMLDivElement>(null);
   const [lebar, setLebar] = useState<number | null>(null); // null = belum di-hydrate: tampilkan versi statis
   const [pilihan, setPilihan] = useState<string | null>(null);
+  const [kunciLalu, setKunciLalu] = useState(kunci);
+  if (kunci !== kunciLalu) {
+    setKunciLalu(kunci);
+    setPilihan(null);
+  }
 
   useEffect(() => {
     const el = wadah.current;
@@ -123,7 +130,7 @@ export default function DiagramArsitektur({ data, judul, id }: Props) {
       <div ref={wadah} className="diagram__wadah" style={lebar === null ? undefined : { height: tinggi }}>
         {lebar !== null && (
           <ReactFlow
-            key={arah}
+            key={`${arah}-${kunci}`}
             id={id}
             nodes={nodes}
             edges={edges}
