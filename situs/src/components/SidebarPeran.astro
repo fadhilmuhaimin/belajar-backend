@@ -25,7 +25,7 @@ const PERAN = [["generalis", "Generalis"], ["mobile", "Mobile"], ["web", "Web"],
     document.querySelectorAll<HTMLButtonElement>("[data-peran-pilih]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.peranPilih === p)));
     const l = document.querySelector<HTMLElement>(`[data-peran-pilih="${p}"]`)?.dataset.peranLabel;
     document.querySelectorAll("[data-peran-nama]").forEach((el) => { if (l) el.textContent = l; });
-    const ada = p === "generalis" ? document.querySelector(".sidebar-content a.nav-inti") : document.querySelector(`.sidebar-content a[data-peran~="${p}"]`);
+    const ada = p === "generalis" ? document.querySelector('.sidebar-content a[data-nav~="inti"]') : document.querySelector(`.sidebar-content a[data-peran~="${p}"]`);
     document.querySelectorAll<HTMLElement>(".peran__kosong").forEach((el) => { el.hidden = !!ada; });
   }
   document.addEventListener("click", (e) => {
