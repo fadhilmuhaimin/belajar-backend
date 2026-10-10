@@ -138,7 +138,7 @@ await storage.delete(key: 'token_sesi'); // saat Keluar atau saat server menjawa
 
 ### ADR 8: sesi acak di server, token di secure storage, JWT ditunda
 
-**Kebutuhan.** PRD v1 meminta login karyawan dengan sesi yang tersimpan di app. Satu backend melayani 103 akun, dengan puncak 0,14 request per detik. Keluar harus langsung berlaku, termasuk untuk salinan token. Token v1 tersimpan di `shared_preferences`.
+**Kebutuhan.** PRD v1 meminta login karyawan dengan sesi yang tersimpan di app. Satu backend melayani 100 karyawan dan 3 warung, dengan puncak 0,14 request per detik. Keluar harus langsung berlaku, termasuk untuk salinan token. Token v1 tersimpan di `shared_preferences`.
 
 Bentuk token:
 
@@ -181,7 +181,7 @@ Tempat token di app:
 |---|---|---|
 | RLS di tabel v1 lab `api-t1` | Di tabel `akun`, policy pemilik membuat bayar jadi `UPDATE 0`; tabel ledger diuji dulu | Tahap 2 |
 | UUID untuk ID akun dan transaksi | Pertanyaan pemilik sudah menutup M5; UUID hanya lapisan tambahan | Tahap 2, bersama skema ledger |
-| Pembatasan percobaan login | 103 akun, penguji internal, satu gedung | [[C4]], Tahap 3 |
+| Pembatasan percobaan login | 100 karyawan dan 3 warung, penguji internal, satu gedung | [[C4]], Tahap 3 |
 | JWT dan refresh token | Satu backend, tidak ada service kedua | Tahap 4 |
 
 </Blok>

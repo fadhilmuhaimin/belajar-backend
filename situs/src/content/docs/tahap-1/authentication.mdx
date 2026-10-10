@@ -190,7 +190,7 @@ Asumsi naskah: puncak Tahap 1 adalah 0,14 request per detik. Satu query sesi per
 | Yang ditunda | Kenapa ditunda | Kapan dibuka lagi |
 |---|---|---|
 | Batas percobaan login | 100 penguji di satu gedung, password dibagikan admin | Tahap 2, bersama brute force |
-| Argon2id menggantikan bcrypt | bcrypt cost 10 masih di atas batas minimum OWASP | Tahap 2 |
+| Argon2id menggantikan bcrypt | bcrypt cost 10 memenuhi batas minimum OWASP | Tahap 2 |
 | Batas waktu idle | Batas absolut 8 jam sudah ada | Belum dijadwalkan; risikonya dicatat di [[t1-fitur-login]] |
 | JWT dan refresh token | Tidak ada service kedua yang memeriksa token | Tahap 4 (ADR 8 di [[t1-idor]]) |
 
