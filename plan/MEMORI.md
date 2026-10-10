@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · K1a favicon 404 dan sisa HTML tautan menyusul, branch `perbaikan/k1a-favicon`. File: `situs/public/favicon.svg` (baru), `situs/astro.config.mjs`, `situs/tools/sidebar.mjs`, `situs/tools/registri.mjs`, `situs/src/plugins/remark-rujukan.mjs`, `situs/src/components/SidebarPeran.astro`, `situs/src/styles/tema.css`. Rencana: simpan `layar.mjs` dan sidik `dist/` sebelum; ikon aksen di latar gelap; `title` menyusul satu konstanta di registri; kelas sidebar pindah ke `data-nav` (Starlight 0.42.5 menyebar `attrs` sesudah `class:list`, jadi `class` tercetak dua kali); periksa `dist/` dengan `tmp/k1a_cek.py`; bandingkan layar sesudah.
+2026-10-10 · K1a selesai di branch `perbaikan/k1a-favicon` (keputusan 245, PR menunggu tinjauan pengatur, belum di-merge): `situs/public/favicon.svg`, `JUDUL_MENYUSUL` di `tools/registri.mjs` dipakai sidebar dan `remark-rujukan`, penanda sidebar `data-nav` (CSS dan `SidebarPeran.astro` ikut). Periksa ulang dengan `python3 tmp/k1a_cek.py` sesudah build. Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
@@ -59,6 +59,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - `git rm` langsung men-stage penghapusan; `git add <file baru> && git commit` ikut membawanya. Hapus file lama di commit yang sama dengan perubahan registry, supaya setiap commit tetap bisa dibangun.
 - Widget lama alur diuji tanpa melihat gambar: `node situs/tangkapan/uji-alur.mjs <url>` (tangkapan/ di-.gitignore, jadi skrip ditulis ulang bila hilang) membuka semua blok (`details.open`), menekan tebakan, Berikutnya, dan varian, lalu menghitung error konsol.
 - Merge ditolak pengaman: berhenti, laporkan di baris pertama, jangan memulai halaman berikutnya di atas PR yang belum di-merge.
+- Komentar XML di SVG tidak boleh memuat `--` (mis. nama token `--aksen`): favicon jadi gambar rusak tanpa error build; parse SVG dengan `xml.etree`.
 - Mode dontAsk/auto menolak: perintah majemuk dengan `cd`, heredoc, loop shell, awalan env (`AXE=...`), diff `<(...)`, pipa ke `gzip`/`wc`, mengubah `.claude/settings.json`; pakai skrip di `tmp/` dan path relatif.
 - Ukur konteks sesi pengatur 1.28 (tools/ukur_konteks.py pada transcript subagen): awal 65–66k (loop lama 94–101k), puncak pelaksana 279k, 24,9 juta token diproses, 86% di atas 150k; peninjau 98–176k. Pelaksana wajib serah-terima di ±120k (PROTOKOL k.4).
 - Animasi CSS yang dipicu event `toggle` (async) mulai satu sampai dua frame sesudah `<details>` terbuka: isi penuh sempat berkedip. Ukur frame per rAF sesudah klik sungguhan (`page.click`, bukan `el.click()`, yang tidak mengirim pointerdown).
