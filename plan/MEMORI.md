@@ -15,8 +15,6 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Catatan untuk halaman Tahap 1 berikutnya
 
-- 1.29 harus memuat ADR 8 dengan sumber shared_preferences 2.5.6 dan flutter_secure_storage 11.2.0 (1.26 merujuknya).
-- 1.29 (ADR 7): policy RLS membaca `app.akun_id`; isi dengan `SET LOCAL` atau `set_config(..., true)` di dalam transaction, bukan `SET` biasa (sesudah COMMIT nilainya bertahan sampai akhir sesi, jadi terbawa ke request berikutnya di connection pool; docs PostgreSQL sql-set dan functions-admin). Masukkan ke checklist review.
 - 1.33 (E1): prasyarat B4.2 dibuang; ADR 10 (expand lalu contract) harus berdiri sendiri, tanpa rekaman crash B4.2.
 - 1.39 (F1) menyerap F2: hapus halaman F2 dan entrinya di PR yang sama (pola keputusan 150).
 - Ilustrasi latar Grup Lestari dan M6 belum ada; ilustrasi baru wajib lolos `ukur-ilustrasi.mjs` (tambahkan path halamannya ke alat itu). `situs/lama/assets/cerita/tahap-1.svg` tidak dipakai lagi.
@@ -39,14 +37,16 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 ## Perlu dicek pemilik
 
 - Redesain #120: usulan perubahan PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` di `plan/AUDIT-TAMPILAN.md` bagian 6, belum diubah.
+- ADR 7 (keputusan 240): RLS sebagai pagar kedua dipasang di tabel ledger Tahap 2, tidak di tabel v1 `api-t1` (rekaman `b5-rls` bagian 5: policy pemilik membuat bayar ke warung `UPDATE 0`). Kalau RLS harus sudah berjalan di Tahap 1, perlu tugas lab `api-t1` sendiri.
 - Cloudflare Pages (keputusan 115): butuh API token (Account > Cloudflare Pages > Edit) dan Account ID, lalu `gh secret set CLOUDFLARE_API_TOKEN` dan `gh secret set CLOUDFLARE_ACCOUNT_ID`.
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.29 Keamanan 2 (`t1-idor`), branch `tahap-1/idor-token-app`. Rencana: (1) lab `b5-rls` ditambah dua bagian: `SET` biasa tertinggal di koneksi yang dipakai ulang, `set_config(..., true)` dalam transaction hilang saat COMMIT; Makefile memeriksa keduanya. (2) halaman `tahap-1/idor-token-app.mdx` pola 1.20: Inti + Rantai ringkas, Coba = alur `t1-idor` (tebak, ubah satu hal: SET jadi set_config), Paham (IDOR, enumerasi ID dan email, pagar kedua RLS, token di app), Putuskan ADR 7 dan ADR 8 (≥ 3 opsi, pre-mortem, kapan salah), Kunci. (3) banding storage token. (4) registry `ada`, rujukan [[t1-idor]] hidup, C4 berhenti menyebut token berumur pendek. (5) KEPUTUSAN, STATUS, ANTREAN, MEMORI; gerbang; PR tanpa merge.
+2026-10-10 · 1.29 selesai di PR (keputusan 239, 240), branch `tahap-1/idor-token-app`, belum di-merge: `tahap-1/idor-token-app.mdx`, lab `b5-rls` bagian 5–7, alur `t1-idor`, banding `t1-idor-banding`, Rantai `t1-idor-dua-pagar`. Uji widget tanpa gambar: `node situs/tangkapan/uji-alur.mjs <url>` dan `uji-banding.mjs <url>` (tangkapan/ tidak di-commit). Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 
+- ADR 7: policy RLS yang menyaring `UPDATE` membuat kredit ke baris orang lain jadi `UPDATE 0` tanpa error (`b5-rls` bagian 5); RLS di Rekeningo hanya untuk baca, di tabel ledger Tahap 2.
 - Konteks awal tiap iterasi loop 94–103k token, puncak 127–209k; 46% token yang diproses berasal dari panggilan dengan konteks > 150k. Penyumbang hasil alat terbesar: gambar (22%), grep (17%), PROTOKOL dibaca ulang (10%), `tail` KEPUTUSAN (baris ribuan karakter).
 - Retrospektif I4–1.28: halaman lama yang ditulis ulang membawa data lab lama yang bertentangan dengan naskah (JWT 15 menit di B5.1, ID teks `budi`/`ani` di b5-rls); cocokkan rekaman lama dengan skema v1 dan ADR naskah sebelum dipakai ulang. Satu rekaman khusus per halaman (`authz.txt`) lebih jelas daripada potongan dari lima file rekaman.
 - Lab SQL yang di-pipe ke `grep` kehilangan exit status psql; tambahkan pemeriksaan hasil di Makefile (pola `labs/b5-rls/Makefile`).
