@@ -1,0 +1,52 @@
+{
+  "id": "t1-idor-dua-pagar",
+  "judul": "Token Dimas, akun 418: siapa yang bertanya?",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · m5.txt dan b5-rls · rls.txt"
+  },
+  "baris": [
+    {
+      "label": "Pagar 1 · service",
+      "simpul": [
+        {
+          "teks": "GET /akun/418",
+          "kode": true,
+          "sub": "token Dimas sah"
+        },
+        {
+          "teks": "417 ≠ 418",
+          "sub": "service bertanya pemilik",
+          "nada": "system"
+        },
+        {
+          "teks": "404",
+          "sub": "sama dengan akun 9999",
+          "nada": "good"
+        }
+      ]
+    },
+    {
+      "label": "Pagar 2 · RLS (lab)",
+      "sub": "lab b5-rls; Rekeningo: Tahap 2",
+      "simpul": [
+        {
+          "teks": "WHERE id = 418",
+          "kode": true,
+          "sub": "kode yang lupa bertanya"
+        },
+        {
+          "teks": "app.akun_id = 417",
+          "sub": "policy pemilik_saja",
+          "nada": "system"
+        },
+        {
+          "teks": "0 baris",
+          "sub": "database menyaring",
+          "nada": "good"
+        }
+      ]
+    }
+  ],
+  "catatan": "Kalau satu pagar lupa bertanya, pagar lain tetap menyaring. Di Rekeningo, pagar kedua direncanakan untuk tabel ledger Tahap 2. Kedua pagar hanya berguna bila token Dimas tidak bisa diambil orang lain dari HP-nya."
+}

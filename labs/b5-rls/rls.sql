@@ -47,5 +47,40 @@ SET ROLE pemilik_b5;
 SELECT current_user, count(*) AS terlihat FROM akun;
 RESET ROLE;
 
-\echo '-- 5. Saldo sesudah semua langkah, dilihat superuser'
+\echo '-- 5. Policy yang sama saat Dimas membayar Rp5.000 ke Warung Ani (dibatalkan di akhir)'
+SET ROLE app_rekeningo;
+SET app.akun_id = '417';
+BEGIN;
+UPDATE akun SET saldo = saldo - 5000 WHERE id = 417;
+UPDATE akun SET saldo = saldo + 5000 WHERE id = 418;
+ROLLBACK;
+RESET app.akun_id;
+RESET ROLE;
+
+-- --8<-- [start:pool-set]
+\echo '-- 6. Satu koneksi dari pool, dua request berurutan; identitas diisi dengan SET biasa'
+SET ROLE app_rekeningo;
+\echo '-- request Dimas'
+SET app.akun_id = '417';
+SELECT id, nama, saldo FROM akun ORDER BY id;
+\echo '-- request Budi di koneksi yang sama, lewat endpoint yang lupa mengisi app.akun_id'
+SELECT current_setting('app.akun_id', true) AS akun_id_terbaca, id, nama, saldo FROM akun ORDER BY id;
+-- --8<-- [end:pool-set]
+RESET app.akun_id;
+RESET ROLE;
+
+-- --8<-- [start:pool-lokal]
+\echo '-- 7. Sama, tapi identitas diisi set_config(..., true) di dalam transaction request'
+SET ROLE app_rekeningo;
+\echo '-- request Dimas'
+BEGIN;
+SELECT set_config('app.akun_id', '417', true);
+SELECT id, nama, saldo FROM akun ORDER BY id;
+COMMIT;
+\echo '-- request Budi di koneksi yang sama, lewat endpoint yang lupa mengisi app.akun_id'
+SELECT current_setting('app.akun_id', true) AS akun_id_terbaca, count(*) AS terlihat FROM akun;
+-- --8<-- [end:pool-lokal]
+RESET ROLE;
+
+\echo '-- 8. Saldo sesudah semua langkah, dilihat superuser'
 SELECT id, nama, saldo FROM akun ORDER BY id;

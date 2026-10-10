@@ -232,6 +232,14 @@ window.ISTILAH = {
   "t": "Endpoint",
   "u": "tahap-1/http/"
  },
+ "Enumerasi": {
+  "b": "t1-idor",
+  "d": "Mencoba nilai satu per satu, mis. ID akun 401 sampai 503 atau daftar email, untuk mengetahui data mana yang ada.",
+  "n": "1.29 IDOR, enumerasi, dan token di app",
+  "s": "istilah-enumerasi",
+  "t": "Enumerasi",
+  "u": "tahap-1/idor-token-app/"
+ },
  "Eventual consistency": {
   "b": "D3",
   "d": "Data di beberapa tempat boleh berbeda sesaat, tapi akan sama setelah perubahan selesai menyebar.",
@@ -312,6 +320,14 @@ window.ISTILAH = {
   "t": "Header",
   "u": "tahap-1/http/"
  },
+ "IDOR": {
+  "b": "t1-idor",
+  "d": "Celah saat server memakai ID dari request tanpa bertanya apakah peminta boleh menyentuh data itu. OWASP API Security menyebutnya BOLA.",
+  "n": "1.29 IDOR, enumerasi, dan token di app",
+  "s": "istilah-idor",
+  "t": "IDOR (Insecure Direct Object Reference)",
+  "u": "tahap-1/idor-token-app/"
+ },
  "Idempotency key": {
   "b": "E3",
   "d": "Nilai unik yang dibuat app untuk satu aksi, mis. satu kali tekan Bayar, dan dikirim ulang di setiap retry, supaya server mengenali kiriman ulang dan tidak menjalankannya dua kali.",
@@ -327,6 +343,14 @@ window.ISTILAH = {
   "s": "istilah-idempotent",
   "t": "Idempotent",
   "u": "b-fondasi/b1-3-pagination-idempotent/"
+ },
+ "Insecure Direct Object Reference": {
+  "b": "t1-idor",
+  "d": "Celah saat server memakai ID dari request tanpa bertanya apakah peminta boleh menyentuh data itu. OWASP API Security menyebutnya BOLA.",
+  "n": "1.29 IDOR, enumerasi, dan token di app",
+  "s": "istilah-idor",
+  "t": "IDOR (Insecure Direct Object Reference)",
+  "u": "tahap-1/idor-token-app/"
  },
  "Invarian": {
   "b": "C1",
@@ -832,6 +856,14 @@ window.ISTILAH = {
   "t": "Saga",
   "u": "d-system-design/d3-consistency/"
  },
+ "Secure storage": {
+  "b": "t1-idor",
+  "d": "Penyimpanan terenkripsi milik sistem operasi HP untuk rahasia kecil seperti token sesi: Keychain di iOS, kunci di Android Keystore.",
+  "n": "1.29 IDOR, enumerasi, dan token di app",
+  "s": "istilah-secure-storage",
+  "t": "Secure storage",
+  "u": "tahap-1/idor-token-app/"
+ },
  "Semaphore": {
   "b": "B8",
   "d": "Penghitung yang membatasi berapa pekerjaan boleh berjalan bersamaan; pekerjaan berikutnya menunggu sampai ada yang selesai.",
@@ -1151,6 +1183,14 @@ window.ISTILAH = {
   "s": "istilah-endpoint",
   "t": "Endpoint",
   "u": "tahap-1/http/"
+ },
+ "enumerasi": {
+  "b": "t1-idor",
+  "d": "Mencoba nilai satu per satu, mis. ID akun 401 sampai 503 atau daftar email, untuk mengetahui data mana yang ada.",
+  "n": "1.29 IDOR, enumerasi, dan token di app",
+  "s": "istilah-enumerasi",
+  "t": "Enumerasi",
+  "u": "tahap-1/idor-token-app/"
  },
  "eventual consistency": {
   "b": "D3",
@@ -1567,6 +1607,14 @@ window.ISTILAH = {
   "s": "istilah-saga",
   "t": "Saga",
   "u": "d-system-design/d3-consistency/"
+ },
+ "secure storage": {
+  "b": "t1-idor",
+  "d": "Penyimpanan terenkripsi milik sistem operasi HP untuk rahasia kecil seperti token sesi: Keychain di iOS, kunci di Android Keystore.",
+  "n": "1.29 IDOR, enumerasi, dan token di app",
+  "s": "istilah-secure-storage",
+  "t": "Secure storage",
+  "u": "tahap-1/idor-token-app/"
  },
  "semaphore": {
   "b": "B8",

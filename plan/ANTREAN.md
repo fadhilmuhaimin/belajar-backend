@@ -173,11 +173,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.29 · Keamanan 2: IDOR, enumerasi, token di app + ADR 7–8
 
 - jenis: konten
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: 1.26
 - selesai bila: halaman `t1-idor` dengan ADR 7 (cek pemilik di `service/` + RLS sebagai pagar kedua; 404 bukan 403) dan ADR 8 (sesi acak dengan masa berlaku, secure storage; JWT ditunda ke Tahap 4 dengan alasan), masing-masing minimal tiga opsi dan "kapan keputusan ini salah"; widget alur dan banding; lab b5-rls.
-- catatan: Jalur Mobile dan Security.
+- catatan: Jalur Mobile dan Security. Selesai (keputusan 239, 240): lab b5-rls bagian 5–7; ADR 7 memasang RLS di tabel ledger Tahap 2, bukan di tabel v1 api-t1.
 
 ### 1.30-lab · Lab M6: rekaman prober deploy
 

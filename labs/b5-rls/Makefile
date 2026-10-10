@@ -9,4 +9,7 @@ run:
 	@test "$$(grep -c '^ pemilik_b5' output/rls.txt)" = 2 && grep -q '^ pemilik_b5   |        3$$' output/rls.txt && grep -q '^ pemilik_b5   |        0$$' output/rls.txt || { echo "GAGAL: pemilik tabel harus 3 baris tanpa FORCE, 0 sesudahnya"; exit 1; }
 	@test "$$(grep -c '^ 418 | Warung Ani |  25000$$' output/rls.txt)" = 1 || { echo "GAGAL: saldo Ani di akhir harus tetap 25000"; exit 1; }
 	@grep -q '^ t                    | f$$' output/rls.txt || { echo "GAGAL: sesudah RESET, setting harus kosong dan tidak bisa jadi bigint"; exit 1; }
+	@test "$$(grep -c '^UPDATE 0$$' output/rls.txt)" = 2 && grep -q '^UPDATE 1$$' output/rls.txt || { echo "GAGAL: bayar ke 418 di bawah policy pemilik harus UPDATE 1 lalu UPDATE 0"; exit 1; }
+	@grep -Eq '^ 417 +\| 417 \| Dimas \| 250000$$' output/rls.txt || { echo "GAGAL: SET biasa harus tertinggal: request Budi membaca akun 417"; exit 1; }
+	@grep -Eq '^ +\| +0$$' output/rls.txt || { echo "GAGAL: set_config lokal harus hilang saat COMMIT: request Budi 0 baris"; exit 1; }
 	@echo "rls.txt: hasil sesuai"

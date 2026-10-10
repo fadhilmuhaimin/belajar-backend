@@ -1,0 +1,138 @@
+{
+  "judul": "Token sesi Budi: acak di server atau JWT 15 menit",
+  "opsi": [
+    {
+      "id": "sesi",
+      "nama": "Opsi A · Sesi acak di server (dipilih)",
+      "baris": [
+        [
+          {
+            "id": "a-hp",
+            "label": "Secure storage HP",
+            "sub": "token acak 64 karakter hex"
+          }
+        ],
+        [
+          {
+            "id": "a-cek",
+            "label": "Cek sesi",
+            "sub": "SHA-256 token → tabel sesi"
+          },
+          {
+            "id": "a-tabel",
+            "label": "Tabel sesi",
+            "sub": "hash, akun, kedaluwarsa"
+          }
+        ]
+      ],
+      "judulBaris": [
+        "App",
+        "Server"
+      ]
+    },
+    {
+      "id": "jwt",
+      "nama": "Opsi B · JWT 15 menit tanpa daftar cabut",
+      "baris": [
+        [
+          {
+            "id": "b-hp",
+            "label": "Secure storage HP",
+            "sub": "JWT berisi akun dan exp"
+          }
+        ],
+        [
+          {
+            "id": "b-cek",
+            "label": "Cek signature",
+            "sub": "tanpa query"
+          },
+          {
+            "id": "b-kunci",
+            "label": "Signing key",
+            "sub": "secret baru di server"
+          }
+        ]
+      ],
+      "judulBaris": [
+        "App",
+        "Server"
+      ]
+    }
+  ],
+  "fitur": [
+    {
+      "label": "Budi login",
+      "sorot": {
+        "sesi": [
+          "a-hp",
+          "a-tabel"
+        ],
+        "jwt": [
+          "b-hp",
+          "b-kunci"
+        ]
+      },
+      "catatan": {
+        "sesi": "Server membuat 32 byte acak dan menyimpan hash-nya dengan masa berlaku 8 jam (asumsi: satu hari kerja). Rekaman login.txt bagian A dan C.",
+        "jwt": "Server menandatangani isi token dengan signing key. Tidak ada baris yang disimpan."
+      }
+    },
+    {
+      "label": "Setiap request",
+      "sorot": {
+        "sesi": [
+          "a-hp",
+          "a-cek",
+          "a-tabel"
+        ],
+        "jwt": [
+          "b-hp",
+          "b-cek"
+        ]
+      },
+      "catatan": {
+        "sesi": "Satu query ke tabel sesi per request. Puncak Tahap 1 adalah 0,14 request per detik.",
+        "jwt": "Signature dan exp diperiksa di memori server, tanpa query."
+      }
+    },
+    {
+      "label": "Budi menekan Keluar",
+      "sorot": {
+        "sesi": [
+          "a-tabel"
+        ],
+        "jwt": [
+          "b-hp"
+        ]
+      },
+      "catatan": {
+        "sesi": "Baris sesi dihapus. Token yang sama langsung ditolak 401. Rekaman login.txt bagian E.",
+        "jwt": "App membuang token. Salinan token di tempat lain tetap diterima sampai exp, karena server tidak menyimpan daftar token yang dicabut."
+      },
+      "nada": {
+        "jwt": "warn"
+      }
+    },
+    {
+      "label": "Service kedua ikut memeriksa token (Tahap 4)",
+      "sorot": {
+        "sesi": [
+          "a-cek",
+          "a-tabel"
+        ],
+        "jwt": [
+          "b-cek",
+          "b-kunci"
+        ]
+      },
+      "catatan": {
+        "sesi": "Service kedua harus bertanya ke tabel sesi milik monolith, atau ke endpoint monolith.",
+        "jwt": "Service kedua cukup memegang key untuk memeriksa signature."
+      },
+      "nada": {
+        "sesi": "warn"
+      }
+    }
+  ]
+}
