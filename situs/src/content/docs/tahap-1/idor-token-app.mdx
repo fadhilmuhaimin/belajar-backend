@@ -64,7 +64,7 @@ Pintu kedua adalah login. Kalau server menjawab "email tidak terdaftar", Dimas b
 
 <Snippet file="labs/api-t1/output/login.txt" lines="10:21" title="Rekaman lab: labs/api-t1/output/login.txt" />
 
-Waktu jawabannya juga dijaga. Untuk email yang tidak terdaftar, `Login` tetap menjalankan bcrypt pada hash palsu, supaya tidak lebih cepat dari password yang salah ([[B5.1]]). OWASP menyebut perbedaan pesan dan waktu ini sebagai sumber enumerasi user ([OWASP Authentication](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)). Pembatasan jumlah percobaan login menyusul di Tahap 2, bersama brute force.
+Waktu jawabannya juga dijaga. Untuk email yang tidak terdaftar, `Login` tetap menjalankan bcrypt pada hash palsu, supaya tidak lebih cepat dari password yang salah ([[B5.1]]). OWASP menyebut perbedaan pesan dan waktu ini sebagai sumber enumerasi user ([OWASP Authentication](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)). Pembatasan jumlah percobaan login menyusul di Tahap 2, saat cerita menghadapi brute force: password ditebak berkali-kali.
 
 **3. RLS sebagai pagar kedua: tiga syarat.** Di [[B5.3]], policy `pemilik_saja` menyaring baris berdasarkan `app.akun_id`. Policy itu baru menjadi pagar bila tiga syarat terpenuhi.
 
@@ -171,9 +171,9 @@ Tempat token di app:
 - Android memulihkan backup ke HP baru tanpa key Keystore-nya, dan membaca token melempar exception saat app dibuka. README `flutter_secure_storage` mencatat masalah ini. Pencegahnya: auto backup dimatikan untuk data itu, dan kegagalan membaca token dianggap belum login.
 - Interceptor HTTP versi debug mencetak header `Authorization` ke log atau crash report. OWASP MAS mencatatnya sebagai kelemahan tersendiri ([MASWE-0005](https://mas.owasp.org/MASWE/MASVS-STORAGE/MASWE-0005/)). Pencegahnya: header itu disamarkan sebelum dicetak.
 
-**Kapan keputusan ini salah.** Saat service kedua harus memeriksa token di setiap request, setiap pemeriksaan berarti query ke tabel sesi milik monolith. Saat itu access token pendek yang bisa diperiksa sendiri lebih masuk akal, dengan sesi atau refresh token tetap di server untuk Keluar.
+**Kapan keputusan ini salah.** Saat token bisa terbaca lewat Wi-Fi palsu atau dari log, masa berlaku 8 jam memberi pencuri satu hari kerja penuh. Saat service kedua harus memeriksa token di setiap request, setiap pemeriksaan berarti query ke tabel sesi milik monolith. Saat itu access token pendek yang bisa diperiksa sendiri lebih masuk akal, dengan sesi atau refresh token tetap di server untuk Keluar.
 
-**Yang merevisinya nanti.** Tahap 2 menambah pembatasan percobaan login, bersama brute force. Tahap 4 menambah access token pendek dan refresh token untuk service kedua.
+**Yang merevisinya nanti.** Tahap 2 menambah pembatasan percobaan login sebagai pertahanan terhadap brute force. Tahap 3 menambah access token pendek dan refresh token, saat token Budi bisa terbaca lewat Wi-Fi palsu atau dari log. Tahap 4 memakai JWT untuk service kedua.
 
 ### Sengaja belum dilakukan
 
@@ -182,7 +182,8 @@ Tempat token di app:
 | RLS di tabel v1 lab `api-t1` | Di tabel `akun`, policy pemilik membuat bayar jadi `UPDATE 0`; tabel ledger diuji dulu | Tahap 2 |
 | UUID untuk ID akun dan transaksi | Pertanyaan pemilik sudah menutup M5; UUID hanya lapisan tambahan | Tahap 2, bersama skema ledger |
 | Pembatasan percobaan login | 100 karyawan dan 3 warung, penguji internal, satu gedung | Tahap 2, bersama brute force |
-| JWT dan refresh token | Satu backend, tidak ada service kedua | Tahap 4 |
+| Access token pendek dan refresh token | Satu gedung; Keluar langsung mencabut sesi di server | Tahap 3 |
+| JWT | Satu backend, tidak ada service kedua | Tahap 4 |
 
 </Blok>
 
