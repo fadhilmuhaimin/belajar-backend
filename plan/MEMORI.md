@@ -43,7 +43,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · I5a selesai di PR (keputusan 238), branch `interaksi/i5a`, belum di-merge: blok lipat memakai `situs/src/gerak/lipat.ts` (`animate` dari `motion/mini` dengan token; buka `lipat(el, true)`, buka/tutup dari klik `alihkan(el)`, sebelum mengubah `open` langsung panggil `hentikan(el)`). Uji tanpa gambar: `node situs/tangkapan/gerak-blok.mjs <url> <nama> [lebar tinggi skema]` (frame per rAF) dan `uji-blok.mjs <url>` (Berikutnya, Enter/Spasi, #); tangkapan/ tidak di-commit. Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-10 · 1.29 Keamanan 2 (`t1-idor`), branch `tahap-1/idor-token-app`. Rencana: (1) lab `b5-rls` ditambah dua bagian: `SET` biasa tertinggal di koneksi yang dipakai ulang, `set_config(..., true)` dalam transaction hilang saat COMMIT; Makefile memeriksa keduanya. (2) halaman `tahap-1/idor-token-app.mdx` pola 1.20: Inti + Rantai ringkas, Coba = alur `t1-idor` (tebak, ubah satu hal: SET jadi set_config), Paham (IDOR, enumerasi ID dan email, pagar kedua RLS, token di app), Putuskan ADR 7 dan ADR 8 (≥ 3 opsi, pre-mortem, kapan salah), Kunci. (3) banding storage token. (4) registry `ada`, rujukan [[t1-idor]] hidup, C4 berhenti menyebut token berumur pendek. (5) KEPUTUSAN, STATUS, ANTREAN, MEMORI; gerbang; PR tanpa merge.
 
 ## Pelajaran
 

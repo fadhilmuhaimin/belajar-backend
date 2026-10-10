@@ -173,7 +173,7 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.29 · Keamanan 2: IDOR, enumerasi, token di app + ADR 7–8
 
 - jenis: konten
-- status: antre
+- status: dikerjakan
 - percobaan: 0
 - bergantung: 1.26
 - selesai bila: halaman `t1-idor` dengan ADR 7 (cek pemilik di `service/` + RLS sebagai pagar kedua; 404 bukan 403) dan ADR 8 (sesi acak dengan masa berlaku, secure storage; JWT ditunda ke Tahap 4 dengan alasan), masing-masing minimal tiga opsi dan "kapan keputusan ini salah"; widget alur dan banding; lab b5-rls.
