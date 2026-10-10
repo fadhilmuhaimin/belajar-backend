@@ -5,7 +5,7 @@
     "jenis": "rekaman",
     "file": "labs/api-t1/output/versi.txt",
     "fileVarian": "labs/api-t1/output/versi.txt",
-    "catatan": "Server Go (labs/api-t1) + PostgreSQL 17 dari database bersih. Latihan lab, bukan kejadian di cerita. Prober memanggil riwayat dari dua HP tiap detik. Jalur utama: bagian B, C, D. Ubah satu hal: bagian F."
+    "catatan": "Server Go (labs/api-t1) + PostgreSQL 17 dari database bersih. Prober memanggil riwayat dari dua HP tiap detik. Jalur utama (bagian B, C, D) adalah server expand yang dipakai di cerita sesudah ADR 10. Ubah satu hal (bagian F, contract) hanya latihan lab."
   },
   "pengantar": "Mulai dari keadaan sesudah M6: server v1 melayani app 1.0, tidak app 1.1. Tebak dulu, lalu ganti v1 dengan server expand dan lihat kedua HP. Sesudahnya centang 'Ubah satu hal' untuk contract.",
   "komponen": [
@@ -94,7 +94,7 @@
     }
   ],
   "varian": {
-    "label": "Budi memperbarui app ke 1.1, lalu jumlah dihapus (contract)",
+    "label": "Latihan lab: Budi memperbarui app ke 1.1, lalu jumlah dihapus (contract)",
     "mulai": 5,
     "langkah": [
       {

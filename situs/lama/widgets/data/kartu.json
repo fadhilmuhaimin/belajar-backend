@@ -510,7 +510,7 @@
   "judul": "1.33 App versi lama",
   "url": "tahap-1/app-versi-lama/",
   "tanya": "Mana yang aman ikut satu deploy, kalau image sebelumnya mungkin dijalankan lagi: `ADD COLUMN catatan text`, `RENAME COLUMN jumlah TO nominal`, atau `DROP COLUMN jumlah`?",
-  "jawab": "Hanya `ADD COLUMN catatan text`. Kolom itu boleh kosong dan tidak disebut kode lama, seperti rekaman 000008. `RENAME COLUMN` membuat image lama menjawab `500` karena kolom `jumlah` tidak ada (`m6.txt` bagian F). `DROP COLUMN jumlah` menghapus kolom yang masih dibaca kode lama, jadi akibatnya sama."
+  "jawab": "Hanya `ADD COLUMN catatan text`. Kolom itu boleh kosong dan tidak disebut kode lama, seperti rekaman 000008. `RENAME COLUMN` membuat image lama menjawab `500` karena kolom `jumlah` tidak ada (`m6.txt` bagian F). `DROP COLUMN jumlah` juga membuat image lama gagal karena kolom itu tidak ada. Akibatnya lebih buruk: isi kolom tidak bisa dibaca lagi lewat SQL, jadi migration mundur pun tidak bisa mengembalikan angkanya (PostgreSQL 17: ALTER TABLE)."
  },
  {
   "id": "D1-1",

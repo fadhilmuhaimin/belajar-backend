@@ -249,12 +249,12 @@ window.ISTILAH = {
   "u": "d-system-design/d3-consistency/"
  },
  "Expand-migrate-contract": {
-  "b": "B4.2",
+  "b": "E1",
   "d": "Urutan mengubah skema tanpa downtime: tambah yang baru, pindahkan data dan kode, baru hapus yang lama.",
-  "n": "2.8 Ubah skema tanpa downtime",
+  "n": "1.33 App versi lama",
   "s": "istilah-expand-migrate-contract",
   "t": "Expand-migrate-contract",
-  "u": "b-fondasi/b4-2-ubah-skema-tanpa-downtime/"
+  "u": "tahap-1/app-versi-lama/"
  },
  "FCM": {
   "b": "E4",
@@ -1201,12 +1201,12 @@ window.ISTILAH = {
   "u": "d-system-design/d3-consistency/"
  },
  "expand-migrate-contract": {
-  "b": "B4.2",
+  "b": "E1",
   "d": "Urutan mengubah skema tanpa downtime: tambah yang baru, pindahkan data dan kode, baru hapus yang lama.",
-  "n": "2.8 Ubah skema tanpa downtime",
+  "n": "1.33 App versi lama",
   "s": "istilah-expand-migrate-contract",
   "t": "Expand-migrate-contract",
-  "u": "b-fondasi/b4-2-ubah-skema-tanpa-downtime/"
+  "u": "tahap-1/app-versi-lama/"
  },
  "fan-out": {
   "b": "D4b",

@@ -36,7 +36,7 @@ Yakin dengan ketiganya? Lompat ke [[berikutnya]].
 
 <Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: satu server bisa melayani app lama dan app baru selama field lama tetap dikirim.">
 
-Ulangi perubahan M6 dengan expand. Ini latihan lab, bukan kejadian di cerita. Setiap status diambil dari rekaman lab.
+Ulangi perubahan M6 dengan expand. Jalur utama adalah server yang dipakai di cerita sesudah ADR 10. Contract di "Ubah satu hal" hanya latihan lab. Setiap status diambil dari rekaman lab.
 
 <WidgetLama nama="alur" src="data/skenario/t1-versi.json" />
 
@@ -72,7 +72,13 @@ Putaran 2 kosong karena server lama dihentikan sebelum server expand menyala. Se
 
 <Snippet file="labs/api-t1/output/versi.txt" lines="36:55" title="Rekaman lab: labs/api-t1/output/versi.txt" />
 
-Kode expand memakai `jumlah` bila kedua field dikirim. AIP-180 meminta perilaku seperti ini ditulis jelas, karena client bisa mengirim dua nilai yang bertentangan.
+Kode expand memakai `jumlah` bila kedua field dikirim. AIP-180 meminta perilaku seperti ini ditulis jelas, karena client bisa mengirim dua nilai yang bertentangan. Kontrak expand menuliskannya di skema request bayar:
+
+<Snippet file="labs/b1-openapi/openapi-expand.yaml" lines="221:228" lang="yaml" title="Kontrak: labs/b1-openapi/openapi-expand.yaml" />
+
+Response transfer dan riwayat juga mendapat `nominal` sebagai field wajib, dan `jumlah` dicatat bersama syarat contract-nya. Pemeriksaan ADR 3 dari 1.18 tidak menemukan breaking change:
+
+<Snippet file="labs/b1-openapi/output/expand.txt" lines="6:9" title="Rekaman lab: labs/b1-openapi/output/expand.txt" />
 
 Contract di rekaman dijalankan sesudah Budi memperbarui app ke 1.1. Field `jumlah` diberi tag `json:"-"`, jadi tidak dikirim dan tidak dibaca lagi. Baris terakhir adalah request bentuk app 1.0 ke server contract:
 
@@ -127,13 +133,13 @@ Paksa update memang ada di platform. Contohnya, mode immediate di Android menamp
 **Yang dipilih.**
 
 1. Nama field di kontrak tidak diganti dan tidak dihapus dalam satu deploy. Label layar boleh berbeda dari nama field: layar Bayar menulis "Nominal", field-nya `jumlah`.
-2. Perubahan bentuk dimulai dengan expand. Field baru ditambahkan di samping yang lama, response mengirim keduanya, dan field baru di request tidak wajib (AIP-180). Perilaku bila keduanya dikirim ditulis di kontrak OpenAPI.
+2. Perubahan bentuk dimulai dengan expand. Field baru ditambahkan di samping yang lama, response mengirim keduanya, dan field baru di request tidak wajib (AIP-180). Perilaku bila keduanya dikirim ditulis di kontrak OpenAPI (`openapi-expand.yaml`).
 3. App yang membaca field baru dirilis sesudah server expand berjalan. Selama migrate, app itu tetap membaca field lama bila field baru tidak ada.
 4. Migration di satu deploy hanya menambah: tabel baru, atau kolom yang boleh kosong atau punya default (000008 di rekaman). Kolom yang dibaca image sebelumnya tidak diganti nama atau dihapus, supaya rollback ADR 9 tetap jalan.
 5. Contract hanya sesudah tidak ada request dari app yang memakai field lama. Selama hal itu belum bisa dihitung, contract tidak dijalankan dan server mengirim kedua field.
 6. Setiap perubahan kontrak tetap melewati pemeriksaan ADR 3 di [[B1.4|1.18]]. Contract menghapus field wajib dari response, jenis perubahan yang ditolak pemeriksaan itu di rekaman 1.18.
 
-Akibatnya untuk Tahap 1: app 1.0 dan app 1.1 dilayani satu server expand, seperti rekaman bagian C dan D. Field `jumlah` tidak dihapus selama uji coba.
+Akibatnya untuk Tahap 1: sesudah ADR 10, Raka men-deploy server expand. App 1.0 dan app 1.1 dilayani satu server, seperti rekaman bagian C dan D. Field `jumlah` tidak dihapus selama uji coba.
 
 **Pre-mortem.** Enam bulan lagi, keputusan ini gagal. Tiga penyebab yang paling mungkin:
 
@@ -184,7 +190,9 @@ Apakah masih ada request dari app yang membaca atau mengirim `jumlah`. Tanggal t
 <details class="success">
 <summary>Jawaban</summary>
 
-Hanya `ADD COLUMN catatan text`. Kolom itu boleh kosong dan tidak disebut kode lama, seperti rekaman 000008. `RENAME COLUMN` membuat image lama menjawab `500` karena kolom `jumlah` tidak ada (`m6.txt` bagian F). `DROP COLUMN jumlah` menghapus kolom yang masih dibaca kode lama, jadi akibatnya sama.
+Hanya `ADD COLUMN catatan text`. Kolom itu boleh kosong dan tidak disebut kode lama, seperti rekaman 000008. `RENAME COLUMN` membuat image lama menjawab `500` karena kolom `jumlah` tidak ada (`m6.txt` bagian F).
+
+`DROP COLUMN jumlah` juga membuat image lama gagal karena kolom itu tidak ada. Akibatnya lebih buruk: isi kolom tidak bisa dibaca lagi lewat SQL, jadi migration mundur pun tidak bisa mengembalikan angkanya ([PostgreSQL 17: ALTER TABLE](https://www.postgresql.org/docs/17/sql-altertable.html#SQL-ALTERTABLE-NOTES)).
 
 </details>
 
