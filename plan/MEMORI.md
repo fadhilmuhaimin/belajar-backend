@@ -17,6 +17,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 - 1.33 (E1): prasyarat B4.2 dibuang; ADR 10 (expand lalu contract) harus berdiri sendiri, tanpa rekaman crash B4.2.
 - 1.39 (F1) menyerap F2: hapus halaman F2 dan entrinya di PR yang sama (pola keputusan 150).
+- 1.31 `deploy.txt`: kode api-t1 diambil dari commit main `f128167` (`KODE_V1` di `run.py`), Dockerfile dari folder lab; hash 390ff47/f5ea0b4 (±27 tempat: halaman, `t1-deploy.json`, `t1-deploy-tag.json`, `kartu.json`) hanya berubah bila salah satunya diubah, dan `harap` membuat lab gagal keras.
 - 1.36 (Tim-infra) memakai ulang `labs/api-t1/deploy/compose.yaml` dan `ci.yml` dari 1.31; jeda ganti container belum diukur, jangan tulis angkanya tanpa rekaman.
 - Ilustrasi latar Grup Lestari belum ada; ilustrasi baru wajib lolos `ukur-ilustrasi.mjs` (tambahkan path halamannya ke alat itu). `situs/lama/assets/cerita/tahap-1.svg` tidak dipakai lagi.
 - Tabel "Angka di tahap ini" ditulis ulang di 1.37/1.38, angka dari `tahap[0].asumsi`.
@@ -37,14 +38,13 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Perlu dicek pemilik
 
-- 1.31 Di stack lain: baris Dart (Serverpod) "server Dart di image container" berlabel [perlu verifikasi]; halaman docs.serverpod.dev dirender JS dan tidak terbaca alat.
 - Redesain #120: usulan perubahan PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` di `plan/AUDIT-TAMPILAN.md` bagian 6, belum diubah.
 - ADR 7 (keputusan 240): RLS sebagai pagar kedua dipasang di tabel ledger Tahap 2, tidak di tabel v1 `api-t1` (rekaman `b5-rls` bagian 5: policy pemilik membuat bayar ke warung `UPDATE 0`). Kalau RLS harus sudah berjalan di Tahap 1, perlu tugas lab `api-t1` sendiri.
 - Cloudflare Pages (keputusan 115): butuh API token (Account > Cloudflare Pages > Edit) dan Account ID, lalu `gh secret set CLOUDFLARE_API_TOKEN` dan `gh secret set CLOUDFLARE_ACCOUNT_ID`.
 
 ## Sedang dikerjakan
 
-2026-10-11 · 1.31 selesai di branch `tahap-1/deployment-rollback` (keputusan 247, PR menunggu tinjauan pengatur, belum di-merge): halaman `tahap-1/deployment-rollback.mdx`, lab `api-t1` Dockerfile + `deploy/` + rekaman `deploy.txt`; C3 lama dan `c3-deploy.json` dihapus. Berikutnya: python3 tools/antrean.py berikut
+2026-10-11 · 1.31 perbaikan review PR #160 (keputusan 247): tag CI 7 karakter, login GHCR `read:packages`, checklist tag rilis, `500` + log server, kode lab dari commit `f128167` dengan `harap` hash, baris Serverpod bersumber. PR menunggu tinjauan pengatur, belum di-merge. Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
