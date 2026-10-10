@@ -1,0 +1,27 @@
+{
+  "skenario": "Tes HTTP: Budi mengirim jumlah -70000 ke Warung Ani, dan app harus menerima 422 dengan field jumlah.",
+  "langkah": [
+    { "id": "siap", "label": "Siapkan server dan database" },
+    { "id": "kirim", "label": "Kirim POST /transfers dengan token Budi" },
+    { "id": "status", "label": "Cek status 422" },
+    { "id": "field", "label": "Cek field jumlah di body error" }
+  ],
+  "stack": {
+    "Go": {
+      "pola": { "siap": ["srv, _ := server(t)"], "kirim": ["minta(t, \"POST\", srv.URL+\"/transfers\""], "status": ["res.StatusCode != c.status"], "field": ["p.Errors[0][\"field\"] != \"jumlah\""] }
+    },
+    "Node.js (Express)": {
+      "pola": { "siap": ["beforeEach("], "kirim": [".post(\"/transfers\")"], "status": [".expect(422)"], "field": ["res.body.errors[0].field"] }
+    },
+    "Laravel": {
+      "pola": { "siap": ["use RefreshDatabase"], "kirim": ["->postJson('/transfers'"], "status": ["->assertStatus(422)"], "field": ["->assertJsonPath('errors.0.field', 'jumlah')"] }
+    },
+    "Django": {
+      "pola": { "siap": ["def setUp(self)"], "kirim": ["self.client.post(\"/transfers\""], "status": ["assertEqual(res.status_code, 422)"], "field": ["res.json()[\"errors\"][0][\"field\"]"] }
+    },
+    "Dart (Serverpod)": {
+      "pola": { "siap": ["withServerpod("], "kirim": ["endpoints.transfer.bayar(budi, 418, -70000)"], "status": ["throwsA(isA<JumlahTidakValid>())"], "field": [] },
+      "catatan": { "field": "Test tools memanggil method endpoint langsung, jadi tidak ada status code dan body JSON. Yang dicek adalah tipe exception yang diterima pemanggil." }
+    }
+  }
+}

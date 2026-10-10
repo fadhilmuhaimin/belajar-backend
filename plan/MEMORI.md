@@ -42,10 +42,11 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - Redesain #120: usulan perubahan PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` di `plan/AUDIT-TAMPILAN.md` bagian 6, belum diubah.
 - ADR 7 (keputusan 240): RLS sebagai pagar kedua dipasang di tabel ledger Tahap 2, tidak di tabel v1 `api-t1` (rekaman `b5-rls` bagian 5: policy pemilik membuat bayar ke warung `UPDATE 0`). Kalau RLS harus sudah berjalan di Tahap 1, perlu tugas lab `api-t1` sendiri.
 - Cloudflare Pages (keputusan 115): butuh API token (Account > Cloudflare Pages > Edit) dan Account ID, lalu `gh secret set CLOUDFLARE_API_TOKEN` dan `gh secret set CLOUDFLARE_ACCOUNT_ID`.
+- Serverpod 4 (1.32): apakah exception buatan sendiri sampai ke tes `withServerpod` dengan tipe aslinya [perlu verifikasi].
 
 ## Sedang dikerjakan
 
-2026-10-11 · G1 selesai (keputusan 249), PR dari `perbaikan/g1-preview-daemon` menunggu tinjauan pengatur, belum di-merge: `tools/cek_situs.sh --layar` menjalankan `preview stop` (lock `situs/.astro/preview.json` milik worktree ini) sebelum mulai dan di trap, menyalakan preview `--background` di laptop dan CI, dan gagal keras bila `gerbang-tanda.txt` per jalan tidak dilayani di port dalam 30 detik. Bukti a–c di keputusan 249 dan PR. Berikutnya: python3 tools/antrean.py berikut
+2026-10-11 · 1.32 Testing di branch `tahap-1/testing` (keputusan 250, 251), PR #163: perbaikan review diterapkan (tes membaca `TEST_DATABASE_URL` dengan penjaga `lab`/`tahap1`, keempat endpoint ber-ID dites 404, Snippet bagian A dan E, tab Django, catatan Dart). Menunggu tinjauan ulang; jangan merge sebelum disetujui. Berikutnya sesudah merge: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
@@ -73,3 +74,4 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - Animasi CSS yang dipicu event `toggle` (async) mulai satu sampai dua frame sesudah `<details>` terbuka: isi penuh sempat berkedip. Ukur frame per rAF sesudah klik sungguhan (`page.click`, bukan `el.click()`, yang tidak mengirim pointerdown).
 - Penanda selesai di `tmp/` bisa tertinggal dari sesi lama (K1: `tmp/cek-hasil.txt` membuat Monitor menyala saat gerbang masih jalan); hapus penanda sebelum gerbang mulai, atau tunggu prosesnya (`pgrep -f cek_situs`).
 - `tmp/sidik_dist.py` hanya menghitung file yang dirujuk HTML; chunk yang diimpor island (React Flow) terlihat lewat `tmp/ukur_diagram_js.py` atau byte jaringan (`situs/tangkapan/i5b-jaringan.mjs`). React Flow `fitView` hanya untuk node awal: data baru = ReactFlow baru (`key`).
+- layar.mjs tidak menghitung Snippet sebagai visual Inti; Inti butuh Rantai atau widget (1.32 gagal 4 ukuran sebelum Rantai).

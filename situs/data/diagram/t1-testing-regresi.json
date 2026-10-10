@@ -1,0 +1,43 @@
+{
+  "id": "t1-testing-regresi",
+  "judul": "Regression test M4 dijalankan ke dua versi kode",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · testing.txt"
+  },
+  "baris": [
+    {
+      "label": "Kode sekarang",
+      "sub": "dengan transaction",
+      "simpul": [
+        {
+          "teks": "Tes lolos",
+          "sub": "PASS",
+          "nada": "good"
+        },
+        {
+          "teks": "Budi Rp250.000",
+          "sub": "saldo tetap",
+          "nada": "good"
+        }
+      ]
+    },
+    {
+      "label": "Bug M4 kembali",
+      "sub": "salinan kode",
+      "simpul": [
+        {
+          "teks": "Tes gagal",
+          "sub": "FAIL",
+          "nada": "warn"
+        },
+        {
+          "teks": "Budi Rp180.000",
+          "sub": "Rp70.000 hilang",
+          "nada": "warn"
+        }
+      ]
+    }
+  ],
+  "catatan": "Tes yang sama, kode berbeda."
+}

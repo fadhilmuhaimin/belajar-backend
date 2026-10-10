@@ -1,0 +1,13 @@
+{
+  "judul": "Hal ini paling tepat dites di level mana?",
+  "kelompok": ["Unit", "Integration", "End-to-end"],
+  "item": [
+    { "teks": "Bayar dengan jumlah -70000 ditolak dengan error field jumlah", "jawab": 0, "kenapa": "Aturan jumlah diperiksa service sebelum database disentuh. TestBayarMenolakJumlahDiLuarBatas lolos tanpa PostgreSQL (rekaman testing.txt bagian A)." },
+    { "teks": "Bayar yang gagal di UPDATE kedua tidak mengurangi saldo Budi", "jawab": 1, "kenapa": "Batas saldo warung dan ROLLBACK dijalankan PostgreSQL. Tes yang sama gagal saat Bayar tanpa transaction dikembalikan (bagian C)." },
+    { "teks": "Riwayat Budi memuat pembayaran Rp25.000 ke Warung Ani", "jawab": 1, "kenapa": "Bug f5ea0b4 ada di klausa WHERE. Hanya PostgreSQL yang menjalankan SQL itu, jadi hanya tes ke database yang melihat riwayat kosong (bagian D)." },
+    { "teks": "Body dengan field amount dijawab 400 problem+json yang menyebut jumlah", "jawab": 1, "kenapa": "Yang diuji adalah router, decoder JSON, dan format error yang dibaca app. TestBayarDitolakDenganNamaField mengirim request HTTP ke server httptest." },
+    { "teks": "Angka 250000 tampil sebagai Rp250.000 di layar HP", "jawab": 0, "kenapa": "Fungsi format di app Flutter. Unit test Dart menjalankannya tanpa emulator, server, atau database." },
+    { "teks": "Budi login di app, membayar, lalu saldo di layar berkurang", "jawab": 2, "kenapa": "Melibatkan app, API, dan database bersama. Tes seperti ini lambat dan rapuh, jadi hanya untuk jalur terpenting. Lab belum menulisnya." }
+  ],
+  "penutup": "Aturan murni dites tanpa database. Yang dijalankan PostgreSQL atau dibaca app lewat HTTP dites ke PostgreSQL dan HTTP sungguhan. End-to-end sedikit saja."
+}
