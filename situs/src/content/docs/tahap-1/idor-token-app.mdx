@@ -122,7 +122,7 @@ await storage.delete(key: 'token_sesi'); // saat Keluar atau saat server menjawa
 
 1. Setiap method service yang menerima ID bertanya pemilik atau peran sebelum data keluar. Sudah berjalan di `api-t1` (rekaman `authz.txt`, [[B5.3]]).
 2. Data orang lain dijawab `404`, sama persis dengan data yang tidak ada. `403` hanya untuk aksi yang tidak boleh bagi perannya. Request tanpa token dijawab `401` lebih dulu.
-3. RLS dipakai untuk baca di tabel yang setiap barisnya punya pemilik jelas. Syaratnya: role aplikasi bukan superuser dan bukan pemilik tabel. Identitas diisi `set_config('app.akun_id', $1, true)` di dalam transaction request.
+3. RLS dipakai untuk baca di tabel yang setiap barisnya punya pemilik jelas. Syaratnya: role aplikasi bukan superuser, tanpa `BYPASSRLS`, dan bukan pemilik tabel. Identitas diisi `set_config('app.akun_id', $1, true)` di dalam transaction request.
 4. RLS tidak dipasang di tabel yang dibaca atau ditulis atas nama pihak lain. Tabel `akun` termasuk: bayar mengubah baris warung, dan policy pemilik menyaringnya diam-diam. Kode yang menulis ke tabel ber-RLS wajib memeriksa jumlah baris yang berubah.
 5. Setiap endpoint ber-ID punya test "token A meminta data B".
 
@@ -134,7 +134,7 @@ await storage.delete(key: 'token_sesi'); // saat Keluar atau saat server menjawa
 
 **Kapan keputusan ini salah.** Saat ada client yang membaca database langsung, misalnya tool laporan untuk Pak Hadi, service tidak lagi satu-satunya pintu, dan RLS harus menjadi pagar pertama. Keputusan ini juga mulai salah saat aturan izin bertambah, misalnya kepala bagian melihat transaksi timnya. Pertanyaan `peminta != id` yang tersebar di banyak method sulit diperiksa satu per satu.
 
-**Yang merevisinya nanti.** Tahap 2 mengganti model uang v1 dengan ledger double-entry, dan RLS di tabel ledger diuji dulu di sana sebelum dipasang. Yang diuji: di bawah policy pemilik, baca atas nama pihak lain ikut tersaring diam-diam, kelas yang sama dengan rekaman bagian 5. Contohnya menghitung saldo atau batas Warung Ani di dalam transaction Dimas, atau `FOR UPDATE` ke baris lawan. Di Tahap 2 juga, test "token A meminta data B" menjadi syarat merge untuk engineer kedua.
+**Yang merevisinya nanti.** Tahap 2 mengganti model uang v1 dengan ledger double-entry, dan policy pemilik di tabel ledger diuji dulu sebelum dipasang. Baca atas nama pihak lain tersaring diam-diam seperti rekaman bagian 5, misalnya batas Warung Ani di transaction Dimas atau `FOR UPDATE` ke baris lawan. `INSERT` entri untuk akun Warung Ani dari pembayaran Dimas gagal dengan error policy, dan seluruh perintahnya batal ([CREATE POLICY](https://www.postgresql.org/docs/17/sql-createpolicy.html)). Di Tahap 2 juga, test "token A meminta data B" menjadi syarat merge untuk engineer kedua.
 
 ### ADR 8: sesi acak di server, token di secure storage, JWT ditunda
 
