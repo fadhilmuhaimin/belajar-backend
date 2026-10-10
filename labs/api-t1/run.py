@@ -6,7 +6,7 @@ Lab gagal keras bila port sudah dipakai, atau bila hasilnya tidak sesuai yang di
 
     make -C labs/api-t1 run      (butuh: Docker, Go; PostgreSQL dijalankan lewat labs/b3-race)
 """
-import hashlib, json, os, pathlib, re, socket, subprocess, sys, time
+import filecmp, hashlib, json, os, pathlib, re, shutil, socket, subprocess, sys, tempfile, time
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE / "output"
@@ -78,11 +78,12 @@ def pastikan_bebas(port):
     gagal(f"port {port} sudah dipakai proses lain; hentikan dulu")
 
 
-def mulai(*flag):
+def mulai(*flag, bin=BIN, tampil=None):
+    """bin: binary lain (M6 menjalankan v1 dan v2 dari folder VPS tiruan). tampil: baris rekaman pengganti."""
     global srv
     stop()
     pastikan_bebas(PORT)
-    srv = subprocess.Popen([str(BIN), *flag], env=ENV, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    srv = subprocess.Popen([str(bin), *flag], env=ENV, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     for _ in range(100):
         try:
             socket.create_connection(("127.0.0.1", PORT), 0.2).close()
@@ -91,7 +92,7 @@ def mulai(*flag):
             time.sleep(0.05)
     else:
         gagal("server tidak mau menyala")
-    log.append(f"# server: ./api-t1 {' '.join(flag)}".rstrip() + "\n")
+    log.append((tampil or f"# server: ./api-t1 {' '.join(flag)}".rstrip()) + "\n")
 
 
 def stop():
@@ -1006,8 +1007,176 @@ def rekam_authz():
     tulis("authz.txt")
 
 
+# Commit v2 Raka di minggu 5: kolom transaksi.jumlah diganti nominal, supaya sama dengan topup.nominal dan label
+# layar. Field JSON ikut berganti. Lab membangun v2 dari salinan kode v1 dengan penggantian di bawah. Setiap
+# penggantian harus ditemukan tepat n kali; kalau kode v1 berubah, lab berhenti dengan error.
+V2_UBAH = [  # (file, teks v1, teks v2, n)
+    ("internal/handler/handler.go", 'Ke     *int64 `json:"ke"`\n\t\tJumlah *int64 `json:"jumlah"`',
+     'Ke     *int64 `json:"ke"`\n\t\tJumlah *int64 `json:"nominal"`', 1),
+    ("internal/handler/handler.go", '[]string{"ke", "jumlah"}', '[]string{"ke", "nominal"}', 1),
+    ("internal/service/bayar.go", 'ErrValidasi{"jumlah", ', 'ErrValidasi{"nominal", ', 1),
+    ("internal/repo/transaksi.go", "INSERT INTO transaksi (dari, ke, jumlah)", "INSERT INTO transaksi (dari, ke, nominal)", 2),
+    ("internal/repo/transaksi.go", "SELECT id, dari, ke, jumlah, dibuat", "SELECT id, dari, ke, nominal, dibuat", 1),
+    ("internal/repo/transaksi.go", 'Jumlah int64     `json:"jumlah"`', 'Jumlah int64     `json:"nominal"`', 1),
+    ("internal/repo/riwayat.go", 'Jumlah int64     `json:"jumlah"`', 'Jumlah int64     `json:"nominal"`', 1),
+    ("internal/repo/riwayat.go", "a.nama, t.jumlah, t.dibuat", "a.nama, t.nominal, t.dibuat", 1),
+    ("internal/repo/riwayat.go", "sum(jumlah)", "sum(nominal)", 1),
+]
+
+
+def bangun_v2(tmp):
+    src = tmp / "src-v2"
+    src.mkdir()
+    for nama in ("go.mod", "go.sum"):
+        shutil.copy2(HERE / nama, src / nama)
+    for nama in ("cmd", "internal"):
+        shutil.copytree(HERE / nama, src / nama)
+    for f, lama, baru, n in V2_UBAH:
+        teks = (src / f).read_text()
+        harap(teks.count(lama), n, f"v2: '{lama}' di {f}")
+        (src / f).write_text(teks.replace(lama, baru))
+    bin_v2 = tmp / "laptop" / "api-t1"
+    subprocess.run(["go", "build", "-o", str(bin_v2), "./cmd/api"], cwd=src, check=True)
+    for f, lama, baru, _ in V2_UBAH:
+        log.append(f"#   {f:<28} {lama.splitlines()[-1].strip()}  ->  {baru.splitlines()[-1].strip()}\n")
+    log.append("$ go build -o laptop:api-t1 ./cmd/api   # di laptop Raka, kode v2\n")
+    return bin_v2
+
+
+def baca_riwayat(token, akun, versi):
+    """Satu request app: GET riwayat, lalu membaca transaksi teratas seperti app versi itu membacanya."""
+    r = subprocess.run(["curl", "-s", "-m", "2", "-w", "\n%{http_code}", "-H", f"Authorization: Bearer {token}",
+                        f"{URL}/akun/{akun}/riwayat"], capture_output=True, text=True).stdout
+    badan, kode = r.rsplit("\n", 1)
+    if kode == "000":
+        return "tidak ada jawaban"
+    if kode != "200":
+        return kode
+    field = "jumlah" if versi == "1.0" else "nominal"   # app 1.0 membaca "jumlah", app 1.1 membaca "nominal"
+    item = json.loads(badan)["riwayat"][0]
+    return f"200 · {field} {item[field]}" if field in item else f"200 · field {field} tidak ada"
+
+
+class Prober:
+    """Satu putaran per detik: setiap HP membaca riwayatnya sekali. Perintah deploy dijalankan di antara dua putaran,
+    jadi rekaman sama di mesin mana pun. Jumlah putaran yang gagal = jumlah perintah, bukan lama scp di VPS."""
+
+    def __init__(self, hp):
+        self.hp, self.hasil, self.jam = hp, [], None   # hp: [[nama, token, akun, versi app]]
+
+    def putaran(self, kali=1):
+        for _ in range(kali):
+            if self.jam is not None:
+                time.sleep(max(0.0, self.jam + 1 - time.monotonic()))
+            self.jam = time.monotonic()
+            hasil = [baca_riwayat(t, a, v) for _, t, a, v in self.hp]
+            self.hasil.append(hasil)
+            log.append(f"{len(self.hasil):<7}" + "".join(f"{'app ' + h[3] + ' · ' + x:<41}" for h, x in zip(self.hp, hasil)).rstrip() + "\n")
+
+    def ringkasan(self):
+        for i, h in enumerate(self.hp):
+            hitung = {}
+            for baris in self.hasil:
+                x = baris[i]
+                jenis = "berhasil" if re.fullmatch(r"200 · (jumlah|nominal) \d+", x) else x.replace("200 · ", "")
+                hitung[jenis] = hitung.get(jenis, 0) + 1
+            log.append(f"# HP {h[0]}: " + ", ".join(f"{v} {k}" for k, v in hitung.items()) + "\n")
+
+
+def rekam_m6():
+    """1.30 M6: Deploy hari Senin (keputusan 241). Deploy v1 ke v2 ala minggu 5 sambil prober memanggil API tiap detik."""
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="api-t1-m6-"))
+    try:
+        _rekam_m6(tmp)
+    finally:
+        stop()
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def _rekam_m6(tmp):
+    reset()
+    samarkan_hari_ini()
+    log.append("# laptop: adalah folder build di laptop Raka, vps: adalah /opt/rekeningo di VPS. Di lab, keduanya folder sementara.\n")
+    bagian("A. Kode v2: kolom transaksi.jumlah diganti nominal, field JSON ikut berganti")
+    bin_v2 = bangun_v2(tmp)
+    vps = tmp / "vps"
+    vps.mkdir()
+    shutil.copy2(BIN, vps / "api-t1")
+
+    bagian("B. Persiapan: v1 berjalan, Budi dan Dimas memakai app 1.0")
+    mulai(bin=vps / "api-t1", tampil="# server: vps:/opt/rekeningo/api-t1 (v1)")
+    topup_awal()
+    k = len(log)
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    dimas = login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+    for token, n in ((budi, 25000), (dimas, 20000)):
+        s, _ = curl("POST", "/transfers", json.dumps({"ke": 418, "jumlah": n}), token=token)
+        harap(s, 201, "bayar ke Warung Ani di v1")
+    del log[k:]
+    log.append("# persiapan: login Budi (419) dan Dimas (417); Budi membayar Rp25.000 dan Dimas Rp20.000 ke Warung Ani\n")
+    s, b = curl("GET", "/akun/419/riwayat", token=budi)
+    harap((s, "jumlah" in json.loads(b)["riwayat"][0]), (200, True), "v1: riwayat memakai field jumlah")
+
+    bagian("C. Deploy: prober memanggil API tiap detik, perintah Raka dijalankan di antara dua putaran")
+    log.append("# prober: GET /akun/419/riwayat dari HP Budi dan GET /akun/417/riwayat dari HP Dimas\n"
+               "# app 1.0 membaca field \"jumlah\" di riwayat; app 1.1 membaca \"nominal\"\n")
+    log.append(f"{'detik':<7}{'HP Budi':<41}HP Dimas\n")
+    p = Prober([["Budi", budi, 419, "1.0"], ["Dimas", dimas, 417, "1.0"]])
+    p.putaran(2)
+    log.append("$ kill -TERM <pid v1>   # v1 berhenti\n")
+    stop()
+    p.putaran()
+    kunci = sql("ALTER TABLE transaksi RENAME COLUMN jumlah TO nominal; "
+                "SELECT mode FROM pg_locks WHERE relation = 'transaksi'::regclass AND pid = pg_backend_pid()")
+    harap("AccessExclusiveLock" in kunci, True, "RENAME COLUMN memegang ACCESS EXCLUSIVE lock")
+    p.putaran()
+    shutil.copy2(bin_v2, vps / "api-t1")
+    log.append("$ cp laptop:api-t1 vps:/opt/rekeningo/api-t1   # di cerita: scp; binary v1 tertimpa\n")
+    p.putaran()
+    mulai(bin=vps / "api-t1", tampil="$ vps:/opt/rekeningo/api-t1 &   # v2 menyala")
+    p.putaran()
+    log.append("# Dimas memperbarui app ke 1.1. Budi belum.\n")
+    p.hp[1][3] = "1.1"
+    p.putaran(2)
+    jalan = ["200 · jumlah 25000", "200 · jumlah 20000"]
+    mati = ["tidak ada jawaban"] * 2
+    harap(p.hasil, [jalan, jalan, mati, mati, mati, ["200 · field jumlah tidak ada"] * 2]
+          + [["200 · field jumlah tidak ada", "200 · nominal 20000"]] * 2, "hasil prober per putaran")
+    log.append(f"# Ringkasan {len(p.hasil)} putaran:\n")
+    p.ringkasan()
+
+    bagian("D. Sesudah deploy: Budi (app 1.0) dan Dimas (app 1.1) membayar Warung Ani")
+    s1, b1 = curl("POST", "/transfers", '{"ke": 418, "jumlah": 25000}', token=budi)
+    s2, _ = curl("POST", "/transfers", '{"ke": 418, "nominal": 20000}', token=dimas)
+    harap((s1, json.loads(b1)["errors"][0]["field"], s2), (400, "nominal", 201), "v2: app 1.0 ditolak, app 1.1 diterima")
+    saldo = sql("SELECT id, nama, saldo FROM akun WHERE id IN (417, 418, 419) ORDER BY id")
+    harap(re.findall(r"\|\s*(\d+)\s*$", saldo, re.M), ["210000", "65000", "225000"], "saldo sesudah dua pembayaran")
+
+    bagian("E. Raka ingin kembali ke v1")
+    for label, folder in (("vps:/opt/rekeningo/", vps), ("laptop:", tmp / "laptop")):
+        isi = sorted(x.name for x in folder.iterdir())
+        harap(isi, ["api-t1"], f"isi {label}")
+        log.append(f"$ ls {label}\n" + "\n".join(isi) + "\n")
+    harap((filecmp.cmp(vps / "api-t1", bin_v2, shallow=False), filecmp.cmp(vps / "api-t1", BIN, shallow=False)),
+          (True, False), "binary di VPS adalah v2, bukan v1")
+    log.append("$ cmp vps:/opt/rekeningo/api-t1 laptop:api-t1 && echo sama\nsama\n")
+    log.append("# Satu-satunya binary di VPS dan di laptop adalah v2. Binary v1 tertimpa oleh cp (di cerita: scp) ke path yang sama.\n")
+
+    bagian("F. Kalaupun v1 dibangun ulang dari kode v1, kolomnya sudah bernama nominal")
+    log.append("$ kill -TERM <pid v2>\n")
+    stop()
+    mulai(tampil="$ go build -o api-t1 ./cmd/api && ./api-t1 &   # binary v1 dibangun ulang dari kode v1")
+    s, _ = curl("GET", "/akun/419/riwayat", token=budi)
+    harap(s, 500, "v1 di skema baru: 500")
+    log.append("$ kill -TERM <pid v1>\n")
+    k = len(log)
+    stop()
+    harap(any("column t.jumlah does not exist" in x for x in log[k:]), True, "log v1 menyebut kolom t.jumlah")
+    tulis("m6.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5", "authz"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5", "authz", "m6"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()

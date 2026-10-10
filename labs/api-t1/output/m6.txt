@@ -1,0 +1,90 @@
+# laptop: adalah folder build di laptop Raka, vps: adalah /opt/rekeningo di VPS. Di lab, keduanya folder sementara.
+
+# --- A. Kode v2: kolom transaksi.jumlah diganti nominal, field JSON ikut berganti ---
+#   internal/handler/handler.go  Jumlah *int64 `json:"jumlah"`  ->  Jumlah *int64 `json:"nominal"`
+#   internal/handler/handler.go  []string{"ke", "jumlah"}  ->  []string{"ke", "nominal"}
+#   internal/service/bayar.go    ErrValidasi{"jumlah",  ->  ErrValidasi{"nominal",
+#   internal/repo/transaksi.go   INSERT INTO transaksi (dari, ke, jumlah)  ->  INSERT INTO transaksi (dari, ke, nominal)
+#   internal/repo/transaksi.go   SELECT id, dari, ke, jumlah, dibuat  ->  SELECT id, dari, ke, nominal, dibuat
+#   internal/repo/transaksi.go   Jumlah int64     `json:"jumlah"`  ->  Jumlah int64     `json:"nominal"`
+#   internal/repo/riwayat.go     Jumlah int64     `json:"jumlah"`  ->  Jumlah int64     `json:"nominal"`
+#   internal/repo/riwayat.go     a.nama, t.jumlah, t.dibuat  ->  a.nama, t.nominal, t.dibuat
+#   internal/repo/riwayat.go     sum(jumlah)  ->  sum(nominal)
+$ go build -o laptop:api-t1 ./cmd/api   # di laptop Raka, kode v2
+
+# --- B. Persiapan: v1 berjalan, Budi dan Dimas memakai app 1.0 ---
+# server: vps:/opt/rekeningo/api-t1 (v1)
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+# persiapan: login Budi (419) dan Dimas (417); Budi membayar Rp25.000 dan Dimas Rp20.000 ke Warung Ani
+$ curl -i -X GET '/akun/419/riwayat' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"riwayat":[{"id":1,"arah":"keluar","lawan":"Warung Ani","jumlah":25000,"waktu":"<hari ini>T<jam>+07:00"}]}
+
+# --- C. Deploy: prober memanggil API tiap detik, perintah Raka dijalankan di antara dua putaran ---
+# prober: GET /akun/419/riwayat dari HP Budi dan GET /akun/417/riwayat dari HP Dimas
+# app 1.0 membaca field "jumlah" di riwayat; app 1.1 membaca "nominal"
+detik  HP Budi                                  HP Dimas
+1      app 1.0 · 200 · jumlah 25000             app 1.0 · 200 · jumlah 20000
+2      app 1.0 · 200 · jumlah 25000             app 1.0 · 200 · jumlah 20000
+$ kill -TERM <pid v1>   # v1 berhenti
+3      app 1.0 · tidak ada jawaban              app 1.0 · tidak ada jawaban
+$ psql -c "ALTER TABLE transaksi RENAME COLUMN jumlah TO nominal; SELECT mode FROM pg_locks WHERE relation = 'transaksi'::regclass AND pid = pg_backend_pid()"
+        mode         
+---------------------
+ AccessExclusiveLock
+(1 row)
+
+4      app 1.0 · tidak ada jawaban              app 1.0 · tidak ada jawaban
+$ cp laptop:api-t1 vps:/opt/rekeningo/api-t1   # di cerita: scp; binary v1 tertimpa
+5      app 1.0 · tidak ada jawaban              app 1.0 · tidak ada jawaban
+$ vps:/opt/rekeningo/api-t1 &   # v2 menyala
+6      app 1.0 · 200 · field jumlah tidak ada   app 1.0 · 200 · field jumlah tidak ada
+# Dimas memperbarui app ke 1.1. Budi belum.
+7      app 1.0 · 200 · field jumlah tidak ada   app 1.1 · 200 · nominal 20000
+8      app 1.0 · 200 · field jumlah tidak ada   app 1.1 · 200 · nominal 20000
+# Ringkasan 8 putaran:
+# HP Budi: 2 berhasil, 3 tidak ada jawaban, 3 field jumlah tidak ada
+# HP Dimas: 4 berhasil, 3 tidak ada jawaban, 1 field jumlah tidak ada
+
+# --- D. Sesudah deploy: Budi (app 1.0) dan Dimas (app 1.1) membayar Warung Ani ---
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Budi>' -d '{"ke": 418, "jumlah": 25000}'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+
+{"type":"/problems/field-wajib","title":"Field wajib tidak dikirim","status":400,"errors":[{"field":"nominal","pesan":"wajib diisi"}]}
+$ curl -i -X POST '/transfers' -H 'Authorization: Bearer <token sesi Dimas>' -d '{"ke": 418, "nominal": 20000}'
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /transfers/3
+
+{"id":3,"saldo":210000}
+$ psql -c "SELECT id, nama, saldo FROM akun WHERE id IN (417, 418, 419) ORDER BY id"
+ id  |    nama    | saldo  
+-----+------------+--------
+ 417 | Dimas      | 210000
+ 418 | Warung Ani |  65000
+ 419 | Budi       | 225000
+(3 rows)
+
+
+# --- E. Raka ingin kembali ke v1 ---
+$ ls vps:/opt/rekeningo/
+api-t1
+$ ls laptop:
+api-t1
+$ cmp vps:/opt/rekeningo/api-t1 laptop:api-t1 && echo sama
+sama
+# Satu-satunya binary di VPS dan di laptop adalah v2. Binary v1 tertimpa oleh cp (di cerita: scp) ke path yang sama.
+
+# --- F. Kalaupun v1 dibangun ulang dari kode v1, kolomnya sudah bernama nominal ---
+$ kill -TERM <pid v2>
+$ go build -o api-t1 ./cmd/api && ./api-t1 &   # binary v1 dibangun ulang dari kode v1
+$ curl -i -X GET '/akun/419/riwayat' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/problem+json
+
+{"type":"/problems/internal","title":"Terjadi kesalahan di server","status":500}
+$ kill -TERM <pid v1>
+server log: error internal: ERROR: column t.jumlah does not exist (SQLSTATE 42703)
