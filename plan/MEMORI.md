@@ -4,7 +4,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Keputusan baru
 
-- Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (keputusan 226); sisa 174–199 dibiarkan kosong.
+- Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (aturan dari keputusan 216); sisa 174–199 dibiarkan kosong.
+- 226: skrip loop menunggu batas pemakaian pulih (`resetsAt` + 2 menit), laporan pagi ikut menunggu (tenggang 180 menit), nomor log berlanjut.
 - 225: I1, situs pindah ke bun 1.4.2 (`bun.lock`, setup-bun di CI); gerbang build menuntut `Complete!`.
 - 224: K0e, chip ilustrasi M2 dilebarkan; `ukur-ilustrasi.mjs` di gerbang `--layar`.
 - 223: K0d, `p.meta` tanpa margin negatif; `ukur-judul.mjs` di gerbang; ruang HP diambil dari jarak meta ke blok.
