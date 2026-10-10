@@ -68,7 +68,7 @@ Bagian G mengembalikan kolom ke `jumlah` lewat migration baru dan menjalankan v1
 
 Dari dua versi server yang ada, tidak satu pun melayani app 1.0 dan app 1.1 sekaligus. Panduan kompatibilitas API Google (AIP-180) menyebut mengganti nama field sama dengan menghapus lalu menambah. Dalam satu versi mayor, field baru boleh ditambah, tapi field lama tidak boleh dihapus ([AIP-180](https://google.aip.dev/180)).
 
-Di [[B1.4|1.18]], `oasdiff breaking` menolak penggantian nama yang sejenis: `saldo` jadi `balance`, dengan error `response-required-property-removed`. Di minggu 5, pemeriksaan itu belum dijalankan sebelum deploy.
+Di [[B1.4|1.18]], `oasdiff breaking` dengan `--fail-on ERR` menolak penggantian nama yang sejenis: `saldo` jadi `balance`, dengan error `response-required-property-removed`. Di minggu 5, pemeriksaan itu belum dijalankan sebelum deploy.
 
 Jalan kembali juga punya aturan tertulis. The Twelve-Factor App menulis bahwa setiap release punya ID unik dan tidak pernah diubah sesudah dibuat; perubahan apa pun menjadi release baru ([12factor.net](https://12factor.net/build-release-run)). Release lama tetap ada, jadi kembali berarti menjalankan release itu lagi.
 
@@ -86,7 +86,7 @@ Ikuti deploy Raka detik demi detik dari dua HP. Status dan field diambil dari re
 
 - [[C3]]: deployment dan rollback. Setiap commit menghasilkan image bertag, jadi kembali berarti menjalankan tag lama. Halaman itu memuat ADR 9 (image per commit, rollback = tag lama, CI pertama).
 - [[C1]]: testing. Di minggu 5 belum ada tes yang mengirim request app 1.0 ke server baru sebelum deploy.
-- [[B1.4]]: file OpenAPI dan ADR 3. `oasdiff breaking` membandingkan file versi lama dan baru, lalu gagal dengan exit code 1 kalau field wajib hilang dari response.
+- [[B1.4]]: file OpenAPI dan ADR 3. `oasdiff breaking openapi.yaml v1-ganti-nama.yaml --fail-on ERR` membandingkan file versi lama dan baru, lalu gagal dengan exit code 1 kalau field wajib hilang dari response. Tanpa `--fail-on ERR`, perintah itu hanya melapor.
 - [[E1]]: app versi lama. Server harus melayani app lama selama masih ada HP yang memakainya. Halaman itu memuat ADR 10 (field tidak pernah diganti nama; expand lalu contract).
 - [[t1-tim-infra]]: satu VPS, Compose, dan CI pertama untuk satu orang.
 
