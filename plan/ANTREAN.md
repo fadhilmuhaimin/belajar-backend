@@ -200,7 +200,7 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.27-lab · Lab: 401 tanpa header Authorization tanpa kode error
 
 - jenis: perbaikan
-- status: antre
+- status: dikerjakan
 - percobaan: 0
 - bergantung: -
 - selesai bila: `wajibLogin` (`labs/api-t1/internal/handler/handler.go`, baris `WWW-Authenticate`) mengirim `Bearer` tanpa `error="invalid_token"` bila request tidak membawa header Authorization, dan tetap mengirim `error="invalid_token"` untuk token yang salah atau sesinya berakhir; rekaman `login.txt`, `authz.txt`, dan `http.txt` direkam ulang dari database bersih dan dibandingkan tanpa waktu; halaman yang mengutip header disesuaikan (1.27 `authentication.mdx`, 1.28, skenario `t1-authn.json` dan `t1-login.json`); keputusan baru.

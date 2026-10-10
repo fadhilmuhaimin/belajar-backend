@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.30 M6: Deploy hari Senin selesai di PR (keputusan 242), branch `tahap-1/m6-deploy`, belum di-merge: `situs/src/content/docs/tahap-1/m6-deploy-hari-senin.mdx`, Rantai `situs/data/diagram/t1-m6-deploy.json`, alur `situs/lama/widgets/data/skenario/t1-m6.json` (dua HP, varian F–G), ilustrasi `m6` di `Ilustrasi.astro` + `ukur-ilustrasi.mjs`. 1.31 (C3, ADR 9) dan 1.33 (E1, ADR 10) dirujuk dari Konsep yang lahir. Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-10 · 1.27-lab (perbaikan), branch `perbaikan/1-27-lab-www-authenticate`. Rencana: (1) `wajibLogin` di `labs/api-t1/internal/handler/handler.go` mengirim `WWW-Authenticate: Bearer` tanpa kode error bila request tanpa Bearer, `error="invalid_token"` tetap untuk token tidak sah (RFC 6750 §3.1); (2) `harap` header di `run.py` (login D/E, http F, authz D); (3) `make -C labs/api-t1 run` dua kali, bandingkan rekaman tanpa waktu; (4) teks 1.27 `authentication.mdx` baris header; skenario `t1-authn.json`/`t1-login.json` memakai kasus logout, tetap `invalid_token`; (5) keputusan baru, ANTREAN, STATUS; gerbang; PR tanpa merge.
 
 ## Pelajaran
 
