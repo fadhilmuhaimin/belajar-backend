@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · K1b selesai di branch `perbaikan/k1b-batas-login` (keputusan 244, PR menunggu tinjauan pengatur, belum di-merge): 1.29 `tahap-1/idor-token-app.mdx` baris 67, 176, 184 kini menulis batas percobaan login di Tahap 2, bersama brute force (PROPOSAL baris 686); 1.7 dan 1.27 tidak berubah; rujukan C4 dilepas. Berikutnya: python3 tools/antrean.py berikut
+2026-10-11 · K1c ADR 7 butir 4 dan RLS di ledger, branch `perbaikan/k1c-adr7-rls-ledger`. Rencana: (1) lab `b5-rls` bagian 9–10 sesudah bagian 8 (sketsa tabel `entri`: policy pemilik FOR ALL membuat INSERT entri Ani gagal; policy per perintah + fungsi `bayar` SECURITY DEFINER milik role penulis), filter Makefile tidak menggeser baris 1–109, pemeriksaan gagal keras, dua kali dari database bersih; (2) 1.29 Inti, butir 4, pre-mortem, Yang merevisinya nanti, Cek diri 2, checklist; (3) keputusan 246, ANTREAN, STATUS; gerbang; PR tanpa merge.
 
 ## Pelajaran
 
