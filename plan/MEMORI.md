@@ -45,7 +45,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · G1 selesai (keputusan 249), PR dari `perbaikan/g1-preview-daemon` menunggu tinjauan pengatur, belum di-merge: `tools/cek_situs.sh --layar` menjalankan `preview stop` (lock `situs/.astro/preview.json` milik worktree ini) sebelum mulai dan di trap, menyalakan preview `--background` di laptop dan CI, dan gagal keras bila `gerbang-tanda.txt` per jalan tidak dilayani di port dalam 30 detik. Bukti a–c di keputusan 249 dan PR. Berikutnya: python3 tools/antrean.py berikut
+2026-10-11 · Tahap 1 · 1.32 Testing (C1 ditulis ulang ke tahap-1/testing.mdx). Rencana: tes Go nyata di labs/api-t1 (unit service tanpa database, integration service + PostgreSQL untuk M4 dan riwayat f5ea0b4, HTTP di cmd/api), bagian rekam testing.txt (tanpa DATABASE_URL seperti CI 1.31, dengan PostgreSQL, bug M4 dan BUG_RIWAYAT dikembalikan ke salinan kode); halaman lima blok dengan pilah dan stackstep (Go dari lab, tab lain dicek ke dokumentasi, termasuk Dart Serverpod); hapus C1 lama dan data widget c1 lama; registry, indeks-topik, sinkron_cerita. File: labs/api-t1/{internal/service,cmd/api}/*_test.go, labs/api-t1/run.py, situs/src/content/docs/tahap-1/testing.mdx, situs/data/cerita.json, situs/public/widgets/data/t1-testing-*.json.
 
 ## Pelajaran
 
