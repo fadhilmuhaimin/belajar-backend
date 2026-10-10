@@ -16,6 +16,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 ## Catatan untuk halaman Tahap 1 berikutnya
 
 - 1.29 harus memuat ADR 8 dengan sumber shared_preferences 2.5.6 dan flutter_secure_storage 11.2.0 (1.26 merujuknya).
+- 1.29 (ADR 7): policy RLS membaca `app.akun_id`; isi dengan `SET LOCAL` atau `set_config(..., true)` di dalam transaction, bukan `SET` biasa (sesudah COMMIT nilainya bertahan sampai akhir sesi, jadi terbawa ke request berikutnya di connection pool; docs PostgreSQL sql-set dan functions-admin). Masukkan ke checklist review.
 - 1.33 (E1): prasyarat B4.2 dibuang; ADR 10 (expand lalu contract) harus berdiri sendiri, tanpa rekaman crash B4.2.
 - 1.39 (F1) menyerap F2: hapus halaman F2 dan entrinya di PR yang sama (pola keputusan 150).
 - Ilustrasi latar Grup Lestari dan M6 belum ada; ilustrasi baru wajib lolos `ukur-ilustrasi.mjs` (tambahkan path halamannya ke alat itu). `situs/lama/assets/cerita/tahap-1.svg` tidak dipakai lagi.
@@ -42,11 +43,14 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.27 Authentication selesai (keputusan 236): `tahap-1/authentication.mdx`, Rantai + alur `t1-authn`. Halaman lama B5.3/C4/F2 masih merujuk JWT 15 menit dari B5.1 lama; saat 1.28/1.29 ditulis, pakai sesi acak (ADR 8). Berikutnya: `python3 tools/antrean.py berikut` (1.28).
+2026-10-10 · 1.28 Authorization selesai di PR (keputusan 237): `tahap-1/authorization.mdx`, rekaman `labs/api-t1/output/authz.txt`, lab `b5-rls` ditulis ulang ke akun v1 (417/418/419). 1.29 memakai `rls.txt` yang sama (policy `app.akun_id` + `nullif`, FORCE, pemilik tabel) untuk ADR 7. Uji pilah tanpa gambar: `node situs/tangkapan/uji-pilah.mjs <url>`. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 
 - Konteks awal tiap iterasi loop 94–103k token, puncak 127–209k; 46% token yang diproses berasal dari panggilan dengan konteks > 150k. Penyumbang hasil alat terbesar: gambar (22%), grep (17%), PROTOKOL dibaca ulang (10%), `tail` KEPUTUSAN (baris ribuan karakter).
+- Retrospektif I4–1.28: halaman lama yang ditulis ulang membawa data lab lama yang bertentangan dengan naskah (JWT 15 menit di B5.1, ID teks `budi`/`ani` di b5-rls); cocokkan rekaman lama dengan skema v1 dan ADR naskah sebelum dipakai ulang. Satu rekaman khusus per halaman (`authz.txt`) lebih jelas daripada potongan dari lima file rekaman.
+- Lab SQL yang di-pipe ke `grep` kehilangan exit status psql; tambahkan pemeriksaan hasil di Makefile (pola `labs/b5-rls/Makefile`).
+- OWASP API Security pindah ke `api-security.owasp.org` (308 dari `owasp.org/API-Security/...`); link baru memakai alamat baru.
 - Retrospektif K0e–I3: alat ukur kecil (ukur-gerak, ukur-ilustrasi, ukur-judul) menangkap yang tidak terlihat di tangkapan. Pola: ukur dulu, perbaiki, ukur ulang, masukkan alat ke gerbang.
 - Motion `reducedMotion="user"` hanya mematikan transform dan layout; ukur frame pertama sesudah klik.
 - Route baru di `src/pages/` atau `import()` lazy mengubah chunk bersama Vite: semua halaman berganti hash; bandingkan sidik `tmp/sidik_dist.py`.

@@ -388,25 +388,33 @@
   "id": "B5.3-1",
   "halaman": "B5.3",
   "judul": "1.28 Authorization: siapa boleh apa",
-  "url": "b-fondasi/b5-3-authorization/",
-  "tanya": "Endpoint `GET /transfers/{id}` sudah memeriksa token. Apa yang masih kurang?",
-  "jawab": "Cek bahwa transfer itu milik peminta: peminta adalah pengirim atau penerima. Tanpa itu, Budi bisa membaca transfer siapa pun dengan menebak ID, yang biasanya berurutan."
+  "url": "tahap-1/authorization/",
+  "tanya": "Minggu 6, Raka menambah `GET /transfers/{id}/struk`. Handler-nya memanggil repo langsung, tanpa lewat `LihatTransaksi`. Apa yang hilang?",
+  "jawab": "Pertanyaan pemilik: apakah peminta pembayar atau penerima transaksi itu. Login tetap diperiksa `wajibLogin`, tapi siapa pun yang login bisa membaca struk transaksi orang lain dengan menebak nomornya. Itu M5 lagi, di endpoint baru."
  },
  {
   "id": "B5.3-2",
   "halaman": "B5.3",
   "judul": "1.28 Authorization: siapa boleh apa",
-  "url": "b-fondasi/b5-3-authorization/",
-  "tanya": "Jelaskan kenapa menyembunyikan tombol di app bukan authorization.",
-  "jawab": "Request bisa dikirim tanpa app, mis. lewat proxy atau `curl`, dengan token yang sah. Server tidak bisa membedakan request dari tombol dan request buatan tangan. Hanya pemeriksaan di server yang berlaku untuk semua jalur."
+  "url": "tahap-1/authorization/",
+  "tanya": "Tombol Top-up tidak ada di app Budi. Kenapa server tetap harus memeriksa peran?",
+  "jawab": "Budi bisa mengirim `POST /topup` tanpa app, dengan token sahnya sendiri. Server tidak bisa membedakan request dari tombol dan request buatan tangan. Di rekaman bagian C, service memeriksa jenis akun Budi dan menjawab `403`."
  },
  {
   "id": "B5.3-3",
   "halaman": "B5.3",
   "judul": "1.28 Authorization: siapa boleh apa",
-  "url": "b-fondasi/b5-3-authorization/",
-  "tanya": "Di rekaman RLS, `UPDATE akun SET saldo = 0 WHERE id = 'ani'` sebagai Budi menghasilkan `UPDATE 0`. Kenapa bukan error?",
-  "jawab": "Policy menyaring baris yang terlihat. Bagi Budi, baris Ani tidak ada, jadi `UPDATE` tidak menemukan baris untuk diubah. Artinya, kode yang memakai RLS harus memeriksa jumlah baris berubah, bukan hanya ada tidaknya error."
+  "url": "tahap-1/authorization/",
+  "tanya": "Di rekaman RLS, `UPDATE akun SET saldo = 0 WHERE id = 418` sebagai Dimas menghasilkan `UPDATE 0`. Kenapa bukan error, dan apa akibatnya untuk kode?",
+  "jawab": "Policy menyaring baris yang terlihat. Bagi Dimas, baris 418 tidak ada, jadi `UPDATE` tidak menemukan apa pun untuk diubah. Kode yang memakai RLS harus memeriksa jumlah baris yang berubah, bukan hanya ada tidaknya error."
+ },
+ {
+  "id": "B5.3-4",
+  "halaman": "B5.3",
+  "judul": "1.28 Authorization: siapa boleh apa",
+  "url": "tahap-1/authorization/",
+  "tanya": "Ani boleh membuka transaksi 1, tapi tidak boleh membuka riwayat Budi. Padahal transaksi 1 ada di riwayat Budi. Kenapa?",
+  "jawab": "Pemiliknya berbeda. Transaksi dimiliki pembayar dan penerimanya, sedangkan riwayat dimiliki pemilik akun. Riwayat Budi juga berisi pembayaran Budi ke warung lain, yang bukan urusan Ani."
  },
  {
   "id": "C3-1",

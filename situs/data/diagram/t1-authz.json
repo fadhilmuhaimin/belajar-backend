@@ -1,0 +1,51 @@
+{
+  "id": "t1-authz",
+  "judul": "Sesudah login: data milik siapa, peran boleh apa?",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · authz.txt"
+  },
+  "baris": [
+    {
+      "label": "Data orang lain",
+      "simpul": [
+        {
+          "teks": "Dimas: GET /transfers/1",
+          "kode": true,
+          "sub": "transaksi Budi ke Ani"
+        },
+        {
+          "teks": "Bukan pembayar atau penerima",
+          "sub": "service bertanya pemilik",
+          "nada": "system"
+        },
+        {
+          "teks": "404",
+          "sub": "sama dengan transaksi yang tidak ada",
+          "nada": "good"
+        }
+      ]
+    },
+    {
+      "label": "Aksi khusus peran",
+      "simpul": [
+        {
+          "teks": "Budi: POST /topup",
+          "kode": true,
+          "sub": "untuk dirinya sendiri"
+        },
+        {
+          "teks": "Budi bukan admin",
+          "sub": "service bertanya peran",
+          "nada": "system"
+        },
+        {
+          "teks": "403",
+          "sub": "hanya admin tunjangan",
+          "nada": "good"
+        }
+      ]
+    }
+  ],
+  "catatan": "Token Dimas dan Budi sah. Login menjawab siapa mereka; service bertanya sekali lagi sebelum menyentuh data."
+}

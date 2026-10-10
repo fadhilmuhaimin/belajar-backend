@@ -1,0 +1,216 @@
+{
+  "versi": 2,
+  "judul": "Satu transaksi, siapa yang boleh membukanya?",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/api-t1/output/authz.txt",
+    "fileVarian": "labs/api-t1/output/authz.txt",
+    "catatan": "Server Go 1.27 (labs/api-t1, versi benar) + PostgreSQL 17, direkam dengan curl -i dari database bersih. Jalur utama dan ubah satu hal: bagian B. Token acak disamarkan di rekaman."
+  },
+  "pengantar": "Budi membayar Rp25.000 ke Warung Ani; itu transaksi 1. Dimas yang membuka transaksi itu. Setelah itu centang 'Ubah satu hal': request yang sama dikirim dari HP Ani.",
+  "komponen": [
+    {
+      "id": "app",
+      "label": "HP peminta"
+    },
+    {
+      "id": "api",
+      "label": "Monolith API",
+      "lapisan": [
+        "handler",
+        "service",
+        "repo"
+      ]
+    },
+    {
+      "id": "db",
+      "label": "PostgreSQL"
+    }
+  ],
+  "layarAwal": {
+    "hp": {
+      "judul": "Transaksi 1",
+      "waktu": "13.20",
+      "isi": [
+        {
+          "jenis": "baris",
+          "kiri": "Masuk sebagai",
+          "kanan": "Dimas (417)"
+        },
+        {
+          "jenis": "baris",
+          "kiri": "Request",
+          "kanan": "GET /transfers/1"
+        }
+      ]
+    }
+  },
+  "predict": {
+    "q": "Transaksi 1 adalah pembayaran Budi ke Warung Ani. Dimas membukanya dengan token sesinya sendiri. Apa jawaban server versi benar?",
+    "options": [
+      "200, karena token Dimas sah",
+      "403, karena bukan transaksi Dimas",
+      "404, sama dengan transaksi yang tidak ada"
+    ],
+    "answer": 2,
+    "varian": false,
+    "explain": "Token Dimas sah, jadi login lolos. Service lalu bertanya apakah Dimas pembayar atau penerima transaksi 1. Jawabannya tidak, dan server menjawab seperti transaksi itu tidak ada. Rekaman lab bagian B."
+  },
+  "langkah": [
+    {
+      "dari": "app",
+      "ke": "api",
+      "lapisan": "handler",
+      "judul": "Dimas membuka transaksi 1",
+      "kirim": "GET /transfers/1\nAuthorization: Bearer <token sesi Dimas>",
+      "jelas": "Nomor 1 tidak pernah muncul di layar Dimas. Ia menebaknya, seperti 418 di M5.",
+      "layar": {
+        "hp": {
+          "judul": "Transaksi 1",
+          "waktu": "13.20",
+          "isi": [
+            {
+              "jenis": "proses",
+              "teks": "Memuat..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "api",
+      "lapisan": "handler",
+      "judul": "wajibLogin: token milik Dimas",
+      "kirim": "token → sesi → peminta = 417   ✓",
+      "jelas": "Authentication lolos. Peminta diambil dari sesi, bukan dari URL atau body.",
+      "nada": "good"
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "repo",
+      "judul": "Repo membaca transaksi 1",
+      "kirim": "SELECT id, dari, ke, jumlah, dibuat FROM transaksi WHERE id = $1   -- 1\n→ dari 419, ke 418, jumlah 25000",
+      "jelas": "Pemilik transaksi baru diketahui setelah barisnya dibaca. Baris ini belum keluar dari server."
+    },
+    {
+      "dari": "api",
+      "lapisan": "service",
+      "judul": "Service bertanya: pembayar atau penerima?",
+      "kirim": "LihatTransaksi(peminta=417, id=1)\n417 ≠ 419 dan 417 ≠ 418  → ErrTidakDitemukan",
+      "jelas": "Aturan transaksi: hanya pembayar atau penerimanya. Dimas bukan keduanya.",
+      "nada": "good"
+    },
+    {
+      "dari": "api",
+      "ke": "app",
+      "lapisan": "handler",
+      "judul": "404, sama dengan transaksi yang tidak ada",
+      "kirim": "404 Not Found\n{\"type\":\"/problems/tidak-ditemukan\",\"title\":\"Transaksi tidak ditemukan\",\"status\":404}",
+      "jelas": "Rekaman lab bagian B. Dimas tidak bisa membedakan transaksi orang lain dari transaksi yang tidak ada.",
+      "nada": "good",
+      "layar": {
+        "hp": {
+          "judul": "Transaksi 1",
+          "waktu": "13.20",
+          "isi": [
+            {
+              "jenis": "baris",
+              "kiri": "Request",
+              "kanan": "GET /transfers/1"
+            },
+            {
+              "jenis": "toast",
+              "teks": "Transaksi tidak ditemukan",
+              "nada": "good"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "varian": {
+    "label": "Ani, penerima transaksi itu, mengirim request yang sama",
+    "mulai": 0,
+    "langkah": [
+      {
+        "dari": "app",
+        "ke": "api",
+        "lapisan": "handler",
+        "judul": "Ani membuka transaksi 1",
+        "kirim": "GET /transfers/1\nAuthorization: Bearer <token sesi Warung Ani>",
+        "jelas": "Path-nya sama persis. Yang berubah hanya token, jadi peminta juga berubah.",
+        "layar": {
+          "hp": {
+            "judul": "Transaksi 1",
+            "waktu": "13.20",
+            "isi": [
+              {
+                "jenis": "baris",
+                "kiri": "Masuk sebagai",
+                "kanan": "Warung Ani (418)"
+              },
+              {
+                "jenis": "proses",
+                "teks": "Memuat..."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "dari": "api",
+        "lapisan": "handler",
+        "judul": "wajibLogin: token milik Ani",
+        "kirim": "token → sesi → peminta = 418   ✓",
+        "jelas": "Authentication lolos, sama seperti untuk Dimas.",
+        "nada": "good"
+      },
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "repo",
+        "judul": "Repo membaca transaksi 1",
+        "kirim": "SELECT id, dari, ke, jumlah, dibuat FROM transaksi WHERE id = $1   -- 1\n→ dari 419, ke 418, jumlah 25000",
+        "jelas": "Query dan barisnya sama dengan untuk Dimas."
+      },
+      {
+        "dari": "api",
+        "lapisan": "service",
+        "judul": "Service bertanya: pembayar atau penerima?",
+        "kirim": "LihatTransaksi(peminta=418, id=1)\n418 = ke  → boleh",
+        "jelas": "Ani penerima transaksi itu. Aturan yang sama memberi jawaban berbeda karena pemintanya berbeda.",
+        "nada": "good"
+      },
+      {
+        "dari": "api",
+        "ke": "app",
+        "lapisan": "handler",
+        "judul": "200: Ani melihat transaksinya",
+        "kirim": "200 OK\n{\"id\":1,\"dari\":419,\"ke\":418,\"jumlah\":25000,\"waktu\":\"<hari ini>T<jam>+07:00\"}",
+        "jelas": "Rekaman lab bagian B. Budi, pembayarnya, mendapat jawaban yang sama persis.",
+        "nada": "good",
+        "layar": {
+          "hp": {
+            "judul": "Transaksi 1",
+            "waktu": "13.20",
+            "saldo": 25000,
+            "saldoLabel": "Diterima dari Budi",
+            "isi": [
+              {
+                "jenis": "baris",
+                "kiri": "Request",
+                "kanan": "GET /transfers/1"
+              },
+              {
+                "jenis": "baris",
+                "kiri": "Jawaban",
+                "kanan": "200"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

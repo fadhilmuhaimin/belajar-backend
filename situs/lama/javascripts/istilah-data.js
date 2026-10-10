@@ -86,7 +86,7 @@ window.ISTILAH = {
   "n": "1.28 Authorization",
   "s": "istilah-authorization",
   "t": "Authorization",
-  "u": "b-fondasi/b5-3-authorization/"
+  "u": "tahap-1/authorization/"
  },
  "BFF": {
   "b": "B11.2",
@@ -710,7 +710,7 @@ window.ISTILAH = {
   "n": "1.28 Authorization",
   "s": "istilah-rbac",
   "t": "RBAC (Role-Based Access Control)",
-  "u": "b-fondasi/b5-3-authorization/"
+  "u": "tahap-1/authorization/"
  },
  "RLS": {
   "b": "B5.3",
@@ -718,7 +718,7 @@ window.ISTILAH = {
   "n": "1.28 Authorization",
   "s": "istilah-rls",
   "t": "RLS (Row Level Security)",
-  "u": "b-fondasi/b5-3-authorization/"
+  "u": "tahap-1/authorization/"
  },
  "ROLLBACK": {
   "b": "B3.1",
@@ -814,7 +814,7 @@ window.ISTILAH = {
   "n": "1.28 Authorization",
   "s": "istilah-rls",
   "t": "RLS (Row Level Security)",
-  "u": "b-fondasi/b5-3-authorization/"
+  "u": "tahap-1/authorization/"
  },
  "SSE": {
   "b": "E4",
@@ -1054,7 +1054,7 @@ window.ISTILAH = {
   "n": "1.28 Authorization",
   "s": "istilah-authorization",
   "t": "Authorization",
-  "u": "b-fondasi/b5-3-authorization/"
+  "u": "tahap-1/authorization/"
  },
  "backfill": {
   "b": "B4.2",

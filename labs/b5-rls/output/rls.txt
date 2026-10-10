@@ -1,26 +1,60 @@
 -- PostgreSQL 17.11
-SELECT current_user, id, saldo FROM akun ORDER BY id;
- current_user |  id  | saldo  
---------------+------+--------
- lab          | ani  | 250000
- lab          | budi | 100000
-(2 rows)
+-- 1. Role lab adalah superuser: superuser selalu melewati RLS
+SELECT current_user, id, nama, saldo FROM akun ORDER BY id;
+ current_user | id  |    nama    | saldo  
+--------------+-----+------------+--------
+ lab          | 417 | Dimas      | 250000
+ lab          | 418 | Warung Ani |  25000
+ lab          | 419 | Budi       | 225000
+(3 rows)
 
-SELECT current_user, id, saldo FROM akun ORDER BY id;
- current_user  |  id  | saldo  
----------------+------+--------
- app_rekeningo | budi | 100000
+-- 2. Role aplikasi, request dari Dimas (417); query di bawah tidak menulis WHERE pemilik
+SELECT current_user, id, nama, saldo FROM akun ORDER BY id;
+ current_user  | id  | nama  | saldo  
+---------------+-----+-------+--------
+ app_rekeningo | 417 | Dimas | 250000
 (1 row)
 
-SELECT id, saldo FROM akun WHERE id = 'ani';
- id | saldo 
-----+-------
+SELECT id, nama, saldo FROM akun WHERE id = 418;
+ id | nama | saldo 
+----+------+-------
 (0 rows)
 
-UPDATE akun SET saldo = 0 WHERE id = 'ani';
+UPDATE akun SET saldo = 0 WHERE id = 418;
 UPDATE 0
-SELECT id, saldo FROM akun ORDER BY id;
- id | saldo 
-----+-------
+-- 3. Request tanpa identitas akun
+SELECT current_setting('app.akun_id', true) = '' AS kosong_sesudah_reset,
+       pg_input_is_valid(current_setting('app.akun_id', true), 'bigint') AS bisa_jadi_bigint;
+ kosong_sesudah_reset | bisa_jadi_bigint 
+----------------------+------------------
+ t                    | f
+(1 row)
+
+SELECT id, nama, saldo FROM akun ORDER BY id;
+ id | nama | saldo 
+----+------+-------
 (0 rows)
+
+-- 4. Pemilik tabel juga melewati RLS, sampai tabelnya diberi FORCE ROW LEVEL SECURITY
+SELECT current_user, count(*) AS terlihat FROM akun;
+ current_user | terlihat 
+--------------+----------
+ pemilik_b5   |        3
+(1 row)
+
+-- sesudah ALTER TABLE akun FORCE ROW LEVEL SECURITY
+SELECT current_user, count(*) AS terlihat FROM akun;
+ current_user | terlihat 
+--------------+----------
+ pemilik_b5   |        0
+(1 row)
+
+-- 5. Saldo sesudah semua langkah, dilihat superuser
+SELECT id, nama, saldo FROM akun ORDER BY id;
+ id  |    nama    | saldo  
+-----+------------+--------
+ 417 | Dimas      | 250000
+ 418 | Warung Ani |  25000
+ 419 | Budi       | 225000
+(3 rows)
 

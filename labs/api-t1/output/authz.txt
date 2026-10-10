@@ -1,0 +1,65 @@
+# server: ./api-t1
+
+# --- A. Persiapan: versi benar, Budi membayar Rp25.000 ke Warung Ani (transaksi 1) ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+# persiapan: login admin tunjangan (400), Dimas (417), Warung Ani (418), Budi (419)
+# persiapan: Budi membayar Rp25.000 ke Warung Ani, transaksi 1 (rinciannya di bayar.txt)
+
+# --- B. Satu transaksi, tiga peminta: pembayar, penerima, orang lain ---
+$ curl -i -X GET '/transfers/1' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":1,"dari":419,"ke":418,"jumlah":25000,"waktu":"<hari ini>T<jam>+07:00"}
+$ curl -i -X GET '/transfers/1' -H 'Authorization: Bearer <token sesi Warung Ani>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":1,"dari":419,"ke":418,"jumlah":25000,"waktu":"<hari ini>T<jam>+07:00"}
+$ curl -i -X GET '/transfers/1' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+
+{"type":"/problems/tidak-ditemukan","title":"Transaksi tidak ditemukan","status":404}
+
+# --- C. Peran: hanya admin tunjangan yang boleh top-up ---
+$ curl -i -X POST '/topup?keterangan=Uji%20peran' -H 'Authorization: Bearer <token sesi Budi>' -H 'Content-Type: text/csv' --data-binary 'email,nominal\nbudi@lestari.example,10000'
+HTTP/1.1 403 Forbidden
+Content-Type: application/problem+json
+
+{"type":"/problems/dilarang","title":"Hanya admin tunjangan yang boleh top-up","status":403}
+$ curl -i -X POST '/topup?keterangan=Uji%20peran' -H 'Authorization: Bearer <token sesi admin>' -H 'Content-Type: text/csv' --data-binary 'email,nominal\nbudi@lestari.example,10000'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"akun":1,"total":10000}
+$ psql -c "SELECT akun_id, nominal, admin_id, keterangan FROM topup WHERE akun_id = 419 ORDER BY id"
+ akun_id | nominal | admin_id |        keterangan        
+---------+---------+----------+--------------------------
+     419 |  250000 |      400 | Tunjangan makan minggu 1
+     419 |   10000 |      400 | Uji peran
+(2 rows)
+
+$ psql -c "SELECT saldo FROM akun WHERE id = 419"
+ saldo  
+--------
+ 235000
+(1 row)
+
+
+# --- D. Urutan: login diperiksa sebelum izin ---
+$ curl -i -X POST '/topup?keterangan=Uji%20peran' -H 'Content-Type: text/csv' --data-binary 'email,nominal\nbudi@lestari.example,10000'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+Www-Authenticate: Bearer error="invalid_token"
+
+{"type":"/problems/belum-login","title":"Belum login atau sesi sudah berakhir","status":401}
+
+# --- E. Ringkasan: empat request yang sama dari lima peminta, status saja ---
+$ for p in Budi Ani Dimas admin tanpa; do curl -s -o /dev/null -w '%{http_code}' ...; done
+# tanpa = tanpa header Authorization; laporan memakai ?dari=<hari ini>&sampai=<hari ini>
+GET                      Budi    Ani  Dimas  admin  tanpa
+/akun/419                 200    404    404    404    401
+/akun/419/riwayat         200    404    404    404    401
+/transfers/1              200    200    404    404    401
+/warung/418/laporan       404    200    404    404    401
