@@ -162,6 +162,18 @@ def harap(nyata, harus, apa):
         gagal(f"{apa}: dapat {nyata!r}, harus {harus!r}")
 
 
+def header(nama):
+    """Nilai header nama dari response terakhir di log (nama tidak peka huruf besar-kecil)."""
+    for l in log[-1].splitlines():
+        if l.lower().startswith(nama.lower() + ":"):
+            return l.split(":", 1)[1].strip()
+    return None
+
+
+TANPA_TOKEN = "Bearer"  # RFC 6750 §3.1: tanpa informasi authentication, tanpa kode error
+TOKEN_DITOLAK = 'Bearer error="invalid_token"'
+
+
 def bagian(judul):
     log.append(f"\n# --- {judul} ---\n")
 
@@ -203,13 +215,13 @@ def rekam_login():
     s, b = curl("GET", "/akun/419", token=token)
     harap((s, json.loads(b)["nama"]), (200, "Budi"), "lihat akun sendiri")
     s, _ = curl("GET", "/akun/419")
-    harap(s, 401, "tanpa sesi")
+    harap((s, header("WWW-Authenticate")), (401, TANPA_TOKEN), "tanpa sesi")
 
     bagian("E. Logout mematikan sesi di server; token yang sama ditolak")
     s, _ = curl("POST", "/logout", token=token)
     harap(s, 204, "logout")
     s, _ = curl("GET", "/akun/419", token=token)
-    harap(s, 401, "token setelah logout")
+    harap((s, header("WWW-Authenticate")), (401, TOKEN_DITOLAK), "token setelah logout")
     sql("SELECT count(*) AS sesi_tersisa FROM sesi")
     tulis("login.txt")
 
@@ -537,7 +549,7 @@ def rekam_http():
 
     bagian("F. Tanpa token: 401 dan header WWW-Authenticate")
     s, _ = curl("GET", "/transfers/1")
-    harap(s, 401, "tanpa token")
+    harap((s, header("WWW-Authenticate")), (401, TANPA_TOKEN), "tanpa token")
 
     bagian("G. Dimas membuka transaksi milik Budi: 404, sama dengan transaksi yang tidak ada")
     s, _ = curl("GET", "/transfers/1", token=dimas)
@@ -988,7 +1000,7 @@ def rekam_authz():
     bagian("D. Urutan: login diperiksa sebelum izin")
     s, _ = curl("POST", "/topup?keterangan=Uji%20peran", isi, jenis="text/csv",
                 tampil_body="'email,nominal\\nbudi@lestari.example,10000'")
-    harap(s, 401, "tanpa token: 401, bukan 403")
+    harap((s, header("WWW-Authenticate")), (401, TANPA_TOKEN), "tanpa token: 401, bukan 403")
 
     bagian("E. Ringkasan: empat request yang sama dari lima peminta, status saja")
     hari_ini = next(k for k, v in samaran.items() if v == "<hari ini>")

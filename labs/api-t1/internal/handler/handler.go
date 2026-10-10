@@ -139,7 +139,13 @@ func (s Server) wajibLogin(next http.HandlerFunc) http.HandlerFunc {
 		token, ada := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
 		akunID, err := s.svc.Periksa(r.Context(), token)
 		if !ada || errors.Is(err, service.ErrSesiTidakSah) {
-			w.Header().Set("WWW-Authenticate", `Bearer error="invalid_token"`)
+			// RFC 6750 §3.1: request tanpa token Bearer tidak diberi kode error.
+			// invalid_token hanya untuk token yang dikirim tapi tidak dikenal atau sesinya berakhir.
+			tantangan := `Bearer`
+			if ada {
+				tantangan = `Bearer error="invalid_token"`
+			}
+			w.Header().Set("WWW-Authenticate", tantangan)
 			tulisProblem(w, Problem{Type: "/problems/belum-login", Title: "Belum login atau sesi sudah berakhir", Status: 401})
 			return
 		}
