@@ -128,11 +128,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.26-lab · Lab M5: rekaman mode rentan m5
 
 - jenis: konten
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: mode `-rentan m5` di `labs/api-t1` (GET akun tanpa cek pemilik, `service.LihatAkunM5`) dan rekaman `labs/api-t1/output/m5.txt` dari database bersih: Dimas membaca akun 417 miliknya, lalu 418 Warung Ani, lalu enumerasi 401–503; versi benar menjawab 404 untuk akun orang lain; output dibandingkan (status, saldo, urutan; bukan waktu); keputusan baru.
-- catatan: Setengah jalan dari worktree konten yang ditutup: lanjutkan dari branch `tahap-1/lab-m5` (commit 860e6b9, kode mode m5 tanpa rekaman dan tanpa `run.py`). Rebase ke main dulu.
+- catatan: Selesai 2026-10-10 (keputusan 233). Dilanjutkan dari branch `tahap-1/lab-m5` (rebase ke main). `m5.txt`: rentan 418 terbaca, enumerasi 200 × 103; benar 418 dan 9999 sama-sama 404 dengan body identik, enumerasi 200 × 1, 404 × 102. `run.py` kini membuang warna ANSI dari gosec (bagian injection gagal di lingkungan loop tanpa itu).
 
 ### 1.26 · M5: Angka di URL
 

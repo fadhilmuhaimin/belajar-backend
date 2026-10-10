@@ -677,7 +677,8 @@ def rekam_injection():
     bagian("C. Linter: gosec aturan G201 dan G202 (SQL dibangun dari string)")
     r = subprocess.run(["go", "run", GOSEC, "-fmt=text", "-include=G201,G202", "./..."], cwd=HERE,
                        capture_output=True, text=True)
-    hasil = r.stdout.replace(str(HERE) + "/", "").replace("\n\n\n", "\n\n").strip()
+    # gosec mewarnai keluarannya bila lingkungan terlihat mendukung warna, juga tanpa terminal; kode warna dibuang.
+    hasil = re.sub(r"\x1b\[[0-9;]*m", "", r.stdout).replace(str(HERE) + "/", "").replace("\n\n\n", "\n\n").strip()
     harap(("G202" in hasil, "Issues : 1" in hasil, r.returncode != 0), (True, True, True),
           "gosec: tepat satu temuan, di fungsi rentan")
     hasil = "\n".join(l.rstrip() for l in hasil.splitlines())
@@ -701,7 +702,7 @@ def rekam_injection():
     log.append(f"$ cd latihan && go test -v ./...\n{keluaran}\n")
     r = subprocess.run(["go", "run", GOSEC, "-fmt=text", "-include=G201,G202", "./..."], cwd=HERE / "latihan",
                        capture_output=True, text=True)
-    ringkas = "\n".join(l.rstrip() for l in r.stdout.splitlines() if l.strip() and not l.startswith("Results"))
+    ringkas = "\n".join(l.rstrip() for l in re.sub(r"\x1b\[[0-9;]*m", "", r.stdout).splitlines() if l.strip() and not l.startswith("Results"))
     harap(("Issues : 0" in ringkas, r.returncode), (True, 0), "gosec tidak menandai draf (query di return)")
     log.append(f"$ cd latihan && go run {GOSEC} -include=G201,G202 ./...\n{ringkas}\n")
     log.append("# Draf menjalankan urut sebagai SQL (tes pertama), tapi gosec tidak menandainya:\n"
@@ -871,8 +872,79 @@ def rekam_koreksi():
     tulis("koreksi.txt")
 
 
+def persiapan_m5():
+    """Top-up minggu 1, lalu Budi membayar Rp25.000 ke Warung Ani supaya saldo Ani tidak nol."""
+    topup_awal()
+    k = len(log)
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    s, _ = curl("POST", "/transfers", '{"ke": 418, "jumlah": 25000}', token=budi)
+    harap(s, 201, "Budi bayar Ani")
+    del log[k:]
+    log.append("# persiapan: Budi membayar Rp25.000 ke Warung Ani (rinciannya di bayar.txt)\n")
+    return login("dimas@lestari.example", "sementara-417", "<token sesi Dimas>")
+
+
+def enumerasi(token):
+    """Dimas mencoba akun 401 sampai 503 satu per satu. Hanya ringkasannya yang ditulis ke rekaman."""
+    status, baris = {}, []
+    for i in range(401, 504):
+        r = subprocess.run(["curl", "-s", "-w", "\n%{http_code}", "-H", f"Authorization: Bearer {token}",
+                            f"{URL}/akun/{i}"], capture_output=True, text=True).stdout
+        badan, kode = r.rsplit("\n", 1)
+        status[kode] = status.get(kode, 0) + 1
+        if kode == "200":
+            a = json.loads(badan)
+            baris.append(f"{a['id']},{a['nama']},{a['saldo']}")
+    log.append("$ for id in $(seq 401 503); do curl -s -H 'Authorization: Bearer <token sesi Dimas>' '/akun/'$id; done\n")
+    log.append("# status: " + ", ".join(f"{k} x {v}" for k, v in sorted(status.items())) + "\n")
+    # Yang ditampilkan hanya baris 416-420 (Dimas, Warung Ani, Budi dan tetangganya); sisanya dihitung.
+    tampil = [x for x in baris if 416 <= int(x.split(",")[0]) <= 420]
+    log.append(f"# yang terbaca, disimpan ke saldo.csv (id,nama,saldo), {len(baris)} baris:\n" + "\n".join(tampil) +
+               (f"\n... {len(baris) - len(tampil)} baris lain" if len(baris) > len(tampil) else "") + "\n\n")
+    return status, baris
+
+
+def rekam_m5():
+    """1.26 M5: Angka di URL (mode rentan m5, keputusan 233)."""
+    reset()
+    mulai("-rentan", "m5")
+    bagian("A. Persiapan: server minggu 4, login dicek, kepemilikan tidak")
+    dimas = persiapan_m5()
+
+    bagian("B. Dimas membuka akunnya sendiri, 417")
+    s, b = curl("GET", "/akun/417", token=dimas)
+    harap((s, json.loads(b)["nama"]), (200, "Dimas"), "akun sendiri")
+
+    bagian("C. Dimas mengganti 417 jadi 418 di URL")
+    s, b = curl("GET", "/akun/418", token=dimas)
+    harap((s, json.loads(b)["nama"], json.loads(b)["saldo"]), (200, "Warung Ani", 25000), "rentan: saldo Ani terbaca")
+
+    bagian("D. Dimas mencoba semua nomor dari 401 sampai 503")
+    status, baris = enumerasi(dimas)
+    harap((status, len(baris)), ({"200": 103}, 103), "rentan: 103 akun terbaca")
+    harap(any(x.startswith("419,Budi,225000") for x in baris), True, "saldo Budi ikut terbaca")
+    stop()
+
+    reset()
+    mulai()
+    bagian("E. Versi benar: service bertanya apakah yang login pemilik akun itu")
+    dimas = persiapan_m5()
+    s, _ = curl("GET", "/akun/417", token=dimas)
+    harap(s, 200, "benar: akun sendiri")
+    s1, b1 = curl("GET", "/akun/418", token=dimas)
+    s2, b2 = curl("GET", "/akun/9999", token=dimas)
+    harap((s1, s2), (404, 404), "akun orang lain dan akun yang tidak ada: 404")
+    harap(b1, b2, "body 418 dan 9999 harus sama")
+    log.append("# Jawaban untuk 418 (ada, milik Ani) dan 9999 (tidak ada) sama persis: Dimas tidak bisa membedakannya.\n\n")
+
+    bagian("F. Enumerasi yang sama di versi benar")
+    status, baris = enumerasi(dimas)
+    harap((status, baris), ({"200": 1, "404": 102}, ["417,Dimas,250000"]), "benar: hanya akun sendiri")
+    tulis("m5.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()

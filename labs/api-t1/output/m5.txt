@@ -1,0 +1,71 @@
+# server: ./api-t1 -rentan m5
+
+# --- A. Persiapan: server minggu 4, login dicek, kepemilikan tidak ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+# persiapan: Budi membayar Rp25.000 ke Warung Ani (rinciannya di bayar.txt)
+$ curl -i -X POST '/login' -d '{"email": "dimas@lestari.example", "password": "sementara-417"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Dimas>"}
+
+# --- B. Dimas membuka akunnya sendiri, 417 ---
+$ curl -i -X GET '/akun/417' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":417,"jenis":"karyawan","nama":"Dimas","saldo":250000}
+
+# --- C. Dimas mengganti 417 jadi 418 di URL ---
+$ curl -i -X GET '/akun/418' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":418,"jenis":"warung","nama":"Warung Ani","saldo":25000}
+
+# --- D. Dimas mencoba semua nomor dari 401 sampai 503 ---
+$ for id in $(seq 401 503); do curl -s -H 'Authorization: Bearer <token sesi Dimas>' '/akun/'$id; done
+# status: 200 x 103
+# yang terbaca, disimpan ke saldo.csv (id,nama,saldo), 103 baris:
+416,Karyawan 416,250000
+417,Dimas,250000
+418,Warung Ani,25000
+419,Budi,225000
+420,Karyawan 420,250000
+... 98 baris lain
+
+server log: PERINGATAN: mode rentan m5 menyala
+# server: ./api-t1
+
+# --- E. Versi benar: service bertanya apakah yang login pemilik akun itu ---
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+# persiapan: Budi membayar Rp25.000 ke Warung Ani (rinciannya di bayar.txt)
+$ curl -i -X POST '/login' -d '{"email": "dimas@lestari.example", "password": "sementara-417"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"kedaluwarsa_detik":28800,"token":"<token sesi Dimas>"}
+$ curl -i -X GET '/akun/417' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":417,"jenis":"karyawan","nama":"Dimas","saldo":250000}
+$ curl -i -X GET '/akun/418' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+
+{"type":"/problems/tidak-ditemukan","title":"Akun tidak ditemukan","status":404}
+$ curl -i -X GET '/akun/9999' -H 'Authorization: Bearer <token sesi Dimas>'
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+
+{"type":"/problems/tidak-ditemukan","title":"Akun tidak ditemukan","status":404}
+# Jawaban untuk 418 (ada, milik Ani) dan 9999 (tidak ada) sama persis: Dimas tidak bisa membedakannya.
+
+
+# --- F. Enumerasi yang sama di versi benar ---
+$ for id in $(seq 401 503); do curl -s -H 'Authorization: Bearer <token sesi Dimas>' '/akun/'$id; done
+# status: 200 x 1, 404 x 102
+# yang terbaca, disimpan ke saldo.csv (id,nama,saldo), 1 baris:
+417,Dimas,250000
+
