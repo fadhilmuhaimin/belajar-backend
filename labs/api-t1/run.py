@@ -1379,8 +1379,74 @@ def _rekam_deploy(tmp):
     tulis("deploy.txt")
 
 
+def go_test(*args, cwd=HERE, env=ENV):
+    """go test tanpa waktu: (0.01s) dan durasi paket dibuang, tab jadi spasi, supaya rekaman ulang sama."""
+    r = subprocess.run(["go", "test", *args], cwd=cwd, env=env, capture_output=True, text=True)
+    k = re.sub(r" \(\d+\.\d+s\)", "", r.stdout + r.stderr)
+    k = re.sub(r"^(ok|FAIL)(\s+\S+)\s+\d+\.\d+s$", r"\1\2", k, flags=re.M)
+    return r.returncode, "\n".join(l.rstrip().replace("\t", "  ") for l in k.strip().splitlines())
+
+
+def salinan_dengan_bug(f, lama, baru):
+    """Salinan kode lab di folder sementara dengan satu bug dikembalikan; kode lab sendiri tidak disentuh."""
+    d = pathlib.Path(tempfile.mkdtemp(prefix="api-t1-bug-"))
+    for x in ["go.mod", "go.sum"]:
+        shutil.copy(HERE / x, d)
+    for x in ["cmd", "internal"]:
+        shutil.copytree(HERE / x, d / x)
+    teks = (d / f).read_text()
+    if teks.count(lama) != 1:
+        gagal(f"bug {f}: teks lama harus muncul tepat sekali")
+    (d / f).write_text(teks.replace(lama, baru))
+    return d
+
+
+BUG_M4 = ("internal/service/bayar.go", "return s.pindahkan(ctx, peminta, ke, jumlah)",
+          "return s.repo.PindahkanM4(ctx, peminta, ke, jumlah)")
+
+
+def rekam_testing():
+    """1.32 Testing: apa dites di level mana. Tes Go di lab, tanpa dan dengan PostgreSQL, lalu bug lama dikembalikan."""
+    tanpa_db = {k: v for k, v in ENV.items() if k != "DATABASE_URL"}
+    bagian("A. Tanpa database, seperti CI pertama di 1.31: DATABASE_URL tidak diisi")
+    rc, k = go_test("-v", "-count=1", "./...", env=tanpa_db)
+    harap((rc, k.count("--- PASS: TestBayarMenolakJumlahDiLuarBatas/"), k.count("--- SKIP")), (0, 3, 3),
+          "tanpa database: unit test lolos, tiga tes database dilewati")
+    log.append(f"$ go test -v ./...\n{k}\n# exit status {rc}\n")
+
+    bagian("B. Dengan PostgreSQL (database dibuat ulang dari nol, data awal uji coba Gedung A)")
+    reset()
+    log.append("# -p 1: paket dites satu per satu, karena tes database di dua paket memakai database yang sama\n")
+    rc, k = go_test("-v", "-count=1", "-p", "1", "./...")
+    harap((rc, k.count("--- PASS: Test"), "SKIP" in k), (0, 7, False), "dengan database: semua tes lolos")
+    log.append(f"$ DATABASE_URL=postgres://... go test -v -p 1 ./...\n{k}\n# exit status {rc}\n")
+
+    bagian("C. Bug M4 dikembalikan di salinan kode: Bayar tanpa transaction (1.22)")
+    f, lama, baru = BUG_M4
+    log.append(f"# {f}: {lama}\n#   menjadi: {baru}\n")
+    reset()
+    d = salinan_dengan_bug(f, lama, baru)
+    rc, k = go_test("-count=1", "-run", "TestBayarGagalTidakMengubahSaldo", "./internal/service/", cwd=d)
+    shutil.rmtree(d)
+    harap((rc, "saldo Budi 180000, ingin 250000" in k, "total saldo 1630000, ingin 1700000" in k), (1, True, True),
+          "regression test M4 gagal untuk bug M4")
+    log.append(f"$ go test -run TestBayarGagalTidakMengubahSaldo ./internal/service/\n{k}\n# exit status {rc}\n")
+
+    bagian("D. Bug commit f5ea0b4 dikembalikan di salinan kode: riwayat kosong (1.31)")
+    f, lama, baru = BUG_RIWAYAT
+    log.append(f"# {f}: {lama}\n#   menjadi: {baru}\n")
+    reset()
+    d = salinan_dengan_bug(f, lama, baru)
+    rc, k = go_test("-count=1", "-run", "TestRiwayatMemuatPembayaran", "./internal/service/", cwd=d)
+    shutil.rmtree(d)
+    harap((rc, "riwayat akun 419: 0 transaksi" in k, "riwayat akun 418: 0 transaksi" in k), (1, True, True),
+          "regression test riwayat gagal untuk bug f5ea0b4")
+    log.append(f"$ go test -run TestRiwayatMemuatPembayaran ./internal/service/\n{k}\n# exit status {rc}\n")
+    tulis("testing.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5", "authz", "m6", "deploy"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5", "authz", "m6", "deploy", "testing"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()

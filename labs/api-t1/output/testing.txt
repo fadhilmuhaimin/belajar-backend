@@ -1,0 +1,76 @@
+
+# --- A. Tanpa database, seperti CI pertama di 1.31: DATABASE_URL tidak diisi ---
+$ go test -v ./...
+=== RUN   TestBayarDitolakDenganNamaField
+    api_test.go:39: DATABASE_URL kosong: tes ini butuh PostgreSQL
+--- SKIP: TestBayarDitolakDenganNamaField
+PASS
+ok    lab/apit1/cmd/api
+?     lab/apit1/internal/handler  [no test files]
+?     lab/apit1/internal/repo  [no test files]
+=== RUN   TestBayarMenolakJumlahDiLuarBatas
+=== RUN   TestBayarMenolakJumlahDiLuarBatas/-70000
+=== RUN   TestBayarMenolakJumlahDiLuarBatas/0
+=== RUN   TestBayarMenolakJumlahDiLuarBatas/200001
+--- PASS: TestBayarMenolakJumlahDiLuarBatas
+    --- PASS: TestBayarMenolakJumlahDiLuarBatas/-70000
+    --- PASS: TestBayarMenolakJumlahDiLuarBatas/0
+    --- PASS: TestBayarMenolakJumlahDiLuarBatas/200001
+=== RUN   TestBayarGagalTidakMengubahSaldo
+    db_test.go:57: DATABASE_URL kosong: tes ini butuh PostgreSQL
+--- SKIP: TestBayarGagalTidakMengubahSaldo
+=== RUN   TestRiwayatMemuatPembayaran
+    db_test.go:79: DATABASE_URL kosong: tes ini butuh PostgreSQL
+--- SKIP: TestRiwayatMemuatPembayaran
+PASS
+ok    lab/apit1/internal/service
+# exit status 0
+
+# --- B. Dengan PostgreSQL (database dibuat ulang dari nol, data awal uji coba Gedung A) ---
+# -p 1: paket dites satu per satu, karena tes database di dua paket memakai database yang sama
+$ DATABASE_URL=postgres://... go test -v -p 1 ./...
+=== RUN   TestBayarDitolakDenganNamaField
+--- PASS: TestBayarDitolakDenganNamaField
+PASS
+ok    lab/apit1/cmd/api
+?     lab/apit1/internal/handler  [no test files]
+?     lab/apit1/internal/repo  [no test files]
+=== RUN   TestBayarMenolakJumlahDiLuarBatas
+=== RUN   TestBayarMenolakJumlahDiLuarBatas/-70000
+=== RUN   TestBayarMenolakJumlahDiLuarBatas/0
+=== RUN   TestBayarMenolakJumlahDiLuarBatas/200001
+--- PASS: TestBayarMenolakJumlahDiLuarBatas
+    --- PASS: TestBayarMenolakJumlahDiLuarBatas/-70000
+    --- PASS: TestBayarMenolakJumlahDiLuarBatas/0
+    --- PASS: TestBayarMenolakJumlahDiLuarBatas/200001
+=== RUN   TestBayarGagalTidakMengubahSaldo
+--- PASS: TestBayarGagalTidakMengubahSaldo
+=== RUN   TestRiwayatMemuatPembayaran
+--- PASS: TestRiwayatMemuatPembayaran
+PASS
+ok    lab/apit1/internal/service
+# exit status 0
+
+# --- C. Bug M4 dikembalikan di salinan kode: Bayar tanpa transaction (1.22) ---
+# internal/service/bayar.go: return s.pindahkan(ctx, peminta, ke, jumlah)
+#   menjadi: return s.repo.PindahkanM4(ctx, peminta, ke, jumlah)
+$ go test -run TestBayarGagalTidakMengubahSaldo ./internal/service/
+--- FAIL: TestBayarGagalTidakMengubahSaldo
+    db_test.go:67: saldo Budi 180000, ingin 250000
+    db_test.go:70: total saldo 1630000, ingin 1700000
+FAIL
+FAIL  lab/apit1/internal/service
+FAIL
+# exit status 1
+
+# --- D. Bug commit f5ea0b4 dikembalikan di salinan kode: riwayat kosong (1.31) ---
+# internal/repo/riwayat.go: WHERE t.dari = $1 OR t.ke = $1
+#   menjadi: WHERE t.dari = $1 AND t.ke = $1
+$ go test -run TestRiwayatMemuatPembayaran ./internal/service/
+--- FAIL: TestRiwayatMemuatPembayaran
+    db_test.go:93: riwayat akun 419: 0 transaksi, ingin 1 (keluar, Warung Ani, 25000)
+    db_test.go:93: riwayat akun 418: 0 transaksi, ingin 1 (masuk, Budi, 25000)
+FAIL
+FAIL  lab/apit1/internal/service
+FAIL
+# exit status 1
