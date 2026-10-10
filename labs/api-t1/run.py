@@ -1410,15 +1410,15 @@ def rekam_testing():
     tanpa_db = {k: v for k, v in ENV.items() if k != "DATABASE_URL"}
     bagian("A. Tanpa database, seperti CI pertama di 1.31: DATABASE_URL tidak diisi")
     rc, k = go_test("-v", "-count=1", "./...", env=tanpa_db)
-    harap((rc, k.count("--- PASS: TestBayarMenolakJumlahDiLuarBatas/"), k.count("--- SKIP")), (0, 3, 3),
-          "tanpa database: unit test lolos, tiga tes database dilewati")
+    harap((rc, k.count("--- PASS: TestBayarMenolakJumlahDiLuarBatas/"), k.count("--- SKIP")), (0, 3, 4),
+          "tanpa database: unit test lolos, empat tes database dilewati")
     log.append(f"$ go test -v ./...\n{k}\n# exit status {rc}\n")
 
     bagian("B. Dengan PostgreSQL (database dibuat ulang dari nol, data awal uji coba Gedung A)")
     reset()
     log.append("# -p 1: paket dites satu per satu, karena tes database di dua paket memakai database yang sama\n")
     rc, k = go_test("-v", "-count=1", "-p", "1", "./...")
-    harap((rc, k.count("--- PASS: Test"), "SKIP" in k), (0, 7, False), "dengan database: semua tes lolos")
+    harap((rc, k.count("--- PASS: Test"), "SKIP" in k), (0, 8, False), "dengan database: semua tes lolos")
     log.append(f"$ DATABASE_URL=postgres://... go test -v -p 1 ./...\n{k}\n# exit status {rc}\n")
 
     bagian("C. Bug M4 dikembalikan di salinan kode: Bayar tanpa transaction (1.22)")

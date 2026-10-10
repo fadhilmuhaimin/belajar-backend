@@ -2,8 +2,11 @@
 # --- A. Tanpa database, seperti CI pertama di 1.31: DATABASE_URL tidak diisi ---
 $ go test -v ./...
 === RUN   TestBayarDitolakDenganNamaField
-    api_test.go:39: DATABASE_URL kosong: tes ini butuh PostgreSQL
+    api_test.go:60: DATABASE_URL kosong: tes ini butuh PostgreSQL
 --- SKIP: TestBayarDitolakDenganNamaField
+=== RUN   TestAkunOrangLainDijawab404
+    api_test.go:84: DATABASE_URL kosong: tes ini butuh PostgreSQL
+--- SKIP: TestAkunOrangLainDijawab404
 PASS
 ok    lab/apit1/cmd/api
 ?     lab/apit1/internal/handler  [no test files]
@@ -31,6 +34,8 @@ ok    lab/apit1/internal/service
 $ DATABASE_URL=postgres://... go test -v -p 1 ./...
 === RUN   TestBayarDitolakDenganNamaField
 --- PASS: TestBayarDitolakDenganNamaField
+=== RUN   TestAkunOrangLainDijawab404
+--- PASS: TestAkunOrangLainDijawab404
 PASS
 ok    lab/apit1/cmd/api
 ?     lab/apit1/internal/handler  [no test files]
