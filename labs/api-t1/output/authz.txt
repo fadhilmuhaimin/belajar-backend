@@ -51,7 +51,7 @@ $ psql -c "SELECT saldo FROM akun WHERE id = 419"
 $ curl -i -X POST '/topup?keterangan=Uji%20peran' -H 'Content-Type: text/csv' --data-binary 'email,nominal\nbudi@lestari.example,10000'
 HTTP/1.1 401 Unauthorized
 Content-Type: application/problem+json
-Www-Authenticate: Bearer error="invalid_token"
+Www-Authenticate: Bearer
 
 {"type":"/problems/belum-login","title":"Belum login atau sesi sudah berakhir","status":401}
 

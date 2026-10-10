@@ -200,11 +200,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.27-lab · Lab: 401 tanpa header Authorization tanpa kode error
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: `wajibLogin` (`labs/api-t1/internal/handler/handler.go`, baris `WWW-Authenticate`) mengirim `Bearer` tanpa `error="invalid_token"` bila request tidak membawa header Authorization, dan tetap mengirim `error="invalid_token"` untuk token yang salah atau sesinya berakhir; rekaman `login.txt`, `authz.txt`, dan `http.txt` direkam ulang dari database bersih dan dibandingkan tanpa waktu; halaman yang mengutip header disesuaikan (1.27 `authentication.mdx`, 1.28, skenario `t1-authn.json` dan `t1-login.json`); keputusan baru.
-- catatan: RFC 6750 §3.1: bila request tidak membawa informasi authentication sama sekali, resource server SHOULD NOT menyertakan kode error atau informasi error lain; `invalid_token` untuk token yang kedaluwarsa, dicabut, rusak, atau tidak sah (https://www.rfc-editor.org/rfc/rfc6750#section-3.1). Ditemukan peninjau PR #150 (keputusan 237). Jenis "lab" tidak dikenal `tools/antrean.py`, jadi ditulis perbaikan.
+- catatan: RFC 6750 §3.1: bila request tidak membawa informasi authentication sama sekali, resource server SHOULD NOT menyertakan kode error atau informasi error lain; `invalid_token` untuk token yang kedaluwarsa, dicabut, rusak, atau tidak sah (https://www.rfc-editor.org/rfc/rfc6750#section-3.1). Ditemukan peninjau PR #150 (keputusan 237). Jenis "lab" tidak dikenal `tools/antrean.py`, jadi ditulis perbaikan. Selesai (keputusan 243): tanpa token `WWW-Authenticate: Bearer`, token sesudah logout tetap `invalid_token`, diperiksa `harap` di `run.py`; rekaman dua kali identik, hanya baris header login/authz/http dan jumlah baris gosec di injection berubah.
 
 ### K1 · Crosscheck kecil 1.26–1.30
 

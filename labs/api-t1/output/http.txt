@@ -55,7 +55,7 @@ Method Not Allowed
 $ curl -i -X GET '/transfers/1'
 HTTP/1.1 401 Unauthorized
 Content-Type: application/problem+json
-Www-Authenticate: Bearer error="invalid_token"
+Www-Authenticate: Bearer
 
 {"type":"/problems/belum-login","title":"Belum login atau sesi sudah berakhir","status":401}
 
