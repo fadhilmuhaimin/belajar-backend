@@ -83,12 +83,29 @@ for (const [lebar, tinggi, arahHarus] of [
       await page.mouse.wheel(0, 300);
       await page.waitForTimeout(300);
       const y1 = await page.evaluate(() => window.scrollY);
+      lapor(y1 > y0, `${tag}: roda di atas diagram ${y0}→${y1}`);
+      // Gestur sentuh: sekali di atas paragraf (kontrol), sekali di atas diagram. Posisi diukur ulang sesudah tiap gulir.
+      // Chromium headless di runner Linux tidak menjalankan gestur sentuh sintetis sama sekali (CI #145 percobaan 1);
+      // bila kontrol tidak bergerak, gestur dilaporkan "info" dan touch-action yang jadi buktinya.
       const cdp = await ctx.newCDPSession(page);
-      await cdp.send("Input.synthesizeScrollGesture", { x: Math.round(cx), y: Math.round(Math.min(cy, 500)), yDistance: -250, gestureSourceType: "touch", speed: 1200 });
-      await page.waitForTimeout(300);
-      const y2 = await page.evaluate(() => window.scrollY);
+      const geser = async (sel) => {
+        await page.locator(sel).first().scrollIntoViewIfNeeded();
+        await page.evaluate(() => window.scrollBy(0, -80));
+        const b = await page.locator(sel).first().boundingBox();
+        const a = await page.evaluate(() => window.scrollY);
+        await cdp.send("Input.synthesizeScrollGesture", { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + Math.min(b.height / 2, 150)), yDistance: -200, gestureSourceType: "touch", speed: 1200 });
+        await page.waitForTimeout(300);
+        return [a, await page.evaluate(() => window.scrollY)];
+      };
+      const [k0, k1] = await geser("main p");
+      const [d0, d1] = await geser("figure.diagram .react-flow__pane");
       const ta = await page.evaluate(() => getComputedStyle(document.querySelector("figure.diagram .react-flow__pane")).touchAction);
-      lapor(y1 > y0 && y2 > y1, `${tag}: roda di atas diagram ${y0}→${y1}, sentuh ${y1}→${y2}, touch-action ${ta}`);
+      const taOk = ta.includes("pan-y") || ta === "auto" || ta === "manipulation";
+      if (k1 > k0) lapor(d1 > d0 && taOk, `${tag}: sentuh di paragraf ${k0}→${k1}, di atas diagram ${d0}→${d1}, touch-action ${ta}`);
+      else {
+        console.log(`info ${tag}: gestur sentuh sintetis tidak berjalan di lingkungan ini (paragraf ${k0}→${k1})`);
+        lapor(taOk, `${tag}: touch-action panel ${ta}`);
+      }
     }
 
     // 4. Keyboard: Tab dari tombol sebelum diagram mendarat di kotak pertama, Enter membuka catatan.
