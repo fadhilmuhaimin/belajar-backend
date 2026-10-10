@@ -47,7 +47,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · P1 (1.4 dan 1.6 lepas dari `api-t1-lama`) di branch `perbaikan/p1-api-t1-lama`. Rencana: Snippet `tahap-1/adr-1-backend-sendiri.mdx` diganti ke `labs/api-t1/internal/service/bayar.go` region `bayar`; tiga Snippet `tahap-1/struktur-folder.mdx` diganti ke komentar paket `internal/handler/handler.go`, `internal/service/sesi.go`, `internal/repo/repo.go`; kalimat di sekitarnya disesuaikan. Kode v1 benar untuk keduanya (sebelum M6). `labs/api-t1-lama` tidak dihapus (P2). Lalu sinkron, gerbang, ANTREAN, PR tanpa merge.
+2026-10-11 · P1 selesai di branch `perbaikan/p1-api-t1-lama` (PR menunggu tinjauan; jangan merge sebelum disetujui pengatur): 1.4 memakai Snippet `labs/api-t1/internal/service/bayar.go` region `bayar`; 1.6 memakai komentar package `internal/handler/handler.go`, `internal/service/sesi.go`, `internal/repo/repo.go`, dan pohon rencananya memakai `schema.sql` (migration baru di 1.25). `grep -rn api-t1-lama situs/src/content/docs/tahap-1/` kosong; `labs/api-t1-lama` masih ada (P2). Berikutnya sesudah merge: `python3 tools/antrean.py berikut` (P2).
 
 ## Pelajaran
 
