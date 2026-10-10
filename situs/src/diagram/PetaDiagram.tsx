@@ -2,7 +2,8 @@
 // tab di Beranda.astro (skrip tanpa React) mengirim event "rtj:peta-tahap" berisi nomor tahap, dan diagram berganti
 // ke data tahap itu dengan gerak masuk singkat (gerak/muncul.ts). Tanpa gerak saat dimuat; reduced motion tanpa gerak.
 // Tahap tanpa data `arsitektur` di registry (proyeksi) tidak digambar: bentuknya belum ada di naskah.
-// Tab yang dipilih sebelum island di-hydrate dibaca dari data-tahap di .peta__tab.
+// Tab yang dipilih sebelum island di-hydrate dibaca dari data-tahap di .peta__tab; sampai data-peta-diagram sama
+// dengan data-tahap, CSS di Beranda.astro menyembunyikan diagram (tanpa frame berisi Tahap 1 dari SSR).
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import DiagramArsitektur from "./DiagramArsitektur";
 import type { Arsitektur } from "./skema";

@@ -44,6 +44,10 @@ const tahap: Peta[] = [
 ];
 
 const diagramTahap = tahap.map((t) => ({ no: t.no, data: t.diagram ? Arsitektur.parse(t.diagram) : null, lama: t.lama }));
+// Diagram yang belum mengikuti tab terpilih tidak terlihat (review PR #161, keputusan 248). Tab bisa dipilih sebelum
+// island di-hydrate, dan sesudah hydrate React baru membaca data-tahap di efek; selama itu isinya masih versi SSR
+// (Tahap 1). Tanpa JS tab tidak berganti, jadi data-tahap tetap tahap pertama dan diagramnya terlihat bersama panelnya.
+const cssPeta = tahap.map((t) => `.peta__tab[data-tahap="${t.no}"] + .peta__isi .peta__diagram:not([data-peta-diagram="${t.no}"])`).join(",\n") + " { visibility: hidden; }";
 
 // Peran sebagai pertanyaan: lima halaman pertama yang menonjolkan peran itu, menurut urutan baca.
 const PERAN: [string, string][] = [
@@ -153,6 +157,7 @@ const cara = hs.find((h) => h.id === "A0");
   {cara && <p class="beranda__kecil"><a href={url(cara)}>Cara pakai panduan ini</a></p>}
 </div>
 <script type="application/json" id="data-masalah" set:html={JSON.stringify(masalah)} />
+<style is:inline set:html={cssPeta} />
 
 <script>
   const simpanan = (k: string): string | null => { try { return localStorage.getItem(k); } catch { return null; } };

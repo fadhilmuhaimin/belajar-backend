@@ -224,6 +224,61 @@ for (const [lebar, tinggi, arahHarus] of [
     await ctx.close();
   }
 }
+
+// 6. Tab dipilih sebelum island di-hydrate (temuan review PR #161, keputusan 248). Di HP, tap Tahap 3 saat island
+// diagram belum jalan, lalu gulir ke diagram. Modul JS diperlambat 1,5 detik sesudah halaman dimuat (seperti jaringan
+// lambat), dan setiap frame dicatat: selama panel Tahap 3 terbuka, tidak boleh ada frame dengan diagram tahap lain
+// (versi statis Tahap 1 dari SSR) yang terlihat. Tanpa JS: panel dan diagram Tahap 1 terlihat bersama.
+{
+  const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 375, height: 667 } });
+  const page = await ctx.newPage();
+  await page.goto(beranda);
+  const r = await page.evaluate(() => {
+    const d = document.querySelector("[data-peta-diagram]");
+    const panel = [...document.querySelectorAll("[data-panel]")].filter((p) => !p.hidden).map((p) => p.id);
+    return { no: d.dataset.petaDiagram, terlihat: d.checkVisibility({ visibilityProperty: true }), label: d.querySelector('[role="img"]').getAttribute("aria-label").slice(0, 30), panel };
+  });
+  lapor(r.no === "1" && r.terlihat && r.label.includes("Tahap 1") && r.panel.join() === "panel-tahap-1", `beranda tanpa JS: panel ${r.panel.join()}, diagram ${r.no} ${r.terlihat ? "terlihat" : "tersembunyi"} "${r.label}"`);
+  await ctx.close();
+}
+{
+  const ctx = await browser.newContext({ viewport: { width: 375, height: 667 }, hasTouch: true });
+  const page = await ctx.newPage();
+  await page.goto(beranda, { waitUntil: "networkidle" });
+  await page.route(/\/_astro\/.+\.js(\?.*)?$/, async (rute) => {
+    await new Promise((s) => setTimeout(s, 1500));
+    await rute.continue().catch(() => {});
+  });
+  await page.evaluate(() => {
+    const f = (window.__frame = { total: 0, salah: 0, kosong: 0, contoh: "", jalan: true });
+    const cek = () => {
+      const d = document.querySelector("[data-peta-diagram]");
+      const tab = document.querySelector(".peta__pilih[aria-selected='true']")?.dataset.no;
+      if (d && tab === "3") {
+        f.total++;
+        const terlihat = d.checkVisibility({ visibilityProperty: true });
+        if (!terlihat) f.kosong++;
+        else if (d.dataset.petaDiagram !== tab) {
+          f.salah++;
+          f.contoh ||= `${d.closest("astro-island[ssr]") ? "sebelum" : "sesudah"} hydrate: ${d.querySelector('[role="img"]')?.getAttribute("aria-label")?.slice(0, 20)}`;
+        }
+      }
+      if (f.jalan) requestAnimationFrame(cek);
+    };
+    requestAnimationFrame(cek);
+  });
+  const belum = await page.evaluate(() => !!document.querySelector("[data-peta-diagram]").closest("astro-island[ssr]"));
+  await page.tap("#tab-tahap-3");
+  await page.evaluate(() => document.querySelector("[data-peta-diagram]").scrollIntoView({ block: "center" }));
+  await page.waitForFunction(() => document.querySelector("[data-peta-diagram]")?.dataset.petaDiagram === "3" && document.querySelectorAll("[data-peta-diagram] .react-flow__node .diagram__kotak").length === 6, null, { timeout: 15000 });
+  await page.waitForTimeout(300);
+  const f = await page.evaluate(() => {
+    window.__frame.jalan = false;
+    return { ...window.__frame, akhir: document.querySelector("[data-peta-diagram]").checkVisibility({ visibilityProperty: true }) };
+  });
+  lapor(belum && f.total > 0 && f.salah === 0 && f.akhir, `beranda 375×667 tap Tahap 3 ${belum ? "sebelum" : "SESUDAH"} hydrate lalu gulir: ${f.total} frame, ${f.salah} frame diagram tahap lain${f.contoh ? ` (${f.contoh})` : ""}, ${f.kosong} frame kosong, akhir ${f.akhir ? "terlihat" : "tersembunyi"}`);
+  await ctx.close();
+}
 await browser.close();
 console.log(gagal ? `Fondasi diagram GAGAL (${gagal})` : "Diagram: statis tanpa JS, scroll tidak tertangkap, keyboard jalan, tanpa animasi saat reduced");
 process.exit(gagal ? 1 : 0);
