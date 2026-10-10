@@ -227,11 +227,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K1b · Batas percobaan login di satu tahap
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: 1.7 (`fitur-login.mdx` baris 83), 1.27 (`authentication.mdx` baris 62, 192), dan 1.29 (`idor-token-app.mdx` baris 67, 176, 184) menyebut tahap yang sama untuk batas percobaan login, sesuai PROPOSAL tabel keamanan (Tahap 2: brute force, rate limit per akun, lockout bertahap); rujukan `[[C4]]` (3.7, Tahap 3) tidak lagi disebut sebagai tempat batas itu lahir, atau disebut sebagai bahan lanjutan saja; `python3 tools/sinkron_cerita.py` dan gerbang lolos.
-- catatan: Dari K1. `plan/PROPOSAL.md` baris 686 menaruh brute force di Tahap 2 ("Perluas `c4-ratelimit`"); 1.29 menulis "[[C4]], Tahap 3".
+- catatan: Dari K1. `plan/PROPOSAL.md` baris 686 menaruh brute force di Tahap 2 ("Perluas `c4-ratelimit`"); 1.29 menulis "[[C4]], Tahap 3". Selesai 2026-10-10 (keputusan 244): 1.29 baris 67, 176, 184 kini menulis Tahap 2, bersama brute force; 1.7 dan 1.27 sudah Tahap 2; rujukan C4 dilepas.
 
 ### K1c · ADR 7 butir 4 dan RLS di ledger
 

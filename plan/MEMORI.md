@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · K1b sedang dikerjakan di branch `perbaikan/k1b-batas-login`: batas percobaan login disamakan ke Tahap 2 (PROPOSAL baris 686). 1.7 dan 1.27 sudah menulis Tahap 2; yang diubah hanya 1.29 `tahap-1/idor-token-app.mdx` baris 67, 176, 184 (`[[C4]]`, Tahap 3). File: halaman itu, ANTREAN, KEPUTUSAN 244, MEMORI, STATUS.
+2026-10-10 · K1b selesai di branch `perbaikan/k1b-batas-login` (keputusan 244, PR menunggu tinjauan pengatur, belum di-merge): 1.29 `tahap-1/idor-token-app.mdx` baris 67, 176, 184 kini menulis batas percobaan login di Tahap 2, bersama brute force (PROPOSAL baris 686); 1.7 dan 1.27 tidak berubah; rujukan C4 dilepas. Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
