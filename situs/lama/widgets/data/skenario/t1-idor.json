@@ -1,0 +1,119 @@
+{
+  "versi": 2,
+  "judul": "Satu koneksi database, dua request berurutan",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/b5-rls/output/rls.txt",
+    "fileVarian": "labs/b5-rls/output/rls.txt",
+    "catatan": "PostgreSQL 17 (lab b5-rls), role app_rekeningo dengan policy pemilik_saja, dijalankan dari schema bersih. Jalur utama: bagian 6. Ubah satu hal: bagian 7. Satu sesi psql mewakili satu koneksi di pool."
+  },
+  "pengantar": "Policy RLS membaca nomor akun peminta dari setting app.akun_id. Server memakai ulang koneksi database. Request Dimas selesai, lalu request Budi memakai koneksi yang sama lewat endpoint yang lupa mengisi app.akun_id. Setelah itu centang 'Ubah satu hal': identitas diisi set_config(..., true) di dalam transaction.",
+  "komponen": [
+    {
+      "id": "api",
+      "label": "Monolith API"
+    },
+    {
+      "id": "kon",
+      "label": "Koneksi #1 di pool"
+    },
+    {
+      "id": "db",
+      "label": "PostgreSQL + RLS"
+    }
+  ],
+  "layarAwal": {},
+  "predict": {
+    "q": "Request Budi tidak mengisi app.akun_id. Koneksinya baru saja dipakai request Dimas, yang mengisi identitas dengan SET biasa. Berapa baris tabel akun yang dilihat request Budi?",
+    "options": [
+      "0 baris, karena Budi tidak mengisi identitas",
+      "1 baris: akun Dimas",
+      "3 baris, karena policy tidak punya identitas"
+    ],
+    "answer": 1,
+    "varian": false,
+    "explain": "SET biasa berlaku sampai sesi koneksi berakhir. Koneksi kembali ke pool dengan app.akun_id = 417, jadi policy menyaring untuk Dimas, bukan untuk Budi. Rekaman lab bagian 6."
+  },
+  "langkah": [
+    {
+      "dari": "api",
+      "ke": "kon",
+      "judul": "Request Dimas mengisi identitas",
+      "kirim": "SET app.akun_id = '417';",
+      "jelas": "SET biasa berlaku untuk seluruh sesi koneksi, bukan hanya untuk request ini."
+    },
+    {
+      "dari": "kon",
+      "ke": "db",
+      "judul": "Policy menyaring untuk Dimas",
+      "kirim": "SELECT id, nama, saldo FROM akun ORDER BY id;\n→ 417 | Dimas | 250000",
+      "jelas": "Query tanpa WHERE pemilik. Policy pemilik_saja menambahkan syaratnya sendiri.",
+      "nada": "good"
+    },
+    {
+      "dari": "api",
+      "ke": "kon",
+      "judul": "Request selesai, koneksi kembali ke pool",
+      "kirim": "koneksi #1 → pool, tidak ditutup\napp.akun_id = '417' ikut tersimpan",
+      "jelas": "Pool memakai ulang koneksi supaya request berikutnya tidak membuka koneksi baru."
+    },
+    {
+      "dari": "api",
+      "ke": "kon",
+      "judul": "Request Budi, endpoint yang lupa mengisi identitas",
+      "kirim": "SELECT current_setting('app.akun_id', true) AS akun_id_terbaca,\n       id, nama, saldo FROM akun ORDER BY id;",
+      "jelas": "Tidak ada perintah untuk Budi. Policy membaca nilai yang masih tersimpan di koneksi."
+    },
+    {
+      "dari": "db",
+      "ke": "api",
+      "judul": "Request Budi membaca akun Dimas",
+      "kirim": "akun_id_terbaca 417\n→ 417 | Dimas | 250000",
+      "jelas": "Rekaman lab bagian 6. Pagar kedua tidak menolak; ia menjawab untuk orang yang salah.",
+      "nada": "warn"
+    }
+  ],
+  "varian": {
+    "label": "Identitas diisi set_config('app.akun_id', '417', true) di dalam transaction",
+    "mulai": 0,
+    "langkah": [
+      {
+        "dari": "api",
+        "ke": "kon",
+        "judul": "Request Dimas membuka transaction",
+        "kirim": "BEGIN;\nSELECT set_config('app.akun_id', '417', true);\n→ 417",
+        "jelas": "Argumen true berarti nilainya hanya berlaku sampai transaction ini selesai."
+      },
+      {
+        "dari": "kon",
+        "ke": "db",
+        "judul": "Policy menyaring untuk Dimas",
+        "kirim": "SELECT id, nama, saldo FROM akun ORDER BY id;\n→ 417 | Dimas | 250000",
+        "jelas": "Hasil untuk Dimas sama dengan jalur utama.",
+        "nada": "good"
+      },
+      {
+        "dari": "api",
+        "ke": "kon",
+        "judul": "COMMIT: identitas ikut selesai",
+        "kirim": "COMMIT;\napp.akun_id kembali ke nilai sesi: kosong",
+        "jelas": "Koneksi kembali ke pool tanpa membawa identitas Dimas."
+      },
+      {
+        "dari": "api",
+        "ke": "kon",
+        "judul": "Request Budi, endpoint yang sama lupanya",
+        "kirim": "SELECT current_setting('app.akun_id', true) AS akun_id_terbaca,\n       count(*) AS terlihat FROM akun;",
+        "jelas": "Perintahnya sama: tidak ada yang mengisi identitas Budi."
+      },
+      {
+        "dari": "db",
+        "ke": "api",
+        "judul": "0 baris: lupa berarti tidak melihat apa pun",
+        "kirim": "akun_id_terbaca ''\n→ terlihat 0",
+        "jelas": "Rekaman lab bagian 7. Kode yang lupa sekarang gagal tertutup: data tidak ditemukan, bukan data orang lain.",
+        "nada": "good"
+      }
+    ]
+  }
+}
