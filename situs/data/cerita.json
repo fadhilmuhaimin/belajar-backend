@@ -50,7 +50,7 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 249,
+        "menit": 251,
         "halaman": 29
       },
       "bagian": [
@@ -927,21 +927,21 @@
       "judul": "Authorization: siapa boleh apa",
       "tahap": 1,
       "topik": "Keamanan",
-      "path": "b-fondasi/b5-3-authorization.md",
+      "path": "tahap-1/authorization.md",
       "prasyarat": [
         "B5.1"
       ],
       "inti": true,
-      "masalah": "Budi bisa melihat saldo Ani lewat ID di URL",
+      "masalah": "Token Dimas sah, tapi server tidak bertanya data itu milik siapa",
       "ada": true,
       "jenis": "konsep",
       "bagian": 4,
       "peran": [
-        "backend"
+        "backend",
+        "security"
       ],
-      "lama": true,
       "nomor": "1.28",
-      "menit": 9
+      "menit": 11
     },
     {
       "id": "t1-idor",

@@ -1,0 +1,306 @@
+---
+title: "1.28 Authorization: siapa boleh apa"
+description: Login menjawab siapa yang bertanya. Sesudah itu service bertanya lagi di setiap request, sebelum menyentuh data, apakah data itu miliknya dan apakah perannya boleh melakukan aksi itu.
+---
+import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import authz from "../../../../data/diagram/t1-authz.json";
+import Snippet from "../../../components/Snippet.astro";
+import TabSet from "../../../components/TabSet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 8 menit · coba 3 menit · Prasyarat: [[B5.1]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Authorization menjawab pertanyaan kedua di setiap request: orang yang sudah dikenal ini boleh apa?
+
+<Rantai data={authz} ringkas />
+
+Di [[t1-m5]], login sudah benar, tapi tidak ada yang bertanya lebih jauh. Versi benar bertanya di service, sesudah token diperiksa dan sebelum data keluar. Ada dua bentuk pertanyaan: apakah data ini milik peminta, dan apakah peran peminta boleh melakukan aksi ini.
+
+Jawaban penolakannya juga berbeda. Data orang lain dijawab `404`, sama dengan data yang tidak ada, supaya keberadaannya tidak bocor. Aksi yang tidak boleh untuk perannya dijawab `403`, karena alamat top-up memang bukan rahasia.
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Token Dimas sah. Apakah itu berarti Dimas boleh membuka transaksi Budi ke Warung Ani?
+2. Kenapa transaksi orang lain dijawab `404`, tapi top-up oleh karyawan dijawab `403`?
+3. Tabel dengan RLS aktif tanpa satu pun policy: siapa yang bisa membaca isinya?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: sesudah login, service bertanya lagi apakah data yang diminta milik peminta.">
+
+Satu transaksi, dua peminta. Header dan jawaban di widget ini diambil dari rekaman lab `api-t1`.
+
+<WidgetLama nama="alur" src="data/skenario/t1-authz.json" />
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Token membuktikan siapa pengirim request, bukan apa yang boleh ia minta. Dimas memakai token sahnya sendiri di M5, dan server tetap menjawab saldo Warung Ani.
+
+Menyembunyikan tombol di app tidak menolong. Request bisa dikirim tanpa app, lewat proxy atau `curl`, dengan token yang sama. Kalau kamu pernah menulis `if (user.isAdmin)` di widget Flutter untuk menyembunyikan menu, itu keputusan tampilan, bukan authorization.
+
+OWASP menempatkan dua kegagalan ini di daftar risiko API 2023. Pemeriksaan pemilik yang hilang ada di peringkat pertama ([API1:2023](https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization)). Pemeriksaan peran yang hilang ada di peringkat kelima ([API5:2023](https://api-security.owasp.org/editions/2023/en/0xa5-broken-function-level-authorization)).
+
+### Cara kerjanya
+
+**1. Peminta selalu dari sesi.** Handler membaca akun pengirim dari sesi lewat `peminta(r)`, lalu meneruskannya ke service. Nomor di URL hanya menunjuk data yang diminta, tidak pernah menentukan siapa yang meminta.
+
+**2. Service bertanya pemilik sebelum data keluar.** Untuk transaksi, pemiliknya baru diketahui setelah barisnya dibaca. Service membandingkan peminta dengan pembayar dan penerima, lalu memutuskan:
+
+<Snippet file="labs/api-t1/internal/service/akun.go" lines="23:30" lang="go" title="labs/api-t1/internal/service/akun.go" />
+
+Rekaman lab dari database bersih. Transaksi yang sama dibuka Budi (pembayar), Ani (penerima), lalu Dimas:
+
+<Snippet file="labs/api-t1/output/authz.txt" lines="9:23" title="Rekaman lab: labs/api-t1/output/authz.txt" />
+
+**3. Setiap jenis data punya aturan pemilik sendiri.** Tidak ada satu aturan yang berlaku untuk semua endpoint:
+
+| Data | Pemiliknya | Pertanyaan di service |
+|---|---|---|
+| Akun dan riwayat, `/akun/{id}` | Pemilik akun itu | `peminta == id` |
+| Transaksi, `/transfers/{id}` | Pembayar dan penerima | `peminta == dari` atau `peminta == ke` |
+| Laporan, `/warung/{id}/laporan` | Warung itu | `peminta == warung` |
+
+Ringkasan rekaman: empat request yang sama dari lima peminta. Hanya statusnya yang ditampilkan:
+
+<Snippet file="labs/api-t1/output/authz.txt" lines="61:65" title="Rekaman lab: labs/api-t1/output/authz.txt" />
+
+Ani menerima uang Budi, jadi ia boleh membuka transaksi 1. Riwayat Budi tetap tertutup untuknya. Satu baris pertanyaan yang lupa ditulis di satu endpoint sudah cukup untuk mengulang M5.
+
+**4. Aksi khusus memeriksa peran.** Top-up hanya untuk akun berjenis `admin`. Service membaca jenis akun peminta dari database, bukan dari flag yang dikirim app:
+
+<Snippet file="labs/api-t1/internal/service/topup.go" lines="32:39" lang="go" title="labs/api-t1/internal/service/topup.go" />
+
+<Snippet file="labs/api-t1/output/authz.txt" lines="26:46" title="Rekaman lab: labs/api-t1/output/authz.txt" />
+
+Peran admin hanya memberi aksi top-up. Di ringkasan rekaman, admin mendapat `404` untuk akun 419, sama dengan Ani dan Dimas. OWASP menyebut prinsip ini least privilege: setiap peran hanya mendapat akses yang ia butuhkan ([OWASP: Authorization](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)).
+
+**5. Login diperiksa lebih dulu.** Tanpa token, `wajibLogin` menjawab `401` dan service tidak pernah jalan. Karena itu request top-up tanpa token mendapat `401`, bukan `403`:
+
+<Snippet file="labs/api-t1/output/authz.txt" lines="51:56" title="Rekaman lab: labs/api-t1/output/authz.txt" />
+
+RFC 9110 membedakan keduanya. `401` berarti request tidak membawa bukti login yang sah ([§15.5.2](https://www.rfc-editor.org/rfc/rfc9110.html#section-15.5.2)). `403` berarti server paham request-nya, tapi menolak menjalankannya ([§15.5.4](https://www.rfc-editor.org/rfc/rfc9110.html#section-15.5.4)).
+
+**6. `404` untuk data, `403` untuk peran.** RFC 9110 mengizinkan server menjawab `404` bila ingin menyembunyikan keberadaan resource yang terlarang ([§15.5.4](https://www.rfc-editor.org/rfc/rfc9110.html#section-15.5.4)). Untuk akun dan transaksi, keberadaan itu sendiri informasi: `403` untuk 418 memberi tahu Dimas bahwa akun 418 ada. Untuk top-up tidak ada yang disembunyikan, jadi `403` dengan pesan yang jelas lebih berguna bagi Budi.
+
+Pilihan ini dicatat sebagai ADR 7 di [[t1-idor]].
+
+**7. Row Level Security: pertanyaan yang sama di database.** RLS adalah fitur PostgreSQL yang menyaring baris tabel berdasarkan policy, apa pun bunyi query-nya ([PostgreSQL 17: Row Security Policies](https://www.postgresql.org/docs/17/ddl-rowsecurity.html)). Lab `b5-rls` memakai tabel akun yang sama. Policy-nya membaca nomor akun peminta dari setting `app.akun_id`, yang diisi aplikasi per request:
+
+<Snippet file="labs/b5-rls/rls.sql" region="policy" lang="sql" title="labs/b5-rls/rls.sql" />
+
+Role aplikasi menjalankan query untuk Dimas tanpa `WHERE` pemilik. Database tetap hanya mengembalikan baris 417:
+
+<Snippet file="labs/b5-rls/output/rls.txt" lines="11:36" title="Rekaman lab: labs/b5-rls/output/rls.txt" />
+
+Tiga hal dari rekaman ini, dicocokkan dengan dokumentasi PostgreSQL:
+
+- **Policy menyaring, tidak melempar error.** `UPDATE` ke akun Ani menghasilkan `UPDATE 0`. Kode yang memakai RLS harus memeriksa jumlah baris yang berubah.
+- **Tanpa identitas, tidak ada baris.** Sesudah `RESET`, `current_setting` mengembalikan teks kosong, bukan `NULL`, dan teks kosong tidak bisa jadi `bigint`. Karena itu policy membungkusnya dengan `nullif`, sehingga hasilnya nol baris, bukan error. Tabel ber-RLS tanpa policy sama sekali juga menolak semua baris (default deny).
+- **Superuser dan pemilik tabel melewati RLS.** Role `lab` melihat ketiga akun. Pemilik tabel juga melihat semuanya sampai tabel diberi `FORCE ROW LEVEL SECURITY`:
+
+<Snippet file="labs/b5-rls/output/rls.txt" lines="38:50" title="Rekaman lab: labs/b5-rls/output/rls.txt" />
+
+Lab `api-t1` v1 belum memakai RLS. Apakah RLS dipasang sebagai pagar kedua di belakang service diputuskan di [[t1-idor]].
+
+### Pilah: request ini dijawab apa?
+
+Delapan request dari rekaman `authz.txt`. Tebak dulu jawabannya, lalu cek.
+
+<WidgetLama nama="pilah" src="data/t1-authz-pilah.json" />
+
+### Di stack lain
+
+**Skenario:** Dimas meminta transaksi Budi, dan Budi mencoba top-up. Tab Go dijalankan di lab. Tab lain tidak dijalankan, hanya dicek ke dokumentasi.
+
+Yang sama di semua stack: peminta diambil dari sesi, dan pertanyaan diajukan di server sesudah login. Yang berbeda: di mana aturan ditulis, dan status apa yang keluar secara bawaan.
+
+<TabSet id="stack" labels={["Go","Laravel","Django","Dart (Serverpod)","Supabase"]}>
+<Fragment slot="t0">
+
+*Dijalankan: Go 1.27.1, PostgreSQL 17.11.*
+
+<Snippet file="labs/api-t1/internal/service/akun.go" lines="23:30" lang="go" title="labs/api-t1/internal/service/akun.go" />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** aturan ditulis sebagai kode biasa di service, satu fungsi per jenis data. Status dipilih di handler dari jenis error-nya.</p>
+
+</Fragment>
+<Fragment slot="t1">
+
+*Tidak dijalankan. Dicek ke [Laravel 13: Authorization](https://laravel.com/docs/13.x/authorization).*
+
+<Snippet lang="php" code={`class TransaksiPolicy
+{
+    public function view(User $user, Transaksi $t): Response
+    {
+        return in_array($user->akun_id, [$t->dari, $t->ke], true)
+            ? Response::allow()
+            : Response::denyAsNotFound();      // 404, bukan 403
+    }
+
+    public function topup(User $user): bool
+    {
+        return $user->jenis === 'admin';      // gagal: 403
+    }
+}
+
+Gate::authorize('view', $transaksi);         // di controller`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** aturan per model ditulis di class Policy. Penolakan bawaannya `403`; `Response::denyAsNotFound()` mengubahnya jadi `404`.</p>
+
+</Fragment>
+<Fragment slot="t2">
+
+*Tidak dijalankan. Dicek ke [Django 5.2: get_object_or_404](https://docs.djangoproject.com/en/5.2/topics/http/shortcuts/#get-object-or-404).*
+
+<Snippet lang="python" code={`from django.db.models import Q
+from django.shortcuts import get_object_or_404
+
+def lihat_transaksi(request, id):
+    akun = request.user.akun
+    milik = Transaksi.objects.filter(Q(dari=akun) | Q(ke=akun))
+    t = get_object_or_404(milik, pk=id)       # transaksi orang lain: 404
+    return JsonResponse({"id": t.id, "jumlah": t.jumlah})`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** aturan pemilik ditulis sebagai filter query. Transaksi orang lain tidak pernah terbaca, jadi otomatis `404`.</p>
+
+</Fragment>
+<Fragment slot="t3">
+
+*Tidak dijalankan. Dicek ke [Serverpod 4.0: Authentication](https://docs.serverpod.dev/concepts/authentication/basics).*
+
+<Snippet lang="dart" code={`class TopupEndpoint extends Endpoint {
+  @override
+  Set<Scope> get requiredScopes => {Scope.admin};   // tanpa scope: 403
+
+  Future<void> unggah(Session session, String csv) async { /* ... */ }
+}
+
+class TransaksiEndpoint extends Endpoint {
+  @override
+  bool get requireLogin => true;
+
+  Future<Transaksi> lihat(Session session, int id) async {
+    final peminta = session.authenticated!.userIdentifier;   // String
+    final t = await Transaksi.db.findById(session, id);
+    if (t == null || (t.dariUser != peminta && t.keUser != peminta)) {
+      throw TidakDitemukan();   // exception buatan sendiri
+    }
+    return t;
+  }
+}`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** peran diperiksa framework lewat `requiredScopes`, dan kekurangan scope dijawab `403`. Pemeriksaan pemilik tidak ada bawaannya, jadi ditulis di method seperti di Go.</p>
+
+</Fragment>
+<Fragment slot="t4">
+
+*Rekaman SQL di atas dijalankan di PostgreSQL 17.11. Bentuk Supabase dicek ke [Supabase: Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).*
+
+<Snippet lang="sql" code={`alter table transaksi enable row level security;
+
+create policy "pembayar atau penerima" on transaksi for select
+  using ((select auth.uid()) in (dari_user, ke_user));   -- kolom uuid user`} />
+
+<p class="bb-beda">**Yang berbeda di stack ini:** app membaca tabel langsung, jadi RLS satu-satunya pengaman. Supabase meminta RLS aktif di setiap tabel pada schema yang terekspos. Secret key melewati RLS bila request tidak membawa token user.</p>
+
+</Fragment>
+</TabSet>
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### Trade-off: di mana pertanyaan izin ditulis
+
+| Di mana | Kelebihan | Kekurangan | Cocok saat |
+|---|---|---|---|
+| Kode di service (Rekeningo v1) | Mudah dibaca dan dites; status dan pesan bebas dipilih | Harus ditulis di setiap method yang menerima ID | Satu backend, aturan sedikit |
+| Filter di query (`WHERE id = $1 AND pemilik = $2`) | Lupa cek berarti tidak ditemukan, bukan bocor | Aturan bisnis tersebar di banyak query di repo | Banyak query baca per pemilik |
+| RLS di database | Berlaku untuk setiap query, termasuk yang lupa | Gagal diam-diam (`UPDATE 0`); superuser dan pemilik tabel melewatinya | App membaca database langsung, atau sebagai pagar kedua |
+
+Rekeningo v1 punya tiga jenis akun dan lima endpoint ber-ID. Pertanyaan di service cukup terbaca untuk satu orang, dan test bisa memanggilnya tanpa HTTP. Keputusan lengkapnya, termasuk RLS sebagai pagar kedua, ada di ADR 7 di [[t1-idor]].
+
+### Sengaja belum dilakukan
+
+| Yang ditunda | Kenapa ditunda | Kapan dibuka lagi |
+|---|---|---|
+| RLS di lab `api-t1` | Pemeriksaan di service sudah menutup M5; pagar kedua butuh keputusan sendiri | ADR 7 di [[t1-idor]] |
+| Tabel peran dan izin | Tiga jenis akun cukup diwakili kolom `jenis` | Saat satu akun butuh lebih dari satu peran |
+| Test "token A meminta data B" di setiap endpoint ber-ID | Testing dibahas sebagai satu halaman | [[C1]] |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Minggu 6, Raka menambah `GET /transfers/{id}/struk`. Handler-nya memanggil repo langsung, tanpa lewat `LihatTransaksi`. Apa yang hilang?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Pertanyaan pemilik: apakah peminta pembayar atau penerima transaksi itu. Login tetap diperiksa `wajibLogin`, tapi siapa pun yang login bisa membaca struk transaksi orang lain dengan menebak nomornya. Itu M5 lagi, di endpoint baru.
+
+</details>
+
+**2.** Tombol Top-up tidak ada di app Budi. Kenapa server tetap harus memeriksa peran?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Budi bisa mengirim `POST /topup` tanpa app, dengan token sahnya sendiri. Server tidak bisa membedakan request dari tombol dan request buatan tangan. Di rekaman bagian C, service memeriksa jenis akun Budi dan menjawab `403`.
+
+</details>
+
+**3.** Di rekaman RLS, `UPDATE akun SET saldo = 0 WHERE id = 418` sebagai Dimas menghasilkan `UPDATE 0`. Kenapa bukan error, dan apa akibatnya untuk kode?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Policy menyaring baris yang terlihat. Bagi Dimas, baris 418 tidak ada, jadi `UPDATE` tidak menemukan apa pun untuk diubah. Kode yang memakai RLS harus memeriksa jumlah baris yang berubah, bukan hanya ada tidaknya error.
+
+</details>
+
+**4.** Ani boleh membuka transaksi 1, tapi tidak boleh membuka riwayat Budi. Padahal transaksi 1 ada di riwayat Budi. Kenapa?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Pemiliknya berbeda. Transaksi dimiliki pembayar dan penerimanya, sedangkan riwayat dimiliki pemilik akun. Riwayat Budi juga berisi pembayaran Budi ke warung lain, yang bukan urusan Ani.
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Setiap method service yang menerima ID menanyakan hubungan peminta dengan data itu.
+- [ ] Peminta dibaca dari sesi, bukan dari body, query, atau header yang diisi app.
+- [ ] Aksi khusus peran membaca peran dari database, bukan flag `isAdmin` dari request.
+- [ ] Data orang lain dan data yang tidak ada mendapat jawaban yang sama persis.
+- [ ] Ada test yang memakai token A untuk meminta data B, di setiap endpoint ber-ID.
+- [ ] Kalau memakai RLS: aplikasi tidak terhubung sebagai superuser atau pemilik tabel, dan `current_setting` dibungkus `nullif` sebelum di-cast.
+
+### Bacaan lanjut
+
+- [OWASP API Security 2023: API1 Broken Object Level Authorization](https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization) · [API5 Broken Function Level Authorization](https://api-security.owasp.org/editions/2023/en/0xa5-broken-function-level-authorization)
+- [OWASP: Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)
+- [RFC 9110 §15.5: 401, 403, 404](https://www.rfc-editor.org/rfc/rfc9110.html#section-15.5)
+- [PostgreSQL 17: Row Security Policies](https://www.postgresql.org/docs/17/ddl-rowsecurity.html)
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur","pilah"]} />
