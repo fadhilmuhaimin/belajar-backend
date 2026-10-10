@@ -73,7 +73,9 @@ OWASP kini menempatkan Argon2id sebagai pilihan pertama dan bcrypt untuk sistem 
 
 <Snippet file="labs/api-t1/internal/handler/handler.go" region="wajib-login" lang="go" title="labs/api-t1/internal/handler/handler.go" />
 
-Header `WWW-Authenticate: Bearer error="invalid_token"` mengikuti RFC 6750. Kode `invalid_token` berarti token kedaluwarsa, dicabut, atau rusak, dengan status 401 ([RFC 6750 §3.1](https://www.rfc-editor.org/rfc/rfc6750.html#section-3.1)). Akun pemilik sesi disimpan di context request, dan handler membacanya lewat `peminta(r)`, bukan dari URL.
+Header `WWW-Authenticate` mengikuti [RFC 6750 §3.1](https://www.rfc-editor.org/rfc/rfc6750.html#section-3.1), dan statusnya selalu 401. Request tanpa token sama sekali hanya mendapat `Bearer`, tanpa kode error. Token yang kedaluwarsa, dicabut, atau rusak mendapat `Bearer error="invalid_token"`. Dengan begitu app bisa membedakan token yang ditolak dari token yang lupa dikirim.
+
+Akun pemilik sesi disimpan di context request, dan handler membacanya lewat `peminta(r)`, bukan dari URL.
 
 <Snippet file="labs/api-t1/output/login.txt" lines="30:41" title="Rekaman lab: labs/api-t1/output/login.txt" />
 
