@@ -1202,9 +1202,178 @@ def _rekam_m6(tmp):
                "# Rekaman halaman sesudah 1.30 mulai dari keadaan ini: kolom jumlah, kode v1.\n")
     tulis("m6.txt")
 
+# 1.31 Deployment dan rollback (keputusan 247): image per commit, rollback = tag lama, satu container lewat Compose.
+DEPLOY = HERE / "deploy"
+DB_CONTAINER = DB.replace("127.0.0.1:54333", "db:5432")
+GIT_ENV = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1",
+               GIT_AUTHOR_NAME="Raka", GIT_AUTHOR_EMAIL="raka@lestari.example",
+               GIT_COMMITTER_NAME="Raka", GIT_COMMITTER_EMAIL="raka@lestari.example",
+               GIT_AUTHOR_DATE="2026-02-09T09:00:00+07:00", GIT_COMMITTER_DATE="2026-02-09T09:00:00+07:00")
+IMAGE = "ghcr.io/grup-lestari/rekeningo-api"   # nama fiktif; di lab image hanya dibangun lokal, tidak di-push
+BUG_RIWAYAT = ("internal/repo/riwayat.go", "WHERE t.dari = $1 OR t.ke = $1", "WHERE t.dari = $1 AND t.ke = $1")
+
+
+def git(repo, *arg):
+    return subprocess.run(["git", *arg], cwd=repo, env=GIT_ENV, capture_output=True, text=True, check=True).stdout
+
+
+def compose(tag, *arg, boleh_gagal=False):
+    env = dict(os.environ, COMPOSE_FILE="compose.yaml:compose.lab.yaml", DATABASE_URL=DB_CONTAINER)
+    env.pop("TAG", None)
+    if tag:
+        env["TAG"] = tag
+    r = subprocess.run(["docker", "compose", *arg], cwd=DEPLOY, env=env, capture_output=True, text=True)
+    if r.returncode and not boleh_gagal:
+        gagal(f"docker compose {' '.join(arg)}: {r.stderr}")
+    return r
+
+
+def hapus_image():
+    ada = subprocess.run(["docker", "image", "ls", IMAGE, "--format", "{{.Repository}}:{{.Tag}}"],
+                         capture_output=True, text=True).stdout.split()
+    if ada:
+        subprocess.run(["docker", "image", "rm", "-f", *ada], capture_output=True)
+
+
+def tunggu_menjawab():
+    """Lab menunggu container baru menjawab (401 tanpa token pun dihitung menjawab). Lama jedanya tidak direkam."""
+    for _ in range(150):
+        kode = subprocess.run(["curl", "-s", "-o", "/dev/null", "-m", "1", "-w", "%{http_code}", f"{URL}/warung"],
+                              capture_output=True, text=True).stdout
+        if kode not in ("", "000"):
+            return
+        time.sleep(0.1)
+    gagal("container tidak menjawab")
+
+
+def isi_riwayat(token):
+    r = subprocess.run(["curl", "-s", "-m", "2", "-w", "\n%{http_code}", "-H", f"Authorization: Bearer {token}",
+                        f"{URL}/akun/419/riwayat"], capture_output=True, text=True).stdout
+    badan, kode = r.rsplit("\n", 1)
+    if kode == "000":
+        return "tidak ada jawaban"
+    if kode != "200":
+        return kode
+    return f"200 · {len(json.loads(badan)['riwayat'])} transaksi"
+
+
+def image_ls():
+    tag = sorted(subprocess.run(["docker", "image", "ls", IMAGE, "--format", "{{.Repository}}:{{.Tag}}"],
+                                capture_output=True, text=True).stdout.split())
+    log.append(f"$ docker image ls {IMAGE} --format '{{{{.Repository}}}}:{{{{.Tag}}}}' | sort\n" + "".join(x + "\n" for x in tag))
+    return tag
+
+
+def image_container(label):
+    i = subprocess.run(["docker", "inspect", "--format", "{{.Image}}", "rekeningo-api-1"],
+                       capture_output=True, text=True, check=True).stdout.strip()
+    log.append(f"$ docker inspect --format '{{{{.Image}}}}' rekeningo-api-1\n{label}\n")
+    return i
+
+
+def rekam_deploy():
+    """1.31 Deployment dan rollback (keputusan 247)."""
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="api-t1-deploy-"))
+    try:
+        _rekam_deploy(tmp)
+    finally:
+        compose("x", "down", boleh_gagal=True)
+        hapus_image()
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def _rekam_deploy(tmp):
+    stop()
+    compose("x", "down", boleh_gagal=True)
+    hapus_image()
+    reset()
+    samarkan_hari_ini()
+    pastikan_bebas(PORT)
+    repo = tmp / "rekeningo"
+    repo.mkdir()
+    for nama in ("go.mod", "go.sum", "Dockerfile"):
+        shutil.copy2(HERE / nama, repo / nama)
+    for nama in ("cmd", "internal"):
+        shutil.copytree(HERE / nama, repo / nama)
+    log.append("# repo: salinan kode api-t1 di repo git sementara. Nama dan tanggal commit tetap, jadi hash commit sama di setiap rekaman.\n"
+               "# Kode v1 = keadaan sesudah 1.30: kolom jumlah, field jumlah. vps: Docker di mesin lab.\n"
+               "# lab: COMPOSE_FILE=compose.yaml:compose.lab.yaml; berkas kedua hanya menyambungkan container ke jaringan database lab.\n")
+
+    bagian("A. Satu commit, satu image: tag image = hash commit")
+    git(repo, "init", "-q", "-b", "main")
+    git(repo, "add", ".")
+    git(repo, "commit", "-q", "-m", "api-t1 v1")
+    v1 = git(repo, "rev-parse", "--short", "HEAD").strip()
+    f, lama, baru = BUG_RIWAYAT
+    teks = (repo / f).read_text()
+    harap(teks.count(lama), 1, f"bug latihan: '{lama}' di {f}")
+    (repo / f).write_text(teks.replace(lama, baru))
+    git(repo, "commit", "-q", "-am", "Saring riwayat per akun")
+    v2 = git(repo, "rev-parse", "--short", "HEAD").strip()
+    log.append(f"$ git log --oneline\n{git(repo, 'log', '--oneline')}")
+    log.append(f"# commit {v2} adalah latihan lab dengan bug buatan, bukan kejadian di cerita:\n#   {f}  {lama}  ->  {baru}\n")
+    for tag in (v1, v2):
+        git(repo, "checkout", "-q", tag)
+        r = subprocess.run(["docker", "build", "-q", "-t", f"{IMAGE}:{tag}", "."], cwd=repo, capture_output=True, text=True)
+        if r.returncode:
+            gagal("docker build: " + r.stderr[-3000:])
+        log.append(f"$ git checkout -q {tag} && docker build -q -t {IMAGE}:{tag} .   # keluaran build tidak direkam\n")
+    harap(image_ls(), sorted([f"{IMAGE}:{v1}", f"{IMAGE}:{v2}"]), "dua image, satu per commit")
+
+    bagian("B. Commit v1 berjalan; Budi membayar Warung Ani")
+    r = compose(None, "up", "-d", boleh_gagal=True)
+    harap(r.returncode != 0 and "TAG" in r.stderr, True, "tanpa TAG, compose menolak jalan")
+    log.append("$ docker compose up -d   # TAG lupa diisi\n" + r.stderr.strip() + "\n")
+    compose(v1, "up", "-d")
+    log.append(f"$ TAG={v1} docker compose up -d\n")
+    tunggu_menjawab()
+    topup_awal()
+    k = len(log)
+    budi = login("budi@lestari.example", "sementara-419", "<token sesi Budi>")
+    s, _ = curl("POST", "/transfers", json.dumps({"ke": 418, "jumlah": 25000}), token=budi)
+    harap(s, 201, "Budi bayar ke Warung Ani di v1")
+    del log[k:]
+    log.append("# persiapan: login Budi (419); Budi membayar Rp25.000 ke Warung Ani\n")
+    id_v1 = image_container(f"sha256:<id image {v1}>")
+    harap(id_v1, subprocess.run(["docker", "image", "inspect", "--format", "{{.Id}}", f"{IMAGE}:{v1}"],
+                                capture_output=True, text=True, check=True).stdout.strip(), "container menjalankan image v1")
+
+    bagian(f"C. Deploy commit {v2}: perintah yang sama, tag lain")
+    log.append("# prober: GET /akun/419/riwayat dari HP Budi; perintah dijalankan di antara dua putaran.\n"
+               "# Sesudah setiap up -d, lab menunggu container baru menjawab; lama jeda itu tidak diukur.\n")
+    log.append(f"{'putaran':<9}HP Budi\n")
+    hasil = []
+    def putaran(n):
+        for _ in range(n):
+            x = isi_riwayat(budi)
+            hasil.append(x)
+            log.append(f"{len(hasil):<9}{x}\n")
+            time.sleep(0.2)
+    putaran(2)
+    compose(v2, "up", "-d")
+    log.append(f"$ TAG={v2} docker compose up -d\n")
+    tunggu_menjawab()
+    putaran(2)
+    curl("GET", "/akun/419", token=budi)
+    harap(hasil, ["200 · 1 transaksi"] * 2 + ["200 · 0 transaksi"] * 2, "v2: riwayat kosong, status tetap 200")
+
+    bagian(f"D. Rollback: tag {v1} dijalankan lagi, tanpa build ulang")
+    compose(v1, "up", "-d")
+    log.append(f"$ TAG={v1} docker compose up -d   # rollback\n")
+    tunggu_menjawab()
+    log.append(f"{'putaran':<9}HP Budi\n")
+    putaran(2)
+    harap(hasil[4:], ["200 · 1 transaksi"] * 2, "rollback: riwayat kembali")
+    harap(image_container(f"sha256:<id image {v1}>"), id_v1, "rollback memakai image yang sama dengan bagian B")
+    log.append(f"# Image yang berjalan sama persis dengan bagian B. Image {v2} tetap ada untuk diperiksa:\n")
+    image_ls()
+    log.append(f"# Ringkasan 6 putaran HP Budi: 4 kali 1 transaksi ({v1}), 2 kali 0 transaksi ({v2}). Saldo Budi tidak berubah.\n"
+               "# Rollback ini hanya mengganti kode. Kalau commit baru juga mengubah skema, tag lama gagal seperti m6.txt bagian F.\n")
+    tulis("deploy.txt")
+
 
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5", "authz", "m6"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5", "authz", "m6", "deploy"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()

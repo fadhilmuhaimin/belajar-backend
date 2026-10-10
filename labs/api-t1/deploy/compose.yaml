@@ -1,0 +1,14 @@
+# Lab 1.31 · satu VPS, satu container API (keputusan 247).
+# Deploy dan rollback memakai perintah yang sama, hanya TAG yang berbeda:
+#   TAG=<hash commit> docker compose up -d
+name: rekeningo
+services:
+  api:
+    image: ghcr.io/grup-lestari/rekeningo-api:${TAG:?isi TAG dengan hash commit yang mau dijalankan}
+    command: ["-addr", "0.0.0.0:8080"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL belum diisi}
+      TZ: Asia/Jakarta
+    ports:
+      - "127.0.0.1:18083:8080"
+    restart: unless-stopped

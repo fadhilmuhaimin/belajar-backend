@@ -1,0 +1,53 @@
+# repo: salinan kode api-t1 di repo git sementara. Nama dan tanggal commit tetap, jadi hash commit sama di setiap rekaman.
+# Kode v1 = keadaan sesudah 1.30: kolom jumlah, field jumlah. vps: Docker di mesin lab.
+# lab: COMPOSE_FILE=compose.yaml:compose.lab.yaml; berkas kedua hanya menyambungkan container ke jaringan database lab.
+
+# --- A. Satu commit, satu image: tag image = hash commit ---
+$ git log --oneline
+f5ea0b4 Saring riwayat per akun
+390ff47 api-t1 v1
+# commit f5ea0b4 adalah latihan lab dengan bug buatan, bukan kejadian di cerita:
+#   internal/repo/riwayat.go  WHERE t.dari = $1 OR t.ke = $1  ->  WHERE t.dari = $1 AND t.ke = $1
+$ git checkout -q 390ff47 && docker build -q -t ghcr.io/grup-lestari/rekeningo-api:390ff47 .   # keluaran build tidak direkam
+$ git checkout -q f5ea0b4 && docker build -q -t ghcr.io/grup-lestari/rekeningo-api:f5ea0b4 .   # keluaran build tidak direkam
+$ docker image ls ghcr.io/grup-lestari/rekeningo-api --format '{{.Repository}}:{{.Tag}}' | sort
+ghcr.io/grup-lestari/rekeningo-api:390ff47
+ghcr.io/grup-lestari/rekeningo-api:f5ea0b4
+
+# --- B. Commit v1 berjalan; Budi membayar Warung Ani ---
+$ docker compose up -d   # TAG lupa diisi
+error while interpolating services.api.image: required variable TAG is missing a value: isi TAG dengan hash commit yang mau dijalankan
+$ TAG=390ff47 docker compose up -d
+# persiapan: admin top-up minggu 1, 100 karyawan x Rp250.000 (rinciannya di topup.txt)
+# persiapan: login Budi (419); Budi membayar Rp25.000 ke Warung Ani
+$ docker inspect --format '{{.Image}}' rekeningo-api-1
+sha256:<id image 390ff47>
+
+# --- C. Deploy commit f5ea0b4: perintah yang sama, tag lain ---
+# prober: GET /akun/419/riwayat dari HP Budi; perintah dijalankan di antara dua putaran.
+# Sesudah setiap up -d, lab menunggu container baru menjawab; lama jeda itu tidak diukur.
+putaran  HP Budi
+1        200 · 1 transaksi
+2        200 · 1 transaksi
+$ TAG=f5ea0b4 docker compose up -d
+3        200 · 0 transaksi
+4        200 · 0 transaksi
+$ curl -i -X GET '/akun/419' -H 'Authorization: Bearer <token sesi Budi>'
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":419,"jenis":"karyawan","nama":"Budi","saldo":225000}
+
+# --- D. Rollback: tag 390ff47 dijalankan lagi, tanpa build ulang ---
+$ TAG=390ff47 docker compose up -d   # rollback
+putaran  HP Budi
+5        200 · 1 transaksi
+6        200 · 1 transaksi
+$ docker inspect --format '{{.Image}}' rekeningo-api-1
+sha256:<id image 390ff47>
+# Image yang berjalan sama persis dengan bagian B. Image f5ea0b4 tetap ada untuk diperiksa:
+$ docker image ls ghcr.io/grup-lestari/rekeningo-api --format '{{.Repository}}:{{.Tag}}' | sort
+ghcr.io/grup-lestari/rekeningo-api:390ff47
+ghcr.io/grup-lestari/rekeningo-api:f5ea0b4
+# Ringkasan 6 putaran HP Budi: 4 kali 1 transaksi (390ff47), 2 kali 0 transaksi (f5ea0b4). Saldo Budi tidak berubah.
+# Rollback ini hanya mengganti kode. Kalau commit baru juga mengubah skema, tag lama gagal seperti m6.txt bagian F.

@@ -1,0 +1,31 @@
+# Lab 1.31 · CI pertama repo Rekeningo (keputusan 247). Contoh berkas; tidak dijalankan di repo panduan ini.
+# Setiap push ke main: periksa kode, lalu image bertag hash commit dikirim ke registry.
+# Deploy tetap satu perintah di VPS: TAG=<hash commit> docker compose up -d
+name: ci
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  packages: write
+jobs:
+  periksa-dan-image:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go run github.com/securego/gosec/v2/cmd/gosec@v2.29.0 -include=G201,G202 ./...
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v7
+        with:
+          push: true
+          # Nama image wajib huruf kecil. github.sha = hash commit penuh yang di-push.
+          tags: ghcr.io/grup-lestari/rekeningo-api:${{ github.sha }}
