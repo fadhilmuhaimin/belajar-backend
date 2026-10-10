@@ -164,11 +164,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### I5a · Blok: buka/tutup dengan layout animation
 
 - jenis: interaksi
-- status: dikerjakan
-- percobaan: 0
+- status: selesai
+- percobaan: 1
 - bergantung: I3
 - selesai bila: buka/tutup blok memakai layout animation dari fondasi gerak, menggantikan transisi CSS; tangkapan sebelum/sesudah; butir I6.
-- catatan: -
+- catatan: Selesai 2026-10-10 (keputusan 238). `situs/src/gerak/lipat.ts` (`animate` mini Motion, token, tanpa React) dipakai `Blok.astro`; transisi CSS `blok-muncul` dihapus; `ukur-gerak.mjs` memeriksa Blok (frame pertama, reduced, disela, tanpa JS, axe). `layar.mjs` identik; 28 halaman ber-Blok +2.711 B gzip.
 
 ### 1.29 · Keamanan 2: IDOR, enumerasi, token di app + ADR 7–8
 

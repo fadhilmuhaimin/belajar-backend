@@ -43,7 +43,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · I5a Blok buka/tutup dengan gerak (branch `interaksi/i5a`). Rencana: (1) ukur sebelum di build main: `layar.mjs`, sidik JS (`tmp/sidik_dist.py`), tangkapan frame sesudah klik; (2) `situs/src/gerak/lipat.ts` (Motion `animate` dari token, rentang tinggi murni + Vitest), `Blok.astro` memakainya, transisi CSS `blok-muncul` di `tema.css` dihapus; (3) `ukur-gerak.mjs` memeriksa Blok (gerak tanpa reduced, frame pertama penuh dengan reduced, tanpa JS tetap lipat); (4) ukur sesudah, AUDIT-TAMPILAN bagian 7, KEPUTUSAN 238, ANTREAN, STATUS. Berikutnya: lanjutkan langkah yang belum dari daftar ini.
+2026-10-10 · I5a selesai di PR (keputusan 238), branch `interaksi/i5a`, belum di-merge: blok lipat memakai `situs/src/gerak/lipat.ts` (`animate` dari `motion/mini` dengan token; buka `lipat(el, true)`, buka/tutup dari klik `alihkan(el)`, sebelum mengubah `open` langsung panggil `hentikan(el)`). Uji tanpa gambar: `node situs/tangkapan/gerak-blok.mjs <url> <nama> [lebar tinggi skema]` (frame per rAF) dan `uji-blok.mjs <url>` (Berikutnya, Enter/Spasi, #); tangkapan/ tidak di-commit. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 
@@ -60,3 +60,5 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - Widget lama alur diuji tanpa melihat gambar: `node situs/tangkapan/uji-alur.mjs <url>` (tangkapan/ di-.gitignore, jadi skrip ditulis ulang bila hilang) menekan tebakan, Berikutnya, dan varian, lalu menghitung error konsol.
 - Merge ditolak pengaman: berhenti, laporkan di baris pertama, jangan memulai halaman berikutnya di atas PR yang belum di-merge.
 - Mode dontAsk/auto menolak: perintah majemuk dengan `cd`, heredoc, loop shell, awalan env (`AXE=...`), diff `<(...)`, pipa ke `gzip`/`wc`, mengubah `.claude/settings.json`; pakai skrip di `tmp/` dan path relatif.
+- Ukur konteks sesi pengatur 1.28 (tools/ukur_konteks.py pada transcript subagen): awal 65–66k (loop lama 94–101k), puncak pelaksana 279k, 24,9 juta token diproses, 86% di atas 150k; peninjau 98–176k. Pelaksana wajib serah-terima di ±120k (PROTOKOL k.4).
+- Animasi CSS yang dipicu event `toggle` (async) mulai satu sampai dua frame sesudah `<details>` terbuka: isi penuh sempat berkedip. Ukur frame per rAF sesudah klik sungguhan (`page.click`, bukan `el.click()`, yang tidak mengirim pointerdown).
