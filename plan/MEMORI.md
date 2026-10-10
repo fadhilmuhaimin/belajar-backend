@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.27 Authentication selesai (keputusan 236): `tahap-1/authentication.mdx`, Rantai + alur `t1-authn`. Halaman lama B5.3/C4/F2 masih merujuk JWT 15 menit dari B5.1 lama; saat 1.28/1.29 ditulis, pakai sesi acak (ADR 8). Berikutnya: `python3 tools/antrean.py berikut` (1.28).
+2026-10-10 · 1.28 Authorization dikerjakan di branch `tahap-1/authorization`. Langkah: baca naskah 1.28 dan B5.3 lama; cek rekaman lab api-t1 (cek pemilik di service, sesi acak dari `login.txt`, bukan JWT) dan b5-rls dari database bersih; tulis `tahap-1/authorization.mdx` lima blok dengan alur dan pilah; hapus `b-fondasi/b5-3-authorization.mdx` dan data widget lamanya; registry tanpa `lama`, `alat/indeks-topik.mdx`, `sinkron_cerita.py`. File: `situs/src/content/docs/tahap-1/authorization.mdx`, `situs/data/cerita.json`, data widget alur/pilah, KEPUTUSAN, STATUS, ANTREAN, MEMORI.
 
 ## Pelajaran
 

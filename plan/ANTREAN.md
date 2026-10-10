@@ -155,7 +155,7 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.28 · Authorization
 
 - jenis: konten
-- status: antre
+- status: dikerjakan
 - percobaan: 0
 - bergantung: -
 - selesai bila: B5.3 ditulis ulang ke `tahap-1/` dengan lima blok, widget alur dan pilah, lab api-t1 (cek pemilik di service) dan b5-rls; tanpa Snippet `api-t1-lama`; registry tanpa `lama`.
