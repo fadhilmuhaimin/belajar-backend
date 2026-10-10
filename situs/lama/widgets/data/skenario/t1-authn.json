@@ -1,0 +1,144 @@
+{
+  "versi": 2,
+  "judul": "Satu request, satu pertanyaan: siapa kamu?",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/api-t1/output/login.txt",
+    "fileVarian": "labs/api-t1/output/login.txt",
+    "catatan": "Server Go 1.27 (labs/api-t1) + PostgreSQL 17, direkam dengan curl -i dari database bersih. Jalur utama: bagian D. Ubah satu hal: bagian E (sesudah logout). Token acak disamarkan di rekaman."
+  },
+  "pengantar": "Budi sudah login. Ikuti satu request ke saldonya melewati pemeriksaan sesi. Setelah itu centang 'Ubah satu hal': Budi menekan Keluar, lalu token yang sama dikirim lagi.",
+  "komponen": [
+    { "id": "app", "label": "HP Budi" },
+    { "id": "api", "label": "Monolith API", "lapisan": ["handler", "service", "repo"] },
+    { "id": "db", "label": "PostgreSQL" }
+  ],
+  "layarAwal": {
+    "hp": {
+      "judul": "Rekeningo",
+      "waktu": "Senin 08.00",
+      "isi": [
+        { "jenis": "baris", "kiri": "Masuk sebagai", "kanan": "Budi" },
+        { "jenis": "tombol", "teks": "Lihat saldo" }
+      ]
+    }
+  },
+  "predict": {
+    "q": "Nanti kamu akan mengubah satu hal: Budi menekan Keluar, lalu HP-nya mengirim token yang sama. Di langkah mana server tahu token itu tidak berlaku lagi?",
+    "options": [
+      "Di handler, saat membaca header Authorization",
+      "Di repo, saat tabel sesi tidak punya baris untuk hash token itu",
+      "Tidak pernah; token yang sudah terbit berlaku sampai 8 jam"
+    ],
+    "answer": 1,
+    "varian": true,
+    "explain": "Header-nya sama persis, jadi handler tidak bisa membedakannya. Logout menghapus baris sesi, sehingga query ke tabel sesi tidak menemukan apa pun dan server menjawab 401. Rekaman lab bagian E."
+  },
+  "langkah": [
+    {
+      "dari": "app",
+      "ke": "api",
+      "lapisan": "handler",
+      "judul": "HP mengirim token, bukan password",
+      "kirim": "GET /akun/419\nAuthorization: Bearer <token sesi Budi>",
+      "jelas": "Token didapat saat login. Interceptor di app menambahkannya ke setiap request.",
+      "layar": {
+        "hp": {
+          "judul": "Rekeningo",
+          "waktu": "Senin 08.00",
+          "isi": [{ "jenis": "proses", "teks": "Memuat saldo..." }]
+        }
+      }
+    },
+    {
+      "dari": "api",
+      "lapisan": "handler",
+      "judul": "wajibLogin membaca header",
+      "kirim": "strings.CutPrefix(Authorization, \"Bearer \")\n→ token 64 karakter hex",
+      "jelas": "Satu fungsi membungkus semua endpoint yang butuh login. Handler saldo tidak memeriksa token sendiri."
+    },
+    {
+      "dari": "api",
+      "lapisan": "service",
+      "judul": "Service menghitung hash token",
+      "kirim": "SHA-256(token) → hash yang dicari",
+      "jelas": "Database tidak pernah menyimpan token asli. Yang dicari adalah hash-nya."
+    },
+    {
+      "dari": "api",
+      "ke": "db",
+      "lapisan": "repo",
+      "judul": "Repo mencari sesi yang masih berlaku",
+      "kirim": "SELECT akun_id FROM sesi\nWHERE token_hash = $1 AND kedaluwarsa > $2\n→ 419",
+      "jelas": "Satu baris ditemukan: sesi milik akun 419 dan belum lewat 8 jam.",
+      "nada": "good"
+    },
+    {
+      "dari": "api",
+      "lapisan": "handler",
+      "judul": "Peminta = 419",
+      "kirim": "context: peminta = 419\nlihatAkun(w, r) dijalankan",
+      "jelas": "Mulai sini server tahu siapa yang bertanya. Boleh tidaknya Budi membuka akun 419 adalah pertanyaan lain: authorization."
+    },
+    {
+      "dari": "api",
+      "ke": "app",
+      "lapisan": "handler",
+      "judul": "200: saldo Budi",
+      "kirim": "200 OK\n{\"id\":419,\"jenis\":\"karyawan\",\"nama\":\"Budi\",\"saldo\":0}",
+      "jelas": "Rekaman lab bagian D. Saldo masih 0 karena tunjangan minggu ini belum diisi.",
+      "nada": "good",
+      "layar": {
+        "hp": {
+          "judul": "Rekeningo",
+          "waktu": "Senin 08.00",
+          "saldo": 0,
+          "saldoLabel": "Saldo Budi",
+          "isi": [{ "jenis": "baris", "kiri": "Jawaban", "kanan": "200" }]
+        }
+      }
+    }
+  ],
+  "varian": {
+    "label": "Budi menekan Keluar dulu, lalu token yang sama dikirim lagi",
+    "mulai": 3,
+    "langkah": [
+      {
+        "dari": "api",
+        "ke": "db",
+        "lapisan": "repo",
+        "judul": "Tabel sesi tidak punya baris itu",
+        "kirim": "-- sebelumnya: POST /logout → 204, DELETE FROM sesi WHERE token_hash = $1\nSELECT akun_id FROM sesi\nWHERE token_hash = $1 AND kedaluwarsa > $2\n→ 0 baris",
+        "jelas": "Header-nya sama persis dengan tadi. Bedanya hanya di database: logout sudah menghapus barisnya.",
+        "nada": "warn"
+      },
+      {
+        "dari": "api",
+        "lapisan": "handler",
+        "judul": "wajibLogin berhenti di sini",
+        "kirim": "Periksa → ErrSesiTidakSah\nlihatAkun tidak pernah dijalankan",
+        "jelas": "Handler saldo tidak tahu ada request ini. Pemeriksaan di satu tempat membuat semua endpoint ikut menolak."
+      },
+      {
+        "dari": "api",
+        "ke": "app",
+        "lapisan": "handler",
+        "judul": "401: sesi sudah berakhir",
+        "kirim": "401 Unauthorized\nWWW-Authenticate: Bearer error=\"invalid_token\"\n{\"type\":\"/problems/belum-login\",\"title\":\"Belum login atau sesi sudah berakhir\",\"status\":401}",
+        "jelas": "Rekaman lab bagian E. App membaca 401 lalu membuka layar login lagi.",
+        "nada": "warn",
+        "layar": {
+          "hp": {
+            "judul": "Masuk",
+            "waktu": "Senin 08.01",
+            "nada": "warn",
+            "isi": [
+              { "jenis": "baris", "kiri": "Jawaban", "kanan": "401", "nada": "warn" },
+              { "jenis": "tombol", "teks": "Masuk lagi" }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -70,7 +70,7 @@ window.ISTILAH = {
   "n": "1.27 Authentication",
   "s": "istilah-authentication",
   "t": "Authentication",
-  "u": "b-fondasi/b5-1-authentication/"
+  "u": "tahap-1/authentication/"
  },
  "Authentication": {
   "b": "B5.1",
@@ -78,7 +78,7 @@ window.ISTILAH = {
   "n": "1.27 Authentication",
   "s": "istilah-authentication",
   "t": "Authentication",
-  "u": "b-fondasi/b5-1-authentication/"
+  "u": "tahap-1/authentication/"
  },
  "Authorization": {
   "b": "B5.3",
@@ -350,7 +350,7 @@ window.ISTILAH = {
   "n": "1.27 Authentication",
   "s": "istilah-jwt",
   "t": "JWT (JSON Web Token)",
-  "u": "b-fondasi/b5-1-authentication/"
+  "u": "tahap-1/authentication/"
  },
  "JWT": {
   "b": "B5.1",
@@ -358,7 +358,7 @@ window.ISTILAH = {
   "n": "1.27 Authentication",
   "s": "istilah-jwt",
   "t": "JWT (JSON Web Token)",
-  "u": "b-fondasi/b5-1-authentication/"
+  "u": "tahap-1/authentication/"
  },
  "LSN": {
   "b": "D3",
@@ -862,7 +862,7 @@ window.ISTILAH = {
   "n": "1.27 Authentication",
   "s": "istilah-signature",
   "t": "Signature",
-  "u": "b-fondasi/b5-1-authentication/"
+  "u": "tahap-1/authentication/"
  },
  "Signed URL": {
   "b": "B11.2",
@@ -950,7 +950,7 @@ window.ISTILAH = {
   "n": "1.27 Authentication",
   "s": "istilah-token",
   "t": "Token",
-  "u": "b-fondasi/b5-1-authentication/"
+  "u": "tahap-1/authentication/"
  },
  "Token bucket": {
   "b": "C4",
@@ -1038,7 +1038,7 @@ window.ISTILAH = {
   "n": "1.27 Authentication",
   "s": "istilah-authentication",
   "t": "Authentication",
-  "u": "b-fondasi/b5-1-authentication/"
+  "u": "tahap-1/authentication/"
  },
  "authentication": {
   "b": "B5.1",
@@ -1046,7 +1046,7 @@ window.ISTILAH = {
   "n": "1.27 Authentication",
   "s": "istilah-authentication",
   "t": "Authentication",
-  "u": "b-fondasi/b5-1-authentication/"
+  "u": "tahap-1/authentication/"
  },
  "authorization": {
   "b": "B5.3",
@@ -1598,7 +1598,7 @@ window.ISTILAH = {
   "n": "1.27 Authentication",
   "s": "istilah-signature",
   "t": "Signature",
-  "u": "b-fondasi/b5-1-authentication/"
+  "u": "tahap-1/authentication/"
  },
  "snapshot": {
   "b": "B3.3",
@@ -1662,7 +1662,7 @@ window.ISTILAH = {
   "n": "1.27 Authentication",
   "s": "istilah-token",
   "t": "Token",
-  "u": "b-fondasi/b5-1-authentication/"
+  "u": "tahap-1/authentication/"
  },
  "token bucket": {
   "b": "C4",
