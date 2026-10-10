@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1c selesai di branch `perbaikan/k1c-adr7-rls-ledger` (keputusan 246, PR menunggu tinjauan pengatur, belum di-merge): butir 4 ADR 7 di 1.29 jadi policy per perintah (`SELECT` pemilik, entri dua sisi lewat fungsi `bayar` `SECURITY DEFINER` milik role penulis); Inti, Cara kerjanya, Yang merevisinya nanti, Sengaja belum dilakukan, dan checklist disamakan; lab `b5-rls` bagian 9–10 di rekaman baris 110–181. Berikutnya: python3 tools/antrean.py berikut
+2026-10-11 · 1.31 Deployment dan rollback + ADR 9, branch `tahap-1/deployment-rollback`. Rencana: (1) lab `api-t1`: Dockerfile + `deploy/compose.yaml` + `rekam_deploy` (dua commit di repo git sementara, image bertag commit, deploy commit latihan dengan bug riwayat, rollback = tag lama), rekaman `output/deploy.txt`, contoh workflow CI `deploy/ci.yml`; (2) halaman `tahap-1/deployment-rollback.mdx` lima blok, Rantai ringkas, alur `t1-deploy.json`, ADR 9; hapus C3 lama + `c3-deploy.json`; registry, indeks-topik, sinkron; (3) KEPUTUSAN, STATUS, ANTREAN, MEMORI; gerbang; PR tanpa merge.
 
 ## Pelajaran
 
