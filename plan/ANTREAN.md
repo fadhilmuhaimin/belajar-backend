@@ -89,6 +89,15 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - selesai bila: ADR baru di KEPUTUSAN dengan versi bun stabil terbaru dicek ke sumber resmi hari itu; `bun install` di `situs/` menghasilkan `bun.lock`, `package-lock.json` dihapus, `bun.lock` tidak lagi di `.gitignore`; CI memakai `oven-sh/setup-bun` dengan versi dipin dan `bun install --frozen-lockfile`; build, Vitest, Playwright, dan `tools/cek_situs.sh` tetap jalan; build lokal dan CI menghasilkan halaman yang sama; README menyebut perintah bun; butir I6.
 - catatan: Keputusan 225. bun 1.4.2; dist npm dan bun identik (HTML/JS/CSS); perintah `bun run --cwd situs <skrip>` (bukan `bun --cwd situs run`, yang diam-diam tidak menjalankan apa-apa). `.devcontainer/postCreate.sh` belum diubah (izin ditolak), tercatat di MEMORI "Perlu dicek pemilik".
 
+### K0f · Margin layar pertama Peta cerita di desktop
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: `/cerita/peta/` di 1366×657 kembali punya margin layar pertama ≥ 20 px (`layar.mjs` tanpa "margin tipis"); penyebab turunnya dari 20 px (gerbang #132) ke 14 px (gerbang #139) ditulis di keputusan; halaman lain tidak berubah (dibandingkan dengan keluaran `layar.mjs` sebelumnya).
+- catatan: Dari laporan pagi 2026-10-10. Di tangkapan, judul kartu "Tahap 1 · Uji coba Gedung A" patah dengan "A" sendirian; kandidat penyebab: `p.meta` K0d (#136). Bukti `tmp/laporan-pagi/cerita_peta-desktop-dark.png`.
+
 ### I2 · Pasang motion dan @xyflow/react
 
 - jenis: interaksi
