@@ -92,9 +92,11 @@ Image lama hanya menolong selama skema masih cocok dengan kode lama. Aturan migr
 
 <Snippet file="labs/api-t1/deploy/ci.yml" lang="yaml" title="labs/api-t1/deploy/ci.yml" />
 
-File ini contoh untuk repo Rekeningo dan tidak dijalankan di repo panduan ini. Versi setiap action dicek ke halaman rilisnya pada 2026-10-11. `github.sha` berisi hash penuh commit yang di-push ([docs.github.com](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts)); lab memakai 7 karakter pertama supaya terbaca.
+File ini contoh untuk repo Rekeningo dan tidak dijalankan di repo panduan ini. Versi setiap action dicek ke halaman rilisnya pada 2026-10-11. `github.sha` berisi hash penuh commit yang di-push, dan context `github` tidak punya versi pendeknya ([docs.github.com](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts)). Karena itu satu langkah menyimpan 7 karakter pertama ke variabel `TAG`, sama dengan tag di lab.
 
 Nama image di registry harus huruf kecil, karena aturan nama image OCI hanya menerima `[a-z0-9]` dan pemisah ([OCI distribution-spec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md)). Login ke registry memakai `GITHUB_TOKEN` bawaan workflow dengan izin `packages: write` ([docs.github.com](https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions)). Deploy tetap satu perintah di VPS, dijalankan Raka sesudah CI hijau.
+
+Image yang pertama di-push ke GHCR bersifat privat, jadi VPS perlu `docker login ghcr.io` dengan token yang punya izin `read:packages` sebelum bisa menarik image ([docs.github.com](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)). Token itu secret, dan tempat menyimpannya dibahas di [[t1-m7]]. Lab membangun image di mesin yang sama, jadi langkah tarik dari registry tidak direkam.
 
 ### Infra Tahap 1: satu VPS dan Compose
 
@@ -115,7 +117,7 @@ Yang sama di semua stack: artefak dibangun sekali, diberi versi, dan disimpan; r
 | Laravel | Kode dan `vendor` di image PHP, biasanya dengan web server di depannya ([Laravel: Deployment](https://laravel.com/docs/12.x/deployment)) |
 | Django | Kode dan paket Python, dijalankan server WSGI atau ASGI ([Django: Deployment](https://docs.djangoproject.com/en/5.2/howto/deployment/)) |
 | Spring | File JAR di image JVM ([Spring Boot: Container Images](https://docs.spring.io/spring-boot/reference/packaging/container-images/index.html)) |
-| Dart (Serverpod) | Server Dart di image container [perlu verifikasi] |
+| Dart (Serverpod) | Binary hasil `dart build cli` di image Alpine, dibangun dua tahap seperti lab ([Serverpod: template Dockerfile](https://github.com/serverpod/serverpod/blob/main/templates/serverpod_templates/projectname_server/Dockerfile)) |
 | Supabase | Tanpa server sendiri; yang di-deploy migration dan Edge Function ([Supabase: Deployment](https://supabase.com/docs/guides/deployment)) |
 
 Polanya sama dengan nomor build di `pubspec.yaml`. Setiap rilis app punya nomornya sendiri, dan rilis lama tidak dibangun ulang untuk dipasang lagi.
@@ -132,7 +134,7 @@ Polanya sama dengan nomor build di `pubspec.yaml`. Setiap rilis app punya nomorn
 |---|---|---|
 | `git pull` lalu build di VPS | Tanpa registry dan tanpa Docker | Hasil build bergantung pada versi Go di VPS; rollback berarti build ulang |
 | Binary per commit di folder `releases/<hash>`, dipilih lewat symlink | Tanpa alat baru; rollback berarti memindah symlink | Skrip simpan, pindah, dan restart ditulis sendiri; build tetap dari laptop |
-| **Image bertag hash commit, dibangun CI, dijalankan Compose** | Artefak yang sama dari CI sampai VPS; rollback satu perintah; tag menunjuk commit | Docker dan registry masuk infra; image lama memakan disk; ada jeda saat container diganti |
+| **Image bertag hash commit, dibangun CI, dijalankan Compose** | Artefak yang sama dari CI sampai VPS; rollback satu perintah; tag menunjuk commit | Docker dan registry masuk infra; VPS menyimpan token baca registry; image lama memakan disk; ada jeda saat container diganti |
 | Orkestrator atau platform container terkelola | Rolling deploy dan rollback bawaan | Biaya belajar dan operasional untuk satu orang, pada 0,14 request per detik |
 
 **Yang dipilih.**
@@ -168,7 +170,7 @@ Polanya sama dengan nomor build di `pubspec.yaml`. Setiap rilis app punya nomorn
 
 ### Cek diri
 
-**1.** Raka menjalankan `TAG=390ff47 docker compose up -d` untuk rollback. Container menyala, tapi riwayat menjawab `500` dengan `column t.jumlah does not exist`. Apa yang terjadi?
+**1.** Kamu menjalankan `TAG=390ff47 docker compose up -d` untuk rollback. Container menyala, tapi riwayat menjawab `500`, dan log server mencatat `column t.jumlah does not exist`. Apa yang terjadi?
 
 <details class="success">
 <summary>Jawaban</summary>
@@ -201,7 +203,7 @@ Belum ada tes yang memanggil riwayat dan memeriksa isinya. CI hanya menjalankan 
 - [ ] Compose menolak jalan tanpa tag (`${TAG:?...}`), bukan memakai nilai bawaan.
 - [ ] URL database dan password tidak ditulis di Dockerfile, `compose.yaml`, atau workflow.
 - [ ] Migration di deploy ini tetap cocok dengan image sebelumnya.
-- [ ] Workflow menjalankan tes sebelum push image, dan setiap action memakai versi tetap (`@v7`), bukan nama branch.
+- [ ] Workflow menjalankan tes sebelum push image, dan setiap action memakai tag rilis (`@v7`), bukan nama branch. Hash commit penuh lebih ketat: menurut GitHub, hanya itu cara memakai action sebagai rilis yang tidak bisa diubah ([docs.github.com](https://docs.github.com/en/actions/reference/security/secure-use)).
 
 ### Bacaan lanjut
 

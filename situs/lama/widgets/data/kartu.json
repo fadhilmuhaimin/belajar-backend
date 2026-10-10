@@ -445,7 +445,7 @@
   "halaman": "C3",
   "judul": "1.31 Deployment dan rollback",
   "url": "tahap-1/deployment-rollback/",
-  "tanya": "Raka menjalankan `TAG=390ff47 docker compose up -d` untuk rollback. Container menyala, tapi riwayat menjawab `500` dengan `column t.jumlah does not exist`. Apa yang terjadi?",
+  "tanya": "Kamu menjalankan `TAG=390ff47 docker compose up -d` untuk rollback. Container menyala, tapi riwayat menjawab `500`, dan log server mencatat `column t.jumlah does not exist`. Apa yang terjadi?",
   "jawab": "Deploy sebelumnya juga menjalankan migration yang mengganti nama kolom. Image `390ff47` berisi kode lama yang masih membaca `jumlah`. Rollback image mengganti kode, bukan skema; rekamannya di `m6.txt` bagian F. Karena itu migration harus tetap cocok dengan image sebelumnya (ADR 10 di 1.33 App versi lama yang tidak bisa dipaksa update)."
  },
  {

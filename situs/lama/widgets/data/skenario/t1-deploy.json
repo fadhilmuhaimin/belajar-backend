@@ -46,7 +46,7 @@
     }
   },
   "predict": {
-    "q": "Riwayat Budi kosong sesudah deploy f5ea0b4. Raka menjalankan TAG=390ff47 docker compose up -d. Apa yang terjadi?",
+    "q": "Riwayat Budi kosong sesudah deploy f5ea0b4. Lab menjalankan TAG=390ff47 docker compose up -d. Apa yang terjadi?",
     "options": [
       "Docker membangun ulang image dari kode 390ff47",
       "Container dari image 390ff47 yang sama menyala, riwayat kembali",
@@ -181,7 +181,7 @@
         "dari": "vps",
         "ke": "budi",
         "judul": "Kode lama di skema baru: 500",
-        "kirim": "GET /akun/419/riwayat\n500 Internal Server Error\nERROR: column t.jumlah does not exist",
+        "kirim": "GET /akun/419/riwayat\n500 Internal Server Error\nlog server: ERROR: column t.jumlah does not exist",
         "jelas": "Rekaman m6.txt bagian F. Kode v1 membaca kolom jumlah, yang sudah tidak ada. Image lama tidak memundurkan skema.",
         "nada": "warn"
       },
