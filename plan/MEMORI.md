@@ -15,6 +15,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Catatan untuk halaman Tahap 1 berikutnya
 
+- 1.30 memakai `labs/api-t1/output/m6.txt` (keputusan 241): 8 putaran prober per detik; Budi (app 1.0) 2 berhasil, 3 tidak ada jawaban, 3 field `jumlah` tidak ada; Dimas update ke app 1.1 sesudah v2 menyala; bayar app 1.0 400 `nominal` wajib, app 1.1 201; VPS hanya punya v2; v1 dibangun ulang di skema baru 500. Angka cerita (5 menit, 11 HP) bukan dari lab. Kode lab utama tetap `jumlah` (sejalan ADR 10).
 - 1.33 (E1): prasyarat B4.2 dibuang; ADR 10 (expand lalu contract) harus berdiri sendiri, tanpa rekaman crash B4.2.
 - 1.39 (F1) menyerap F2: hapus halaman F2 dan entrinya di PR yang sama (pola keputusan 150).
 - Ilustrasi latar Grup Lestari dan M6 belum ada; ilustrasi baru wajib lolos `ukur-ilustrasi.mjs` (tambahkan path halamannya ke alat itu). `situs/lama/assets/cerita/tahap-1.svg` tidak dipakai lagi.
@@ -42,7 +43,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.30-lab (Lab M6: rekaman prober deploy), branch `tahap-1/m6-lab`. Rencana: (1) bagian `m6` di `labs/api-t1/run.py`: prober memanggil API tiap detik (detik logis, bukan jam) selama deploy naif v1 ke v2: hentikan binary, migrasi ganti nama kolom, jalankan binary baru, binary lama tertimpa; client versi lama memanggil field lama; (2) rekaman `labs/api-t1/output/m6.txt` dibandingkan tanpa waktu, dua kali dari database bersih; (3) README bagian lab, KEPUTUSAN nomor baru, ANTREAN, STATUS, MEMORI. File: `labs/api-t1/` (run.py, cmd/, internal/, output/m6.txt), README.md, plan/*.
+2026-10-10 · 1.30-lab selesai di PR (keputusan 241), branch `tahap-1/m6-lab`, belum di-merge: bagian `m6` di `labs/api-t1/run.py` (`V2_UBAH`, `Prober`, `rekam_m6`), rekaman `labs/api-t1/output/m6.txt`, README "Rekaman deploy M6". Rekam ulang: `make -C labs/api-t1 run BAGIAN=m6`. Berikutnya: `python3 tools/antrean.py berikut` (1.30).
 
 ## Pelajaran
 

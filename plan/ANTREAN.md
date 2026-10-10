@@ -182,11 +182,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.30-lab · Lab M6: rekaman prober deploy
 
 - jenis: konten
-- status: dikerjakan
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: rekaman prober deploy dari database bersih: prober memanggil API tiap detik saat binary diganti dan kolom diganti nama; terekam jeda layanan, error untuk client versi lama sesudah ganti nama kolom, dan tidak ada binary lama untuk kembali; output dibandingkan tanpa waktu; keputusan baru.
-- catatan: Naskah M6 menyebut "app mati 5 menit" dan "11 HP"; angka itu cerita, angka lab yang tampil di halaman harus dari rekaman.
+- catatan: Naskah M6 menyebut "app mati 5 menit" dan "11 HP"; angka itu cerita, angka lab yang tampil di halaman harus dari rekaman. Selesai (keputusan 241): `labs/api-t1/output/m6.txt`, jeda 3 putaran, app 1.0 field `jumlah` hilang dan bayar 400, VPS hanya punya v2, v1 di skema baru 500.
 
 ### 1.30 · M6: Deploy hari Senin
 
