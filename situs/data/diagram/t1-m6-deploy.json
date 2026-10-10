@@ -1,0 +1,69 @@
+{
+  "id": "t1-m6-deploy",
+  "judul": "Sesudah v2 menyala",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · m6.txt"
+  },
+  "baris": [
+    {
+      "label": "Riwayat",
+      "sub": "HP Budi, app 1.0",
+      "simpul": [
+        {
+          "teks": "GET /akun/419/riwayat",
+          "kode": true
+        },
+        {
+          "teks": "200 dari v2",
+          "sub": "field bernama nominal",
+          "nada": "warn"
+        },
+        {
+          "teks": "Field jumlah tidak ada",
+          "sub": "app 1.0 mencari jumlah",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Bayar",
+      "sub": "HP Budi, app 1.0",
+      "simpul": [
+        {
+          "teks": "{\"jumlah\": 25000}",
+          "kode": true
+        },
+        {
+          "teks": "v2 mewajibkan nominal",
+          "nada": "warn"
+        },
+        {
+          "teks": "400",
+          "sub": "nominal wajib diisi",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Kembali ke v1",
+      "simpul": [
+        {
+          "teks": "ls /opt/rekeningo",
+          "kode": true
+        },
+        {
+          "teks": "Hanya v2",
+          "sub": "v1 tertimpa cp",
+          "nada": "warn"
+        },
+        {
+          "teks": "v1 dibangun ulang: 500",
+          "sub": "kolom sudah nominal",
+          "nada": "warn"
+        }
+      ]
+    }
+  ],
+  "catatan": "Server berganti dalam beberapa detik. App di HP baru berganti saat pemiliknya memperbarui."
+}
