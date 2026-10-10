@@ -1,0 +1,288 @@
+openapi: 3.1.0
+info:
+  title: Rekeningo API v1 (fiktif)
+  version: 1.1.0
+  description: Kontrak expand ADR 10 (1.33), sama dengan server api-t1-expand di labs/api-t1/output/versi.txt. Field nominal ditambah di samping jumlah. Lab, bukan layanan sungguhan.
+  license: { name: MIT, identifier: MIT }
+servers:
+  - url: http://127.0.0.1:18083
+security:
+  - bearer: []
+paths:
+  /login:
+    post:
+      operationId: login
+      summary: Login dengan email perusahaan dan password sementara
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Sesi dibuat
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, kedaluwarsa_detik]
+                properties:
+                  token: { type: string, description: Token sesi acak; simpan di secure storage }
+                  kedaluwarsa_detik: { type: integer }
+        '401': { $ref: '#/components/responses/Problem' }
+  /logout:
+    post:
+      operationId: logout
+      summary: Matikan sesi ini di server
+      responses:
+        '204': { description: Sesi dimatikan }
+        '401': { $ref: '#/components/responses/Problem' }
+  /topup:
+    post:
+      operationId: topup
+      summary: Admin mengisi saldo dari CSV (email,nominal), semua atau tidak sama sekali
+      parameters:
+        - { name: keterangan, in: query, required: true, schema: { type: string, minLength: 1 } }
+      requestBody:
+        required: true
+        content:
+          text/csv:
+            schema: { type: string }
+      responses:
+        '200':
+          description: Semua baris diproses dalam satu transaction
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [akun, total]
+                properties:
+                  akun: { type: integer }
+                  total: { $ref: '#/components/schemas/Rupiah' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+  # --8<-- [start:koreksi]
+  /koreksi:
+    post:
+      operationId: koreksi
+      summary: Admin mengubah saldo satu akun di luar bayar dan top-up, dengan alasan tertulis (ADR 6)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermintaanKoreksi'
+      responses:
+        '201':
+          description: Saldo diubah dan baris koreksi dicatat dalam satu transaction
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, saldo]
+                properties:
+                  id: { type: integer, format: int64 }
+                  saldo: { $ref: '#/components/schemas/Rupiah' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+  # --8<-- [end:koreksi]
+  # --8<-- [start:transfer]
+  /transfers:
+    post:
+      operationId: bayar
+      summary: Bayar dari akun karyawan yang login ke akun warung
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermintaanBayar'
+      responses:
+        '201':
+          description: Pembayaran dibuat
+          headers:
+            Location:
+              description: Alamat pembayaran yang baru dibuat, misalnya /transfers/1
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HasilBayar'
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+  # --8<-- [end:transfer]
+  /transfers/{id}:
+    get:
+      operationId: lihatTransaksi
+      summary: Satu pembayaran; hanya pembayar atau penerimanya
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Pembayaran
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Transaksi' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /akun/{id}:
+    get:
+      operationId: lihatAkun
+      summary: Akun milik sendiri, dengan saldo
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Akun
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Akun' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /akun/{id}/riwayat:
+    get:
+      operationId: riwayat
+      summary: 20 transaksi terakhir milik sendiri, terbaru dulu
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Riwayat
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [riwayat]
+                properties:
+                  riwayat:
+                    type: array
+                    maxItems: 20
+                    items: { $ref: '#/components/schemas/BarisRiwayat' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /warung/{id}/laporan:
+    get:
+      operationId: laporanWarung
+      summary: Jumlah dan total pembayaran masuk per hari (waktu Jakarta); hanya pemilik warung
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - { name: dari, in: query, required: true, schema: { type: string, format: date } }
+        - { name: sampai, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        '200':
+          description: Laporan
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [warung, per_hari]
+                properties:
+                  warung: { type: integer, format: int64 }
+                  per_hari:
+                    type: array
+                    items:
+                      type: object
+                      required: [tanggal, transaksi, total]
+                      properties:
+                        tanggal: { type: string, format: date }
+                        transaksi: { type: integer }
+                        total: { $ref: '#/components/schemas/Rupiah' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer }
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+  responses:
+    Problem:
+      description: Error RFC 9457
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  schemas:
+    Rupiah: { type: integer, format: int64, description: 'Rupiah, tanpa desimal' }
+    # --8<-- [start:skema-bayar]
+    PermintaanBayar:
+      type: object
+      required: [ke]
+      description: 'Kirim jumlah (app 1.0) atau nominal (app 1.1). Bila keduanya dikirim, server memakai jumlah.'
+      properties:
+        ke: { type: integer, format: int64, description: Nomor akun warung penerima }
+        jumlah: { type: integer, format: int64, minimum: 1, maximum: 200000, description: 'Rupiah; field lama, dihapus (contract) sesudah tidak ada request dari app 1.0' }
+        nominal: { type: integer, format: int64, minimum: 1, maximum: 200000, description: 'Rupiah; ditambah di 1.1.0 (expand)' }
+    HasilBayar:
+      type: object
+      required: [id, saldo]
+      properties:
+        id: { type: integer, format: int64 }
+        saldo: { $ref: '#/components/schemas/Rupiah' }
+    # --8<-- [end:skema-bayar]
+    PermintaanKoreksi:
+      type: object
+      required: [akun, jumlah, alasan]
+      properties:
+        akun: { type: integer, format: int64, description: Nomor akun yang saldonya dikoreksi }
+        jumlah: { type: integer, format: int64, minimum: -1000000, maximum: 1000000, description: 'Rupiah; positif menambah, negatif mengurangi, bukan 0' }
+        alasan: { type: string, minLength: 20, description: Kenapa saldo ini diubah; dibaca Keuangan saat rekonsiliasi }
+    Akun:
+      type: object
+      required: [id, jenis, nama, saldo]
+      properties:
+        id: { type: integer, format: int64 }
+        jenis: { type: string, enum: [karyawan, warung, admin] }
+        nama: { type: string }
+        saldo: { $ref: '#/components/schemas/Rupiah' }
+    Transaksi:
+      type: object
+      required: [id, dari, ke, jumlah, nominal, waktu]
+      description: 'jumlah dan nominal berisi angka yang sama. jumlah dihapus (contract) sesudah tidak ada request dari app 1.0.'
+      properties:
+        id: { type: integer, format: int64 }
+        dari: { type: integer, format: int64 }
+        ke: { type: integer, format: int64 }
+        jumlah: { $ref: '#/components/schemas/Rupiah' }
+        nominal: { $ref: '#/components/schemas/Rupiah' }
+        waktu: { type: string, format: date-time }
+    BarisRiwayat:
+      type: object
+      required: [id, arah, lawan, jumlah, nominal, waktu]
+      description: 'jumlah dan nominal berisi angka yang sama. jumlah dihapus (contract) sesudah tidak ada request dari app 1.0.'
+      properties:
+        id: { type: integer, format: int64 }
+        arah: { type: string, enum: [keluar, masuk] }
+        lawan: { type: string }
+        jumlah: { $ref: '#/components/schemas/Rupiah' }
+        nominal: { $ref: '#/components/schemas/Rupiah' }
+        waktu: { type: string, format: date-time }
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string, description: Pengenal jenis masalah; app memilih pesan dari field ini }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string, description: Untuk manusia; jangan di-parse }
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              baris: { type: integer }
+              pesan: { type: string }
