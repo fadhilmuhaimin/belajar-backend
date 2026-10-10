@@ -1,0 +1,145 @@
+/* Diagram arsitektur (I4, keputusan 232). Hanya base.css React Flow yang dipakai; semua warna dari token tema.css.
+   Kotak baru/berubah memakai keluarga "system", kotak lama keluarga "old"; status juga ditulis sebagai teks. */
+.diagram {
+  margin: 1.5rem 0;
+}
+.diagram__wadah {
+  width: 100%;
+  color: var(--teks-2); /* currentColor untuk kepala panah */
+}
+.diagram .react-flow {
+  background: transparent;
+  --xy-edge-stroke: var(--teks-2);
+}
+/* Panel tidak pernah menangkap gerak jari atau roda: halaman tetap bisa digulir di atas diagram. */
+.diagram .react-flow__pane,
+.diagram .react-flow__renderer {
+  touch-action: pan-y;
+  cursor: default;
+}
+.diagram .react-flow__edge-path {
+  stroke: var(--teks-2);
+  stroke-width: 1.5;
+}
+.diagram .react-flow__handle {
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+}
+.diagram .react-flow__node {
+  cursor: default;
+}
+
+.diagram__kotak {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.35rem 0.6rem;
+  border: 1.5px solid var(--k-old-edge);
+  border-radius: 0.5rem;
+  background: var(--k-old-fill);
+  color: var(--teks);
+  font: inherit;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+}
+.diagram__kotak.is-baru,
+.diagram__kotak.is-berubah {
+  border-color: var(--k-system-edge);
+  background: var(--k-system-fill);
+}
+.diagram__kotak.is-berubah {
+  border-style: dashed;
+}
+.diagram__kotak[aria-pressed="true"] {
+  border-width: 3px;
+}
+.diagram__kotak:focus-visible {
+  outline: 2px solid var(--aksen);
+  outline-offset: 3px;
+}
+.diagram__label {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.diagram__status {
+  font-size: 0.8rem;
+  color: var(--k-old-ink);
+}
+.diagram__kotak.is-baru .diagram__status,
+.diagram__kotak.is-berubah .diagram__status {
+  color: var(--k-system-ink);
+}
+
+.diagram .react-flow__node.diagram__zona {
+  border: 1.5px dashed var(--garis-2);
+  border-radius: 0.75rem;
+  pointer-events: none;
+}
+/* Label zona menutup panah yang lewat di belakangnya (tata tegak: panah masuk zona dari atas). */
+.diagram__zona-label {
+  display: inline-block;
+  margin: 0.2rem 0.45rem;
+  padding: 0.1rem 0.25rem;
+  background: var(--bg);
+  position: relative;
+  z-index: 1;
+  font-size: 0.8rem;
+  color: var(--teks-2);
+}
+
+/* Teks di bawah diagram sejajar dengan kolom baca (--rk-ukur), diagramnya boleh selebar wadah (keputusan 209). */
+.diagram__catatan,
+.diagram figcaption,
+.diagram__statis {
+  max-width: var(--rk-ukur);
+  margin-inline: auto;
+}
+.diagram__catatan {
+  min-height: 1.65em;
+  margin-top: 0.5rem;
+}
+.diagram__catatan > p {
+  margin: 0;
+}
+.diagram__petunjuk,
+.diagram figcaption {
+  color: var(--teks-2);
+  font-size: 0.9rem;
+}
+.diagram figcaption {
+  margin-top: 0.5rem;
+}
+
+/* Versi statis sebelum JS: baris kotak sederhana tanpa panah. */
+.diagram__statis-baris {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+.diagram__statis-baris > li {
+  margin: 0;
+  padding: 0.4rem 0.7rem;
+  border: 1.5px solid var(--k-old-edge);
+  border-radius: 0.5rem;
+  background: var(--k-old-fill);
+  color: var(--teks);
+}
+.diagram__statis-baris > li.is-baru,
+.diagram__statis-baris > li.is-berubah {
+  border-color: var(--k-system-edge);
+  background: var(--k-system-fill);
+}

@@ -1,0 +1,32 @@
+---
+// Halaman uji fondasi diagram (I4, keputusan 232). Bukan halaman cerita: tidak di registry, tidak di sidebar,
+// tidak diindeks. Dipakai situs/tools/ukur-diagram.mjs (scroll tidak tertangkap, keyboard, versi statis, axe).
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import DiagramArsitektur from "../../diagram/DiagramArsitektur";
+import { Arsitektur } from "../../diagram/skema";
+import { muat } from "../../../tools/registri.mjs";
+
+const d = muat();
+const tahap: { no: number; arsitektur: unknown }[] = d.tahap.filter((t: { no: number }) => t.no === 1 || t.no === 2);
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "Uji diagram",
+    description: "Halaman uji fondasi diagram arsitektur.",
+    pagefind: false,
+    tableOfContents: false,
+    head: [{ tag: "meta", attrs: { name: "robots", content: "noindex" } }],
+  }}
+>
+  <p>Halaman uji untuk diagram arsitektur tahap. Pilih kotak untuk membaca catatannya di bawah diagram.</p>
+  {
+    tahap.map((t) => (
+      <>
+        <h2>Tahap {t.no}</h2>
+        <DiagramArsitektur client:visible id={`diagram-t${t.no}`} judul={`Arsitektur Tahap ${t.no}`} data={Arsitektur.parse(t.arsitektur)} />
+      </>
+    ))
+  }
+  <p>Teks sesudah diagram, supaya halaman cukup panjang untuk diuji scroll-nya.</p>
+</StarlightPage>

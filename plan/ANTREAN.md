@@ -119,11 +119,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### I4 · Fondasi diagram
 
 - jenis: interaksi
-- status: antre
-- percobaan: 0
+- status: selesai
+- percobaan: 1
 - bergantung: I2
 - selesai bila: komponen DiagramArsitektur di atas React Flow, data dari registry tahap (kotak, zona, catatan, baru/lama), skema Zod, warna dari token; pengaturan `nodesDraggable` false, `zoomOnScroll` false, `panOnDrag` false di layar sempit, `preventScrolling` false, `fitView`; klik kotak membuka catatannya di bawah diagram (bukan tooltip) dan bisa dioperasikan dengan keyboard; dimuat hanya di halaman yang memakainya (`client:visible`); selalu ada versi statis untuk pembaca layar (`role="img"` + `aria-label`) dan sebelum JS dimuat; CSS React Flow hanya base, gaya dari token, `contrast.py` lolos gelap dan terang; dipakai di satu halaman uji; halaman lain tidak memuat React Flow; butir I6.
-- catatan: -
+- catatan: Selesai 2026-10-10 (keputusan 232). `situs/src/diagram/` (skema, tata, komponen), halaman uji `/uji/diagram/`, `ukur-diagram.mjs` di gerbang. Tahap 1 mendapat zona HP karyawan dan Satu VPS Divisi TI. Hanya halaman uji yang memuat React Flow (58,3 KB gzip). Percobaan 1: CI gagal karena gestur sentuh sintetis tidak menggulir apa pun di Chromium runner Linux (dan titik gestur dihitung sebelum roda menggulir); alat kini mengukur ulang posisi dan memakai gestur kontrol di paragraf, bila kontrol diam yang diperiksa `touch-action`.
 
 ### 1.26-lab · Lab M5: rekaman mode rentan m5
 

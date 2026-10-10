@@ -13,19 +13,32 @@
           [
             {
               "label": "App Flutter",
-              "baru": true
+              "baru": true,
+              "zona": "hp"
             },
             {
               "label": "Monolith API",
-              "baru": true
+              "baru": true,
+              "zona": "vps"
             },
             {
               "label": "PostgreSQL",
-              "baru": true
+              "baru": true,
+              "zona": "vps"
             }
           ]
         ],
-        "caption": "Tahap 1 punya tiga komponen. Biru = baru di tahap ini."
+        "caption": "Tahap 1 punya tiga komponen. Biru = baru di tahap ini.",
+        "zona": [
+          {
+            "id": "hp",
+            "label": "HP karyawan"
+          },
+          {
+            "id": "vps",
+            "label": "Satu VPS Divisi TI"
+          }
+        ]
       },
       "asumsi": {
         "user": 100,

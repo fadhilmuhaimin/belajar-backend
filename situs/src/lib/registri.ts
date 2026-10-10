@@ -1,6 +1,7 @@
 // Skema Zod registry halaman (situs/data/cerita.json), keputusan 117. Dites Vitest: registry yang salah bentuk
 // menggagalkan gerbang. Field turunan (ada, nomor, menit, jalur_inti) ditulis tools/sinkron_cerita.py.
 import { z } from "zod";
+import { Arsitektur } from "../diagram/skema";
 
 export const PERAN = ["mobile", "web", "backend", "devops", "security"] as const;
 export const JENIS = ["prd", "fitur", "masalah", "konsep", "adr", "tim-infra"] as const;
@@ -51,7 +52,7 @@ export const Registry = z
           user: z.string(),
           rekap: z.string(),
           sebelumnya: z.string(),
-          arsitektur: z.unknown(),
+          arsitektur: Arsitektur,
           asumsi: z.record(z.string(), z.union([z.number(), z.string()])),
           jalur_inti: z.object({ menit: z.number(), halaman: z.number() }).optional(),
           bagian: z.array(Bagian).optional(),
