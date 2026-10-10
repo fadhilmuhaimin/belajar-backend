@@ -49,7 +49,56 @@ SELECT current_user, count(*) AS terlihat FROM akun;
  pemilik_b5   |        0
 (1 row)
 
--- 5. Saldo sesudah semua langkah, dilihat superuser
+-- 5. Policy yang sama saat Dimas membayar Rp5.000 ke Warung Ani (dibatalkan di akhir)
+BEGIN;
+BEGIN
+UPDATE akun SET saldo = saldo - 5000 WHERE id = 417;
+UPDATE 1
+UPDATE akun SET saldo = saldo + 5000 WHERE id = 418;
+UPDATE 0
+ROLLBACK;
+ROLLBACK
+-- 6. Satu koneksi dari pool, dua request berurutan; identitas diisi dengan SET biasa
+-- request Dimas
+SELECT id, nama, saldo FROM akun ORDER BY id;
+ id  | nama  | saldo  
+-----+-------+--------
+ 417 | Dimas | 250000
+(1 row)
+
+-- request Budi di koneksi yang sama, lewat endpoint yang lupa mengisi app.akun_id
+SELECT current_setting('app.akun_id', true) AS akun_id_terbaca, id, nama, saldo FROM akun ORDER BY id;
+ akun_id_terbaca | id  | nama  | saldo  
+-----------------+-----+-------+--------
+ 417             | 417 | Dimas | 250000
+(1 row)
+
+-- 7. Sama, tapi identitas diisi set_config(..., true) di dalam transaction request
+-- request Dimas
+BEGIN;
+BEGIN
+SELECT set_config('app.akun_id', '417', true);
+ set_config 
+------------
+ 417
+(1 row)
+
+SELECT id, nama, saldo FROM akun ORDER BY id;
+ id  | nama  | saldo  
+-----+-------+--------
+ 417 | Dimas | 250000
+(1 row)
+
+COMMIT;
+COMMIT
+-- request Budi di koneksi yang sama, lewat endpoint yang lupa mengisi app.akun_id
+SELECT current_setting('app.akun_id', true) AS akun_id_terbaca, count(*) AS terlihat FROM akun;
+ akun_id_terbaca | terlihat 
+-----------------+----------
+                 |        0
+(1 row)
+
+-- 8. Saldo sesudah semua langkah, dilihat superuser
 SELECT id, nama, saldo FROM akun ORDER BY id;
  id  |    nama    | saldo  
 -----+------------+--------
