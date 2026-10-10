@@ -110,11 +110,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### I3 · Fondasi gerak
 
 - jenis: interaksi
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: I2
 - selesai bila: komponen MotionProvider dengan `MotionConfig reducedMotion="user"`, memakai `LazyMotion` + `m`; token durasi dan easing di satu file (mis. cepat 150 ms, sedang 250 ms) dan tidak ada angka durasi di komponen lain; aturan tertulis di file token: semua gerak dipicu klik, scroll, atau pilihan, tidak ada animasi yang berjalan sendiri, tidak ada gerak dekoratif; tes Vitest untuk token dan satu tes Playwright bahwa reduced-motion mematikan gerak; belum ada komponen yang memakainya kecuali satu contoh di halaman uji; butir I6.
-- catatan: -
+- catatan: Selesai 2026-10-10 (keputusan 231). `situs/src/gerak/` (token, MotionProvider dengan `useGerak` dan `useAwal`, contoh), halaman uji `/uji/gerak/`, `ukur-gerak.mjs` di gerbang. `reducedMotion="user"` saja tidak cukup (opacity tetap bergerak, frame pertama masih `initial`); provider menutup keduanya.
 
 ### I4 · Fondasi diagram
 
