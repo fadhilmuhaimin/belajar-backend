@@ -363,26 +363,26 @@
  {
   "id": "B5.1-1",
   "halaman": "B5.1",
-  "judul": "1.27 Authentication: session atau token",
-  "url": "b-fondasi/b5-1-authentication/",
-  "tanya": "Budi mendekode token-nya dan membaca `\"sub\": \"budi\"`. Apakah ini celah keamanan?",
-  "jawab": "Bukan. Payload JWT memang tidak rahasia, hanya tidak bisa diubah tanpa ketahuan. Karena itu, jangan pernah menaruh data rahasia (PIN, nomor identitas) di payload."
+  "judul": "1.27 Authentication: siapa yang mengirim request ini",
+  "url": "tahap-1/authentication/",
+  "tanya": "Isi tabel `sesi` bocor: kolom `akun_id`, `token_hash`, dan `kedaluwarsa`. Bisakah penyerang memakai sesi Budi?",
+  "jawab": "Tidak. Header `Authorization` harus berisi token asli, dan yang bocor hanya SHA-256-nya. Token itu 256 bit acak, jadi menebak token dari hash-nya tidak mungkin dalam waktu yang masuk akal."
  },
  {
   "id": "B5.1-2",
   "halaman": "B5.1",
-  "judul": "1.27 Authentication: session atau token",
-  "url": "b-fondasi/b5-1-authentication/",
-  "tanya": "HP Budi hilang. Dengan JWT 15 menit + refresh token, apa yang dilakukan server supaya pencuri tidak bisa memakai akun Budi?",
-  "jawab": "Mencabut refresh token milik HP itu di database. Token akses yang sudah ada masih berlaku sampai `exp`, paling lama 15 menit. Setelah itu, refresh ditolak dan pencuri harus login ulang, padahal ia tidak tahu PIN."
+  "judul": "1.27 Authentication: siapa yang mengirim request ini",
+  "url": "tahap-1/authentication/",
+  "tanya": "Di M5, Dimas login dengan akunnya sendiri lalu membaca saldo akun 418. Apakah authentication gagal?",
+  "jawab": "Tidak. Authentication bekerja: server tahu request itu dari Dimas, akun 417. Yang tidak ada adalah pemeriksaan apakah akun 418 milik Dimas. Itu authorization."
  },
  {
   "id": "B5.1-3",
   "halaman": "B5.1",
-  "judul": "1.27 Authentication: session atau token",
-  "url": "b-fondasi/b5-1-authentication/",
-  "tanya": "Jelaskan kenapa server harus menolak token dengan `\"alg\": \"none\"`, walau token itu \"valid\" menurut format JWT.",
-  "jawab": "`\"none\"` berarti tanpa signature. Kalau server mempercayai algoritma dari header token, siapa pun bisa membuat token tanpa secret. RFC 8725 mewajibkan daftar algoritma yang diizinkan ditentukan server, bukan oleh token."
+  "judul": "1.27 Authentication: siapa yang mengirim request ini",
+  "url": "tahap-1/authentication/",
+  "tanya": "Budi menekan Keluar. Dengan sesi di server, kapan token di HP-nya berhenti berlaku? Bagaimana kalau token itu JWT 15 menit tanpa daftar cabut?",
+  "jawab": "Sesi di server: langsung, karena barisnya dihapus dan query berikutnya tidak menemukan apa pun (rekaman lab bagian E). JWT tanpa daftar cabut: token tetap lolos pemeriksaan signature sampai `exp`, paling lama 15 menit lagi."
  },
  {
   "id": "B5.3-1",

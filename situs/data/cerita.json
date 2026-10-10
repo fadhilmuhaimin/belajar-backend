@@ -903,15 +903,15 @@
     },
     {
       "id": "B5.1",
-      "judul": "Authentication: session atau token",
+      "judul": "Authentication: siapa yang mengirim request ini",
       "tahap": 1,
       "topik": "Keamanan",
-      "path": "b-fondasi/b5-1-authentication.md",
+      "path": "tahap-1/authentication.md",
       "prasyarat": [
-        "B1.1"
+        "t1-m5"
       ],
       "inti": true,
-      "masalah": "Bingung memilih session atau JWT untuk login",
+      "masalah": "Server harus tahu siapa pengirim setiap request tanpa meminta password lagi",
       "ada": true,
       "jenis": "konsep",
       "bagian": 4,
@@ -919,7 +919,6 @@
         "mobile",
         "backend"
       ],
-      "lama": true,
       "nomor": "1.27",
       "menit": 10
     },
