@@ -5,6 +5,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 ## Keputusan baru
 
 - Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (aturan dari keputusan 216); sisa 174–199 dibiarkan kosong.
+- 227: `.devcontainer/postCreate.sh` memasang bun 1.4.2 dan `bun install --frozen-lockfile` (diizinkan pemilik).
 - 226: skrip loop menunggu batas pemakaian pulih (`resetsAt` + 2 menit), laporan pagi ikut menunggu (tenggang 180 menit), nomor log berlanjut.
 - 225: I1, situs pindah ke bun 1.4.2 (`bun.lock`, setup-bun di CI); gerbang build menuntut `Complete!`.
 - 224: K0e, chip ilustrasi M2 dilebarkan; `ukur-ilustrasi.mjs` di gerbang `--layar`.
@@ -70,8 +71,6 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 - Widget lama stackstep (1.23 `tahap-1/transaction`): tombol langkah pertama lebih tinggi/turun dari tombol lain di 375 px dan desktop terang; kemungkinan margin saudara Starlight (`* + *`) seperti keputusan 124/128. Kontainer tombol stackstep perlu masuk aturan margin di tema.css.
 
 ## Perlu dicek pemilik
-
-- I1 (keputusan 225): `.devcontainer/postCreate.sh` baris situs masih `npm --prefix situs ci`, yang sekarang gagal karena `package-lock.json` sudah dihapus. Sesi ditolak mengedit `.devcontainer/`. Ganti baris itu dengan: `curl -fsSL https://bun.com/install | bash -s "bun-v1.4.2"`, `export PATH="$HOME/.bun/bin:$PATH"`, `bun install --cwd situs --frozen-lockfile && (cd situs && bunx playwright install --with-deps chromium)`. Opsional: `bun upgrade` lokal ke 1.4.2 (sekarang 1.2.19).
 
 - Redesain (PR #120, sudah di-merge 2026-10-09): usulan perubahan PROPOSAL "Desain visual final" dan CLAUDE.md `<tampilan>` (beranda bukan lagi satu layar penuh; warna, ukuran, navigasi) ada di `plan/AUDIT-TAMPILAN.md` bagian 6. Belum diubah karena butuh persetujuan pemilik; loop tidak menyentuhnya.
 

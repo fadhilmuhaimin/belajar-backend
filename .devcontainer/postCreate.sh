@@ -4,13 +4,18 @@
 set -euo pipefail
 ARCH=$(dpkg --print-architecture)
 sudo apt-get update -q
-sudo apt-get install -y -q apt-transport-https gpg
+sudo apt-get install -y -q apt-transport-https gpg unzip
 wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/dart.gpg
 echo "deb [signed-by=/usr/share/keyrings/dart.gpg arch=$ARCH] https://storage.googleapis.com/download.dartlang.org/linux/debian stable main" \
   | sudo tee /etc/apt/sources.list.d/dart_stable.list >/dev/null
 sudo apt-get update -q && sudo apt-get install -y -q dart
 echo 'export PATH="$PATH:/usr/lib/dart/bin"' >> ~/.bashrc
-# Situs: dependency Astro + Chromium Playwright; lab: venv labs/.venv.
-npm --prefix situs ci && (cd situs && npx playwright install --with-deps chromium)
+# Situs: bun 1.4.2, versi yang sama dengan CI dan bun.lock (keputusan 225, 227), lalu dependency Astro dan
+# Chromium Playwright. Installer resmi (https://bun.com/docs/installation) butuh unzip dan menulis PATH ke
+# ~/.bashrc sendiri; export di bawah untuk shell yang sedang berjalan.
+curl -fsSL https://bun.com/install | bash -s "bun-v1.4.2"
+export BUN_INSTALL="$HOME/.bun" PATH="$HOME/.bun/bin:$PATH"
+bun install --cwd situs --frozen-lockfile && (cd situs && bunx playwright install --with-deps chromium)
+# Lab: venv labs/.venv.
 make -C labs/b3-race setup
 echo "Dev Container siap. Jalankan: make lab"
