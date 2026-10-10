@@ -50,8 +50,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 241,
-        "halaman": 28
+        "menit": 249,
+        "halaman": 29
       },
       "bagian": [
         {
@@ -894,8 +894,12 @@
       ],
       "label": "Masalah 5 · minggu 4",
       "masalah": "Mengganti angka di URL menampilkan saldo orang lain",
-      "ada": false,
-      "nomor": "1.26"
+      "ada": true,
+      "prasyarat": [
+        "t1-fitur-saldo"
+      ],
+      "nomor": "1.26",
+      "menit": 8
     },
     {
       "id": "B5.1",

@@ -1,0 +1,180 @@
+{
+  "versi": 2,
+  "judul": "Satu angka di URL: 417 jadi 418",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/api-t1/output/m5.txt",
+    "fileVarian": "labs/api-t1/output/m5.txt",
+    "catatan": "Server Go (labs/api-t1) + PostgreSQL 17, direkam dengan curl -i dari database bersih. Jalur utama: bagian C (mode rentan m5). Ubah satu hal: bagian E (versi benar)."
+  },
+  "pengantar": "Dimas sudah login dan membuka akunnya sendiri, 417. Jalankan request yang sama dengan angka 418. Setelah itu centang 'Ubah satu hal' dan jalankan versi benar.",
+  "komponen": [
+    {
+      "id": "app",
+      "label": "HP Dimas"
+    },
+    {
+      "id": "api",
+      "label": "Monolith API",
+      "lapisan": [
+        "handler",
+        "service",
+        "repo"
+      ]
+    }
+  ],
+  "perangkat": [
+    {
+      "id": "dimas",
+      "label": "HP Dimas"
+    }
+  ],
+  "layarAwal": {
+    "dimas": {
+      "judul": "Akun 417",
+      "waktu": "13.10",
+      "saldo": 250000,
+      "saldoLabel": "Saldo Dimas",
+      "isi": [
+        {
+          "jenis": "baris",
+          "kiri": "Request",
+          "kanan": "GET /akun/417"
+        },
+        {
+          "jenis": "baris",
+          "kiri": "Jawaban",
+          "kanan": "200"
+        }
+      ]
+    }
+  },
+  "predict": {
+    "q": "Dimas mengirim GET /akun/418 dengan token sesinya sendiri. Akun 418 milik Warung Ani. Apa jawaban server minggu 4?",
+    "options": [
+      "401, token tidak sah",
+      "403, bukan akun Dimas",
+      "200, saldo Warung Ani"
+    ],
+    "answer": 2,
+    "varian": false,
+    "explain": "Tokennya sah, jadi handler meloloskannya. Service menerima nomor akun Dimas, tapi tidak memakainya untuk bertanya apakah 418 miliknya. Rekaman lab bagian C."
+  },
+  "langkah": [
+    {
+      "dari": "app",
+      "ke": "api",
+      "lapisan": "handler",
+      "judul": "Dimas mengganti 417 jadi 418",
+      "kirim": "GET /akun/418\nAuthorization: Bearer <token sesi Dimas>",
+      "jelas": "Token yang sama dengan request ke akun 417. Hanya angka di URL yang berubah.",
+      "layar": {
+        "dimas": {
+          "judul": "Akun 418",
+          "waktu": "13.11",
+          "isi": [
+            {
+              "jenis": "proses",
+              "teks": "Memuat..."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "api",
+      "lapisan": "handler",
+      "judul": "Handler memeriksa token",
+      "kirim": "token → sesi Dimas, akun 417   ✓",
+      "jelas": "Authentication lolos: server tahu yang bertanya adalah Dimas. Ini benar.",
+      "nada": "good"
+    },
+    {
+      "dari": "api",
+      "lapisan": "service",
+      "judul": "Service tidak bertanya pemilik",
+      "kirim": "LihatAkunM5(peminta=417, id=418)\npeminta diterima, tidak dipakai",
+      "jelas": "Tidak ada baris yang membandingkan 417 dengan 418. Authorization tidak ada.",
+      "nada": "warn"
+    },
+    {
+      "dari": "api",
+      "lapisan": "repo",
+      "judul": "Repo membaca akun 418",
+      "kirim": "SELECT id, jenis, nama, saldo FROM akun WHERE id = $1   -- 418",
+      "jelas": "Query-nya aman dari injection. Masalahnya bukan SQL, tapi siapa yang boleh meminta baris ini."
+    },
+    {
+      "dari": "api",
+      "ke": "app",
+      "lapisan": "handler",
+      "judul": "200: saldo Warung Ani",
+      "kirim": "200 OK\n{\"id\":418,\"jenis\":\"warung\",\"nama\":\"Warung Ani\",\"saldo\":25000}",
+      "jelas": "Rekaman lab bagian C. Dimas melihat saldo akun yang bukan miliknya.",
+      "nada": "warn",
+      "layar": {
+        "dimas": {
+          "judul": "Akun 418",
+          "waktu": "13.11",
+          "saldo": 25000,
+          "saldoLabel": "Saldo Warung Ani",
+          "nada": "warn",
+          "isi": [
+            {
+              "jenis": "baris",
+              "kiri": "Request",
+              "kanan": "GET /akun/418"
+            },
+            {
+              "jenis": "baris",
+              "kiri": "Jawaban",
+              "kanan": "200",
+              "nada": "warn"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "varian": {
+    "label": "versi benar: service bertanya apakah yang login pemilik akun itu",
+    "mulai": 2,
+    "langkah": [
+      {
+        "dari": "api",
+        "lapisan": "service",
+        "judul": "Service membandingkan pemilik",
+        "kirim": "LihatAkun(peminta=417, id=418)\n417 ≠ 418  → ErrTidakDitemukan",
+        "jelas": "Pertanyaan diajukan sebelum repo dipanggil. Akun 418 tidak pernah dibaca.",
+        "nada": "good"
+      },
+      {
+        "dari": "api",
+        "ke": "app",
+        "lapisan": "handler",
+        "judul": "404, sama dengan akun yang tidak ada",
+        "kirim": "404 Not Found\n{\"type\":\"/problems/tidak-ditemukan\",\"title\":\"Akun tidak ditemukan\",\"status\":404}",
+        "jelas": "Rekaman lab bagian E. Jawaban untuk 418 dan 9999 sama persis, jadi Dimas tidak tahu akun 418 ada.",
+        "nada": "good",
+        "layar": {
+          "dimas": {
+            "judul": "Akun 418",
+            "waktu": "13.11",
+            "isi": [
+              {
+                "jenis": "baris",
+                "kiri": "Request",
+                "kanan": "GET /akun/418"
+              },
+              {
+                "jenis": "toast",
+                "teks": "Akun tidak ditemukan",
+                "nada": "good"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

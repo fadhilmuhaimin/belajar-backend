@@ -1,0 +1,91 @@
+---
+title: "1.26 M5: Angka di URL"
+description: Minggu 4. Dimas mengganti 417 jadi 418 di URL dan melihat saldo Warung Ani. Lalu ia mencoba semua nomor, menyimpan saldonya ke spreadsheet, dan mengirimnya ke Sinta.
+---
+import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import pemilik from "../../../../data/diagram/t1-m5-pemilik.json";
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 6 menit · coba 2 menit · Prasyarat: [[t1-fitur-saldo]] · Jalur inti</p>
+
+<Blok nama="Gejala" buka ilustrasi="m5">
+
+Minggu 4. Sejak kejadian tanda kutip di minggu 2, Dimas penasaran dengan cara app Rekeningo berbicara ke server. Ia mengarahkan HP-nya lewat proxy di laptopnya dan membuka layar Saldo.
+
+Proxy menampilkan request yang dikirim app: `GET /akun/417`. Itu nomor akun Dimas. Jawabannya berisi nama dan saldonya, Rp250.000.
+
+Dimas mengirim ulang request yang sama, hanya angkanya ia ganti jadi 418. Jawabannya: Warung Ani, saldo Rp25.000.
+
+Ia mencoba semua nomor dari 401 sampai 503. Setiap nomor dijawab. Dimas menyimpan hasilnya ke spreadsheet: 103 baris, 100 karyawan dan tiga warung, lengkap dengan saldonya. Untuk kedua kalinya dalam sebulan, ia mengirim spreadsheet ke Sinta: "ini bocor."
+
+</Blok>
+
+<Blok nama="Yang Raka kira" buka>
+
+Raka melihat nomornya: 417, 418, 419, berurutan. Kesimpulannya, nomor akun terlalu mudah ditebak.
+
+Rencananya, ganti nomor akun dengan UUID, deretan acak sepanjang 36 karakter. Tidak ada yang bisa menebak akun berikutnya kalau nomornya tidak berurutan.
+
+<details class="question">
+<summary>Tebak dulu: kalau nomor akun diganti UUID, apakah Dimas tidak bisa melihat saldo Ani lagi?</summary>
+
+Tidak. UUID hanya membuat nomor sulit ditebak, bukan sulit didapat. Nomor akun Ani bisa muncul di riwayat pembayaran, di laporan warung, atau di layar yang dibagikan. Begitu Dimas memegang satu nomor, server yang sama tetap menjawabnya. Blok berikutnya menunjukkan baris yang hilang.
+
+</details>
+
+</Blok>
+
+<Blok nama="Yang sebenarnya">
+
+Server memeriksa login, tapi tidak pernah bertanya apakah akun yang diminta milik orang yang login. Token Dimas sah, jadi setiap nomor yang ia kirim dijawab.
+
+<Rantai data={pemilik} />
+
+Ini kode service minggu 4. Nomor akun Dimas diterima sebagai `peminta`, lalu tidak dipakai:
+
+<Snippet file="labs/api-t1/internal/service/rentan.go" region="m5" lang="go" title="labs/api-t1/internal/service/rentan.go" />
+
+Rekaman lab dari database bersih, mode rentan. Dimas membuka akunnya sendiri, lalu mengganti satu angka:
+
+<Snippet file="labs/api-t1/output/m5.txt" lines="13:24" title="Rekaman lab: labs/api-t1/output/m5.txt" />
+
+Enumerasi 401 sampai 503 dengan token yang sama. Setiap nomor dijawab `200`:
+
+<Snippet file="labs/api-t1/output/m5.txt" lines="28:35" title="Rekaman lab: labs/api-t1/output/m5.txt" />
+
+Versi benar bertanya dulu sebelum membaca database. Akun orang lain dijawab sama dengan akun yang tidak ada:
+
+<Snippet file="labs/api-t1/internal/service/akun.go" lines="10:21" lang="go" title="labs/api-t1/internal/service/akun.go" />
+
+<Snippet file="labs/api-t1/output/m5.txt" lines="53:62" title="Rekaman lab: labs/api-t1/output/m5.txt" />
+
+Jawaban untuk 418 dan 9999 sama persis. Kalau server menjawab `403` untuk 418, Dimas tetap tahu akun itu ada. Enumerasi yang sama di versi benar hanya membaca satu baris, milik Dimas sendiri:
+
+<Snippet file="labs/api-t1/output/m5.txt" lines="68:70" title="Rekaman lab: labs/api-t1/output/m5.txt" />
+
+UUID tidak menggantikan pertanyaan itu. Cheat sheet OWASP tentang IDOR menulis bahwa pemeriksaan akses tetap wajib walau identifier sulit ditebak; identifier acak hanya lapisan tambahan ([OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html)).
+
+Saat memeriksa app untuk menjawab Sinta, Raka menemukan masalah kedua di sisi app. *Ilustrasi, tidak direkam di lab:* app v1 menyimpan token sesi dengan `shared_preferences`, penyimpanan preferences biasa yang tidak ditujukan untuk data rahasia. Siapa pun yang bisa membaca file app di HP itu bisa memakai token tersebut. Tempat yang tepat adalah `flutter_secure_storage`, yang memakai Keychain di iOS dan enkripsi AES-GCM di Android ([pub.dev, versi 11.2.0](https://pub.dev/packages/flutter_secure_storage)). Rinciannya ada di [[t1-idor]].
+
+</Blok>
+
+<Blok nama="Coba sendiri">
+
+Ikuti request Dimas ke akun 418, lapis demi lapis. Status dan body diambil dari rekaman lab.
+
+<WidgetLama nama="alur" src="data/skenario/t1-m5.json" />
+
+</Blok>
+
+<Blok nama="Konsep yang lahir">
+
+- [[B5.1]]: authentication. Server tahu siapa yang bertanya. Di M5, bagian ini sudah benar.
+- [[B5.3]]: authorization. Tahu siapa kamu belum berarti tahu kamu boleh apa. Pertanyaan pemilik ditanyakan di service, untuk setiap akun yang diminta.
+- [[t1-idor]]: IDOR, enumerasi, dan token di app. Halaman itu memuat ADR 7 (cek pemilik di service, RLS sebagai pagar kedua, `404` bukan `403`) dan ADR 8 (sesi acak dengan masa berlaku, secure storage di app).
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />

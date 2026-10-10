@@ -1,0 +1,70 @@
+{
+  "id": "t1-m5-pemilik",
+  "judul": "Token Dimas, akun siapa?",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · m5.txt"
+  },
+  "baris": [
+    {
+      "label": "Akun sendiri",
+      "sub": "mode rentan",
+      "simpul": [
+        {
+          "teks": "GET /akun/417",
+          "kode": true
+        },
+        {
+          "teks": "Token sah",
+          "sub": "login dicek",
+          "nada": "good"
+        },
+        {
+          "teks": "200 Dimas",
+          "sub": "saldo 250000",
+          "nada": "good"
+        }
+      ]
+    },
+    {
+      "label": "Ganti satu angka",
+      "sub": "mode rentan",
+      "simpul": [
+        {
+          "teks": "GET /akun/418",
+          "kode": true
+        },
+        {
+          "teks": "Token sah",
+          "sub": "pemilik tidak ditanya",
+          "nada": "warn"
+        },
+        {
+          "teks": "200 Warung Ani",
+          "sub": "saldo 25000",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Versi benar",
+      "simpul": [
+        {
+          "teks": "GET /akun/418",
+          "kode": true
+        },
+        {
+          "teks": "417 ≠ 418",
+          "sub": "service bertanya pemilik",
+          "nada": "good"
+        },
+        {
+          "teks": "404",
+          "sub": "sama dengan akun 9999",
+          "nada": "good"
+        }
+      ]
+    }
+  ],
+  "catatan": "Login menjawab siapa Dimas. Tidak ada baris kode yang menanyakan apakah akun 418 milik Dimas."
+}
