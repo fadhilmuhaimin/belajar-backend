@@ -623,7 +623,7 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
 .peta__no { font-size: 1.8rem; font-weight: 600; line-height: 1; color: var(--judul); }
 .peta__nama { font-size: 1rem; font-weight: 600; line-height: 1.3; color: var(--judul); }
 .peta__user { font-size: var(--rk-ui); line-height: 1.35; color: var(--teks-2); }
-.peta__panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 2rem; margin-top: 1.2rem; padding: 1.3rem 0 0; }
+.peta__isi { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 2rem; margin-top: 1.2rem; padding: 1.3rem 0 0; }
 .peta__panel[hidden] { display: none; }
 .peta__info h3 { margin: 0 0 0.6rem; font-size: 1.25rem; color: var(--judul); }
 .peta__info dl { margin: 0; display: grid; gap: 0.5rem; }
@@ -633,13 +633,9 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
 .peta__status { margin: 0.9rem 0 0.4rem; color: var(--teks-2); font-size: var(--rk-ui); }
 .beranda a.peta__buka { color: var(--aksen); font-weight: 600; text-decoration: none; display: inline-block; min-height: 2.75rem; padding: 0.55rem 0; }
 .beranda a.peta__buka:hover { text-decoration: underline; }
-.peta__diagram { margin: 0; padding: 1rem; border: 1px solid var(--garis); border-radius: 10px; display: grid; gap: 0.6rem; align-content: start; }
-.peta__baris { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; }
-.peta__baris li { position: relative; margin: 0; padding: 0.5rem 0.8rem; border: 1px solid var(--k-old-edge); border-radius: 8px; color: var(--teks); background: var(--bg); display: grid; }
-.peta__baris li:not(:last-child)::after { content: "→"; position: absolute; right: -1.15rem; top: 50%; transform: translateY(-50%); color: var(--teks-2); }
-.peta__baris li.is-baru { border-color: var(--k-system-edge); background: var(--k-system-fill); color: var(--k-system-ink); font-weight: 600; }
-.peta__baris small { font-weight: 400; font-size: var(--rk-ui-kecil); color: inherit; }
-.peta__diagram figcaption { color: var(--teks-2); font-size: var(--rk-ui); }
+.peta__diagram { min-width: 0; }
+.peta__diagram .diagram { margin: 0; }
+.peta__catatan { margin: 0.4rem 0 0; color: var(--teks-2); font-size: var(--rk-ui); }
 /* Peran sebagai pertanyaan */
 .peran__tanya { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .peran__jawab { font: inherit; min-height: 2.75rem; padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid var(--garis-2); background: transparent; color: var(--teks); cursor: pointer; }
@@ -660,7 +656,7 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
 @media (max-width: 62em) {
   .beranda__depan { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 0.6rem; }
   .peta__tab { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .peta__panel { grid-template-columns: 1fr; gap: 1rem; }
+  .peta__isi { grid-template-columns: 1fr; gap: 1rem; }
 }
 @media (max-width: 50em) {
   .beranda__judul { font-size: 2rem; }
@@ -674,9 +670,6 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
   .peta__no { font-size: 1.4rem; }
   .peta__info dl div { grid-template-columns: 1fr; gap: 0; }
   .beranda__bagian h2 { font-size: 1.35rem; }
-  /* Diagram tahap di HP: komponen ditumpuk dengan panah ke bawah, supaya panah tidak tergantung di ujung baris. */
-  .peta__baris { flex-direction: column; align-items: flex-start; gap: 1.4rem; }
-  .peta__baris li:not(:last-child)::after { content: "↓"; right: auto; left: 1rem; top: auto; bottom: -1.35rem; transform: none; }
 }
 /* Widget tebak (keputusan 208) */
 .sl-markdown-content .tb-adegan { display: grid; gap: 0.8rem; }

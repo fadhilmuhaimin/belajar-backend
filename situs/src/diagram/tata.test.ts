@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { Arsitektur } from "./skema";
-import { UKURAN, deskripsi, lebarMendatar, tata, type Tata } from "./tata";
+import { UKURAN, deskripsi, lebarMendatar, tata, varPesan, type Tata } from "./tata";
 
 const registry = JSON.parse(readFileSync(new URL("../../data/cerita.json", import.meta.url), "utf8"));
 const semua: Arsitektur[] = registry.tahap.map((t: { arsitektur: unknown }) => Arsitektur.parse(t.arsitektur));
@@ -84,5 +84,17 @@ describe("deskripsi", () => {
   });
   it("kotak lepas tidak diberi kata 'ke'", () => {
     expect(deskripsi(semua[3], "T4")).toContain("Object storage (baru); Layanan pembayaran");
+  });
+});
+
+describe("varPesan", () => {
+  it("memesan tinggi tata tegak dan mendatar ditambah bantalan, dengan ambang lebarMendatar", () => {
+    for (const a of semua) {
+      const v = varPesan(a);
+      const mendatar = tata(a, "mendatar").tinggi + UKURAN.bantalan;
+      expect(v["--diagram-mendatar"]).toBe(`${mendatar}px`);
+      expect(Number(v["--diagram-selisih"])).toBe(tata(a, "tegak").tinggi + UKURAN.bantalan - mendatar);
+      expect(v["--diagram-ambang"]).toBe(`${lebarMendatar(a)}px`);
+    }
   });
 });

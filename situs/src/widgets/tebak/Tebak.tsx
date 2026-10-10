@@ -1,6 +1,8 @@
 // Widget tebak (keputusan 208): adegan + layar HP opsional, satu pertanyaan, pilihan dengan alasan.
 // Semua teks dari data JSON; tautan lanjutan diberikan pemanggil (dari registry). Logika di logika.ts.
-import { useState } from "react";
+// Jawaban muncul dengan gerak masuk singkat sesudah pilihan ditekan (I5b, keputusan 248); reduced motion tanpa gerak.
+import { useLayoutEffect, useRef, useState } from "react";
+import { muncul } from "../../gerak/muncul";
 import { DataTebak } from "./skema";
 import { nilai } from "./logika";
 
@@ -11,6 +13,10 @@ export default function Tebak({ data: mentah, tautan = [] }: { data: unknown; ta
   const L = data.label;
   const [dipilih, setDipilih] = useState<number | null>(null);
   const hasil = dipilih === null ? null : nilai(data, dipilih);
+  const kotakHasil = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (dipilih !== null) muncul(kotakHasil.current);
+  }, [dipilih]);
 
   return (
     <div className="bb-widget tb" role="group" aria-label={data.judul}>
@@ -53,7 +59,7 @@ export default function Tebak({ data: mentah, tautan = [] }: { data: unknown; ta
 
       <div role="status" aria-live="polite">
         {hasil && (
-          <div className={"tb-hasil " + (hasil.benar ? "is-benar" : "is-salah")}>
+          <div ref={kotakHasil} className={"tb-hasil " + (hasil.benar ? "is-benar" : "is-salah")}>
             <p className="tb-hasil__judul"><strong>{hasil.benar ? L.benar : L.belum}</strong></p>
             <p>{hasil.alasan[0]}</p>
             {!hasil.benar && <p><strong>{L.jawaban}: {String.fromCharCode(65 + hasil.jawaban)}.</strong> {hasil.alasan[1]}</p>}

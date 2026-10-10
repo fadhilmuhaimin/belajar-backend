@@ -3,9 +3,30 @@
 .diagram {
   margin: 1.5rem 0;
 }
+/* Tinggi wadah dipesan sejak SSR (review PR #161, keputusan 248), nilainya dari varPesan() di tata.ts: tinggi tata
+   mendatar, ditambah selisih ke tata tegak bila lebar container (100cqw) di bawah ambang lebarMendatar().
+   clamp(0px, …, 1px) memberi tangga 0 atau 1 px; ambang dikurangi 0,5 px karena komponen membulatkan lebar wadah
+   sebelum membandingkan. Versi statis dan wadah berbagi satu sel grid, jadi statis duduk di dalam ruang yang dipesan. */
+.diagram__panggung {
+  display: grid;
+  container-type: inline-size;
+}
+.diagram__panggung > * {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
 .diagram__wadah {
   width: 100%;
+  height: calc(
+    var(--diagram-mendatar) + clamp(0px, (var(--diagram-ambang) - 0.5px - 100cqw) * 10000, 1px) * var(--diagram-selisih)
+  );
   color: var(--teks-2); /* currentColor untuk kepala panah */
+}
+/* Tanpa JS React Flow tidak pernah datang: ruang pesanan dilepas, versi statis memakai tingginya sendiri. */
+@media (scripting: none) {
+  .diagram__wadah {
+    height: auto;
+  }
 }
 .diagram .react-flow {
   background: transparent;
