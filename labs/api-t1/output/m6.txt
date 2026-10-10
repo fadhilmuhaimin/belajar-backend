@@ -30,6 +30,8 @@ detik  HP Budi                                  HP Dimas
 2      app 1.0 · 200 · jumlah 25000             app 1.0 · 200 · jumlah 20000
 $ kill -TERM <pid v1>   # v1 berhenti
 3      app 1.0 · tidak ada jawaban              app 1.0 · tidak ada jawaban
+# di cerita: migrate up, file 000006_transaksi_nominal.up.sql berisi ALTER TABLE ini
+# lab: mode lock dibaca dari pg_locks di transaction yang sama; SELECT ini bukan bagian dari deploy Raka
 $ psql -c "ALTER TABLE transaksi RENAME COLUMN jumlah TO nominal; SELECT mode FROM pg_locks WHERE relation = 'transaksi'::regclass AND pid = pg_backend_pid()"
         mode         
 ---------------------
@@ -88,3 +90,14 @@ Content-Type: application/problem+json
 {"type":"/problems/internal","title":"Terjadi kesalahan di server","status":500}
 $ kill -TERM <pid v1>
 server log: error internal: ERROR: column t.jumlah does not exist (SQLSTATE 42703)
+
+# --- G. Kembali ke v1: kolom dikembalikan ke jumlah, v1 yang dibangun ulang dijalankan ---
+# di cerita: migrate up, file baru 000007_transaksi_jumlah.up.sql berisi ALTER TABLE ini (di server, mundur lewat migration baru)
+$ psql -c "ALTER TABLE transaksi RENAME COLUMN nominal TO jumlah"
+$ ./api-t1 &   # v1 yang dibangun ulang di bagian F
+# prober yang sama, detik dihitung dari v1 menyala. Budi masih app 1.0, Dimas sudah app 1.1.
+detik  HP Budi                                  HP Dimas
+1      app 1.0 · 200 · jumlah 25000             app 1.1 · 200 · field nominal tidak ada
+2      app 1.0 · 200 · jumlah 25000             app 1.1 · 200 · field nominal tidak ada
+# v2 melayani app 1.1, tidak app 1.0 (bagian C). v1 melayani app 1.0, tidak app 1.1. Dari dua versi yang ada, tidak satu pun melayani keduanya.
+# Rekaman halaman sesudah 1.30 mulai dari keadaan ini: kolom jumlah, kode v1.

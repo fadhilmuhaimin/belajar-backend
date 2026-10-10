@@ -1059,7 +1059,7 @@ def baca_riwayat(token, akun, versi):
 
 class Prober:
     """Satu putaran per detik: setiap HP membaca riwayatnya sekali. Perintah deploy dijalankan di antara dua putaran,
-    jadi rekaman sama di mesin mana pun. Jumlah putaran yang gagal = jumlah perintah, bukan lama scp di VPS."""
+    jadi rekaman sama di mesin mana pun. Jumlah putaran yang gagal = jumlah perintah, bukan lama perintah itu di VPS."""
 
     def __init__(self, hp):
         self.hp, self.hasil, self.jam = hp, [], None   # hp: [[nama, token, akun, versi app]]
@@ -1126,6 +1126,10 @@ def _rekam_m6(tmp):
     log.append("$ kill -TERM <pid v1>   # v1 berhenti\n")
     stop()
     p.putaran()
+    # Naskah: Raka memakai migrate up sejak minggu 3 (1.25). Lab memakai psql supaya mode lock terbaca: satu psql -c
+    # adalah satu transaction (dokumentasi psql 17), jadi pg_locks masih melihat lock milik ALTER TABLE.
+    log.append("# di cerita: migrate up, file 000006_transaksi_nominal.up.sql berisi ALTER TABLE ini\n"
+               "# lab: mode lock dibaca dari pg_locks di transaction yang sama; SELECT ini bukan bagian dari deploy Raka\n")
     kunci = sql("ALTER TABLE transaksi RENAME COLUMN jumlah TO nominal; "
                 "SELECT mode FROM pg_locks WHERE relation = 'transaksi'::regclass AND pid = pg_backend_pid()")
     harap("AccessExclusiveLock" in kunci, True, "RENAME COLUMN memegang ACCESS EXCLUSIVE lock")
@@ -1172,6 +1176,18 @@ def _rekam_m6(tmp):
     k = len(log)
     stop()
     harap(any("column t.jumlah does not exist" in x for x in log[k:]), True, "log v1 menyebut kolom t.jumlah")
+
+    bagian("G. Kembali ke v1: kolom dikembalikan ke jumlah, v1 yang dibangun ulang dijalankan")
+    log.append("# di cerita: migrate up, file baru 000007_transaksi_jumlah.up.sql berisi ALTER TABLE ini (di server, mundur lewat migration baru)\n")
+    sql("ALTER TABLE transaksi RENAME COLUMN nominal TO jumlah")
+    mulai(tampil="$ ./api-t1 &   # v1 yang dibangun ulang di bagian F")
+    log.append("# prober yang sama, detik dihitung dari v1 menyala. Budi masih app 1.0, Dimas sudah app 1.1.\n")
+    log.append(f"{'detik':<7}{'HP Budi':<41}HP Dimas\n")
+    p = Prober([["Budi", budi, 419, "1.0"], ["Dimas", dimas, 417, "1.1"]])
+    p.putaran(2)
+    harap(p.hasil, [["200 · jumlah 25000", "200 · field nominal tidak ada"]] * 2, "v1 sesudah kolom kembali: app 1.0 jalan, app 1.1 tidak")
+    log.append("# v2 melayani app 1.1, tidak app 1.0 (bagian C). v1 melayani app 1.0, tidak app 1.1. Dari dua versi yang ada, tidak satu pun melayani keduanya.\n"
+               "# Rekaman halaman sesudah 1.30 mulai dari keadaan ini: kolom jumlah, kode v1.\n")
     tulis("m6.txt")
 
 

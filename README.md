@@ -168,9 +168,13 @@ Angka waktu (latency, downtime, jumlah request per detik) bergantung pada mesinm
 
 `make -C labs/api-t1 run BAGIAN=m6` mengulang deploy minggu 5 untuk halaman 1.30 dan menulis `labs/api-t1/output/m6.txt`. Lab membangun v2 dari salinan kode v1: kolom `transaksi.jumlah` diganti `nominal`, dan field JSON ikut berganti. Dua folder sementara meniru laptop Raka dan `/opt/rekeningo` di VPS.
 
-Prober membaca riwayat dari HP Budi dan HP Dimas satu kali per detik. Setiap perintah deploy dijalankan di antara dua putaran prober. Karena itu jumlah putaran yang gagal sama dengan jumlah perintah, bukan lama `scp` di mesinmu.
+Prober membaca riwayat dari HP Budi dan HP Dimas satu kali per detik. Setiap perintah deploy dijalankan di antara dua putaran prober. Karena itu jumlah putaran yang gagal sama dengan jumlah perintah, bukan lama perintah itu di mesinmu.
 
-Yang terekam: jeda layanan selama tiga putaran, lalu app 1.0 yang tidak menemukan field `jumlah`. App 1.0 yang membayar mendapat `400`, app 1.1 mendapat `201`. VPS dan laptop hanya punya binary v2, dan v1 yang dibangun ulang mendapat `500` di skema baru. Lab berhenti dengan error bila satu penggantian v2 tidak ditemukan atau hasil prober berbeda dari skenario.
+Di cerita, Raka mengganti nama kolom lewat `migrate up` (file `000006`). Lab menjalankan `ALTER TABLE` yang sama lewat `psql`, supaya mode lock terbaca dari `pg_locks` di transaction yang sama.
+
+Yang terekam: jeda layanan selama tiga putaran, lalu app 1.0 yang tidak menemukan field `jumlah`. App 1.0 yang membayar mendapat `400`, app 1.1 mendapat `201`. VPS dan laptop hanya punya binary v2, dan v1 yang dibangun ulang mendapat `500` di skema baru.
+
+Sesudah kolom dikembalikan ke `jumlah`, v1 melayani app 1.0 lagi, tapi app 1.1 mendapat `200` tanpa field `nominal`. Rekaman halaman sesudah 1.30 mulai dari keadaan itu: kolom `jumlah`, kode v1. Lab berhenti dengan error bila satu penggantian v2 tidak ditemukan atau hasil prober berbeda dari skenario.
 
 ### Semua pihak ketiga di lab adalah tiruan
 
