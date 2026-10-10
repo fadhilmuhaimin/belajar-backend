@@ -1,0 +1,49 @@
+{
+  "id": "t1-authn",
+  "judul": "Password sekali, token di setiap request",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · login.txt"
+  },
+  "baris": [
+    {
+      "label": "Login",
+      "simpul": [
+        {
+          "teks": "POST /login",
+          "kode": true,
+          "sub": "email + password"
+        },
+        {
+          "teks": "bcrypt cocok",
+          "sub": "password tidak disimpan",
+          "nada": "good"
+        },
+        {
+          "teks": "Token 8 jam",
+          "sub": "acak, 256 bit"
+        }
+      ]
+    },
+    {
+      "label": "Request",
+      "simpul": [
+        {
+          "teks": "Bearer token",
+          "kode": true,
+          "sub": "header Authorization"
+        },
+        {
+          "teks": "Cari di sesi",
+          "sub": "SHA-256 token"
+        },
+        {
+          "teks": "419 atau 401",
+          "sub": "akun pengirim, atau ditolak",
+          "nada": "good"
+        }
+      ]
+    }
+  ],
+  "catatan": "Password hanya dikirim saat login. Sesudah itu server bertanya: hash token ini milik sesi siapa?"
+}
