@@ -29,7 +29,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 ## Perintah dan pola kerja
 
 - Situs (bun 1.4.2): `bun run --cwd situs build|preview|test|cek-tipe|tangkap|layar` (urutan ini; `bun --cwd situs run x` hanya mencetak bantuan dengan exit 0). bun lokal 1.2.19; versi CI lewat `npx --yes bun@1.4.2 ...`.
-- Gerbang: `bash tools/cek_situs.sh --layar > tmp/cek.txt 2>&1 && echo LOLOS || echo GAGAL`, lalu `tail -30 tmp/cek.txt`. Preview tertinggal: `npm --prefix situs run preview -- stop`.
+- Gerbang: `bash tools/cek_situs.sh --layar > tmp/cek.txt 2>&1 && echo LOLOS || echo GAGAL`, lalu `tail -30 tmp/cek.txt`. Gerbang menghentikan preview worktree ini sendiri (sebelum mulai dan di trap) dan gagal keras bila port dipegang server lain (keputusan 249). Preview manual: `bun run --cwd situs preview --background`, hentikan `bun run --cwd situs preview stop`.
 - Tangkapan dari root: `npm --prefix situs run tangkap -- --url http://127.0.0.1:4321 --path /<path>/` (ke `situs/tangkapan/`). Layar pertama: `npm --prefix situs run layar -- --url http://127.0.0.1:4321`; `layar.mjs` tidak mengukur halaman ADR.
 - Layar pertama HP sempit: 1.23 hanya punya 28 px di 375×667; jangan tambah tinggi di atas Inti. Rantai di Inti selalu `ringkas`, maksimal dua baris pendek.
 - Gerak: bungkus island dengan `MotionProvider` (`situs/src/gerak/`), `import * as m from "motion/react-m"`, `transition` dari `useGerak(...)`, `initial` dari `useAwal(...)`; jangan tulis `duration: <angka>`. Contoh `/uji/gerak/`; diperiksa `ukur-gerak.mjs`.
@@ -45,10 +45,11 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · G1 gerbang menghentikan daemon preview, branch `perbaikan/g1-preview-daemon`. File: `tools/cek_situs.sh` (bagian `--layar`), `plan/KEPUTUSAN.md`, `plan/ANTREAN.md`, `plan/USULAN-PERBAIKAN.md`, MEMORI. Rencana: hentikan preview worktree ini (`preview stop`, lock `situs/.astro/preview.json`) sebelum mulai dan di trap; nyalakan dengan `--background` di laptop dan CI; penanda unik per jalan di `situs/dist` dibaca lewat curl (gagal keras bila tidak cocok dalam 30 detik); bukti a–c di PR. I5b (#161) sudah di-merge.
+2026-10-11 · G1 selesai (keputusan 249), PR dari `perbaikan/g1-preview-daemon` menunggu tinjauan pengatur, belum di-merge: `tools/cek_situs.sh --layar` menjalankan `preview stop` (lock `situs/.astro/preview.json` milik worktree ini) sebelum mulai dan di trap, menyalakan preview `--background` di laptop dan CI, dan gagal keras bila `gerbang-tanda.txt` per jalan tidak dilayani di port dalam 30 detik. Bukti a–c di keputusan 249 dan PR. Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
+- Astro 7 `preview` otomatis jadi daemon bila agen terdeteksi, dan bila daemon lama hidup ia keluar tanpa menyalakan server baru; `curl /` berhasil tidak membuktikan server melayani build ini (G1 memakai penanda per jalan di `situs/dist`).
 - Island yang mengganti versi statis wajib memesan tinggi akhirnya di SSR; ukur CLS dengan modul JS ditunda dan gulir tanpa input (`ukur-diagram.mjs` bagian 7), karena tangkapan dan `layar.mjs` tidak melihat geser.
 - Island React Astro di-hydrate di `startTransition` dan atribut `ssr` dilepas sebelum React selesai; keadaan yang dibaca dari DOM di efek butuh CSS yang menyembunyikan isi SSR sampai cocok, bukan selektor `[ssr]`.
 - Widget alur hanya menerima nada `warn` dan `good` (`alur-core.js` NADA, diperiksa `tools/validasi_skenario.mjs` saat build); Rantai menerima juga `system`.
