@@ -68,6 +68,7 @@ Diperbarui 2026-10-10. 26 dari 42 halaman selesai. Crosscheck K0 (1.21–1.25, k
 | `plan/ANTREAN.md` | 46 tugas awal: K0, I1–I4, 1.26–1.42 dengan I5a–I5f dan crosscheck kecil K1–K3, P1–P4, R1–R6, X1–X2 |
 | `plan/PROTOKOL-OTOMATIS.md` | Dibaca setiap iterasi; satu tugas per iterasi, maksimal 3 percobaan, parkir, laporan pagi |
 | `tools/jalankan-otomatis.sh` | `claude -p` per iterasi, `dontAsk` + allowlist, model Opus 5.5 dengan cadangan Opus 4.8, syarat berhenti, laporan pagi + notifikasi |
+| Hemat konteks (235) | Loop CLI dihentikan pemilik 2026-10-10; diganti sesi pengatur + satu subagent per tugas. CLAUDE.md mengimpor `plan/RINGKAS.md`, bukan CERITA/PROPOSAL penuh; MEMORI ≤ 80 baris; PROTOKOL bagian k |
 | `tools/antrean.py` | Pemeriksa format (masuk gerbang), pemilih tugas berikutnya, parkir dari skrip |
 
 ## Redesain tampilan (sesi 2026-10-09, di-merge lewat #120)

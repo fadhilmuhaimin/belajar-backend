@@ -7,10 +7,11 @@ Kamu adalah engineer utama proyek Rekeningo Tech Journey: situs belajar backend 
 <sumber_kebenaran>
 Baca dalam urutan ini di awal setiap sesi. Kalau bertentangan: CERITA > PROPOSAL > KEPUTUSAN > MEMORI > STATUS.
 
-@plan/CERITA-TAHAP-1.md
-@plan/PROPOSAL.md
+@plan/RINGKAS.md
 @plan/MEMORI.md
 @plan/STATUS.md
+
+plan/RINGKAS.md meringkas CERITA dan PROPOSAL (keputusan 235). Kedua file penuh tidak diimpor: baca bagian yang dibutuhkan tugas saja (`grep -n '^##'` lalu Read dengan offset/limit), atau lewat subagent yang mengembalikan ringkasan. Urutan kebenaran di atas tetap berlaku untuk file penuhnya.
 
 plan/KEPUTUSAN.md dibaca saat menulis atau merujuk keputusan (file besar, jangan diimpor penuh).
 plan/CERITA-TAHAP-N.md adalah naskah milik pemilik: cerita, PRD, tokoh, angka. Kamu tidak mengubahnya; kamu mengusulkan perubahan di MEMORI bagian "Usulan perubahan cerita".
@@ -31,17 +32,17 @@ Setiap sesi dimulai dari konteks kosong dan model bisa berganti (/model). Konsis
 Awal sesi: baca sumber kebenaran; tulis satu paragraf di plan/MEMORI.md "Sedang dikerjakan": tanggal, tahap, halaman atau tugas, file yang disentuh. Jangan mulai sebelum paragraf ini ada.
 Selama sesi: setiap keputusan bukan detail masuk plan/KEPUTUSAN.md dengan nomor baru saat itu juga (format: apa · kenapa · alternatif yang ditolak · sumber). Setiap pelajaran tentang repo masuk MEMORI "Pelajaran", satu baris.
 Sebelum compaction atau akhir sesi: perbarui "Sedang dikerjakan" jadi keadaan terakhir dan perintah untuk melanjutkan; perbarui STATUS; commit. Kalau konteks hampir penuh, lakukan ini dulu.
-MEMORI maksimal 200 baris; hapus yang tidak relevan.
+MEMORI maksimal 80 baris (diperiksa gerbang); pelajaran lama pindah ke plan/PELAJARAN-ARSIP.md.
 </memori>
 
 <cara_kerja>
 1. Pahami dulu: baca file yang akan diubah, halaman tetangganya, dan tes yang menyentuhnya.
 2. Rencana 5–10 baris di MEMORI untuk tugas lebih dari satu file, lalu langsung kerjakan. Tidak ada yang menunggu persetujuan pemilik kecuali: mengubah CERITA atau PROPOSAL, menghapus lab atau halaman, merge ke main saat CI merah.
 3. Kecil: satu halaman per PR, satu widget per PR, satu lab per PR. Situs bisa dibangun setelah setiap commit.
-4. Verifikasi sendiri: jalankan gerbang kualitas dan baca hasilnya sebelum melapor. Untuk tampilan: Playwright 375×667 dan 1366×657, gelap dan terang; lihat tangkapan layarnya sendiri dan jawab: dalam 3 detik, tahu di mana saya, apa yang dibaca dulu, ke mana selanjutnya?
+4. Verifikasi sendiri: jalankan gerbang kualitas dan baca hasilnya sebelum melapor. Untuk tampilan: Playwright 375×667 dan 1366×657, gelap dan terang; lihat sendiri paling banyak dua tangkapan per tugas (HP dulu; sisanya diperiksa alat ukur) dan jawab: dalam 3 detik, tahu di mana saya, apa yang dibaca dulu, ke mana selanjutnya?
 5. Riset nyata: setiap versi, API, klaim riset, angka industri dicek dengan WebSearch/WebFetch ke sumber primer saat dipakai. Yang tidak bisa dicek diberi [perlu verifikasi] dan dicatat di MEMORI "Perlu dicek pemilik".
 6. Laporkan pendek: apa yang berubah, apa yang dicek (dengan output), apa yang belum, skill mana yang dipakai. Lalu lanjut.
-7. Hemat konteks: output perintah panjang dipotong (`| tail -30`) atau ditulis ke file lalu dibaca seperlunya; jangan cetak diff atau log penuh. Ganti sesi setiap ±10 halaman, setelah MEMORI diperbarui. Di akhir setiap PR tulis kalimat "Siap dilanjutkan dari <halaman>" (mis. "Siap dilanjutkan dari 1.12"): itu tanda berhenti untuk `tools/jalankan-tahap.sh`.
+7. Hemat konteks (keputusan 235): output perintah selalu ditulis ke file lalu dibaca bagian yang perlu (`tail -30`, `grep`); jangan cetak diff atau log penuh. Eksplorasi dan file besar (> 300 baris) dibaca subagent yang mengembalikan ringkasan. Aturan lengkapnya di plan/PROTOKOL-OTOMATIS.md bagian k. Ganti sesi setiap ±10 halaman, setelah MEMORI diperbarui. Di akhir setiap PR tulis kalimat "Siap dilanjutkan dari <halaman>" (mis. "Siap dilanjutkan dari 1.12"): itu tanda berhenti untuk `tools/jalankan-tahap.sh`.
 </cara_kerja>
 
 <commit>

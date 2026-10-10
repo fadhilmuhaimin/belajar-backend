@@ -1,6 +1,6 @@
 # Protokol iterasi otomatis
 
-Dibaca di awal SETIAP iterasi `tools/jalankan-otomatis.sh` (keputusan 216). Kamu satu-satunya pekerja di repo ini: tidak ada sesi lain, tidak ada worktree. Pemilik sedang tidak ada; tidak ada yang menjawab pertanyaan, dan izin di luar allowlist `.claude/settings.json` langsung ditolak (mode `dontAsk`). Kalau sebuah perintah ditolak, ganti caranya; jangan ulangi perintah yang sama. Jalankan perintah dari root repo; `cd <folder> && git ...` ditolak (pakai `git -C`). `sleep` di depan diblokir: tunggu dengan `gh pr checks --watch`, `gh run watch`, atau perintah yang memang berjalan lama. macOS ini tidak punya `timeout`.
+Dibaca di awal SETIAP tugas (keputusan 216, 235). Sejak 2026-10-10 loop CLI `tools/jalankan-otomatis.sh` tidak dipakai lagi: satu sesi pengatur memilih tugas dan menyerahkan tiap tugas ke SATU subagent. Kalau kamu subagent itu, kamu satu-satunya yang mengubah repo; kerjakan tugas yang disebut pengatur sampai PR merge atau diparkir, lalu kembalikan hanya 5 baris: status, nomor PR, keputusan, hal untuk pemilik, satu pelajaran. Pemilik tidak menjawab pertanyaan; izin yang ditolak berarti ganti cara. Kalau sebuah perintah ditolak, ganti caranya; jangan ulangi perintah yang sama. Jalankan perintah dari root repo; `cd <folder> && git ...` ditolak (pakai `git -C`). `sleep` di depan diblokir: tunggu dengan `gh pr checks --watch`, `gh run watch`, atau perintah yang memang berjalan lama. macOS ini tidak punya `timeout`.
 
 Pola perintah yang ditolak di uji kering 2026-10-10 (log `log/otomatis-2026-10-10/`), dan penggantinya:
 
@@ -19,7 +19,7 @@ Urutan sumber kebenaran tetap seperti CLAUDE.md: CERITA > PROPOSAL > KEPUTUSAN >
 2. `python3 tools/antrean.py berikut` memberi tugasnya. Kerjakan HANYA tugas itu di iterasi ini.
 3. Kalau stderr menulis `PERLU DIPARKIR <id>`, parkir tugas itu di ANTREAN (status diparkir, catatan "bergantung pada <id> yang diparkir") di PR tugas iterasi ini.
 4. Kalau `berikut` tidak memberi apa-apa, antrean habis: tulis "Iterasi selesai: - antrean-habis" dan berhenti.
-5. Cek sisa iterasi yang terhenti: `git branch -a | grep -i <slug-atau-id>`. Kalau ada branch untuk tugas ini, lanjutkan dari branch itu (rebase ke main), jangan mulai dari nol.
+5. Cek sisa iterasi yang terhenti: `git branch -a | grep -i <slug-atau-id>`. Kalau ada branch untuk tugas ini, lanjutkan dari branch itu (rebase ke main), jangan mulai dari nol; catatan lanjutannya ada di MEMORI "Sedang dikerjakan" di branch itu (k.4).
 
 ## b. Prasyarat: main hijau
 
@@ -29,7 +29,7 @@ Urutan sumber kebenaran tetap seperti CLAUDE.md: CERITA > PROPOSAL > KEPUTUSAN >
 ## c. Rencana dan branch
 
 1. Branch baru dari main: konten `tahap-1/<slug>`, interaksi `interaksi/<id>`, perbaikan `perbaikan/<id>`, crosscheck `crosscheck/<id>` (huruf kecil, titik jadi strip).
-2. Tulis rencana 5 baris di `plan/MEMORI.md` bagian "Sedang dikerjakan" (tanggal, id tugas, langkah, file yang disentuh). Ganti paragraf iterasi sebelumnya; MEMORI paling banyak 200 baris.
+2. Tulis rencana 5 baris di `plan/MEMORI.md` bagian "Sedang dikerjakan" (tanggal, id tugas, langkah, file yang disentuh). Ganti paragraf iterasi sebelumnya; MEMORI paling banyak 80 baris (gerbang menolak lebih).
 3. Di ANTREAN: status tugas `dikerjakan`.
 4. Pakai ketiga skill: gaya-bahasa (teks), visualisasi (visual, widget, interaksi, layout), analisis-kritis (klaim, versi, ADR, review kode). Sebut di PR skill mana yang dipakai.
 5. Kerjakan sesuai "selesai bila" tugas, "Definisi selesai bersama" di ANTREAN, dan CLAUDE.md. Kalau halaman butuh rekaman lab yang belum ada, sisipkan tugas `<nomor>-lab` tepat sebelum tugas halaman, kerjakan lab itu sebagai tugas iterasi ini, dan biarkan halamannya antre.
@@ -39,7 +39,7 @@ Urutan sumber kebenaran tetap seperti CLAUDE.md: CERITA > PROPOSAL > KEPUTUSAN >
 "Kelihatannya benar" bukan verifikasi. Yang dihitung (setelah I1 selesai, perintah npm diganti padanannya di README dan `tools/cek_situs.sh`):
 
 - Gerbang penuh: `bash tools/cek_situs.sh --layar > tmp/cek.txt 2>&1 && echo LOLOS || echo GAGAL`, lalu `tail -30 tmp/cek.txt` sebagai perintah terpisah. Sebelumnya hentikan preview yang tertinggal: `npx --prefix situs astro preview stop`.
-- Tangkapan: `npm --prefix situs run preview -- --port 4321 --host 127.0.0.1` di latar, lalu dari `situs/` `node tools/tangkap.mjs --url http://127.0.0.1:4321 --path /<path>/`. Buka PNG-nya dengan Read dan lihat sendiri.
+- Tangkapan (paling banyak dua dibuka per tugas, k.3): `npm --prefix situs run preview -- --port 4321 --host 127.0.0.1` di latar, lalu dari `situs/` `node tools/tangkap.mjs --url http://127.0.0.1:4321 --path /<path>/`. Buka PNG-nya dengan Read dan lihat sendiri.
 - Rekaman lab dari database bersih dibandingkan dengan yang di-commit (status, saldo, urutan; bukan waktu).
 - Sumber primer untuk setiap versi, API, dan klaim (WebSearch/WebFetch). Yang tidak bisa dicek diberi [perlu verifikasi] dan dicatat di MEMORI "Perlu dicek pemilik".
 
@@ -81,6 +81,15 @@ Kalau jumlah tugas selesai di ANTREAN (`python3 tools/antrean.py ringkas`) jadi 
 - Menjalankan lab serangan ke target di luar container atau folder sementara lab.
 
 Semua itu menjadi catatan di MEMORI "Perlu dicek pemilik".
+
+## k. Hemat konteks (keputusan 235)
+
+Konteks awal tiap iterasi 94–103k token dan puncaknya sampai 209k (`python3 tools/ukur_konteks.py <log>`); setiap langkah memproses ulang seluruh konteks, jadi yang dibaca sekali dibayar puluhan kali.
+
+1. Eksplorasi (mencari di banyak file) dan membaca file besar (> 300 baris, mis. KEPUTUSAN, ANTREAN, CERITA, PROPOSAL, tema.css, run.py lab) dikerjakan subagent `Explore` yang mengembalikan ringkasan dan nomor baris, bukan dibaca di konteks ini. Yang perlu dibaca sendiri: rentang baris (Read offset/limit), bukan seluruh file. Nomor keputusan terakhir: `grep -o '^| [0-9]*' plan/KEPUTUSAN.md | tail -1`.
+2. Output perintah selalu ke file (`> tmp/<nama>.txt 2>&1`), lalu baca bagian yang perlu (`tail -30`, `grep -n`). Jangan `cat` file, jangan cetak diff atau log penuh, jangan `tail` KEPUTUSAN (barisnya ribuan karakter).
+3. Tangkapan layar: paling banyak dua dibuka dengan Read per tugas, ukuran HP (375×667) dulu; sisanya diperiksa alat ukur (`layar.mjs`, `ukur-*.mjs`, `tangkap.mjs`), bukan dilihat.
+4. Kalau konteks melewati ±120k (tandanya: lebih dari ±50 panggilan alat, atau sudah membuka dua gambar dan beberapa file besar): tulis catatan lanjutan di MEMORI "Sedang dikerjakan" (langkah yang selesai, langkah berikutnya, perintahnya), commit yang aman ke branch tugas dan push, ANTREAN status `dikerjakan`, `git checkout main`, lalu akhiri dengan `Iterasi selesai: <id> dikerjakan`. Tugas berikutnya melanjutkan dengan konteks segar (a.5).
 
 ## Laporan pagi
 
