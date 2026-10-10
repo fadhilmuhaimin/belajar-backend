@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.29 selesai di PR (keputusan 239, 240), branch `tahap-1/idor-token-app`, belum di-merge: `tahap-1/idor-token-app.mdx`, lab `b5-rls` bagian 5–7, alur `t1-idor`, banding `t1-idor-banding`, Rantai `t1-idor-dua-pagar`. Uji widget tanpa gambar: `node situs/tangkapan/uji-alur.mjs <url>` dan `uji-banding.mjs <url>` (tangkapan/ tidak di-commit). Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-10 · 1.30-lab (Lab M6: rekaman prober deploy), branch `tahap-1/m6-lab`. Rencana: (1) bagian `m6` di `labs/api-t1/run.py`: prober memanggil API tiap detik (detik logis, bukan jam) selama deploy naif v1 ke v2: hentikan binary, migrasi ganti nama kolom, jalankan binary baru, binary lama tertimpa; client versi lama memanggil field lama; (2) rekaman `labs/api-t1/output/m6.txt` dibandingkan tanpa waktu, dua kali dari database bersih; (3) README bagian lab, KEPUTUSAN nomor baru, ANTREAN, STATUS, MEMORI. File: `labs/api-t1/` (run.py, cmd/, internal/, output/m6.txt), README.md, plan/*.
 
 ## Pelajaran
 

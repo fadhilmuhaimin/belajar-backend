@@ -182,7 +182,7 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.30-lab · Lab M6: rekaman prober deploy
 
 - jenis: konten
-- status: antre
+- status: dikerjakan
 - percobaan: 0
 - bergantung: -
 - selesai bila: rekaman prober deploy dari database bersih: prober memanggil API tiap detik saat binary diganti dan kolom diganti nama; terekam jeda layanan, error untuk client versi lama sesudah ganti nama kolom, dan tidak ada binary lama untuk kembali; output dibandingkan tanpa waktu; keputusan baru.
