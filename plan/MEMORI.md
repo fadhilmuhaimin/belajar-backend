@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.27-lab (perbaikan), branch `perbaikan/1-27-lab-www-authenticate`. Rencana: (1) `wajibLogin` di `labs/api-t1/internal/handler/handler.go` mengirim `WWW-Authenticate: Bearer` tanpa kode error bila request tanpa Bearer, `error="invalid_token"` tetap untuk token tidak sah (RFC 6750 §3.1); (2) `harap` header di `run.py` (login D/E, http F, authz D); (3) `make -C labs/api-t1 run` dua kali, bandingkan rekaman tanpa waktu; (4) teks 1.27 `authentication.mdx` baris header; skenario `t1-authn.json`/`t1-login.json` memakai kasus logout, tetap `invalid_token`; (5) keputusan baru, ANTREAN, STATUS; gerbang; PR tanpa merge.
+2026-10-10 · 1.27-lab selesai di PR (keputusan 243), branch `perbaikan/1-27-lab-www-authenticate`, belum di-merge: `wajibLogin` mengirim `Bearer` tanpa kode error bila request tanpa token Bearer, `invalid_token` untuk token ditolak; `harap` header di `labs/api-t1/run.py`; rekaman `login.txt`, `authz.txt`, `http.txt`, `injection.txt` (jumlah baris gosec) direkam ulang; teks header di 1.27 `authentication.mdx`. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 
