@@ -47,7 +47,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · 1.33 App versi lama + ADR 10 di branch `tahap-1/app-versi-lama` (keputusan 252, 253): rekaman `versi.txt`, kontrak expand `openapi-expand.yaml` + `expand.txt`, halaman `tahap-1/app-versi-lama.mdx`, alur `t1-versi`; perbaikan review #164 (expand = kejadian cerita, Cek diri 3 DROP COLUMN, glosarium E1) sudah di-push. PR menunggu tinjauan; jangan merge sebelum disetujui pengatur. Berikutnya sesudah merge: `python3 tools/antrean.py berikut` (1.34).
+2026-10-11 · P1 (1.4 dan 1.6 lepas dari `api-t1-lama`) di branch `perbaikan/p1-api-t1-lama`. Rencana: Snippet `tahap-1/adr-1-backend-sendiri.mdx` diganti ke `labs/api-t1/internal/service/bayar.go` region `bayar`; tiga Snippet `tahap-1/struktur-folder.mdx` diganti ke komentar paket `internal/handler/handler.go`, `internal/service/sesi.go`, `internal/repo/repo.go`; kalimat di sekitarnya disesuaikan. Kode v1 benar untuk keduanya (sebelum M6). `labs/api-t1-lama` tidak dihapus (P2). Lalu sinkron, gerbang, ANTREAN, PR tanpa merge.
 
 ## Pelajaran
 
