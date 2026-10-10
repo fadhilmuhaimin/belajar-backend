@@ -14,6 +14,8 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Rekeningo Tech Journey",
+      // File di public/; nilai ini sama dengan default Starlight, ditulis supaya tidak 404 lagi diam-diam (keputusan 245).
+      favicon: "/favicon.svg",
       defaultLocale: "root",
       locales: { root: { label: "Bahasa Indonesia", lang: "id" } },
       customCss: ["./src/styles/tema.css"],
