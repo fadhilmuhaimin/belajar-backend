@@ -2,16 +2,18 @@
 // Redesain (keputusan 202): semua grup terlipat; Starlight membuka grup yang memuat halaman aktif, jadi
 // yang terlihat hanya jalur ke halaman ini.
 // Tahap 1 dikelompokkan per bagian naskah (PRD, fitur ke teknis, ...); tahap lain per kelompok lama dan ditandai
-// "versi lama". Halaman yang belum ditulis tetap tampil (urutan dan nomor tidak berubah) dengan kelas nav-menyusul
+// "versi lama". Halaman yang belum ditulis tetap tampil (urutan dan nomor tidak berubah) dengan data-nav="menyusul"
 // (keputusan 104). Peran yang ditonjolkan dibawa sebagai data-peran untuk pemilih peran.
-import { muat, label, url, byId } from "./registri.mjs";
+// Penanda inti/menyusul/lama memakai data-nav, bukan class: Starlight 0.42.5 (SidebarSublist.astro) memasang
+// attrs.class lewat class:list lalu menyebar attrs lagi, jadi class tercetak dua kali (keputusan 245).
+import { muat, label, url, byId, JUDUL_MENYUSUL } from "./registri.mjs";
 
 function item(h, by) {
-  const kelas = [h.inti ? "nav-inti" : "", h.ada ? "" : "nav-menyusul", h.lama || h.lebur_ke || h.diganti_oleh ? "nav-lama" : ""]
+  const nav = [h.inti ? "inti" : "", h.ada ? "" : "menyusul", h.lama || h.lebur_ke || h.diganti_oleh ? "lama" : ""]
     .filter(Boolean).join(" ");
   const attrs = {};
-  if (kelas) attrs.class = kelas;
-  if (!h.ada) attrs.title = "Belum ditulis";
+  if (nav) attrs["data-nav"] = nav;
+  if (!h.ada) attrs.title = JUDUL_MENYUSUL;
   if (h.lama) attrs.title = "Versi lama; akan ditulis ulang mengikuti naskah";
   if (h.lebur_ke) attrs.title = `Versi lama; isinya digabung ke ${label(by[h.lebur_ke])}`;
   if (h.diganti_oleh) attrs.title = `Versi lama; digantikan ${label(by[h.diganti_oleh])}`;

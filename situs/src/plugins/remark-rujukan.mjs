@@ -2,7 +2,7 @@
 // ID tidak pernah tampil. ID yang tidak dikenal menggagalkan build (padanan hook MkDocs).
 // Link ke halaman yang belum dipindah diberi kelas rujukan-menyusul (keputusan 104).
 import path from "node:path";
-import { muat, byId, label, url, urutanBaca, urlDariId, SITE_DOCS } from "../../tools/registri.mjs";
+import { muat, byId, label, url, urutanBaca, urlDariId, SITE_DOCS, JUDUL_MENYUSUL } from "../../tools/registri.mjs";
 
 const TOKEN = /\[\[([A-Za-z0-9.\-]+)(?:\|([^\]]+))?\]\]/g;
 const LEWATI = new Set(["code", "inlineCode", "link", "linkReference", "mdxJsxTextElement"]);
@@ -31,7 +31,7 @@ export default function remarkRujukan() {
 
     function linkNode(h, teks) {
       const props = {};
-      if (!h.diporting) { props.class = "rujukan-menyusul"; props.title = "Halaman ini belum dipindah ke situs baru"; }
+      if (!h.diporting) { props.class = "rujukan-menyusul"; props.title = JUDUL_MENYUSUL; }
       return { type: "link", url: url(h), children: [{ type: "text", value: teks }], data: { hProperties: props } };
     }
 

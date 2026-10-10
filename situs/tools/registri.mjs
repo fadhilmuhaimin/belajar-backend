@@ -59,6 +59,8 @@ export function urlDariId(id) {
   return s ? `/${s}/` : "/";
 }
 
+// title tautan ke halaman yang belum ditulis, sama di sidebar dan di rujukan teks (keputusan 245).
+export const JUDUL_MENYUSUL = "Halaman ini belum ditulis";
 export const urutanBaca = (d) => URUT_BACA.flatMap((k) => d.halaman.filter((h) => h.tahap === k && h.ada));
 export const byId = (d) => Object.fromEntries(d.halaman.map((h) => [h.id, h]));
 export const dariUrl = (d, u) => d.halaman.find((h) => url(h) === u);

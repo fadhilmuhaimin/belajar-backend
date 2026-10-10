@@ -218,11 +218,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K1a · Favicon 404 dan dua sisa HTML tautan menyusul
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: `situs/dist/favicon.svg` ada setelah build (ikon sederhana dari token aksen di latar gelap, tanpa teks; atau `favicon` Starlight di `situs/astro.config.mjs` menunjuk file yang ada) dan tidak ada lagi `<link rel="icon">` yang 404; `title` tautan ke halaman yang belum ada sama di sidebar dan di teks, dan tidak menyebut "dipindah" untuk halaman baru (`situs/src/plugins/remark-rujukan.mjs` baris 34, `situs/tools/sidebar.mjs` baris 13); tautan sidebar `nav-menyusul` hanya punya satu atribut `class` (`sidebar.mjs` baris 10–13); build strict dan layar pertama lolos.
-- catatan: Dari K1 (`plan/CROSSCHECK-KECIL.md`): 79 halaman memuat `/favicon.svg` yang 404; `situs/public/` tidak punya favicon. Ganti `title` dan kelas mengubah HTML semua halaman; bandingkan sidik `tmp/sidik_dist.py`.
+- catatan: Dari K1 (`plan/CROSSCHECK-KECIL.md`): 79 halaman memuat `/favicon.svg` yang 404; `situs/public/` tidak punya favicon. Ganti `title` dan kelas mengubah HTML semua halaman; bandingkan sidik `tmp/sidik_dist.py`. Selesai 2026-10-10 (keputusan 245): favicon aksen di latar gelap, `title` dari `JUDUL_MENYUSUL`, penanda sidebar di `data-nav`; `tmp/k1a_cek.py` 0 salah, `layar.mjs` identik.
 
 ### K1b · Batas percobaan login di satu tahap
 

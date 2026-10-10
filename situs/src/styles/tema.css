@@ -143,12 +143,12 @@ body { background: var(--bg); }
 /* Gerak hanya karena klik; pembaca yang meminta sedikit gerak tidak mendapat transisi. */
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 
-/* Sidebar: ★ jalur inti (atribut dari tools/sidebar.mjs), halaman yang belum dipindah redup */
-.sidebar-content a.nav-inti::after { content: " ★"; color: var(--k-warn-edge); font-size: 0.8em; }
-.sidebar-content a.nav-menyusul { color: var(--teks-2); }
-.sidebar-content a.nav-menyusul:not([aria-current]) { opacity: 0.7; }
+/* Sidebar: ★ jalur inti (data-nav dari tools/sidebar.mjs), halaman yang belum ditulis redup */
+.sidebar-content a[data-nav~="inti"]::after { content: " ★"; color: var(--k-warn-edge); font-size: 0.8em; }
+.sidebar-content a[data-nav~="menyusul"] { color: var(--teks-2); }
+.sidebar-content a[data-nav~="menyusul"]:not([aria-current]) { opacity: 0.7; }
 /* Halaman versi lama yang akan digabung atau digantikan halaman baru (keputusan 117); title menjelaskan ke mana. */
-.sidebar-content a.nav-lama { font-style: italic; color: var(--teks-2); }
+.sidebar-content a[data-nav~="lama"] { font-style: italic; color: var(--teks-2); }
 .sl-markdown-content a.rujukan-menyusul { text-decoration: underline dotted; text-underline-offset: 3px; }
 
 /* Blok kode dari komponen Snippet (div.highlight + pre.shiki) */
@@ -826,8 +826,8 @@ starlight-toc a, .right-sidebar a, starlight-toc h2 { font-size: var(--rk-ui); }
 /* Tautan di teks dibedakan dengan garis bawah tipis, bukan warna saja (WCAG 1.4.1; axe link-in-text-block). */
 .sl-markdown-content :is(p, li, td) a:not(.blok__lanjut) { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; text-decoration-color: color-mix(in srgb, var(--aksen) 55%, transparent); }
 /* Sidebar: tanpa opacity dan tanpa huruf miring (kontras ≥ 8:1; panduan disleksia menghindari italic). */
-.sidebar-content a.nav-menyusul:not([aria-current]) { opacity: 1; }
-.sidebar-content a.nav-lama { font-style: normal; }
+.sidebar-content a[data-nav~="menyusul"]:not([aria-current]) { opacity: 1; }
+.sidebar-content a[data-nav~="lama"] { font-style: normal; }
 /* Sisa teks < 14 px dari pemindaian audit-tampilan.mjs (keputusan 201). */
 .kamu__tag { font-size: var(--rk-ui); }
 nav.bb-lanjut a span { font-size: var(--rk-ui); }

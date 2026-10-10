@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Favicon (keputusan 245): tiga anak tangga, tahap demi tahap. Warna sama dengan token bg dan aksen di tema.css;
+       kotak gelap terlihat di tab terang, aksen terlihat di tab gelap. Tanpa teks supaya terbaca di 16 px.
+       Komentar XML tidak boleh memuat dua tanda hubung berurutan, jadi nama token ditulis tanpa awalannya. -->
+  <rect width="32" height="32" rx="7" fill="#0B0B0C"/>
+  <path d="M6 26V20H12V14H18V8H26V26Z" fill="#7AB8FF"/>
+</svg>
