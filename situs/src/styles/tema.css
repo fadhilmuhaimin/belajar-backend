@@ -468,8 +468,12 @@ nav.bb-lanjut a.menyusul { color: var(--teks-2); border-style: dashed; }
 /* Peta cerita (cerita.js): lima tahap, progres, daftar halaman; indeks masalah */
 .sl-markdown-content .bb-peta { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.8rem; margin: 1em 0; }
 .sl-markdown-content .bb-peta__tahap { border: 1px solid var(--garis); border-radius: 12px; padding: 0.6rem 0.7rem; }
-.sl-markdown-content .bb-peta__tahap h3 { margin: 0 0 0.2rem; font-size: 1em; }
-.sl-markdown-content .bb-peta__user { margin: 0 0 0.35rem; font-size: 0.8em; }
+/* Margin saudara Starlight menurunkan kartu kedua dst. 16 px di grid; semua kartu mulai sejajar (K0f, keputusan 228). */
+.sl-markdown-content .bb-peta > .bb-peta__tahap { margin-top: 0; }
+.sl-markdown-content .bb-peta__tahap h3 { margin: 0 0 0.2rem; font-size: 1em; text-wrap: balance; }
+/* Baris user + progres sampai empat baris di 1366 px; line-height 1,7 isi artikel membuat diagram kartu pertama
+   jatuh 14 px dari tepi layar setelah meta K0d. 1,45 cukup untuk teks UI pendek (K0f, keputusan 228). */
+.sl-markdown-content .bb-peta__user { margin: 0 0 0.35rem; font-size: 0.8em; line-height: 1.45; }
 .sl-markdown-content .bb-peta__bar { height: 0.4rem; border-radius: 999px; background: var(--k-old-fill); overflow: hidden; margin-bottom: 0.5rem; }
 .sl-markdown-content .bb-peta__bar i { display: block; height: 100%; background: var(--k-good-edge); }
 .sl-markdown-content figure.bb-peta__arch { margin: 0 0 0.4rem; }
