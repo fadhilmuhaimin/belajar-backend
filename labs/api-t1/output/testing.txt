@@ -1,11 +1,11 @@
 
-# --- A. Tanpa database, seperti CI pertama di 1.31: DATABASE_URL tidak diisi ---
+# --- A. Tanpa database, seperti CI pertama di 1.31: TEST_DATABASE_URL tidak diisi ---
 $ go test -v ./...
 === RUN   TestBayarDitolakDenganNamaField
-    api_test.go:60: DATABASE_URL kosong: tes ini butuh PostgreSQL
+    api_test.go:70: TEST_DATABASE_URL kosong: tes ini butuh PostgreSQL
 --- SKIP: TestBayarDitolakDenganNamaField
 === RUN   TestAkunOrangLainDijawab404
-    api_test.go:84: DATABASE_URL kosong: tes ini butuh PostgreSQL
+    api_test.go:94: TEST_DATABASE_URL kosong: tes ini butuh PostgreSQL
 --- SKIP: TestAkunOrangLainDijawab404
 PASS
 ok    lab/apit1/cmd/api
@@ -20,10 +20,10 @@ ok    lab/apit1/cmd/api
     --- PASS: TestBayarMenolakJumlahDiLuarBatas/0
     --- PASS: TestBayarMenolakJumlahDiLuarBatas/200001
 === RUN   TestBayarGagalTidakMengubahSaldo
-    db_test.go:57: DATABASE_URL kosong: tes ini butuh PostgreSQL
+    db_test.go:89: TEST_DATABASE_URL kosong: tes ini butuh PostgreSQL
 --- SKIP: TestBayarGagalTidakMengubahSaldo
 === RUN   TestRiwayatMemuatPembayaran
-    db_test.go:79: DATABASE_URL kosong: tes ini butuh PostgreSQL
+    db_test.go:111: TEST_DATABASE_URL kosong: tes ini butuh PostgreSQL
 --- SKIP: TestRiwayatMemuatPembayaran
 PASS
 ok    lab/apit1/internal/service
@@ -31,7 +31,7 @@ ok    lab/apit1/internal/service
 
 # --- B. Dengan PostgreSQL (database dibuat ulang dari nol, data awal uji coba Gedung A) ---
 # -p 1: paket dites satu per satu, karena tes database di dua paket memakai database yang sama
-$ DATABASE_URL=postgres://... go test -v -p 1 ./...
+$ TEST_DATABASE_URL=postgres://.../lab?search_path=tahap1 go test -v -p 1 ./...
 === RUN   TestBayarDitolakDenganNamaField
 --- PASS: TestBayarDitolakDenganNamaField
 === RUN   TestAkunOrangLainDijawab404
@@ -61,8 +61,8 @@ ok    lab/apit1/internal/service
 #   menjadi: return s.repo.PindahkanM4(ctx, peminta, ke, jumlah)
 $ go test -run TestBayarGagalTidakMengubahSaldo ./internal/service/
 --- FAIL: TestBayarGagalTidakMengubahSaldo
-    db_test.go:67: saldo Budi 180000, ingin 250000
-    db_test.go:70: total saldo 1630000, ingin 1700000
+    db_test.go:99: saldo Budi 180000, ingin 250000
+    db_test.go:102: total saldo 1630000, ingin 1700000
 FAIL
 FAIL  lab/apit1/internal/service
 FAIL
@@ -73,8 +73,17 @@ FAIL
 #   menjadi: WHERE t.dari = $1 AND t.ke = $1
 $ go test -run TestRiwayatMemuatPembayaran ./internal/service/
 --- FAIL: TestRiwayatMemuatPembayaran
-    db_test.go:93: riwayat akun 419: 0 transaksi, ingin 1 (keluar, Warung Ani, 25000)
-    db_test.go:93: riwayat akun 418: 0 transaksi, ingin 1 (masuk, Budi, 25000)
+    db_test.go:125: riwayat akun 419: 0 transaksi, ingin 1 (keluar, Warung Ani, 25000)
+    db_test.go:125: riwayat akun 418: 0 transaksi, ingin 1 (masuk, Budi, 25000)
+FAIL
+FAIL  lab/apit1/internal/service
+FAIL
+# exit status 1
+
+# --- E. TEST_DATABASE_URL menunjuk database lain: penjaga di siapkan berhenti sebelum menghapus ---
+$ TEST_DATABASE_URL=postgres://.../postgres go test -run TestRiwayatMemuatPembayaran ./internal/service/
+--- FAIL: TestRiwayatMemuatPembayaran
+    db_test.go:111: postgres/public bukan database tes lab/tahap1: tidak ada data yang dihapus
 FAIL
 FAIL  lab/apit1/internal/service
 FAIL

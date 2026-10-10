@@ -14,6 +14,9 @@ PORT = 18083
 URL = f"http://127.0.0.1:{PORT}"
 DB = "postgres://lab:lab@127.0.0.1:54333/lab?search_path=tahap1&application_name=api-t1"
 ENV = dict(os.environ, DATABASE_URL=DB, TZ="Asia/Jakarta")   # waktu di response sama di mesin mana pun
+# Tes Go membaca TEST_DATABASE_URL, tidak pernah DATABASE_URL milik server (1.32); DATABASE_URL dibuang dari env tes.
+ENV_TES = dict({k: v for k, v in ENV.items() if k != "DATABASE_URL"}, TEST_DATABASE_URL=DB)
+DB_LAIN = "postgres://lab:lab@127.0.0.1:54333/postgres?application_name=api-t1"   # database lain di server yang sama
 PSQL = ["docker", "compose", "-f", str(HERE / "../b3-race/docker-compose.yml"), "exec", "-T", "db",
         "psql", "-U", "lab", "-d", "lab", "-q"]
 BIN = HERE / "api-t1"
@@ -706,7 +709,7 @@ def rekam_injection():
 
     bagian("E. Latihan: draf AI laporan warung (latihan/laporan.go), dites ke database lalu di-lint")
     reset()
-    t = subprocess.run(["go", "test", "-v", "-count=1", "./..."], cwd=HERE / "latihan", env=ENV,
+    t = subprocess.run(["go", "test", "-v", "-count=1", "./..."], cwd=HERE / "latihan", env=ENV_TES,
                        capture_output=True, text=True)
     keluaran = re.sub(r" \(\d+\.\d+s\)", "", t.stdout)
     keluaran = re.sub(r"(ok\s+lab/latihan)\s+\d+\.\d+s", r"\1", keluaran).strip()
@@ -1379,7 +1382,7 @@ def _rekam_deploy(tmp):
     tulis("deploy.txt")
 
 
-def go_test(*args, cwd=HERE, env=ENV):
+def go_test(*args, cwd=HERE, env=ENV_TES):
     """go test tanpa waktu: (0.01s) dan durasi paket dibuang, tab jadi spasi, supaya rekaman ulang sama."""
     r = subprocess.run(["go", "test", *args], cwd=cwd, env=env, capture_output=True, text=True)
     k = re.sub(r" \(\d+\.\d+s\)", "", r.stdout + r.stderr)
@@ -1407,8 +1410,8 @@ BUG_M4 = ("internal/service/bayar.go", "return s.pindahkan(ctx, peminta, ke, jum
 
 def rekam_testing():
     """1.32 Testing: apa dites di level mana. Tes Go di lab, tanpa dan dengan PostgreSQL, lalu bug lama dikembalikan."""
-    tanpa_db = {k: v for k, v in ENV.items() if k != "DATABASE_URL"}
-    bagian("A. Tanpa database, seperti CI pertama di 1.31: DATABASE_URL tidak diisi")
+    tanpa_db = {k: v for k, v in ENV_TES.items() if k != "TEST_DATABASE_URL"}
+    bagian("A. Tanpa database, seperti CI pertama di 1.31: TEST_DATABASE_URL tidak diisi")
     rc, k = go_test("-v", "-count=1", "./...", env=tanpa_db)
     harap((rc, k.count("--- PASS: TestBayarMenolakJumlahDiLuarBatas/"), k.count("--- SKIP")), (0, 3, 4),
           "tanpa database: unit test lolos, empat tes database dilewati")
@@ -1419,7 +1422,7 @@ def rekam_testing():
     log.append("# -p 1: paket dites satu per satu, karena tes database di dua paket memakai database yang sama\n")
     rc, k = go_test("-v", "-count=1", "-p", "1", "./...")
     harap((rc, k.count("--- PASS: Test"), "SKIP" in k), (0, 8, False), "dengan database: semua tes lolos")
-    log.append(f"$ DATABASE_URL=postgres://... go test -v -p 1 ./...\n{k}\n# exit status {rc}\n")
+    log.append(f"$ TEST_DATABASE_URL=postgres://.../lab?search_path=tahap1 go test -v -p 1 ./...\n{k}\n# exit status {rc}\n")
 
     bagian("C. Bug M4 dikembalikan di salinan kode: Bayar tanpa transaction (1.22)")
     f, lama, baru = BUG_M4
@@ -1442,6 +1445,13 @@ def rekam_testing():
     harap((rc, "riwayat akun 419: 0 transaksi" in k, "riwayat akun 418: 0 transaksi" in k), (1, True, True),
           "regression test riwayat gagal untuk bug f5ea0b4")
     log.append(f"$ go test -run TestRiwayatMemuatPembayaran ./internal/service/\n{k}\n# exit status {rc}\n")
+
+    bagian("E. TEST_DATABASE_URL menunjuk database lain: penjaga di siapkan berhenti sebelum menghapus")
+    rc, k = go_test("-count=1", "-run", "TestRiwayatMemuatPembayaran", "./internal/service/",
+                    env=dict(ENV_TES, TEST_DATABASE_URL=DB_LAIN))
+    harap((rc, "bukan database tes lab/tahap1: tidak ada data yang dihapus" in k), (1, True),
+          "penjaga menolak database selain lab/tahap1")
+    log.append(f"$ TEST_DATABASE_URL=postgres://.../postgres go test -run TestRiwayatMemuatPembayaran ./internal/service/\n{k}\n# exit status {rc}\n")
     tulis("testing.txt")
 
 

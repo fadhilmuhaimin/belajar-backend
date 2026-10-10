@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,19 +17,28 @@ import (
 )
 
 // server merakit router, handler, service, dan PostgreSQL seperti main, di port acak dari httptest.
-func server(t *testing.T) *httptest.Server {
+// Alamat database dari TEST_DATABASE_URL, dengan penjaga yang sama seperti siapkan di internal/service.
+func server(t *testing.T) (*httptest.Server, *sql.DB) {
 	t.Helper()
-	url := os.Getenv("DATABASE_URL")
+	url := os.Getenv("TEST_DATABASE_URL")
 	if url == "" {
-		t.Skip("DATABASE_URL kosong: tes ini butuh PostgreSQL")
+		t.Skip("TEST_DATABASE_URL kosong: tes ini butuh PostgreSQL")
 	}
 	db, err := sql.Open("pgx", url)
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() { db.Close() })
+	var nama, schema string
+	if err := db.QueryRow("SELECT current_database(), coalesce(current_schema(), '')").Scan(&nama, &schema); err != nil {
+		t.Fatal(err)
+	}
+	if nama != "lab" || schema != "tahap1" {
+		t.Fatalf("%s/%s bukan database tes lab/tahap1: tidak ada data yang ditulis", nama, schema)
+	}
 	srv := httptest.NewServer(handler.Baru(service.Baru(repo.Baru(db), time.Hour)).Rute())
-	t.Cleanup(func() { srv.Close(); db.Close() })
-	return srv
+	t.Cleanup(srv.Close)
+	return srv, db
 }
 
 func minta(t *testing.T, method, url, token, body string) *http.Response {
@@ -57,7 +67,7 @@ func loginBudi(t *testing.T, srv *httptest.Server) string {
 // --8<-- [start:http]
 // Tes HTTP: yang diperiksa adalah yang dibaca app, yaitu status code, Content-Type, dan nama field.
 func TestBayarDitolakDenganNamaField(t *testing.T) {
-	srv := server(t)
+	srv, _ := server(t)
 	token := loginBudi(t, srv)
 	for _, c := range []struct {
 		body   string
@@ -79,13 +89,30 @@ func TestBayarDitolakDenganNamaField(t *testing.T) {
 // --8<-- [end:http]
 
 // --8<-- [start:pemilik]
-// Tes "token A meminta data B" (1.28): akun orang lain dijawab sama dengan akun yang tidak ada.
+// Tes "token A meminta data B" (1.28) di keempat endpoint ber-ID: data orang lain dijawab sama dengan data yang tidak ada.
 func TestAkunOrangLainDijawab404(t *testing.T) {
-	srv := server(t)
+	srv, db := server(t)
 	token := loginBudi(t, srv)
-	for path, status := range map[string]int{"/akun/419": 200, "/akun/417": 404, "/akun/9999": 404} {
-		if res := minta(t, "GET", srv.URL+path, token, ""); res.StatusCode != status {
-			t.Errorf("Budi GET %s: %d, ingin %d", path, res.StatusCode, status)
+	// Satu baris transaksi Dimas (417) ke Warung Ani (418) tanpa Budi; dihapus lagi sesudah tes.
+	var milikDimas int64
+	if err := db.QueryRow("INSERT INTO transaksi (dari, ke, jumlah) VALUES (417, 418, 10000) RETURNING id").Scan(&milikDimas); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Exec("DELETE FROM transaksi WHERE id = $1", milikDimas) })
+	hari := time.Now().Format("2006-01-02")
+	for _, c := range []struct {
+		path   string
+		status int
+	}{
+		{"/akun/419", 200},  // akun Budi sendiri
+		{"/akun/417", 404},  // akun Dimas
+		{"/akun/9999", 404}, // akun yang tidak ada
+		{"/akun/417/riwayat", 404},
+		{"/warung/418/laporan?dari=" + hari + "&sampai=" + hari, 404},
+		{fmt.Sprintf("/transfers/%d", milikDimas), 404},
+	} {
+		if res := minta(t, "GET", srv.URL+c.path, token, ""); res.StatusCode != c.status {
+			t.Errorf("Budi GET %s: %d, ingin %d", c.path, res.StatusCode, c.status)
 		}
 	}
 }

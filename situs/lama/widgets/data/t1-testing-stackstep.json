@@ -8,7 +8,7 @@
   ],
   "stack": {
     "Go": {
-      "pola": { "siap": ["srv := server(t)"], "kirim": ["minta(t, \"POST\", srv.URL+\"/transfers\""], "status": ["res.StatusCode != c.status"], "field": ["p.Errors[0][\"field\"] != \"jumlah\""] }
+      "pola": { "siap": ["srv, _ := server(t)"], "kirim": ["minta(t, \"POST\", srv.URL+\"/transfers\""], "status": ["res.StatusCode != c.status"], "field": ["p.Errors[0][\"field\"] != \"jumlah\""] }
     },
     "Node.js (Express)": {
       "pola": { "siap": ["beforeEach("], "kirim": [".post(\"/transfers\")"], "status": [".expect(422)"], "field": ["res.body.errors[0].field"] }
@@ -21,7 +21,7 @@
     },
     "Dart (Serverpod)": {
       "pola": { "siap": ["withServerpod("], "kirim": ["endpoints.transfer.bayar(budi, 418, -70000)"], "status": ["throwsA(isA<JumlahTidakValid>())"], "field": [] },
-      "catatan": { "field": "Endpoint Serverpod tidak menjawab dengan status code dan body JSON. Yang dicek adalah tipe exception yang diterima pemanggil." }
+      "catatan": { "field": "Test tools memanggil method endpoint langsung, jadi tidak ada status code dan body JSON. Yang dicek adalah tipe exception yang diterima pemanggil." }
     }
   }
 }

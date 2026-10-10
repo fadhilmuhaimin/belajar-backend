@@ -13,7 +13,7 @@ import (
 const serangan = "(SELECT 1/0)"
 
 func buka(t *testing.T) *sql.DB {
-	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
+	db, err := sql.Open("pgx", os.Getenv("TEST_DATABASE_URL"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -13,23 +13,33 @@ import (
 )
 
 // --8<-- [start:siapkan]
+// Database dan schema yang dibuat ulang dari nol oleh lab (run.py) sebelum tes dijalankan.
+const databaseTes, schemaTes = "lab", "tahap1"
+
 // siapkan membuka PostgreSQL sungguhan dan menulis keadaan awal yang sama sebelum setiap tes.
-// Tanpa DATABASE_URL tes dilewati (SKIP), jadi tidak pernah terhitung lolos tanpa database.
+// Alamatnya dari TEST_DATABASE_URL, bukan DATABASE_URL milik server; tanpa variabel itu tes dilewati (SKIP).
+// Sebelum menghapus apa pun, tes berhenti bila database atau schema-nya bukan milik tes.
 func siapkan(t *testing.T, perintah ...string) (Service, *sql.DB) {
 	t.Helper()
-	url := os.Getenv("DATABASE_URL")
+	url := os.Getenv("TEST_DATABASE_URL")
 	if url == "" {
-		t.Skip("DATABASE_URL kosong: tes ini butuh PostgreSQL")
+		t.Skip("TEST_DATABASE_URL kosong: tes ini butuh PostgreSQL")
 	}
 	db, err := sql.Open("pgx", url)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { db.Close() })
+	var nama, schema string
+	if err := db.QueryRow("SELECT current_database(), coalesce(current_schema(), '')").Scan(&nama, &schema); err != nil {
+		t.Fatal(err)
+	}
+	if nama != databaseTes || schema != schemaTes {
+		t.Fatalf("%s/%s bukan database tes %s/%s: tidak ada data yang dihapus", nama, schema, databaseTes, schemaTes)
+	}
 	awal := []string{
 		"DELETE FROM koreksi",
 		"DELETE FROM transaksi",
-		"ALTER TABLE akun DROP CONSTRAINT IF EXISTS batas_saldo_warung",
 		"UPDATE akun SET saldo = 0",
 	}
 	for _, q := range append(awal, perintah...) {
@@ -51,13 +61,35 @@ func angka(t *testing.T, db *sql.DB, q string) int64 {
 	return n
 }
 
+// batasWarung memasang batas saldo warung dari M4 bila belum ada, lalu melepasnya lagi sesudah tes.
+// Constraint yang sudah ada sebelum tes tidak disentuh, jadi database ditinggalkan seperti ditemukan.
+func batasWarung(t *testing.T, db *sql.DB) {
+	t.Helper()
+	var ada bool
+	q := "SELECT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'batas_saldo_warung' AND conrelid = 'akun'::regclass)"
+	if err := db.QueryRow(q).Scan(&ada); err != nil {
+		t.Fatal(err)
+	}
+	if ada {
+		return
+	}
+	if _, err := db.Exec("ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000)"); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if _, err := db.Exec("ALTER TABLE akun DROP CONSTRAINT batas_saldo_warung"); err != nil {
+			t.Error(err)
+		}
+	})
+}
+
 // --8<-- [start:m4]
 // Regression test M4 (1.22): pembayaran yang gagal di langkah kedua tidak mengubah saldo siapa pun.
 func TestBayarGagalTidakMengubahSaldo(t *testing.T) {
 	svc, db := siapkan(t,
 		"UPDATE akun SET saldo = 250000 WHERE id = 419",
-		"UPDATE akun SET saldo = 1450000 WHERE id = 418",
-		"ALTER TABLE akun ADD CONSTRAINT batas_saldo_warung CHECK (jenis <> 'warung' OR saldo <= 1500000)")
+		"UPDATE akun SET saldo = 1450000 WHERE id = 418")
+	batasWarung(t, db)
 
 	_, _, err := svc.Bayar(context.Background(), 419, 418, 70000)
 	if err == nil {
