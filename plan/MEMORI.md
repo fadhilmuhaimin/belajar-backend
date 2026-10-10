@@ -5,6 +5,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 ## Keputusan baru
 
 - Nomor keputusan baru = nomor terbesar di KEPUTUSAN + 1 (aturan dari keputusan 216); sisa 174–199 dibiarkan kosong.
+- 233: 1.26-lab, mode rentan m5 + `m5.txt`; `run.py` membuang warna ANSI gosec.
 - 232: I4, fondasi diagram `situs/src/diagram/` (skema Zod registry arsitektur + zona, tata mendatar/tegak, React Flow terkunci), `/uji/diagram/`, `ukur-diagram.mjs`.
 - 231: I3, fondasi gerak `situs/src/gerak/` (token, MotionProvider, `useGerak`, `useAwal`), halaman uji `/uji/gerak/`, `ukur-gerak.mjs`.
 - 229–230: I2, motion 14.1.0 dan @xyflow/react 12.12.0 (ADR dependency).
@@ -85,6 +86,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 200 baris; baris yang tidak
 
 ## Sedang dikerjakan
 
+2026-10-10 · 1.26-lab selesai (keputusan 233), branch `tahap-1/lab-m5`. `labs/api-t1/output/m5.txt` siap untuk halaman 1.26: bagian B–D mode rentan (417, 418 Warung Ani saldo 25000, enumerasi 401–503 = 103 akun, baris 416–420 tampil), E–F versi benar (418 dan 9999 sama-sama 404, body identik; enumerasi 1 × 200, 102 × 404). Kode yang dikutip: region `m5` di `internal/service/rentan.go`, versi benar `LihatAkun` di `internal/service/akun.go`. Rekam satu bagian: `make -C labs/api-t1 run BAGIAN=m5`. Berikutnya: `python3 tools/antrean.py berikut` (1.26 halaman).
 2026-10-10 · I4 selesai (keputusan 232), branch `interaksi/i4`. Diagram arsitektur: `<DiagramArsitektur client:visible id="..." judul="Arsitektur Tahap N" data={Arsitektur.parse(t.arsitektur)} />` dari `situs/src/diagram/` (data registry `tahap[].arsitektur`, skema di `skema.ts`, tata di `tata.ts`). Contoh: `src/pages/uji/diagram.astro`. Diagram baru wajib lolos `ukur-diagram.mjs` (path uji di alat itu). Ukuran JS per halaman: `python3 tmp/ukur_diagram_js.py` (penutupan impor; siapa yang memuat React Flow). Berikutnya: `python3 tools/antrean.py berikut`.
 I3 selesai (keputusan 231), branch `interaksi/i3`. Komponen yang memakai gerak: bungkus island dengan `MotionProvider` (`situs/src/gerak/`), pakai `import * as m from "motion/react-m"`, `transition` dari `useGerak("cepat"|"sedang", "masuk"|"keluar")`, `initial` dari `useAwal(...)`; jangan tulis `duration: <angka>` (Vitest gagal). Contoh: `ContohGerak.tsx` di `/uji/gerak/` (StarlightPage, di luar registry). `ukur-gerak.mjs --axe tmp/axe/axe.min.js` menjalankan axe juga (axe-core 4.10.3 dari unpkg; env `AXE=` di depan perintah ditolak dontAsk). Berikutnya: `python3 tools/antrean.py berikut`.
 I2 selesai (keputusan 229, 230): `motion` 14.1.0 dan `@xyflow/react` 12.12.0 dipin persis; ukuran paket diukur `python3 tmp/ukur-paket/ukur.py`.
