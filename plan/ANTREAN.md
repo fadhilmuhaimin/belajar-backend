@@ -254,11 +254,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### I5b · Beranda: peta tahap memakai DiagramArsitektur
 
 - jenis: interaksi
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: I3, I4
 - selesai bila: peta tahap di beranda memakai DiagramArsitektur; memilih tahap mengubah diagram dengan transisi; jawaban teka-teki muncul dengan gerak singkat; tangkapan sebelum/sesudah; butir I6.
-- catatan: -
+- catatan: keputusan 248
 
 ### 1.32 · Testing: apa dites di level mana
 
