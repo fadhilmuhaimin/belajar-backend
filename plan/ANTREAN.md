@@ -137,11 +137,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### 1.26 · M5: Angka di URL
 
 - jenis: konten
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: 1.26-lab
 - selesai bila: halaman `t1-m5` (masalah, ★, peran security) dengan template masalah: gejala (Dimas mengganti 417 jadi 418, menyimpan 100 saldo ke spreadsheet, mengirimnya ke Sinta) → yang Raka kira (UUID) → yang sebenarnya (backend tidak pernah bertanya pemilik; token di tempat yang salah di app) → coba sendiri dari `m5.txt` → konsep → ADR 7–8 dirujuk; widget alur; ilustrasi adegan M5 baru di `Ilustrasi.astro` (token gelap/terang, tanpa teks di SVG) lewat `<Blok ilustrasi="m5">`; token di app berlabel Ilustrasi bila tidak direkam.
-- catatan: -
+- catatan: Selesai 2026-10-10 (keputusan 234). Spreadsheet 103 baris dari rekaman (naskah: 100); ilustrasi m5 tanpa teks di SVG; widget alur `t1-m5.json` dengan varian versi benar.
 
 ### 1.27 · Authentication
 
