@@ -182,7 +182,7 @@ window.ISTILAH = {
   "n": "1.31 Deployment dan rollback",
   "s": "istilah-container",
   "t": "Container",
-  "u": "c-operasional/c3-deployment/"
+  "u": "tahap-1/deployment-rollback/"
  },
  "Continuous Integration": {
   "b": "B1.4",
@@ -814,7 +814,7 @@ window.ISTILAH = {
   "n": "1.31 Deployment dan rollback",
   "s": "istilah-rolling-deploy",
   "t": "Rolling deploy",
-  "u": "c-operasional/c3-deployment/"
+  "u": "tahap-1/deployment-rollback/"
  },
  "Round trip": {
   "b": "B11.2",
@@ -1142,7 +1142,7 @@ window.ISTILAH = {
   "n": "1.31 Deployment dan rollback",
   "s": "istilah-container",
   "t": "Container",
-  "u": "c-operasional/c3-deployment/"
+  "u": "tahap-1/deployment-rollback/"
  },
  "cursor pagination": {
   "b": "B1.3",
@@ -1582,7 +1582,7 @@ window.ISTILAH = {
   "n": "1.31 Deployment dan rollback",
   "s": "istilah-rolling-deploy",
   "t": "Rolling deploy",
-  "u": "c-operasional/c3-deployment/"
+  "u": "tahap-1/deployment-rollback/"
  },
  "round trip": {
   "b": "B11.2",

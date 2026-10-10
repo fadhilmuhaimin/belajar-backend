@@ -1,0 +1,216 @@
+---
+title: "1.31 Deployment dan rollback, dan ADR 9"
+description: Setiap commit menjadi satu image bertag hash commit, dan rollback berarti menjalankan tag lama dengan perintah yang sama. Memuat ADR 9 dan infra Tahap 1, satu VPS dengan Compose.
+---
+import Blok from "../../../components/Blok.astro";
+import Rantai from "../../../components/Rantai.astro";
+import tag from "../../../../data/diagram/t1-deploy-tag.json";
+import Snippet from "../../../components/Snippet.astro";
+import WidgetLama from "../../../components/WidgetLama.astro";
+import SkripLama from "../../../components/SkripLama.astro";
+
+<p class="meta">Baca 9 menit · coba 3 menit · Prasyarat: [[t1-m6]] · Jalur inti</p>
+
+<Blok nama="Mulai" buka>
+
+## Inti
+
+Setiap commit yang di-deploy dibangun sekali menjadi image bertag hash commit itu. Rollback menjalankan tag lama, tanpa build ulang.
+
+<Rantai data={tag} ringkas />
+
+Di [[t1-m6]], binary v1 tertimpa saat versi baru disalin, jadi kembali berarti membangun ulang. Dengan image per commit, versi lama tetap tersimpan dan dijalankan dengan perintah yang sama. Rollback hanya mengganti kode. Skema database tidak ikut mundur.
+
+<details class="question">
+<summary>Sudah tahu? Cek 3 pertanyaan</summary>
+
+1. Kenapa tag `latest` tidak dipakai untuk deploy?
+2. Rollback ke tag lama berhasil menyala, tapi riwayat menjawab `500`. Apa penyebab yang paling mungkin?
+3. CI pertama Rekeningo hijau, tapi riwayat Budi kosong sesudah deploy. Apa yang belum dikerjakan CI itu?
+
+Yakin dengan ketiganya? Lompat ke [[berikutnya]].
+
+</details>
+
+</Blok>
+
+<Blok nama="Coba" buka aman="Kalau berhenti di sini, kamu sudah tahu: rollback menjalankan image lama yang masih tersimpan, bukan membangun ulang kode lama.">
+
+Ikuti satu deploy yang salah dan rollback-nya dari HP Budi. Commit `f5ea0b4` adalah latihan lab dengan bug buatan, bukan kejadian di cerita. Setiap status diambil dari rekaman lab.
+
+<WidgetLama nama="alur" src="data/skenario/t1-deploy.json" />
+
+</Blok>
+
+<Blok nama="Paham">
+
+### Kenapa ini ada
+
+Di [[t1-m6]], Raka membangun binary di laptop lalu menyalinnya ke VPS dengan `scp`. Binary v1 tertimpa karena path-nya sama. Untuk kembali, v1 dibangun ulang dari kode lama, dan hasilnya menjawab `500` karena kolom sudah berganti nama.
+
+Deploy itu menghapus dua hal: jalan kembali ke versi lama, dan nama field yang dibaca app lama. Halaman ini menjawab yang pertama. Yang kedua dijawab ADR 10 di [[E1]].
+
+### Cara kerjanya
+
+**Satu commit, satu image.** Image container berisi binary beserta semua yang dibutuhkannya untuk jalan. Lab membangunnya dalam dua tahap: compile di image Go, lalu binary disalin ke image distroless tanpa shell.
+
+<Snippet file="labs/api-t1/Dockerfile" lang="dockerfile" title="labs/api-t1/Dockerfile" />
+
+Tag image adalah hash commit yang membangunnya. Dua commit menghasilkan dua image, dan keduanya tetap tersimpan:
+
+<Snippet file="labs/api-t1/output/deploy.txt" lines="6:15" title="Rekaman lab: labs/api-t1/output/deploy.txt" />
+
+Dari tag ini, `git show 390ff47` menunjukkan kode yang sedang jalan. Tag seperti `latest` dipindah ke image baru setiap build, jadi tidak menunjuk ke satu versi. Dokumentasi Docker menulis bahwa tag bisa dipindah publisher-nya, sedangkan digest selalu menunjuk image yang sama ([docs.docker.com](https://docs.docker.com/build/building/best-practices/#pin-base-image-versions)).
+
+**Satu file Compose, satu perintah.** Compose membaca deskripsi container dari file, lalu `docker compose up -d` membuat container yang sesuai. Tag image diambil dari variabel `TAG`:
+
+<Snippet file="labs/api-t1/deploy/compose.yaml" lang="yaml" title="labs/api-t1/deploy/compose.yaml" />
+
+`${TAG:?...}` membuat Compose berhenti kalau `TAG` kosong atau tidak diisi ([docs.docker.com](https://docs.docker.com/reference/compose-file/interpolation/)). Deploy tanpa menyebut commit ditolak sebelum container apa pun disentuh:
+
+<Snippet file="labs/api-t1/output/deploy.txt" lines="18:20" title="Rekaman lab: labs/api-t1/output/deploy.txt" />
+
+`DATABASE_URL` diberikan saat perintah dijalankan, tidak ditulis di file. Dari mana nilai itu datang di VPS dibahas di [[t1-m7]].
+
+**Deploy dan rollback memakai perintah yang sama.** Saat tag berubah, `up` menghentikan container lama lalu membuat yang baru ([docs.docker.com](https://docs.docker.com/reference/cli/docker/compose/up/)). Prober membaca riwayat Budi di antara dua perintah:
+
+<Snippet file="labs/api-t1/output/deploy.txt" lines="29:39" title="Rekaman lab: labs/api-t1/output/deploy.txt" />
+
+Commit `f5ea0b4` menjawab `200` dengan riwayat kosong, jadi server tidak mencatat error. Saldo Budi tetap Rp225.000; yang salah hanya query riwayat. Rollback menjalankan tag lama:
+
+<Snippet file="labs/api-t1/output/deploy.txt" lines="42:51" title="Rekaman lab: labs/api-t1/output/deploy.txt" />
+
+Container memakai image yang sama persis dengan sebelum deploy. Tidak ada yang dibangun ulang, jadi versi Go dan dependency tidak mungkin berbeda. The Twelve-Factor App menulis bahwa release tidak diubah sesudah dibuat, sehingga rollback ke release sebelumnya bisa cepat ([12factor.net](https://12factor.net/build-release-run)).
+
+**Rollback tidak memundurkan skema.** Kode v1 yang sama dijalankan di [[t1-m6]] sesudah kolom diganti nama, dan riwayat menjawab `500`:
+
+<Snippet file="labs/api-t1/output/m6.txt" lines="83:92" title="Rekaman lab: labs/api-t1/output/m6.txt" />
+
+Image lama hanya menolong selama skema masih cocok dengan kode lama. Aturan migration yang tetap cocok dengan image sebelumnya adalah ADR 10 di [[E1]].
+
+**CI pertama.** Di laptop, Raka bisa melewatkan satu langkah tanpa sadar. CI menjalankan langkah yang sama di setiap push ke `main`: `go vet`, `go test`, gosec, lalu build image dan push ke registry.
+
+<Snippet file="labs/api-t1/deploy/ci.yml" lang="yaml" title="labs/api-t1/deploy/ci.yml" />
+
+File ini contoh untuk repo Rekeningo dan tidak dijalankan di repo panduan ini. Versi setiap action dicek ke halaman rilisnya pada 2026-10-11. `github.sha` berisi hash penuh commit yang di-push ([docs.github.com](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts)); lab memakai 7 karakter pertama supaya terbaca.
+
+Nama image di registry harus huruf kecil, karena aturan nama image OCI hanya menerima `[a-z0-9]` dan pemisah ([OCI distribution-spec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md)). Login ke registry memakai `GITHUB_TOKEN` bawaan workflow dengan izin `packages: write` ([docs.github.com](https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions)). Deploy tetap satu perintah di VPS, dijalankan Raka sesudah CI hijau.
+
+### Infra Tahap 1: satu VPS dan Compose
+
+API Tahap 1 berjalan sebagai satu container di satu VPS. Asumsi naskah: puncak Tahap 1 adalah 0,14 request per detik. Satu proses Go menjawab beban itu, jadi tambahan mesin hanya menambah hal yang harus dijaga satu orang.
+
+Compose memberi tiga hal yang dibutuhkan di sini: konfigurasi container tertulis di repo, deploy dan rollback lewat satu perintah, dan restart otomatis. `restart: unless-stopped` menyalakan ulang container apa pun exit code-nya, kecuali container itu dihentikan dengan sengaja ([docs.docker.com](https://docs.docker.com/reference/compose-file/services/#restart)).
+
+Batasnya juga jelas. Saat container diganti, ada jeda tanpa container yang menjawab; lab tidak mengukur lamanya. Kalau VPS itu mati, Rekeningo ikut mati. Rinciannya di [[t1-tim-infra]].
+
+### Di stack lain
+
+Yang sama di semua stack: artefak dibangun sekali, diberi versi, dan disimpan; rollback menjalankan artefak lama. Yang berbeda adalah bentuk artefaknya. Hanya baris Go yang dijalankan di lab.
+
+| Stack | Artefak yang di-deploy |
+|---|---|
+| Go | Satu binary statis di image distroless (dijalankan di lab) |
+| Express | Kode dan `node_modules` di image Node |
+| Laravel | Kode dan `vendor` di image PHP, biasanya dengan web server di depannya ([Laravel: Deployment](https://laravel.com/docs/12.x/deployment)) |
+| Django | Kode dan paket Python, dijalankan server WSGI atau ASGI ([Django: Deployment](https://docs.djangoproject.com/en/5.2/howto/deployment/)) |
+| Spring | File JAR di image JVM ([Spring Boot: Container Images](https://docs.spring.io/spring-boot/reference/packaging/container-images/index.html)) |
+| Dart (Serverpod) | Server Dart di image container [perlu verifikasi] |
+| Supabase | Tanpa server sendiri; yang di-deploy migration dan Edge Function ([Supabase: Deployment](https://supabase.com/docs/guides/deployment)) |
+
+Polanya sama dengan nomor build di `pubspec.yaml`. Setiap rilis app punya nomornya sendiri, dan rilis lama tidak dibangun ulang untuk dipasang lagi.
+
+</Blok>
+
+<Blok nama="Putuskan">
+
+### ADR 9: image per commit, rollback = tag lama, CI pertama
+
+**Kebutuhan.** Di M6, deploy lewat `scp` menimpa binary v1, dan kembali ke v1 berarti build ulang. Engineer-nya satu orang, servernya satu VPS, dan app dipakai 100 karyawan dan 3 warung saat makan siang. Asumsi puncaknya 0,14 request per detik.
+
+| Opsi | Kelebihan | Kekurangan |
+|---|---|---|
+| `git pull` lalu build di VPS | Tanpa registry dan tanpa Docker | Hasil build bergantung pada versi Go di VPS; rollback berarti build ulang |
+| Binary per commit di folder `releases/<hash>`, dipilih lewat symlink | Tanpa alat baru; rollback berarti memindah symlink | Skrip simpan, pindah, dan restart ditulis sendiri; build tetap dari laptop |
+| **Image bertag hash commit, dibangun CI, dijalankan Compose** | Artefak yang sama dari CI sampai VPS; rollback satu perintah; tag menunjuk commit | Docker dan registry masuk infra; image lama memakan disk; ada jeda saat container diganti |
+| Orkestrator atau platform container terkelola | Rolling deploy dan rollback bawaan | Biaya belajar dan operasional untuk satu orang, pada 0,14 request per detik |
+
+**Yang dipilih.**
+
+1. Setiap push ke `main` menjalankan CI: `go vet`, `go test`, gosec G201 dan G202 (janji di [[t1-sql-injection]]), lalu build dan push image.
+2. Tag image adalah hash commit. Satu tag dibangun sekali dan tidak pernah ditimpa. `latest` tidak dipakai untuk deploy.
+3. Deploy adalah `TAG=<hash> docker compose up -d` di VPS, sesudah CI hijau. Rollback adalah perintah yang sama dengan hash sebelumnya.
+4. Sebelum deploy, Raka mencatat hash yang sedang jalan. Image itu tidak dihapus dari VPS maupun registry.
+5. Migration tetap dijalankan Raka sebelum `up -d`, dan harus tetap cocok dengan image sebelumnya (ADR 10 di [[E1]]).
+
+**Pre-mortem.** Enam bulan lagi, keputusan ini gagal. Tiga penyebab yang paling mungkin:
+
+- Migration mengganti nama kolom, lalu tag lama menjawab `500` seperti rekaman `m6.txt` bagian F. Pencegahnya butir 5.
+- Image lama dihapus untuk mengosongkan disk, dan rollback harus menunggu image ditarik ulang saat warung ramai. Pencegahnya butir 4.
+- Tag yang sama dibangun ulang dengan base image yang sudah bergerak, misalnya `golang:1.27-alpine`, jadi tag lama tidak lagi berisi image lama. Pencegahnya butir 2.
+
+**Kapan keputusan ini salah.** Saat jeda ganti container tidak lagi bisa diterima, misalnya pembayaran berjalan sepanjang hari di banyak gedung. Juga saat satu VPS tidak lagi menampung beban, atau mati tanpa cadangan. Saat itu deploy butuh lebih dari satu instance.
+
+**Yang merevisinya nanti.** Naskah Tahap 3 menambah staging dan CI penuh. Deploy otomatis dari CI dan migration di pipeline menunggu sampai syaratnya ada (tabel di bawah).
+
+### Sengaja belum dilakukan
+
+| Yang belum | Kenapa sekarang tidak | Dibahas di |
+|---|---|---|
+| CI men-deploy sendiri ke VPS | CI butuh kunci akses ke VPS, dan cara menyimpan secret belum dibahas | [[t1-m7]] |
+| Migration dijalankan otomatis oleh pipeline | Migration harus terbukti cocok dengan image lama dulu | [[E1]] |
+| Tes yang menangkap riwayat kosong | CI hanya menjalankan tes yang sudah ada | [[C1]] |
+| Deploy tanpa jeda | Butuh dua instance dan load balancer; puncak 0,14 request per detik | [[t1-tim-infra]] |
+
+</Blok>
+
+<Blok nama="Kunci">
+
+### Cek diri
+
+**1.** Raka menjalankan `TAG=390ff47 docker compose up -d` untuk rollback. Container menyala, tapi riwayat menjawab `500` dengan `column t.jumlah does not exist`. Apa yang terjadi?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Deploy sebelumnya juga menjalankan migration yang mengganti nama kolom. Image `390ff47` berisi kode lama yang masih membaca `jumlah`. Rollback image mengganti kode, bukan skema; rekamannya di `m6.txt` bagian F. Karena itu migration harus tetap cocok dengan image sebelumnya (ADR 10 di [[E1]]).
+
+</details>
+
+**2.** Kenapa tag `latest` tidak dipakai untuk deploy?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+`latest` dipindah ke image baru setiap build. Sesudah deploy yang salah, image lama tidak lagi punya nama yang bisa dipanggil, dan tidak ada yang tahu commit mana yang sedang jalan. Tag hash commit menjawab keduanya.
+
+</details>
+
+**3.** CI membangun image dari commit `f5ea0b4`, semua langkah hijau, tapi riwayat Budi kosong. Apa yang belum dikerjakan CI pertama?
+
+<details class="success">
+<summary>Jawaban</summary>
+
+Belum ada tes yang memanggil riwayat dan memeriksa isinya. CI hanya menjalankan tes yang sudah ditulis. Tes apa di level mana dibahas di [[C1]].
+
+</details>
+
+### Saat me-review kode AI, cek ini
+
+- [ ] Tag image adalah hash commit atau versi tetap; `latest` tidak muncul di file deploy.
+- [ ] Compose menolak jalan tanpa tag (`${TAG:?...}`), bukan memakai nilai bawaan.
+- [ ] URL database dan password tidak ditulis di Dockerfile, `compose.yaml`, atau workflow.
+- [ ] Migration di deploy ini tetap cocok dengan image sebelumnya.
+- [ ] Workflow menjalankan tes sebelum push image, dan setiap action memakai versi tetap (`@v7`), bukan nama branch.
+
+### Bacaan lanjut
+
+- [The Twelve-Factor App: Build, release, run](https://12factor.net/build-release-run)
+- [Docker: Multi-stage builds](https://docs.docker.com/build/building/multi-stage/) · [Distroless images](https://github.com/GoogleContainerTools/distroless)
+- [Docker Compose: `up`](https://docs.docker.com/reference/cli/docker/compose/up/) · [Interpolation](https://docs.docker.com/reference/compose-file/interpolation/)
+- [GitHub: Publishing Docker images](https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images)
+- [Google SRE book: Release Engineering](https://sre.google/sre-book/release-engineering/)
+
+</Blok>
+
+<SkripLama daftar={["cerita","hp","alur-core","alur"]} />

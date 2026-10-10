@@ -1,0 +1,211 @@
+{
+  "versi": 2,
+  "judul": "Deploy commit baru, lalu rollback ke tag lama",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/api-t1/output/deploy.txt",
+    "fileVarian": "labs/api-t1/output/m6.txt",
+    "catatan": "Server Go (labs/api-t1) di container Docker + PostgreSQL 17 dari database bersih. Commit f5ea0b4 adalah latihan lab dengan bug buatan. Ubah satu hal: rekaman m6.txt bagian C, F, dan G."
+  },
+  "pengantar": "Commit baru membuat riwayat Budi kosong. Ikuti deploy-nya, lalu rollback ke tag lama. Sesudah itu centang 'Ubah satu hal' dan lihat rollback yang tidak menolong.",
+  "komponen": [
+    {
+      "id": "budi",
+      "label": "HP Budi · app 1.0"
+    },
+    {
+      "id": "build",
+      "label": "Build · image per commit"
+    },
+    {
+      "id": "vps",
+      "label": "VPS · Compose"
+    },
+    {
+      "id": "db",
+      "label": "PostgreSQL"
+    }
+  ],
+  "perangkat": [
+    {
+      "id": "hp-budi",
+      "label": "HP Budi"
+    }
+  ],
+  "layarAwal": {
+    "hp-budi": {
+      "judul": "Riwayat · app 1.0",
+      "waktu": "–",
+      "isi": [
+        {
+          "jenis": "baris",
+          "kiri": "Ke Warung Ani",
+          "kanan": "Rp25.000"
+        }
+      ]
+    }
+  },
+  "predict": {
+    "q": "Riwayat Budi kosong sesudah deploy f5ea0b4. Raka menjalankan TAG=390ff47 docker compose up -d. Apa yang terjadi?",
+    "options": [
+      "Docker membangun ulang image dari kode 390ff47",
+      "Container dari image 390ff47 yang sama menyala, riwayat kembali",
+      "Gagal, karena image lama tertimpa image baru",
+      "Riwayat tetap kosong sampai app Budi diperbarui"
+    ],
+    "answer": 1,
+    "varian": false,
+    "explain": "Image 390ff47 masih tersimpan di samping image baru, jadi tidak ada yang dibangun. Rekaman bagian D: putaran 5 dan 6 kembali 1 transaksi, dan id image sama dengan bagian B."
+  },
+  "langkah": [
+    {
+      "dari": "build",
+      "judul": "Commit 390ff47 menjadi image",
+      "kirim": "$ git checkout -q 390ff47 && docker build -q -t ghcr.io/grup-lestari/rekeningo-api:390ff47 .",
+      "jelas": "Tag image adalah hash commit. Image ini dibangun sekali dan tidak pernah dibangun ulang."
+    },
+    {
+      "dari": "vps",
+      "ke": "budi",
+      "judul": "Tag 390ff47 berjalan",
+      "kirim": "$ TAG=390ff47 docker compose up -d\nGET /akun/419/riwayat\n200 · 1 transaksi",
+      "jelas": "Budi membayar Rp25.000 ke Warung Ani. Riwayatnya memuat satu transaksi.",
+      "nada": "good",
+      "layar": {
+        "hp-budi": {
+          "judul": "Riwayat · app 1.0",
+          "waktu": "–",
+          "isi": [
+            {
+              "jenis": "baris",
+              "kiri": "Ke Warung Ani",
+              "kanan": "Rp25.000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "build",
+      "judul": "Commit f5ea0b4 menjadi image kedua",
+      "kirim": "$ docker image ls ghcr.io/grup-lestari/rekeningo-api ... | sort\nghcr.io/grup-lestari/rekeningo-api:390ff47\nghcr.io/grup-lestari/rekeningo-api:f5ea0b4",
+      "jelas": "Commit latihan lab dengan bug buatan: query riwayat memakai AND, bukan OR. Image lama tetap ada di sampingnya."
+    },
+    {
+      "dari": "vps",
+      "judul": "Deploy: hanya tag yang berganti",
+      "kirim": "$ TAG=f5ea0b4 docker compose up -d",
+      "jelas": "Compose menghentikan container lama, lalu membuat container baru dari image f5ea0b4. Perintahnya sama dengan deploy sebelumnya."
+    },
+    {
+      "dari": "vps",
+      "ke": "budi",
+      "judul": "Riwayat Budi kosong",
+      "kirim": "GET /akun/419/riwayat\n200 · 0 transaksi\nGET /akun/419\n200 · saldo 225000",
+      "jelas": "Server menjawab 200, jadi log tidak mencatat error. Saldo tetap Rp225.000; yang salah hanya query riwayat.",
+      "nada": "warn",
+      "layar": {
+        "hp-budi": {
+          "judul": "Riwayat · app 1.0",
+          "waktu": "–",
+          "nada": "warn",
+          "isi": [
+            {
+              "jenis": "teks",
+              "teks": "Belum ada transaksi"
+            },
+            {
+              "jenis": "baris",
+              "kiri": "Saldo",
+              "kanan": "Rp225.000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "vps",
+      "judul": "Rollback: tag lama",
+      "kirim": "$ TAG=390ff47 docker compose up -d   # rollback",
+      "jelas": "Tidak ada build. Compose menjalankan image 390ff47 yang masih tersimpan."
+    },
+    {
+      "dari": "vps",
+      "ke": "budi",
+      "judul": "Riwayat kembali",
+      "kirim": "GET /akun/419/riwayat\n200 · 1 transaksi\n$ docker inspect --format '{{.Image}}' rekeningo-api-1\nsha256:<id image 390ff47>",
+      "jelas": "Image yang berjalan sama persis dengan sebelum deploy. Rekaman bagian D.",
+      "nada": "good",
+      "layar": {
+        "hp-budi": {
+          "judul": "Riwayat · app 1.0",
+          "waktu": "–",
+          "isi": [
+            {
+              "jenis": "baris",
+              "kiri": "Ke Warung Ani",
+              "kanan": "Rp25.000"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "varian": {
+    "label": "commit baru juga mengganti nama kolom jumlah jadi nominal (kode v2 dari M6)",
+    "mulai": 3,
+    "langkah": [
+      {
+        "dari": "vps",
+        "ke": "db",
+        "judul": "Deploy dengan migration 000006",
+        "kirim": "ALTER TABLE transaksi RENAME COLUMN jumlah TO nominal\nGET /akun/419/riwayat\n200 · field jumlah tidak ada",
+        "jelas": "Rekaman m6.txt bagian C. App 1.0 di HP Budi mencari field jumlah, yang kini bernama nominal.",
+        "nada": "warn",
+        "layar": {
+          "hp-budi": {
+            "judul": "Riwayat · app 1.0",
+            "waktu": "–",
+            "nada": "warn",
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Riwayat tidak bisa dimuat",
+                "nada": "warn"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "dari": "vps",
+        "ke": "budi",
+        "judul": "Kode lama di skema baru: 500",
+        "kirim": "GET /akun/419/riwayat\n500 Internal Server Error\nERROR: column t.jumlah does not exist",
+        "jelas": "Rekaman m6.txt bagian F. Kode v1 membaca kolom jumlah, yang sudah tidak ada. Image lama tidak memundurkan skema.",
+        "nada": "warn"
+      },
+      {
+        "dari": "db",
+        "ke": "vps",
+        "judul": "Skema harus mundur lewat migration baru",
+        "kirim": "ALTER TABLE transaksi RENAME COLUMN nominal TO jumlah\nGET /akun/419/riwayat\n200 · jumlah 25000",
+        "jelas": "Rekaman m6.txt bagian G: migration 000007 mengembalikan kolom. Aturan supaya ini tidak perlu terjadi adalah ADR 10 di 1.33.",
+        "nada": "good",
+        "layar": {
+          "hp-budi": {
+            "judul": "Riwayat · app 1.0",
+            "waktu": "–",
+            "isi": [
+              {
+                "jenis": "baris",
+                "kiri": "Ke Warung Ani",
+                "kanan": "Rp25.000"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

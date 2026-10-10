@@ -444,25 +444,25 @@
   "id": "C3-1",
   "halaman": "C3",
   "judul": "1.31 Deployment dan rollback",
-  "url": "c-operasional/c3-deployment/",
-  "tanya": "Rollback ke image v2 berhasil, health check 200, tapi semua request profil error `column \"telp\" does not exist`. Apa yang terjadi?",
-  "jawab": "Deploy v3 sudah menjalankan migration yang menghapus atau me-rename kolom `telp`. Image v2 masih membaca kolom itu. Rollback kode tidak membatalkan migration. Karena itu migration harus kompatibel mundur: hapus kolom hanya setelah kode yang memakainya sudah tidak mungkin di-rollback (2.8 Ubah skema tanpa downtime)."
+  "url": "tahap-1/deployment-rollback/",
+  "tanya": "Raka menjalankan `TAG=390ff47 docker compose up -d` untuk rollback. Container menyala, tapi riwayat menjawab `500` dengan `column t.jumlah does not exist`. Apa yang terjadi?",
+  "jawab": "Deploy sebelumnya juga menjalankan migration yang mengganti nama kolom. Image `390ff47` berisi kode lama yang masih membaca `jumlah`. Rollback image mengganti kode, bukan skema; rekamannya di `m6.txt` bagian F. Karena itu migration harus tetap cocok dengan image sebelumnya (ADR 10 di 1.33 App versi lama yang tidak bisa dipaksa update)."
  },
  {
   "id": "C3-2",
   "halaman": "C3",
   "judul": "1.31 Deployment dan rollback",
-  "url": "c-operasional/c3-deployment/",
-  "tanya": "Jelaskan kenapa aplikasi sebaiknya menolak start kalau `TOKEN_SECRET` kosong, bukan memakai nilai bawaan.",
-  "jawab": "Dengan nilai bawaan, aplikasi tampak sehat tapi menandatangani token dengan secret yang diketahui siapa pun yang membaca kodenya. Kesalahan konfigurasi jadi celah keamanan yang tidak terlihat. Dengan fail-fast, kesalahan langsung terlihat di log dan health check, lalu deploy di-rollback."
+  "url": "tahap-1/deployment-rollback/",
+  "tanya": "Kenapa tag `latest` tidak dipakai untuk deploy?",
+  "jawab": "`latest` dipindah ke image baru setiap build. Sesudah deploy yang salah, image lama tidak lagi punya nama yang bisa dipanggil, dan tidak ada yang tahu commit mana yang sedang jalan. Tag hash commit menjawab keduanya."
  },
  {
   "id": "C3-3",
   "halaman": "C3",
   "judul": "1.31 Deployment dan rollback",
-  "url": "c-operasional/c3-deployment/",
-  "tanya": "Health check hanya mengembalikan `200` tanpa memeriksa apa pun. Apa yang terlewat?",
-  "jawab": "Instance yang tidak bisa menghubungi database tetap dianggap sehat, dan deploy dinyatakan berhasil. Health check di lab memanggil `PingContext` ke database supaya kegagalan koneksi terlihat."
+  "url": "tahap-1/deployment-rollback/",
+  "tanya": "CI membangun image dari commit `f5ea0b4`, semua langkah hijau, tapi riwayat Budi kosong. Apa yang belum dikerjakan CI pertama?",
+  "jawab": "Belum ada tes yang memanggil riwayat dan memeriksa isinya. CI hanya menjalankan tes yang sudah ditulis. Tes apa di level mana dibahas di 1.32 Testing."
  },
  {
   "id": "C1-1",

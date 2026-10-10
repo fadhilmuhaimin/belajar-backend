@@ -1,0 +1,46 @@
+{
+  "id": "t1-deploy-tag",
+  "judul": "Deploy dan rollback dengan tag commit",
+  "sumber": {
+    "jenis": "rekaman",
+    "teks": "Rekaman lab api-t1 · deploy.txt"
+  },
+  "baris": [
+    {
+      "label": "Deploy",
+      "sub": "commit baru",
+      "simpul": [
+        {
+          "teks": "TAG=f5ea0b4 up -d",
+          "kode": true
+        },
+        {
+          "teks": "Riwayat Budi kosong",
+          "sub": "200 · 0 transaksi",
+          "nada": "warn"
+        }
+      ]
+    },
+    {
+      "label": "Rollback",
+      "sub": "tag lama",
+      "simpul": [
+        {
+          "teks": "TAG=390ff47 up -d",
+          "kode": true
+        },
+        {
+          "teks": "Image yang sama",
+          "sub": "tanpa build ulang",
+          "nada": "system"
+        },
+        {
+          "teks": "Riwayat kembali",
+          "sub": "200 · 1 transaksi",
+          "nada": "good"
+        }
+      ]
+    }
+  ],
+  "catatan": "Rollback mengganti kode, bukan skema database."
+}
