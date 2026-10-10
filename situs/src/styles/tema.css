@@ -670,7 +670,6 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
   .peta__no { font-size: 1.4rem; }
   .peta__info dl div { grid-template-columns: 1fr; gap: 0; }
   .beranda__bagian h2 { font-size: 1.35rem; }
-  /* Diagram tahap di HP: komponen ditumpuk dengan panah ke bawah, supaya panah tidak tergantung di ujung baris. */
 }
 /* Widget tebak (keputusan 208) */
 .sl-markdown-content .tb-adegan { display: grid; gap: 0.8rem; }

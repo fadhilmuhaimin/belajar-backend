@@ -12,6 +12,7 @@ export const UKURAN = {
   jarakBaris: 40, // jarak antarbaris
   padZona: 14, // padding zona di sekeliling kotak
   labelZona: 26, // ruang label di atas zona
+  bantalan: 24, // ruang fitView di atas dan bawah tata, ditambahkan ke tinggi wadah
 } as const;
 
 export type TataKotak = { id: string; kotak: Kotak; status: Status; x: number; y: number };
@@ -66,6 +67,15 @@ export function tata(a: Arsitektur, arah: Arah): Tata {
   const semuaX = [...kotak.map((t) => t.x + lebar), ...zona.map((z) => z.x + z.lebar)];
   const semuaY = [...kotak.map((t) => t.y + tinggi), ...zona.map((z) => z.y + z.tinggi)];
   return { kotak, zona, panah, lebar: Math.max(...semuaX), tinggi: Math.max(...semuaY) };
+}
+
+// Tinggi wadah yang dipesan sejak SSR (review PR #161, keputusan 248), supaya versi statis berganti ke React Flow
+// tanpa layout shift. Server belum tahu lebar wadah, jadi kedua tinggi dikirim sebagai variabel CSS dan diagram.css
+// memilih salah satunya dari lebar container dengan ambang yang sama dengan komponen (lebarMendatar).
+export function varPesan(a: Arsitektur): Record<`--${string}`, string> {
+  const tegak = tata(a, "tegak").tinggi + UKURAN.bantalan;
+  const mendatar = tata(a, "mendatar").tinggi + UKURAN.bantalan;
+  return { "--diagram-mendatar": `${mendatar}px`, "--diagram-selisih": String(tegak - mendatar), "--diagram-ambang": `${lebarMendatar(a)}px` };
 }
 
 // Teks alternatif untuk versi statis (role="img"): urutan per baris, panah sebagai "ke", status dan zona disebut.

@@ -12,6 +12,7 @@ import Tebak from "../widgets/tebak/Tebak.tsx";
 import tebakM4 from "../../data/widget/beranda-m4-tebak.json";
 import PetaDiagram from "../diagram/PetaDiagram";
 import { Arsitektur } from "../diagram/skema";
+import { varPesan } from "../diagram/tata";
 
 type H = { id: string; judul: string; tahap: unknown; path: string; ada?: boolean; masalah?: string; nomor?: string; peran?: string[]; inti?: boolean; menit?: number };
 type Node = { label: string; baru?: boolean; berubah?: boolean; catatan?: string; lepas?: boolean };
@@ -48,6 +49,15 @@ const diagramTahap = tahap.map((t) => ({ no: t.no, data: t.diagram ? Arsitektur.
 // island di-hydrate, dan sesudah hydrate React baru membaca data-tahap di efek; selama itu isinya masih versi SSR
 // (Tahap 1). Tanpa JS tab tidak berganti, jadi data-tahap tetap tahap pertama dan diagramnya terlihat bersama panelnya.
 const cssPeta = tahap.map((t) => `.peta__tab[data-tahap="${t.no}"] + .peta__isi .peta__diagram:not([data-peta-diagram="${t.no}"])`).join(",\n") + " { visibility: hidden; }";
+// Selama diagram belum mengikuti tab (tab dipilih sebelum hydrate), wadahnya memesan tinggi tahap terpilih, bukan
+// Tahap 1 dari SSR; tahap proyeksi tanpa diagram tidak memesan apa pun. Hydrate yang datang lebih dari 500 ms sesudah
+// tap tidak lagi menggeser halaman (CLS, review PR #161, keputusan 248). Nilainya sama dengan varPesan di komponen.
+const cssPesan = diagramTahap.map((t) => {
+  const sel = `.peta__tab[data-tahap="${t.no}"] + .peta__isi .peta__diagram:not([data-peta-diagram="${t.no}"])`;
+  return t.data
+    ? `${sel} .diagram__wadah { ${Object.entries(varPesan(t.data)).map(([k, v]) => `${k}: ${v};`).join(" ")} }`
+    : `${sel} .diagram__panggung { display: none; }`;
+}).join("\n");
 
 // Peran sebagai pertanyaan: lima halaman pertama yang menonjolkan peran itu, menurut urutan baca.
 const PERAN: [string, string][] = [
@@ -157,7 +167,7 @@ const cara = hs.find((h) => h.id === "A0");
   {cara && <p class="beranda__kecil"><a href={url(cara)}>Cara pakai panduan ini</a></p>}
 </div>
 <script type="application/json" id="data-masalah" set:html={JSON.stringify(masalah)} />
-<style is:inline set:html={cssPeta} />
+<style is:inline set:html={cssPeta + "\n" + cssPesan} />
 
 <script>
   const simpanan = (k: string): string | null => { try { return localStorage.getItem(k); } catch { return null; } };

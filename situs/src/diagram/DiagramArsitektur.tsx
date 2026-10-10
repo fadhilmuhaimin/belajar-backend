@@ -2,15 +2,17 @@
 // - Sebelum JS dimuat dan untuk pembaca layar selalu ada versi statis (role="img" + aria-label).
 // - Diagram tidak bisa digeser, di-zoom, atau menangkap scroll halaman; ukurannya dari fitView (zoom paling besar 1).
 // - Kotak adalah tombol: klik atau Enter membuka catatannya di bawah diagram, bukan tooltip.
+// - Tinggi wadah sudah dipesan di SSR (varPesan, diagram.css): versi statis duduk di dalam ruang itu, jadi hydrate
+//   tidak menggeser halaman (review PR #161, keputusan 248).
 // - `kunci` berganti (peta tahap di beranda, I5b): React Flow dipasang ulang supaya fitView mengukur data baru
 //   (fitView hanya berlaku untuk node awal), dan kotak yang dipilih dilepas.
 // Dimuat hanya di halaman yang memakainya, dengan client:visible.
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Handle, MarkerType, Position, ReactFlow, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/base.css";
 import "./diagram.css";
 import type { Arsitektur } from "./skema";
-import { LABEL_STATUS, UKURAN, deskripsi, lebarMendatar, tata, type Arah, type Status, type TataKotak } from "./tata";
+import { LABEL_STATUS, UKURAN, deskripsi, lebarMendatar, tata, varPesan, type Arah, type Status, type TataKotak } from "./tata";
 
 type DataKotak = { t: TataKotak; arah: Arah; dipilih: boolean; pilih: (id: string) => void; idCatatan: string };
 type DataZona = { label: string };
@@ -72,6 +74,7 @@ export default function DiagramArsitektur({ data, judul, id, kunci = "" }: Props
   const arah: Arah = lebar !== null && lebar < lebarMendatar(data) ? "tegak" : "mendatar";
   const hasil = useMemo(() => tata(data, arah), [data, arah]);
   const teks = useMemo(() => deskripsi(data, judul), [data, judul]);
+  const pesan = useMemo(() => varPesan(data) as CSSProperties, [data]);
   const pilih = (k: string) => setPilihan((p) => (p === k ? null : k));
   const idCatatan = `${id}-catatan`;
 
@@ -110,11 +113,11 @@ export default function DiagramArsitektur({ data, judul, id, kunci = "" }: Props
     markerEnd: { type: MarkerType.ArrowClosed, color: "currentColor", width: 16, height: 16 },
   }));
   const terpilih = hasil.kotak.find((t) => t.id === pilihan);
-  // Tinggi wadah = tinggi tata pada zoom 1 + bantalan fitView; lebar mengikuti kolom.
-  const tinggi = hasil.tinggi + 24;
 
   return (
-    <figure className="diagram not-content" data-diagram={id} data-arah={lebar === null ? "statis" : arah}>
+    <figure className="diagram not-content" data-diagram={id} data-arah={lebar === null ? "statis" : arah} style={pesan}>
+      {/* Satu sel grid: versi statis di atas wadah yang tingginya sudah dipesan; sesudah hydrate statis jadi sr-only. */}
+      <div className="diagram__panggung">
       {/* Versi statis: terlihat sebelum JS, tetap ada untuk pembaca layar sesudahnya. */}
       <div role="img" aria-label={teks} className={lebar === null ? "diagram__statis" : "diagram__statis sr-only"}>
         {data.baris.map((b, r) => (
@@ -127,7 +130,7 @@ export default function DiagramArsitektur({ data, judul, id, kunci = "" }: Props
           </ol>
         ))}
       </div>
-      <div ref={wadah} className="diagram__wadah" style={lebar === null ? undefined : { height: tinggi }}>
+      <div ref={wadah} className="diagram__wadah">
         {lebar !== null && (
           <ReactFlow
             key={`${arah}-${kunci}`}
@@ -154,6 +157,7 @@ export default function DiagramArsitektur({ data, judul, id, kunci = "" }: Props
             proOptions={{ hideAttribution: true }}
           />
         )}
+      </div>
       </div>
       <div id={idCatatan} className="diagram__catatan" aria-live="polite">
         {terpilih ? (

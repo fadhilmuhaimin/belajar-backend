@@ -3,7 +3,9 @@
 // - dengan JS: React Flow terpasang, tegak di 375 px dan mendatar di 1366 px, semua kotak di dalam wadah;
 // - di 375×667 roda dan gestur sentuh di atas diagram tetap menggulir halaman (scroll tidak tertangkap);
 // - kotak bisa dicapai dengan Tab dan dibuka dengan Enter; catatan muncul di bawah diagram;
-// - dengan reduced motion: 0 animasi sesudah memilih kotak; fungsi tetap.
+// - dengan reduced motion: 0 animasi sesudah memilih kotak; fungsi tetap;
+// - CLS ≤ 0,1 saat island di-hydrate: gulir pelan dengan modul JS ditunda 300 ms (HP dan desktop) dan tap tab
+//   beranda sebelum hydrate (keputusan 248).
 //   node tools/ukur-diagram.mjs --url http://127.0.0.1:4321
 //   node tools/ukur-diagram.mjs --url ... --axe /path/axe.min.js   # + axe-core, gelap dan terang
 import { chromium } from "@playwright/test";
@@ -21,6 +23,32 @@ const lapor = (ok, pesan) => {
   console.log(`${ok ? "ok" : "GAGAL"} ${pesan}`);
   if (!ok) gagal++;
 };
+
+// CLS menurut definisi web.dev (https://web.dev/articles/cls): jendela sesi terbesar, geser berjarak < 1 s dan satu
+// jendela paling lama 5 s; geser dalam 500 ms sesudah input (hadRecentInput) tidak dihitung. Baik ≤ 0,1.
+const pasangCls = (ctx) =>
+  ctx.addInitScript(() => {
+    const c = (window.__cls = { nilai: 0, sesi: 0, awal: 0, akhir: 0, besar: 0, contoh: "" });
+    new PerformanceObserver((l) => {
+      for (const e of l.getEntries()) {
+        if (e.hadRecentInput) continue;
+        if (c.sesi && e.startTime - c.akhir < 1000 && e.startTime - c.awal < 5000) c.sesi += e.value;
+        else [c.sesi, c.awal] = [e.value, e.startTime];
+        c.akhir = e.startTime;
+        c.nilai = Math.max(c.nilai, c.sesi);
+        if (e.value > c.besar) {
+          c.besar = e.value;
+          const n = e.sources?.[0]?.node;
+          c.contoh = `${e.value.toFixed(4)} ${n?.nodeName?.toLowerCase() ?? "?"}.${String(n?.className ?? "").split(" ")[0]}`;
+        }
+      }
+    }).observe({ type: "layout-shift", buffered: true });
+  });
+const tundaJs = (page, ms) =>
+  page.route(/\/_astro\/.+\.js(\?.*)?$/, async (rute) => {
+    await new Promise((s) => setTimeout(s, ms));
+    await rute.continue().catch(() => {});
+  });
 
 // 1. Tanpa JS.
 {
@@ -243,12 +271,10 @@ for (const [lebar, tinggi, arahHarus] of [
 }
 {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 667 }, hasTouch: true });
+  await pasangCls(ctx);
   const page = await ctx.newPage();
   await page.goto(beranda, { waitUntil: "networkidle" });
-  await page.route(/\/_astro\/.+\.js(\?.*)?$/, async (rute) => {
-    await new Promise((s) => setTimeout(s, 1500));
-    await rute.continue().catch(() => {});
-  });
+  await tundaJs(page, 1500);
   await page.evaluate(() => {
     const f = (window.__frame = { total: 0, salah: 0, kosong: 0, contoh: "", jalan: true });
     const cek = () => {
@@ -277,7 +303,38 @@ for (const [lebar, tinggi, arahHarus] of [
     return { ...window.__frame, akhir: document.querySelector("[data-peta-diagram]").checkVisibility({ visibilityProperty: true }) };
   });
   lapor(belum && f.total > 0 && f.salah === 0 && f.akhir, `beranda 375×667 tap Tahap 3 ${belum ? "sebelum" : "SESUDAH"} hydrate lalu gulir: ${f.total} frame, ${f.salah} frame diagram tahap lain${f.contoh ? ` (${f.contoh})` : ""}, ${f.kosong} frame kosong, akhir ${f.akhir ? "terlihat" : "tersembunyi"}`);
+  // Hydrate datang 1,5 s sesudah tap, jadi geser saat itu dihitung CLS: wadah harus sudah memesan tinggi Tahap 3.
+  const c = await page.evaluate(() => window.__cls);
+  lapor(c.nilai <= 0.1, `CLS beranda 375×667 tap Tahap 3 sebelum hydrate: ${c.nilai.toFixed(4)}${c.contoh ? ` (terbesar ${c.contoh})` : ""}`);
   await ctx.close();
+}
+
+// 7. Layout shift saat island di-hydrate (review PR #161, keputusan 248): versi statis SSR harus sudah memesan tinggi
+// React Flow (tegak atau mendatar menurut lebar wadah). Gulir pelan 80 px tiap 120 ms sampai bawah, tanpa input
+// pengguna, modul JS ditunda 300 ms; diukur di halaman uji dan beranda, HP dan desktop. Syarat CLS ≤ 0,1.
+for (const [nama, halaman] of [["/uji/diagram/", url], ["beranda", beranda]]) {
+  for (const [lebar, tinggi] of [
+    [375, 667],
+    [1366, 657],
+  ]) {
+    const ctx = await browser.newContext({ viewport: { width: lebar, height: tinggi } });
+    await pasangCls(ctx);
+    const page = await ctx.newPage();
+    await tundaJs(page, 300);
+    await page.goto(halaman, { waitUntil: "domcontentloaded" });
+    await page.evaluate(async () => {
+      const jeda = (ms) => new Promise((s) => setTimeout(s, ms));
+      for (let i = 0; i < 250 && window.scrollY + innerHeight < document.documentElement.scrollHeight - 2; i++) {
+        window.scrollBy(0, 80);
+        await jeda(120);
+      }
+    });
+    await page.waitForFunction(() => [...document.querySelectorAll("figure.diagram")].every((f) => f.querySelector(".react-flow__node")), null, { timeout: 15000 });
+    await page.waitForTimeout(600);
+    const c = await page.evaluate(() => window.__cls);
+    lapor(c.nilai <= 0.1, `CLS ${nama} ${lebar}×${tinggi} gulir pelan, JS ditunda 300 ms: ${c.nilai.toFixed(4)}${c.contoh ? ` (terbesar ${c.contoh})` : ""}`);
+    await ctx.close();
+  }
 }
 await browser.close();
 console.log(gagal ? `Fondasi diagram GAGAL (${gagal})` : "Diagram: statis tanpa JS, scroll tidak tertangkap, keyboard jalan, tanpa animasi saat reduced");
