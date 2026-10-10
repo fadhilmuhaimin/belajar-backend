@@ -19,7 +19,7 @@ IDOR terjadi saat server memakai ID dari request tanpa bertanya apakah peminta b
 
 <Rantai data={duaPagar} ringkas />
 
-Enumerasi adalah IDOR yang diulang: Dimas mencoba akun 401 sampai 503 dan membaca 103 saldo di [[t1-m5]]. Pagar pertama sudah jalan di v1: service bertanya pemilik. Pagar kedua, RLS di database, direncanakan untuk tabel ledger Tahap 2, karena di tabel `akun` policy pemilik membuat bayar ke warung jadi `UPDATE 0`. Token yang membuktikan siapa peminta disimpan di secure storage HP, bukan di preferences biasa.
+Enumerasi adalah IDOR yang diulang: Dimas mencoba akun 401 sampai 503 dan membaca 103 saldo di [[t1-m5]]. Pagar pertama sudah jalan di v1: service bertanya pemilik. Pagar kedua, RLS di database, menunggu ledger Tahap 2: policy baca per pemilik, entri ditulis satu fungsi `bayar`. Di tabel `akun`, policy pemilik membuat bayar ke warung jadi `UPDATE 0`. Token yang membuktikan siapa peminta disimpan di secure storage HP, bukan di preferences biasa.
 
 <details class="question">
 <summary>Sudah tahu? Cek 3 pertanyaan</summary>
@@ -70,7 +70,7 @@ Waktu jawabannya juga dijaga. Untuk email yang tidak terdaftar, `Login` tetap me
 
 - **Role aplikasi tidak melewati RLS.** Superuser dan role ber-`BYPASSRLS` selalu melewati RLS. Pemilik tabel juga melewatinya, kecuali tabel diberi `FORCE ROW LEVEL SECURITY` (rekaman di [[B5.3]]).
 - **Identitas hidup sepanjang satu transaction.** Menurut [dokumentasi `SET`](https://www.postgresql.org/docs/17/sql-set.html), nilai `SET` biasa bertahan sampai sesi berakhir setelah transaction-nya di-COMMIT. Connection pool memakai ulang sesi itu untuk request berikutnya, seperti di blok Coba. `set_config(..., true)` hanya berlaku di transaction yang sedang berjalan ([functions-admin](https://www.postgresql.org/docs/17/functions-admin.html)).
-- **Tabelnya tidak diubah atas nama orang lain.** Bayar ke warung mengubah baris milik Ani. Di bawah policy pemilik, perintah itu tidak gagal; ia tidak menemukan baris:
+- **Tulisan atas nama orang lain tidak lewat policy pemilik.** Bayar ke warung mengubah baris milik Ani. Di bawah policy pemilik, perintah itu tidak gagal; ia tidak menemukan baris:
 
 <Snippet file="labs/b5-rls/output/rls.txt" lines="52:60" title="Rekaman lab: labs/b5-rls/output/rls.txt" />
 
@@ -79,6 +79,20 @@ Saldo Dimas berkurang Rp5.000, saldo Ani tidak bertambah. Lab membatalkannya den
 Pola identitas yang aman, dari lab yang sama:
 
 <Snippet file="labs/b5-rls/rls.sql" region="pool-lokal" lang="sql" title="labs/b5-rls/rls.sql" />
+
+Di ledger Tahap 2, bayar tidak meng-`UPDATE` baris warung, tapi meng-`INSERT` entri untuk warung. Policy pemilik untuk semua perintah menolak entri itu dengan error, dan seluruh `INSERT` batal ([CREATE POLICY](https://www.postgresql.org/docs/17/sql-createpolicy.html)):
+
+<Snippet file="labs/b5-rls/output/rls.txt" lines="120:121" title="Rekaman lab: labs/b5-rls/output/rls.txt, bagian 9" />
+
+Jalan keluarnya adalah policy per perintah. Role aplikasi hanya boleh `SELECT` baris pemilik. Entri dua sisi ditulis fungsi `bayar`, yang berjalan dengan hak pemiliknya, role penulis yang hanya boleh `INSERT` ([CREATE FUNCTION](https://www.postgresql.org/docs/17/sql-createfunction.html)):
+
+<Snippet file="labs/b5-rls/rls.sql" region="ledger" lang="sql" title="labs/b5-rls/rls.sql" />
+
+`WITH CHECK (true)` hanya aman karena role penulis tidak bisa login ([CREATE ROLE](https://www.postgresql.org/docs/17/sql-createrole.html)) dan tidak punya anggota; pemeriksaannya ada di dalam `bayar`. Dokumentasi CREATE FUNCTION juga meminta `search_path` tetap dengan `pg_temp` terakhir, dan `EXECUTE` dicabut dari `PUBLIC`. Hasilnya di rekaman bagian 10:
+
+<Snippet file="labs/b5-rls/output/rls.txt" lines="134:144" title="Rekaman lab: labs/b5-rls/output/rls.txt, bagian 10" />
+
+Dimas hanya melihat entri −5.000 miliknya, dan request Warung Ani hanya melihat entri +5.000. `INSERT` langsung dari role aplikasi ditolak `permission denied for table entri`. `bayar` tanpa identitas ditolak dengan error.
 
 **4. Token di app: siapa pun yang memegangnya adalah Budi.** Token sesi dari [[B5.1]] berisi 32 byte acak dan berlaku 8 jam. Server hanya menyimpan hash-nya. Selama token itu berlaku, siapa pun yang membacanya dari HP Budi bisa memakai saldo Budi.
 
@@ -116,14 +130,14 @@ await storage.delete(key: 'token_sesi'); // saat Keluar atau saat server menjawa
 | UUID untuk semua ID (yang Raka kira) | Enumerasi berurutan tidak bisa lagi | OWASP: pemeriksaan tetap wajib; UUID ikut tersebar di struk, log, dan tangkapan layar |
 | Pertanyaan pemilik hanya di service | Terbaca, dites tanpa HTTP, status dan pesan bebas dipilih | Satu method baru yang lupa bertanya membuka data lagi |
 | RLS saja | Berlaku untuk setiap query, termasuk yang lupa | Bayar ke warung jadi `UPDATE 0` (rekaman); login dan admin butuh jalan pintas |
-| **Service sebagai pagar pertama, RLS untuk baca sebagai pagar kedua** | Lupa di satu lapis disaring lapis lain | Aturan ditulis di dua tempat; RLS punya tiga syarat yang harus dijaga |
+| **Service sebagai pagar pertama, RLS per perintah sebagai pagar kedua** | Lupa di satu lapis disaring lapis lain | Aturan ditulis di dua tempat; RLS punya tiga syarat; tulisan ke akun lain butuh fungsi `bayar` |
 
 **Yang dipilih.**
 
 1. Setiap method service yang menerima ID bertanya pemilik atau peran sebelum data keluar. Sudah berjalan di `api-t1` (rekaman `authz.txt`, [[B5.3]]).
 2. Data orang lain dijawab `404`, sama persis dengan data yang tidak ada. `403` hanya untuk aksi yang tidak boleh bagi perannya. Request tanpa token dijawab `401` lebih dulu.
-3. RLS dipakai untuk baca di tabel yang setiap barisnya punya pemilik jelas. Syaratnya: role aplikasi bukan superuser, tanpa `BYPASSRLS`, dan bukan pemilik tabel. Identitas diisi `set_config('app.akun_id', $1, true)` di dalam transaction request.
-4. RLS tidak dipasang di tabel yang dibaca atau ditulis atas nama pihak lain. Tabel `akun` termasuk: bayar mengubah baris warung, dan policy pemilik menyaringnya diam-diam. Kode yang menulis ke tabel ber-RLS wajib memeriksa jumlah baris yang berubah.
+3. RLS dipakai untuk baca di tabel yang setiap barisnya punya pemilik jelas. Syaratnya: role aplikasi bukan superuser, tanpa `BYPASSRLS`, dan bukan pemilik tabel. Identitas diisi `set_config('app.akun_id', $1, true)` di dalam transaction request. `UPDATE` ke tabel ber-RLS selalu memeriksa jumlah baris yang berubah.
+4. Policy ditulis per perintah. Di ledger Tahap 2, role aplikasi hanya punya `SELECT`, dan policy-nya meloloskan baris pemilik saja. Entri dua sisi hanya ditulis fungsi `bayar`: `SECURITY DEFINER` milik role penulis, `search_path` tetap, pembayar dari `app.akun_id` (rekaman bagian 9–10). Tabel `akun` v1 tidak diberi RLS, karena policy pemilik menyaring `UPDATE` ke baris warung diam-diam.
 5. Setiap endpoint ber-ID punya test "token A meminta data B".
 
 **Pre-mortem.** Enam bulan lagi, keputusan ini gagal. Tiga penyebab yang paling mungkin:
@@ -132,9 +146,9 @@ await storage.delete(key: 'token_sesi'); // saat Keluar atau saat server menjawa
 - Identitas RLS diisi `SET` biasa, dan request Budi membaca akun Dimas lewat koneksi bekas (rekaman bagian 6). Pencegahnya butir 3 dan checklist review di bawah.
 - Policy pemilik dipasang di tabel `akun`, lalu pembayaran ke warung hilang tanpa error (rekaman bagian 5). Pencegahnya butir 4.
 
-**Kapan keputusan ini salah.** Saat ada client yang membaca database langsung, misalnya tool laporan untuk Pak Hadi, service tidak lagi satu-satunya pintu, dan RLS harus menjadi pagar pertama. Keputusan ini juga mulai salah saat aturan izin bertambah, misalnya kepala bagian melihat transaksi timnya. Pertanyaan `peminta != id` yang tersebar di banyak method sulit diperiksa satu per satu.
+**Kapan keputusan ini salah.** Saat ada client yang membaca database langsung, misalnya tool laporan untuk Pak Hadi, service tidak lagi satu-satunya pintu, dan RLS harus menjadi pagar pertama. Keputusan ini juga mulai salah saat aturan izin bertambah, misalnya kepala bagian melihat transaksi timnya. Pertanyaan `peminta != id` yang tersebar di banyak method sulit diperiksa satu per satu. Butir 4 mulai berat saat jenis entri bertambah, misalnya top-up dan koreksi: setiap jenis butuh fungsi sendiri, dan pemeriksaan di dalamnya menggantikan policy.
 
-**Yang merevisinya nanti.** Tahap 2 mengganti model uang v1 dengan ledger double-entry, dan policy pemilik di tabel ledger diuji dulu sebelum dipasang. Baca atas nama pihak lain tersaring diam-diam seperti rekaman bagian 5, misalnya batas Warung Ani di transaction Dimas atau `FOR UPDATE` ke baris lawan. `INSERT` entri untuk akun Warung Ani dari pembayaran Dimas gagal dengan error policy, dan seluruh perintahnya batal ([CREATE POLICY](https://www.postgresql.org/docs/17/sql-createpolicy.html)). Di Tahap 2 juga, test "token A meminta data B" menjadi syarat merge untuk engineer kedua.
+**Yang merevisinya nanti.** Tahap 2 mengganti model uang v1 dengan ledger double-entry dan memasang butir 4 di tabel ledger. Policy pemilik untuk semua perintah tidak dipakai, karena `INSERT` entri Warung Ani dari pembayaran Dimas gagal dengan error (rekaman bagian 9). Bacaan untuk pihak lain, misalnya batas saldo Ani, tersaring untuk role aplikasi (rekaman bagian 2), jadi pindah ke `bayar` dengan policy baca sendiri. Di Tahap 2 juga, test "token A meminta data B" menjadi syarat merge untuk engineer kedua.
 
 ### ADR 8: sesi acak di server, token di secure storage, JWT ditunda
 
@@ -179,7 +193,7 @@ Tempat token di app:
 
 | Yang ditunda | Kenapa ditunda | Muncul lagi di |
 |---|---|---|
-| RLS di tabel v1 lab `api-t1` | Di tabel `akun`, policy pemilik membuat bayar jadi `UPDATE 0`; tabel ledger diuji dulu | Tahap 2 |
+| RLS di tabel v1 lab `api-t1` | Di tabel `akun`, policy pemilik membuat bayar jadi `UPDATE 0`; ledger memakai policy per perintah dan fungsi `bayar` (rekaman bagian 10) | Tahap 2 |
 | UUID untuk ID akun dan transaksi | Pertanyaan pemilik sudah menutup M5; UUID hanya lapisan tambahan | Tahap 2, bersama skema ledger |
 | Pembatasan percobaan login | 100 karyawan dan 3 warung, penguji internal, satu gedung | Tahap 2, bersama brute force |
 | Access token pendek dan refresh token | Satu gedung; Keluar langsung mencabut sesi di server | Tahap 3 |
@@ -225,6 +239,7 @@ Ya. Satu jalur yang melewatkan `SET` sudah membuka celah, misalnya error sebelum
 - [ ] Identitas untuk RLS diisi `set_config('app.akun_id', $1, true)` atau `SET LOCAL` di dalam transaction request, tidak pernah `SET` biasa.
 - [ ] Role database aplikasi bukan superuser dan tanpa `BYPASSRLS`; kalau role itu pemilik tabel, tabelnya diberi `FORCE ROW LEVEL SECURITY`.
 - [ ] `UPDATE` ke tabel ber-RLS memeriksa jumlah baris yang berubah; `UPDATE 0` bukan sukses.
+- [ ] Role aplikasi tidak punya `INSERT` di ledger; entri untuk akun lain hanya ditulis fungsi `bayar`, dengan `EXECUTE` dicabut dari `PUBLIC`.
 - [ ] Token hanya lewat `flutter_secure_storage`; tidak ada token di `shared_preferences`, log, atau crash report.
 - [ ] Endpoint ber-ID yang baru punya test "token A meminta data B".
 
