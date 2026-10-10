@@ -42,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1c ADR 7 butir 4 dan RLS di ledger, branch `perbaikan/k1c-adr7-rls-ledger`. Rencana: (1) lab `b5-rls` bagian 9–10 sesudah bagian 8 (sketsa tabel `entri`: policy pemilik FOR ALL membuat INSERT entri Ani gagal; policy per perintah + fungsi `bayar` SECURITY DEFINER milik role penulis), filter Makefile tidak menggeser baris 1–109, pemeriksaan gagal keras, dua kali dari database bersih; (2) 1.29 Inti, butir 4, pre-mortem, Yang merevisinya nanti, Cek diri 2, checklist; (3) keputusan 246, ANTREAN, STATUS; gerbang; PR tanpa merge.
+2026-10-11 · K1c selesai di branch `perbaikan/k1c-adr7-rls-ledger` (keputusan 246, PR menunggu tinjauan pengatur, belum di-merge): butir 4 ADR 7 di 1.29 jadi policy per perintah (`SELECT` pemilik, entri dua sisi lewat fungsi `bayar` `SECURITY DEFINER` milik role penulis); Inti, Cara kerjanya, Yang merevisinya nanti, Sengaja belum dilakukan, dan checklist disamakan; lab `b5-rls` bagian 9–10 di rekaman baris 110–181. Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
@@ -60,6 +60,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - Widget lama alur diuji tanpa melihat gambar: `node situs/tangkapan/uji-alur.mjs <url>` (tangkapan/ di-.gitignore, jadi skrip ditulis ulang bila hilang) membuka semua blok (`details.open`), menekan tebakan, Berikutnya, dan varian, lalu menghitung error konsol.
 - Merge ditolak pengaman: berhenti, laporkan di baris pertama, jangan memulai halaman berikutnya di atas PR yang belum di-merge.
 - Komentar XML di SVG tidak boleh memuat `--` (mis. nama token `--aksen`): favicon jadi gambar rusak tanpa error build; parse SVG dengan `xml.etree`.
+- Lab psql dengan `-e`: `\set ECHO none` menyembunyikan setup panjang (fungsi, policy); `DROP SCHEMA ... CASCADE` atas lebih dari satu objek mencetak `DETAIL:` yang tidak tersaring `^NOTICE`, jadi run ulang berbeda dari run bersih.
 - Mode dontAsk/auto menolak: perintah majemuk dengan `cd`, heredoc, loop shell, awalan env (`AXE=...`), diff `<(...)`, pipa ke `gzip`/`wc`, mengubah `.claude/settings.json`; pakai skrip di `tmp/` dan path relatif.
 - Ukur konteks sesi pengatur 1.28 (tools/ukur_konteks.py pada transcript subagen): awal 65–66k (loop lama 94–101k), puncak pelaksana 279k, 24,9 juta token diproses, 86% di atas 150k; peninjau 98–176k. Pelaksana wajib serah-terima di ±120k (PROTOKOL k.4).
 - Animasi CSS yang dipicu event `toggle` (async) mulai satu sampai dua frame sesudah `<details>` terbuka: isi penuh sempat berkedip. Ukur frame per rAF sesudah klik sungguhan (`page.click`, bukan `el.click()`, yang tidak mengirim pointerdown).

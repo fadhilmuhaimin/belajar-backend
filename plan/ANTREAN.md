@@ -236,11 +236,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K1c · ADR 7 butir 4 dan RLS di ledger
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: ADR 7 di 1.29 (`idor-token-app.mdx`) tidak lagi bertentangan dengan dirinya sendiri: Inti (baris 22) merencanakan RLS untuk ledger Tahap 2, butir 4 (baris 126) melarang RLS di tabel yang dibaca atau ditulis atas nama pihak lain, dan "Yang merevisinya nanti" (baris 137) menulis ledger di-`INSERT` untuk Warung Ani dari pembayaran Dimas. Butir 4 dirumuskan ulang dengan syarat yang bisa diuji (mis. policy per perintah: `SELECT` pemilik, `INSERT` lewat jalur service yang diperiksa) dan klaimnya didukung rekaman `b5-rls` atau dokumentasi PostgreSQL; Inti, butir, dan blok terakhir saling cocok; gerbang lolos.
-- catatan: Dari K1. Pakai skill analisis-kritis; jangan menambah klaim RLS tanpa rekaman (pola temuan peninjau #150: FORCE dan superuser).
+- catatan: Dari K1. Pakai skill analisis-kritis; jangan menambah klaim RLS tanpa rekaman (pola temuan peninjau #150: FORCE dan superuser). Selesai 2026-10-11 (keputusan 246): butir 4 jadi policy per perintah (`SELECT` pemilik, entri dua sisi lewat fungsi `bayar` `SECURITY DEFINER`); lab `b5-rls` bagian 9–10 merekamnya; baris 1–109 rekaman tidak bergeser.
 
 ### 1.31 · Deployment dan rollback + ADR 9
 
