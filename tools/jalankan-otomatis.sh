@@ -10,7 +10,7 @@
 #
 # Variabel: BERHENTI_JAM (07:00), BATAS_ITERASI (0 = tanpa batas), MODEL (claude-opus-5-5),
 #   MODEL_CADANGAN (claude-opus-4-8), MAKS_TURN (300), TUNGGU_DETIK (900), BUDGET_USD (kosong),
-#   EFFORT (kosong = bawaan akun).
+#   EFFORT (kosong = bawaan akun), TENGGANG_LAPORAN_MENIT (180).
 #
 # Flag dicek ke `claude --help` 2.1.292 dan https://code.claude.com/docs/en/cli-reference (2026-10-09):
 #   --permission-mode dontAsk   menolak otomatis semua yang biasanya meminta izin; yang jalan hanya
@@ -36,14 +36,20 @@
 #   --output-format stream-json --verbose   satu event JSON per baris selama sesi, jadi log terisi saat
 #                               iterasi berjalan; event terakhir `type: result` dipakai untuk menilai hasil.
 #
-# Saat iterasi gagal (kode keluar bukan 0, result is_error, batas pemakaian, atau sesi dihentikan pengaman
-# model): sisa kerja disimpan (commit ke branch tugas, atau stash bila di main), tunggu TUNGGU_DETIK, ulangi
-# dengan MODEL_CADANGAN. Gagal dua kali karena error -> tugas diparkir lewat PR kecil, lanjut ke tugas
-# berikutnya. Gagal karena batas pemakaian akun tidak memarkir tugas (tugas lain akan kena batas yang sama);
-# skrip menunggu sampai batas pulih atau jam berhenti. Isi tugas tidak pernah diubah untuk menghindari pengaman.
+# Saat iterasi gagal (kode keluar bukan 0, result is_error, atau sesi dihentikan pengaman model): sisa kerja
+# disimpan (commit ke branch tugas, atau stash bila di main), tunggu TUNGGU_DETIK, ulangi dengan MODEL_CADANGAN.
+# Gagal dua kali -> tugas diparkir lewat PR kecil, lanjut ke tugas berikutnya. Isi tugas tidak pernah diubah
+# untuk menghindari pengaman.
+# Batas pemakaian akun (keputusan 226): jam pulih dibaca dari rate_limit_event.resetsAt, skrip menunggu sampai
+# jam itu + 2 menit lalu mengulang tugas yang sama dengan MODEL; tidak memarkir tugas (tugas lain akan kena
+# batas yang sama). Menyerah hanya bila jam pulih lewat BERHENTI_JAM. Laporan pagi boleh menunggu sampai
+# BERHENTI_JAM + TENGGANG_LAPORAN_MENIT, dan sesudah menunggu hanya jalan bila checkout masih main bersih.
+# Nomor log melanjutkan nomor terbesar di log/otomatis-<tanggal>/, jadi jalan kedua di hari yang sama tidak
+# menimpa log jalan pertama; log laporan pagi diberi jam mulai (laporan-pagi-HHMM.log).
 #
 # Berhenti bila: antrean habis; BATAS_ITERASI tercapai; 3 iterasi berturut tanpa commit baru di main;
-# 5 tugas diparkir berturut; main merah sesudah 2 iterasi perbaikan; melewati BERHENTI_JAM; Ctrl-C.
+# 5 tugas diparkir berturut; main merah sesudah 2 iterasi perbaikan; melewati BERHENTI_JAM; batas pemakaian
+# baru pulih sesudah BERHENTI_JAM; Ctrl-C.
 # Apa pun alasannya, satu sesi terakhir menulis plan/LAPORAN-PAGI.md, lalu notifikasi macOS.
 set -uo pipefail
 
@@ -64,7 +70,9 @@ MAKS_PARKIR_BERTURUT=5
 MAKS_MAIN_MERAH=2
 SETELAN="$ROOT/tools/otomatis.settings.json"
 # Pesan batas pemakaian dan beban dicari di teks result dan 20 baris terakhir stderr (lihat nilai_sesi).
-POLA_LIMIT='usage limit|rate.?limit|limit reached|hit your limit|resets at|overloaded|API Error: ?(429|529)'
+POLA_LIMIT='usage limit|rate.?limit|limit reached|hit your (session |weekly )?limit|resets at|overloaded|API Error: ?(429|529)'
+# Laporan pagi boleh menunggu batas pemakaian pulih sampai jam berhenti ditambah tenggang ini (menit).
+TENGGANG_LAPORAN_MENIT="${TENGGANG_LAPORAN_MENIT:-180}"
 
 MULAI_EPOCH=$(date +%s)
 MULAI="$(date '+%Y-%m-%d %H:%M')"
@@ -156,6 +164,37 @@ nilai_sesi() {
   fi
 }
 
+# Epoch jam pulih dari event rate_limit_event terakhir yang statusnya bukan "allowed*". $1 berkas log.
+# Dicek 2026-10-10: resetsAt 1791593400 = 08:50 WITA, sama dengan pesan "resets 8:50am" di result.
+jam_pulih() {
+  grep '"type":"rate_limit_event"' "$1" |
+    jq -r 'select((.rate_limit_info.status // "allowed") | startswith("allowed") | not) | .rate_limit_info.resetsAt // empty' 2>/dev/null |
+    tail -1
+}
+
+# Tunggu sampai batas pemakaian pulih ditambah 2 menit. $1 berkas log, $2 epoch paling lambat.
+# Tanpa jam pulih di log (mis. overloaded), tunggu TUNGGU_DETIK. Keluar 1 bila jam pulih lewat $2 atau Ctrl-C.
+tunggu_pulih() {
+  local pulih target sekarang
+  sekarang=$(date +%s)
+  pulih=$(jam_pulih "$1")
+  if [ -n "$pulih" ]; then target=$((pulih + 120)); else pulih=$((sekarang + TUNGGU_DETIK)); target=$pulih; fi
+  [ "$target" -lt "$sekarang" ] && target=$sekarang
+  if [ "$target" -ge "$2" ]; then
+    catat "batas pemakaian pulih $(date -r "$pulih" '+%Y-%m-%d %H:%M'), lewat batas tunggu $(date -r "$2" '+%Y-%m-%d %H:%M')"
+    return 1
+  fi
+  catat "batas pemakaian; tunggu sampai $(date -r "$target" '+%Y-%m-%d %H:%M') (pulih $(date -r "$pulih" '+%H:%M') + 2 menit)"
+  while [ "$(date +%s)" -lt "$target" ] && [ "$DIMINTA_BERHENTI" -eq 0 ]; do sleep 30; done
+  [ "$DIMINTA_BERHENTI" -eq 0 ]
+}
+
+# Nomor log terbesar di LOGDIR (<n>.log atau <n>-<ke>.log), supaya jalan kedua di hari yang sama
+# melanjutkan nomornya dan tidak menimpa log jalan sebelumnya. Kosong bila belum ada.
+nomor_log_terakhir() {
+  ls "$LOGDIR" 2>/dev/null | sed -nE 's/^([0-9]+)(-[0-9]+)?\.log$/\1/p' | sort -n | tail -1
+}
+
 # Baris "Iterasi selesai: <id> <status>" dari result sesi. $1 berkas log.
 baris_selesai() {
   grep '"type":"result"' "$1" | tail -1 | jq -r '.result // ""' 2>/dev/null |
@@ -207,21 +246,38 @@ beri_tahu() {
   osascript -e "display notification \"$pesan\" with title \"Rekeningo otomatis\" sound name \"Glass\"" 2>/dev/null || true
 }
 
+# Sesi terakhir yang menulis plan/LAPORAN-PAGI.md. Kena batas pemakaian: tunggu sampai pulih + 2 menit
+# selama jam pulih tidak lewat max(jam berhenti, sekarang) + TENGGANG_LAPORAN_MENIT, dan sesudah menunggu
+# hanya lanjut bila checkout masih main bersih (kalau pemilik sudah bekerja di folder ini, jangan diganggu).
+# Error lain: ulang sekali dengan MODEL_CADANGAN. Gagal -> tmp/LAPORAN-PAGI-darurat.md.
 laporan_pagi() {
-  local alasan="$1" log="$LOGDIR/laporan-pagi.log" kode kelas prompt
+  local alasan="$1" jam log kode kelas prompt ke=1 gagal=0 model="$MODEL" batas_laporan dasar
+  jam=$(date +%H%M)
+  dasar=$(date +%s); [ "$BATAS" -gt "$dasar" ] && dasar=$BATAS
+  batas_laporan=$((dasar + TENGGANG_LAPORAN_MENIT * 60))
   pulihkan
   prompt="Baca plan/PROTOKOL-OTOMATIS.md bagian \"Laporan pagi\" dan tulis laporan pagi. Alasan berhenti: $alasan. Loop mulai: $MULAI. Folder log: $LOGDIR. Kejadian skrip:
 $(tail -40 "$KEJADIAN")"
   catat "laporan pagi: $alasan"
-  sesi "$prompt" "$MODEL" "$log"; kode=$?
-  kelas=$(nilai_sesi "$log" "$kode")
-  if [ "$kelas" != ok ]; then
-    catat "sesi laporan pagi gagal ($kelas, kode $kode); ulang sekali dengan $MODEL_CADANGAN"
+  while :; do
+    log="$LOGDIR/laporan-pagi-$jam.log"; [ "$ke" -gt 1 ] && log="$LOGDIR/laporan-pagi-$jam-$ke.log"
+    sesi "$prompt" "$model" "$log"; kode=$?
+    kelas=$(nilai_sesi "$log" "$kode")
+    [ "$kelas" = ok ] && break
+    catat "sesi laporan pagi gagal ($kelas, kode $kode) · log ${log#$ROOT/}"
     pulihkan
-    sesi "$prompt" "$MODEL_CADANGAN" "$LOGDIR/laporan-pagi-2.log"; kode=$?
-    kelas=$(nilai_sesi "$LOGDIR/laporan-pagi-2.log" "$kode")
-  fi
-  pulihkan
+    if [ "$kelas" = limit ]; then
+      tunggu_pulih "$log" "$batas_laporan" || break
+      pengaman 2>/dev/null || { catat "sesudah menunggu, checkout bukan main bersih; laporan tidak dijalankan"; kelas=dipakai; break; }
+      model="$MODEL"
+    else
+      gagal=$((gagal + 1)); [ "$gagal" -ge 2 ] && break
+      catat "ulang laporan pagi dengan $MODEL_CADANGAN"
+      model="$MODEL_CADANGAN"
+    fi
+    ke=$((ke + 1))
+  done
+  [ "$kelas" = dipakai ] || pulihkan
   if [ "$kelas" = ok ]; then
     beri_tahu "Loop berhenti: $alasan. Baca plan/LAPORAN-PAGI.md"
   else
@@ -262,15 +318,17 @@ trap 'DIMINTA_BERHENTI=$((DIMINTA_BERHENTI + 1)); [ $DIMINTA_BERHENTI -ge 2 ] &&
 BATAS=$(hitung_batas) || { echo "BERHENTI_JAM tidak dikenali: $BERHENTI_JAM (format HH:MM)" >&2; exit 1; }
 catat "mulai · model $MODEL (cadangan $MODEL_CADANGAN) · berhenti $(date -r "$BATAS" '+%Y-%m-%d %H:%M') · batas iterasi $BATAS_ITERASI"
 
-i=0; tanpa_commit=0; parkir_berturut=0; merah_berturut=0; ALASAN=""
+# i = nomor iterasi untuk log dan kejadian (melanjutkan nomor terakhir hari ini); jalan = iterasi jalan ini.
+i=$(nomor_log_terakhir); i=${i:-0}; jalan=0
+tanpa_commit=0; parkir_berturut=0; merah_berturut=0; ALASAN=""
 while :; do
   [ "$DIMINTA_BERHENTI" -gt 0 ] && { ALASAN="dihentikan pemilik (Ctrl-C)"; break; }
-  [ "$BATAS_ITERASI" -gt 0 ] && [ "$i" -ge "$BATAS_ITERASI" ] && { ALASAN="batas $BATAS_ITERASI iterasi tercapai"; break; }
+  [ "$BATAS_ITERASI" -gt 0 ] && [ "$jalan" -ge "$BATAS_ITERASI" ] && { ALASAN="batas $BATAS_ITERASI iterasi tercapai"; break; }
   [ "$(date +%s)" -ge "$BATAS" ] && { ALASAN="melewati jam berhenti $BERHENTI_JAM"; break; }
   pulihkan || { ALASAN="checkout tidak bisa dikembalikan ke main"; break; }
   [ "$(python3 tools/antrean.py sisa)" = 0 ] && { ALASAN="antrean habis"; break; }
 
-  i=$((i + 1))
+  i=$((i + 1)); jalan=$((jalan + 1))
   tugas=$(python3 tools/antrean.py berikut 2>/dev/null | cut -f1)
   sebelum=$(git rev-parse origin/main)
   model="$MODEL"; gagal=0; ke=1
@@ -283,15 +341,23 @@ while :; do
     catat "iterasi $i gagal: $kelas (kode $kode)"
     pulihkan
     [ "$DIMINTA_BERHENTI" -gt 0 ] && break
-    if [ "$kelas" != limit ]; then
-      gagal=$((gagal + 1))
-      if [ "$gagal" -ge 2 ]; then
-        parkir_dari_skrip "${tugas:-?}" "Sesi gagal dua kali ($kelas, kode $kode), terakhir dengan $model. Log: ${log#$ROOT/}." ||
-          { ALASAN="tugas $tugas gagal dua kali dan tidak bisa diparkir otomatis"; break 2; }
-        parkir_berturut=$((parkir_berturut + 1))
-        kelas=diparkir
-        break
-      fi
+    if [ "$kelas" = limit ]; then
+      # Batas pemakaian akun: tunggu sampai pulih + 2 menit, ulangi tugas yang sama dengan model utama.
+      # Tidak menghitung percobaan tugas; menyerah hanya bila jam pulih lewat jam berhenti.
+      tunggu_pulih "$log" "$BATAS" || {
+        [ "$DIMINTA_BERHENTI" -gt 0 ] && break
+        ALASAN="batas pemakaian baru pulih sesudah jam berhenti $BERHENTI_JAM"; break 2
+      }
+      model="$MODEL"; ke=$((ke + 1))
+      continue
+    fi
+    gagal=$((gagal + 1))
+    if [ "$gagal" -ge 2 ]; then
+      parkir_dari_skrip "${tugas:-?}" "Sesi gagal dua kali ($kelas, kode $kode), terakhir dengan $model. Log: ${log#$ROOT/}." ||
+        { ALASAN="tugas $tugas gagal dua kali dan tidak bisa diparkir otomatis"; break 2; }
+      parkir_berturut=$((parkir_berturut + 1))
+      kelas=diparkir
+      break
     fi
     if [ $(( $(date +%s) + TUNGGU_DETIK )) -ge "$BATAS" ]; then
       ALASAN="iterasi $i gagal ($kelas) dan jam berhenti sudah dekat"; break 2
