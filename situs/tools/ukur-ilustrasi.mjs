@@ -10,7 +10,8 @@ const arg = (nama, bawaan) => {
 };
 const url = arg("--url", "http://127.0.0.1:4321");
 const halaman = ["/tahap-1/prd-v1/", "/tahap-1/m1-nominal-minus/", "/tahap-1/m2-amount-nominal/",
-  "/tahap-1/m3-tanda-kutip/", "/tahap-1/m4-rp70000-hilang/", "/tahap-1/m5-angka-di-url/"];
+  "/tahap-1/m3-tanda-kutip/", "/tahap-1/m4-rp70000-hilang/", "/tahap-1/m5-angka-di-url/",
+  "/tahap-1/m6-deploy-hari-senin/"];
 const ukuran = [[375, 667], [1366, 657]];
 const JARAK = 2; // satuan viewBox minimal antara teks dan tepi bingkai
 
@@ -46,5 +47,5 @@ for (const [w, h] of ukuran) {
   }
 }
 await browser.close();
-console.log(gagal ? `${gagal} teks ilustrasi keluar bingkai` : "Teks ilustrasi di dalam bingkai: 5 halaman × 2 ukuran × 2 tema");
+console.log(gagal ? `${gagal} teks ilustrasi keluar bingkai` : `Teks ilustrasi di dalam bingkai: ${halaman.length} halaman × 2 ukuran × 2 tema`);
 process.exit(gagal ? 1 : 0);

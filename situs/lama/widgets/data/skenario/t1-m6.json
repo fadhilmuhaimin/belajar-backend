@@ -1,0 +1,305 @@
+{
+  "versi": 2,
+  "judul": "Deploy v2 dilihat dari dua HP",
+  "sumber": {
+    "jenis": "rekaman",
+    "file": "labs/api-t1/output/m6.txt",
+    "fileVarian": "labs/api-t1/output/m6.txt",
+    "catatan": "Server Go (labs/api-t1) + PostgreSQL 17 dari database bersih. Prober memanggil riwayat dari dua HP tiap detik; perintah deploy dijalankan di antara dua putaran. Jalur utama: bagian C, D, E. Ubah satu hal: bagian F dan G."
+  },
+  "pengantar": "Raka mengganti v1 dengan v2 saat makan siang. Jalankan deploy-nya dan lihat dua HP di setiap putaran prober. Setelah itu centang 'Ubah satu hal' dan coba kembali ke v1.",
+  "komponen": [
+    {
+      "id": "budi",
+      "label": "HP Budi · app 1.0"
+    },
+    {
+      "id": "dimas",
+      "label": "HP Dimas"
+    },
+    {
+      "id": "vps",
+      "label": "VPS · api-t1"
+    },
+    {
+      "id": "db",
+      "label": "PostgreSQL"
+    }
+  ],
+  "perangkat": [
+    {
+      "id": "hp-budi",
+      "label": "HP Budi"
+    },
+    {
+      "id": "hp-dimas",
+      "label": "HP Dimas"
+    }
+  ],
+  "layarAwal": {
+    "hp-budi": {
+      "judul": "Riwayat · app 1.0",
+      "waktu": "12.10",
+      "isi": [
+        {
+          "jenis": "baris",
+          "kiri": "Ke Warung Ani",
+          "kanan": "Rp25.000"
+        }
+      ]
+    },
+    "hp-dimas": {
+      "judul": "Riwayat · app 1.0",
+      "waktu": "12.10",
+      "isi": [
+        {
+          "jenis": "baris",
+          "kiri": "Ke Warung Ani",
+          "kanan": "Rp20.000"
+        }
+      ]
+    }
+  },
+  "predict": {
+    "q": "Detik 6, v2 sudah menyala. HP Budi masih app 1.0, yang membaca field jumlah. Apa yang diterimanya?",
+    "options": [
+      "Tidak ada jawaban",
+      "500 dari server",
+      "200, tapi tanpa field jumlah",
+      "200, riwayat seperti biasa"
+    ],
+    "answer": 2,
+    "varian": false,
+    "explain": "v2 menjawab normal, hanya field-nya kini bernama nominal. Server tidak mencatat error; yang rusak adalah app yang masih mencari nama lama. Rekaman lab bagian C, putaran 6."
+  },
+  "langkah": [
+    {
+      "dari": "budi",
+      "ke": "vps",
+      "judul": "Detik 1–2: v1 menjawab kedua HP",
+      "kirim": "GET /akun/419/riwayat   HP Budi\n200 · jumlah 25000\nGET /akun/417/riwayat   HP Dimas\n200 · jumlah 20000",
+      "jelas": "Prober memanggil riwayat tiap detik dari dua HP. Keduanya masih app 1.0, yang membaca field jumlah.",
+      "nada": "good",
+      "layar": {
+        "hp-budi": {
+          "judul": "Riwayat · app 1.0",
+          "waktu": "12.10",
+          "nada": "good",
+          "isi": [
+            {
+              "jenis": "baris",
+              "kiri": "Ke Warung Ani",
+              "kanan": "Rp25.000"
+            }
+          ]
+        },
+        "hp-dimas": {
+          "judul": "Riwayat · app 1.0",
+          "waktu": "12.10",
+          "nada": "good",
+          "isi": [
+            {
+              "jenis": "baris",
+              "kiri": "Ke Warung Ani",
+              "kanan": "Rp20.000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "vps",
+      "judul": "Raka mematikan v1",
+      "kirim": "$ kill -TERM <pid v1>\ndetik 3: kedua HP tidak ada jawaban",
+      "jelas": "Sejak perintah ini tidak ada server yang menjawab. Putaran 3 sampai 5 kosong: tiga perintah dijalankan satu per satu sebelum v2 menyala.",
+      "nada": "warn",
+      "layar": {
+        "hp-budi": {
+          "judul": "Riwayat · app 1.0",
+          "waktu": "12.10",
+          "nada": "warn",
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Tidak bisa terhubung",
+              "nada": "warn"
+            }
+          ]
+        },
+        "hp-dimas": {
+          "judul": "Riwayat · app 1.0",
+          "waktu": "12.10",
+          "nada": "warn",
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Tidak bisa terhubung",
+              "nada": "warn"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "vps",
+      "ke": "db",
+      "judul": "Kolom jumlah diganti nominal",
+      "kirim": "ALTER TABLE transaksi RENAME COLUMN jumlah TO nominal\ndetik 4: tidak ada jawaban",
+      "jelas": "Di cerita lewat migrate up file 000006. Sejak perintah ini, kode v1 yang membaca kolom jumlah tidak cocok lagi dengan skema."
+    },
+    {
+      "dari": "vps",
+      "judul": "Binary v2 menimpa v1",
+      "kirim": "$ cp laptop:api-t1 vps:/opt/rekeningo/api-t1\ndetik 5: tidak ada jawaban",
+      "jelas": "Di cerita lewat scp. Path-nya sama, jadi file v1 diganti, bukan disimpan di samping v2.",
+      "nada": "warn"
+    },
+    {
+      "dari": "vps",
+      "ke": "budi",
+      "judul": "v2 menyala: 200 tanpa field jumlah",
+      "kirim": "$ vps:/opt/rekeningo/api-t1 &\nGET /akun/419/riwayat\ndetik 6: 200 · field jumlah tidak ada",
+      "jelas": "Server menjawab 200, tapi field-nya kini bernama nominal. App 1.0 di kedua HP tidak menemukan angka yang dicarinya.",
+      "nada": "warn",
+      "layar": {
+        "hp-budi": {
+          "judul": "Riwayat · app 1.0",
+          "waktu": "12.10",
+          "nada": "warn",
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Riwayat tidak bisa dimuat",
+              "nada": "warn"
+            }
+          ]
+        },
+        "hp-dimas": {
+          "judul": "Riwayat · app 1.0",
+          "waktu": "12.10",
+          "nada": "warn",
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Riwayat tidak bisa dimuat",
+              "nada": "warn"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "dimas",
+      "ke": "vps",
+      "judul": "Dimas memperbarui ke app 1.1",
+      "kirim": "GET /akun/417/riwayat\ndetik 7–8: 200 · nominal 20000",
+      "jelas": "App 1.1 membaca nominal, jadi HP Dimas normal lagi. HP Budi masih app 1.0 dan tetap tanpa field jumlah.",
+      "nada": "good",
+      "layar": {
+        "hp-dimas": {
+          "judul": "Riwayat · app 1.1",
+          "waktu": "12.10",
+          "nada": "good",
+          "isi": [
+            {
+              "jenis": "baris",
+              "kiri": "Ke Warung Ani",
+              "kanan": "Rp20.000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "budi",
+      "ke": "vps",
+      "judul": "Budi membayar dari app 1.0: 400",
+      "kirim": "POST /transfers {\"ke\": 418, \"jumlah\": 25000}\n400 Bad Request\nerrors: nominal · wajib diisi",
+      "jelas": "Rekaman bagian D. App 1.0 masih mengirim jumlah. Dimas dengan app 1.1 membayar Rp20.000 dan mendapat 201.",
+      "nada": "warn",
+      "layar": {
+        "hp-budi": {
+          "judul": "Bayar · app 1.0",
+          "waktu": "12.10",
+          "nada": "warn",
+          "isi": [
+            {
+              "jenis": "toast",
+              "teks": "Pembayaran gagal",
+              "nada": "warn"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "dari": "vps",
+      "judul": "Raka mencari binary v1",
+      "kirim": "$ ls vps:/opt/rekeningo/\napi-t1\n$ cmp vps:/opt/rekeningo/api-t1 laptop:api-t1 && echo sama\nsama",
+      "jelas": "Rekaman bagian E. Di VPS dan di laptop hanya ada v2. Tidak ada versi lama untuk dijalankan.",
+      "nada": "warn"
+    }
+  ],
+  "varian": {
+    "label": "Raka membangun ulang v1 dari kode lama, lalu mencoba kembali",
+    "mulai": 7,
+    "langkah": [
+      {
+        "dari": "vps",
+        "ke": "budi",
+        "judul": "v1 dibangun ulang: 500",
+        "kirim": "$ go build -o api-t1 ./cmd/api && ./api-t1 &\nGET /akun/419/riwayat\n500 Internal Server Error\nERROR: column t.jumlah does not exist",
+        "jelas": "Rekaman bagian F. Binary lama saja tidak cukup: kolom di database sudah bernama nominal.",
+        "nada": "warn",
+        "layar": {
+          "hp-budi": {
+            "judul": "Riwayat · app 1.0",
+            "waktu": "12.10",
+            "nada": "warn",
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Riwayat tidak bisa dimuat",
+                "nada": "warn"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "dari": "vps",
+        "ke": "db",
+        "judul": "Kolom dikembalikan ke jumlah",
+        "kirim": "ALTER TABLE transaksi RENAME COLUMN nominal TO jumlah\nHP Budi, app 1.0: 200 · jumlah 25000\nHP Dimas, app 1.1: 200 · field nominal tidak ada",
+        "jelas": "Rekaman bagian G. Kini app 1.0 normal dan app 1.1 rusak. Dari dua versi server yang ada, tidak satu pun melayani kedua app.",
+        "nada": "warn",
+        "layar": {
+          "hp-budi": {
+            "judul": "Riwayat · app 1.0",
+            "waktu": "12.10",
+            "nada": "good",
+            "isi": [
+              {
+                "jenis": "baris",
+                "kiri": "Ke Warung Ani",
+                "kanan": "Rp25.000"
+              }
+            ]
+          },
+          "hp-dimas": {
+            "judul": "Riwayat · app 1.1",
+            "waktu": "12.10",
+            "nada": "warn",
+            "isi": [
+              {
+                "jenis": "toast",
+                "teks": "Riwayat tidak bisa dimuat",
+                "nada": "warn"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

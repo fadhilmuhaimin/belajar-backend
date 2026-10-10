@@ -136,7 +136,7 @@ Request yang sama dengan [[t1-m2]], sesudah perbaikan:
 **Yang dipilih.**
 
 1. `labs/b1-openapi/openapi.yaml` adalah kontrak v1, diubah sebelum kode di perubahan yang sama.
-2. Setiap perubahan kontrak diperiksa `redocly lint` dan `oasdiff breaking` terhadap versi sebelumnya.
+2. Setiap perubahan kontrak diperiksa `redocly lint` dan `oasdiff breaking` dengan `--fail-on ERR` terhadap versi sebelumnya.
 3. Server toleran terhadap field yang tidak dikenal, tapi tegas terhadap field wajib dan tipe: `400` dengan nama field.
 
 **Kapan keputusan ini salah.** Catatan jujur: untuk satu orang, menulis kontrak terasa berlebihan sampai minggu 5. Di minggu 5, penggantian nama kolom mematikan app di HP penguji ([[t1-m6]]); pemeriksaan kontrak menangkap jenis perubahan itu sebelum deploy. Keputusan ini juga salah kalau kontrak dan kode dibiarkan berbeda: kontrak yang tidak dipercaya lebih buruk daripada tidak ada kontrak.

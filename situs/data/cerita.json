@@ -50,8 +50,8 @@
         "tim": "1 developer"
       },
       "jalur_inti": {
-        "menit": 263,
-        "halaman": 30
+        "menit": 272,
+        "halaman": 31
       },
       "bagian": [
         {
@@ -974,7 +974,7 @@
       "id": "t1-m6",
       "judul": "Deploy hari Senin",
       "tahap": 1,
-      "path": "tahap-1/m6-deploy.md",
+      "path": "tahap-1/m6-deploy-hari-senin.md",
       "topik": "Operasional",
       "jenis": "masalah",
       "bagian": 4,
@@ -985,8 +985,12 @@
       ],
       "label": "Masalah 6 · minggu 5",
       "masalah": "Deploy saat makan siang mematikan app 5 menit",
-      "ada": false,
-      "nomor": "1.30"
+      "ada": true,
+      "prasyarat": [
+        "B4.1"
+      ],
+      "nomor": "1.30",
+      "menit": 9
     },
     {
       "id": "C3",

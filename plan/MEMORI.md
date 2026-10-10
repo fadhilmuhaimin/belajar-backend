@@ -15,10 +15,9 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Catatan untuk halaman Tahap 1 berikutnya
 
-- 1.30 memakai `labs/api-t1/output/m6.txt` (keputusan 241): 8 putaran prober per detik; Budi (app 1.0) 2 berhasil, 3 tidak ada jawaban, 3 field `jumlah` tidak ada; Dimas update ke app 1.1 sesudah v2 menyala; bayar app 1.0 400 `nominal` wajib, app 1.1 201; VPS hanya punya v2; v1 dibangun ulang di skema baru 500; G: kolom kembali ke `jumlah`, v1 melayani app 1.0, app 1.1 200 tanpa field `nominal` (jembatan ke ADR 10, yang tetap berdiri sendiri). Lock ACCESS EXCLUSIVE dipegang saat v1 sudah mati: jeda 3 putaran berasal dari jumlah perintah, bukan dari lock; halaman 1.30 jangan mengaitkan jeda dengan lock. Ganti nama kolom di cerita lewat `migrate up` file 000006 (komentar di rekaman). Angka cerita (5 menit, 11 HP) bukan dari lab. Kode lab utama tetap `jumlah`.
 - 1.33 (E1): prasyarat B4.2 dibuang; ADR 10 (expand lalu contract) harus berdiri sendiri, tanpa rekaman crash B4.2.
 - 1.39 (F1) menyerap F2: hapus halaman F2 dan entrinya di PR yang sama (pola keputusan 150).
-- Ilustrasi latar Grup Lestari dan M6 belum ada; ilustrasi baru wajib lolos `ukur-ilustrasi.mjs` (tambahkan path halamannya ke alat itu). `situs/lama/assets/cerita/tahap-1.svg` tidak dipakai lagi.
+- Ilustrasi latar Grup Lestari belum ada; ilustrasi baru wajib lolos `ukur-ilustrasi.mjs` (tambahkan path halamannya ke alat itu). `situs/lama/assets/cerita/tahap-1.svg` tidak dipakai lagi.
 - Tabel "Angka di tahap ini" ditulis ulang di 1.37/1.38, angka dari `tahap[0].asumsi`.
 - `/cara-pakai/` (A0) masih menjelaskan susunan lama; tulis ulang untuk lima blok dan tiga pintu.
 - `labs/api-t1-lama` boleh dihapus (disetujui pemilik 2026-10-08) hanya setelah `grep -rn api-t1-lama situs/ labs/ tools/` kosong; bukti grep di PR hapus. Kolom "Halaman" di README lab memakai nomor lama.
@@ -43,7 +42,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.30-lab selesai di PR (keputusan 241), branch `tahap-1/m6-lab`, belum di-merge: bagian `m6` di `labs/api-t1/run.py` (`V2_UBAH`, `Prober`, `rekam_m6`), rekaman `labs/api-t1/output/m6.txt`, README "Rekaman deploy M6"; perbaikan review: bagian G (jalan kembali), komentar migrate 000006, README tanpa `scp`. Rekam ulang: `make -C labs/api-t1 run BAGIAN=m6`. Berikutnya: `python3 tools/antrean.py berikut` (1.30).
+2026-10-10 · 1.30 M6: Deploy hari Senin selesai di PR (keputusan 242), branch `tahap-1/m6-deploy`, belum di-merge: `situs/src/content/docs/tahap-1/m6-deploy-hari-senin.mdx`, Rantai `situs/data/diagram/t1-m6-deploy.json`, alur `situs/lama/widgets/data/skenario/t1-m6.json` (dua HP, varian F–G), ilustrasi `m6` di `Ilustrasi.astro` + `ukur-ilustrasi.mjs`. 1.31 (C3, ADR 9) dan 1.33 (E1, ADR 10) dirujuk dari Konsep yang lahir. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 
@@ -58,7 +57,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - Perubahan CSS global di atas Inti menggeser layar pertama semua halaman; simpan keluaran `layar.mjs` sebelum dan bandingkan sesudahnya (`tmp/banding_layar.py`).
 - Setelah gerbang lolos, perubahan teks apa pun wajib diikuti `python3 tools/sinkron_cerita.py` dan gerbang ulang (CI #119 gagal karena `kartu.json` tertinggal).
 - `git rm` langsung men-stage penghapusan; `git add <file baru> && git commit` ikut membawanya. Hapus file lama di commit yang sama dengan perubahan registry, supaya setiap commit tetap bisa dibangun.
-- Widget lama alur diuji tanpa melihat gambar: `node situs/tangkapan/uji-alur.mjs <url>` (tangkapan/ di-.gitignore, jadi skrip ditulis ulang bila hilang) menekan tebakan, Berikutnya, dan varian, lalu menghitung error konsol.
+- Widget lama alur diuji tanpa melihat gambar: `node situs/tangkapan/uji-alur.mjs <url>` (tangkapan/ di-.gitignore, jadi skrip ditulis ulang bila hilang) membuka semua blok (`details.open`), menekan tebakan, Berikutnya, dan varian, lalu menghitung error konsol.
 - Merge ditolak pengaman: berhenti, laporkan di baris pertama, jangan memulai halaman berikutnya di atas PR yang belum di-merge.
 - Mode dontAsk/auto menolak: perintah majemuk dengan `cd`, heredoc, loop shell, awalan env (`AXE=...`), diff `<(...)`, pipa ke `gzip`/`wc`, mengubah `.claude/settings.json`; pakai skrip di `tmp/` dan path relatif.
 - Ukur konteks sesi pengatur 1.28 (tools/ukur_konteks.py pada transcript subagen): awal 65–66k (loop lama 94–101k), puncak pelaksana 279k, 24,9 juta token diproses, 86% di atas 150k; peninjau 98–176k. Pelaksana wajib serah-terima di ±120k (PROTOKOL k.4).
