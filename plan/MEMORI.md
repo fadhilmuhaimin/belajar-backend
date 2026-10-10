@@ -43,7 +43,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-10 · 1.30-lab selesai di PR (keputusan 241), branch `tahap-1/m6-lab`, belum di-merge: bagian `m6` di `labs/api-t1/run.py` (`V2_UBAH`, `Prober`, `rekam_m6`), rekaman `labs/api-t1/output/m6.txt`, README "Rekaman deploy M6"; perbaikan review: bagian G (jalan kembali), komentar migrate 000006, README tanpa `scp`. Rekam ulang: `make -C labs/api-t1 run BAGIAN=m6`. Berikutnya: `python3 tools/antrean.py berikut` (1.30).
+2026-10-10 · 1.30 M6: Deploy hari Senin, branch `tahap-1/m6-deploy`. Rencana: (1) baca naskah M6 dan rekaman `labs/api-t1/output/m6.txt`; (2) halaman `situs/src/content/docs/tahap-1/m6-deploy.mdx` dengan template masalah (pola 1.26); (3) alur `t1-m6.json` dari rekaman prober; (4) ilustrasi adegan M6 `<Blok ilustrasi="m6">` + path di `ukur-ilustrasi.mjs`; (5) registry `t1-m6` ada, indeks topik, `sinkron_cerita.py`; (6) KEPUTUSAN, STATUS, ANTREAN, MEMORI; gerbang dan PR tanpa merge.
 
 ## Pelajaran
 
