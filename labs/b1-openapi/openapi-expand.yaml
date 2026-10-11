@@ -221,7 +221,10 @@ components:
     PermintaanBayar:
       type: object
       required: [ke]
-      description: 'Kirim jumlah (app 1.0) atau nominal (app 1.1). Bila keduanya dikirim, server memakai jumlah.'
+      anyOf:
+        - required: [jumlah]
+        - required: [nominal]
+      description: 'Wajib salah satu: jumlah (app 1.0) atau nominal (app 1.1). Bila keduanya dikirim, server memakai jumlah.'
       properties:
         ke: { type: integer, format: int64, description: Nomor akun warung penerima }
         jumlah: { type: integer, format: int64, minimum: 1, maximum: 200000, description: 'Rupiah; field lama, dihapus (contract) sesudah tidak ada request dari app 1.0' }
