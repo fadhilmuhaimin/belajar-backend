@@ -72,9 +72,9 @@ Putaran 2 kosong karena server lama dihentikan sebelum server expand menyala. Se
 
 <Snippet file="labs/api-t1/output/versi.txt" lines="36:55" title="Rekaman lab: labs/api-t1/output/versi.txt" />
 
-Kode expand memakai `jumlah` bila kedua field dikirim. AIP-180 meminta perilaku seperti ini ditulis jelas, karena client bisa mengirim dua nilai yang bertentangan. Kontrak expand menuliskannya di skema request bayar:
+Kode expand memakai `jumlah` bila kedua field dikirim. AIP-180 meminta perilaku seperti ini ditulis jelas, karena client bisa mengirim dua nilai yang bertentangan. Kontrak expand menuliskannya di skema request bayar. Blok `anyOf` di skema itu membuat request valid bila memuat `jumlah`, `nominal`, atau keduanya:
 
-<Snippet file="labs/b1-openapi/openapi-expand.yaml" lines="221:228" lang="yaml" title="Kontrak: labs/b1-openapi/openapi-expand.yaml" />
+<Snippet file="labs/b1-openapi/openapi-expand.yaml" region="skema-bayar" lang="yaml" title="Kontrak: labs/b1-openapi/openapi-expand.yaml" />
 
 Response transfer dan riwayat juga mendapat `nominal` sebagai field wajib, dan `jumlah` dicatat bersama syarat contract-nya. Pemeriksaan ADR 3 dari 1.18 tidak menemukan breaking change:
 
@@ -133,7 +133,7 @@ Paksa update memang ada di platform. Contohnya, mode immediate di Android menamp
 **Yang dipilih.**
 
 1. Nama field di kontrak tidak diganti dan tidak dihapus dalam satu deploy. Label layar boleh berbeda dari nama field: layar Bayar menulis "Nominal", field-nya `jumlah`.
-2. Perubahan bentuk dimulai dengan expand. Field baru ditambahkan di samping yang lama, response mengirim keduanya, dan field baru di request tidak wajib (AIP-180). Perilaku bila keduanya dikirim ditulis di kontrak OpenAPI (`openapi-expand.yaml`).
+2. Perubahan bentuk dimulai dengan expand. Field baru ditambahkan di samping yang lama, response mengirim keduanya, dan field baru di request tidak wajib (AIP-180). Kontrak OpenAPI (`openapi-expand.yaml`) mewajibkan salah satu dari kedua field dan menulis perilaku bila keduanya dikirim.
 3. App yang membaca field baru dirilis sesudah server expand berjalan. Selama migrate, app itu tetap membaca field lama bila field baru tidak ada.
 4. Migration di satu deploy hanya menambah: tabel baru, atau kolom yang boleh kosong atau punya default (000008 di rekaman). Kolom yang dibaca image sebelumnya tidak diganti nama atau dihapus, supaya rollback ADR 9 tetap jalan.
 5. Contract hanya sesudah tidak ada request dari app yang memakai field lama. Selama hal itu belum bisa dihitung, contract tidak dijalankan dan server mengirim kedua field.
@@ -199,7 +199,7 @@ Hanya `ADD COLUMN catatan text`. Kolom itu boleh kosong dan tidak disebut kode l
 ### Saat me-review kode AI, cek ini
 
 - [ ] Diff tidak mengganti tag JSON atau nama field yang sudah dikirim ke app. Nama baru ditulis sebagai field baru di samping yang lama.
-- [ ] Field baru di request tidak wajib, dan perilaku bila field lama dan baru sama-sama dikirim tertulis.
+- [ ] Field baru di request tidak wajib, kontrak mewajibkan salah satu dari field lama dan baru, dan perilaku bila keduanya dikirim tertulis.
 - [ ] Migration di diff yang sama tidak memuat `RENAME COLUMN` atau `DROP COLUMN` untuk kolom yang dibaca image sebelumnya.
 - [ ] Model Dart untuk response server tidak memakai `disallowUnrecognizedKeys: true`, dan field yang bisa hilang punya `defaultValue` atau tipe nullable.
 - [ ] Penghapusan field disertai bukti tidak ada request dari app lama, bukan tanggal.

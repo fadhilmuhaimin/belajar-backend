@@ -317,11 +317,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K1xb · Kontrak expand: salah satu jumlah atau nominal wajib
 
 - jenis: perbaikan
-- status: antre
-- percobaan: 0
+- status: selesai
+- percobaan: 1
 - bergantung: -
 - selesai bila: `PermintaanBayar` di `labs/b1-openapi/openapi-expand.yaml` menyatakan salah satu `jumlah` atau `nominal` wajib (mis. `anyOf` dengan `required: [jumlah]` dan `required: [nominal]`), dicek ke spesifikasi OpenAPI yang dipakai file itu; redocly lint dan oasdiff direkam ulang ke `labs/b1-openapi/output/expand.txt` (dua kali identik); bila hasil oasdiff berubah, 1.33 baris 79 diperbarui sesuai rekaman; Snippet 1.33 `openapi-expand.yaml` `lines="221:228"` (`situs/src/content/docs/tahap-1/app-versi-lama.mdx` ~baris 77) diganti region `skema-bayar` atau rentang baru, supaya syarat baru tampil; keputusan baru.
-- catatan: Dari K1x butir (f): server expand menjawab `400` (field `jumlah`) bila keduanya tidak dikirim (`EXPAND_UBAH` di `labs/api-t1/run.py`), tetapi kontrak hanya mewajibkan `ke`.
+- catatan: Dari K1x butir (f): server expand menjawab `400` (field `jumlah`) bila keduanya tidak dikirim (`EXPAND_UBAH` di `labs/api-t1/run.py`), tetapi kontrak hanya mewajibkan `ke`. Selesai 2026-10-11 (keputusan 255): `anyOf` dengan `required: [jumlah]` dan `required: [nominal]`; rekaman `expand.txt` dua kali identik dan tidak berubah (oasdiff tetap tanpa breaking change), jadi kalimat 1.33 baris 79 tetap; Snippet 1.33 memakai region `skema-bayar`.
 
 ### K1xc · Skema Bearer tidak peka huruf di lab api-t1
 
