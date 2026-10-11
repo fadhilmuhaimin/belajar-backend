@@ -47,11 +47,12 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · P1 selesai di branch `perbaikan/p1-api-t1-lama` (PR menunggu tinjauan; jangan merge sebelum disetujui pengatur): 1.4 memakai Snippet `labs/api-t1/internal/service/bayar.go` region `bayar`; 1.6 memakai komentar package `internal/handler/handler.go`, `internal/service/sesi.go`, `internal/repo/repo.go`, pohon rencananya tetap `migrations/` (cocok dengan `migrate.txt` minggu 1, 1.25, 1.33), kalimat lab menyebut lab memakai `schema.sql`; 1.4 menyebut transaction baru ada setelah M4 (perbaikan review #165). `grep -rn api-t1-lama situs/src/content/docs/tahap-1/` kosong; `labs/api-t1-lama` masih ada (P2). Berikutnya sesudah merge: `python3 tools/antrean.py berikut` (P2).
+2026-10-11 · K1x selesai di branch `crosscheck/k1x` (PR menunggu tinjauan, jangan merge sebelum disetujui pengatur; keputusan 254): alur 1.30→1.33 dan beranda, 1.4, 1.6, 1.29 tanpa error konsol dan tanpa scroll horizontal, href 0 salah, lintas halaman cocok, layar pertama lolos (1.32 tertipis, 20 px di 375×667).
+Diperbaiki langsung: terjemahan literal 1.29, GHCR 1.31, label varian 1.33, tiga komentar, sumber KEPUTUSAN 246, alasan KEPUTUSAN 252. Tugas baru K1xa–K1xe (CLS tab beranda, kontrak expand, Bearer tidak peka huruf, Snippet rls 1.29, gulir blok 1 halaman ADR); K2 menyempit ke 1.34–1.35.
+Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
-- Data widget lama (skenario alur) ditulis di `situs/lama/widgets/data/`; `situs/public/widgets/` tidak dilacak git dan disalin saat build. `tools/sinkron_cerita.py` mengabaikan argumen (`--help` pun langsung menyinkronkan).
 - Astro 7 `preview` otomatis jadi daemon bila agen terdeteksi, dan bila daemon lama hidup ia keluar tanpa menyalakan server baru; `curl /` berhasil tidak membuktikan server melayani build ini (G1 memakai penanda per jalan di `situs/dist`).
 - Island yang mengganti versi statis wajib memesan tinggi akhirnya di SSR; ukur CLS dengan modul JS ditunda dan gulir tanpa input (`ukur-diagram.mjs` bagian 7), karena tangkapan dan `layar.mjs` tidak melihat geser.
 - Island React Astro di-hydrate di `startTransition` dan atribut `ssr` dilepas sebelum React selesai; keadaan yang dibaca dari DOM di efek butuh CSS yang menyembunyikan isi SSR sampai cocok, bukan selektor `[ssr]`.

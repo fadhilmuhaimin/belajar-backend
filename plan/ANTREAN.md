@@ -296,6 +296,60 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - selesai bila: `adr-1-backend-sendiri.mdx` dan `struktur-folder.mdx` memakai Snippet dari `labs/api-t1` (folder nyata), bukan `api-t1-lama`; `grep -rn api-t1-lama situs/src/content/docs/tahap-1/` kosong.
 - catatan: 1.4 memakai `internal/service/bayar.go` region `bayar`; 1.4 menyebut transaction baru ada setelah M4 (minggu 3), seperti 1.9; 1.6 memakai komentar package handler, service, repo, pohon rencananya tetap `migrations/`, dan kalimat lab menyebut beda `schema.sql`.
 
+### K1x · Crosscheck kecil 1.31–1.33
+
+- jenis: crosscheck
+- status: selesai
+- percobaan: 0
+- bergantung: -
+- selesai bila: bagian K1x di `plan/CROSSCHECK-KECIL.md` memuat 1.31–1.33, P1 di 1.4 dan 1.6, beranda I5b, dan sambungan 1.30→1.31 dengan bukti; temuan menjadi tugas perbaikan di bawah K1x.
+- catatan: Ditambahkan pengatur karena K2 mencakup lima halaman. Selesai 2026-10-11 (keputusan 254): alur 1.30→1.33 tanpa error konsol dan scroll horizontal, href 0 salah, konsistensi lintas halaman cocok, layar pertama lolos; tujuh salah kecil diperbaiki langsung; lima temuan jadi K1xa–K1xe.
+
+### K1xa · CLS beranda untuk tab 2–5 sebelum hydrate
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: tap tab Tahap 2, 3, 4, dan 5 sebelum hydrate di 375×667 masing-masing diukur di gerbang (bukan hanya Tahap 3) dan CLS tiap tab ≤ 0,0105 (nilai Tahap 3 sekarang); komentar `situs/src/components/Beranda.astro` di atas `cssPesan` sesuai hasil ukur; tangkapan sebelum/sesudah.
+- catatan: Dari K1x butir (e): peninjau PR sebelumnya mengukur geseran 20–63 px (CLS 0,0323) untuk tab 2–5; gerbang sekarang hanya mengukur tap Tahap 3 (0,0105). Keputusan 248.
+
+### K1xb · Kontrak expand: salah satu jumlah atau nominal wajib
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: `PermintaanBayar` di `labs/b1-openapi/openapi-expand.yaml` menyatakan salah satu `jumlah` atau `nominal` wajib (mis. `anyOf` dengan `required: [jumlah]` dan `required: [nominal]`), dicek ke spesifikasi OpenAPI yang dipakai file itu; redocly lint dan oasdiff direkam ulang ke `labs/b1-openapi/output/expand.txt` (dua kali identik); bila hasil oasdiff berubah, 1.33 baris 79 diperbarui sesuai rekaman; keputusan baru.
+- catatan: Dari K1x butir (f): server expand menjawab `400` (field `jumlah`) bila keduanya tidak dikirim (`EXPAND_UBAH` di `labs/api-t1/run.py`), tetapi kontrak hanya mewajibkan `ke`.
+
+### K1xc · Skema Bearer tidak peka huruf di lab api-t1
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: lab `api-t1` menerima `bearer` dan `BEARER` sama dengan `Bearer` (RFC 9110 §11.1), dengan tes; rekaman yang memuat header Authorization dibandingkan sebelum dan sesudah (status, urutan; bukan waktu) dan tidak berubah kecuali baris baru untuk kasus ini; keputusan baru.
+- catatan: Dari K1x butir (g): sekarang `bearer <token>` diperlakukan sebagai tanpa token (`401`). Tidak tampil di halaman mana pun.
+
+### K1xd · 1.29: rekaman bagian 10 tampil untuk klaimnya
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: kalimat di `situs/src/content/docs/tahap-1/idor-token-app.mdx` sesudah Snippet bagian 10 (Warung Ani melihat +5.000, `INSERT` ditolak `permission denied`, `bayar` tanpa identitas ditolak) didukung Snippet yang tampil dari `labs/b5-rls/output/rls.txt` baris 157–160 dan 174–181 (atau satu Snippet bila komponen mendukung beberapa rentang); layar pertama 1.29 tidak berubah.
+- catatan: Dari K1x butir (b): Snippet sekarang hanya baris 134–144 (Dimas −5.000).
+
+### K1xe · Berikutnya blok 1 di halaman ADR tidak menggulir melewati tujuan
+
+- jenis: perbaikan
+- status: antre
+- percobaan: 0
+- bergantung: -
+- selesai bila: di setiap halaman ADR (1.4, 1.24, dan yang menyusul) di 375×667 dan 1366×657, `scrollY` sesudah klik Berikutnya di blok 1 bergerak ke posisi akhir tanpa melewatinya (diukur per frame); pemeriksaannya masuk gerbang (mis. `ukur-gerak.mjs`); reduced motion tetap tanpa gerak.
+- catatan: Dari K1x: di 1.4 375×667 blok Kebutuhan menutup (tinggi halaman 4.678 → 2.704 px) saat gulir berjalan, `scrollY` 0 → 1.737 → 610 → 192 dalam 600 ms; 1.24 1.143 → 186. Alat ukur: `situs/tangkapan/k1x-adr.mjs` (di-.gitignore, tulis ulang bila hilang).
+
 ### P2 · Hapus labs/api-t1-lama
 
 - jenis: perbaikan
@@ -341,14 +395,14 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - selesai bila: halaman `t1-secret` dengan ADR 11 (`.env.example`, pre-commit gitleaks, secret hanya di server), minimal tiga opsi dan "kapan keputusan ini salah"; lab api-t1.
 - catatan: Jalur Security.
 
-### K2 · Crosscheck kecil 1.31–1.35
+### K2 · Crosscheck kecil 1.34–1.35
 
 - jenis: crosscheck
 - status: antre
 - percobaan: 0
 - bergantung: -
-- selesai bila: bagian K2 di `plan/CROSSCHECK-KECIL.md` memuat 1.31–1.35 dengan bukti; temuan menjadi tugas perbaikan di bawah K2.
-- catatan: -
+- selesai bila: bagian K2 di `plan/CROSSCHECK-KECIL.md` memuat 1.34–1.35 serta sambungan 1.33 → 1.34 dan 1.35 → 1.36 dengan bukti; temuan menjadi tugas perbaikan di bawah K2.
+- catatan: 1.31–1.33 sudah diperiksa di K1x (keputusan 254).
 
 ### 1.36 · Tim dan infra Tahap 1
 
