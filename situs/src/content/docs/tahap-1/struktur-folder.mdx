@@ -67,7 +67,7 @@ Aturan arahnya sederhana:
 2. Service memanggil repo. Service tidak tahu HTTP, JSON, atau status code.
 3. Repo hanya menjalankan SQL. Repo tidak tahu aturan uang.
 
-Lab `labs/api-t1` memakai struktur ini, dengan satu beda: skemanya satu file `schema.sql`, bukan folder `migrations/`. Migration dipraktikkan di [[B4.1]]. Setiap lapisan adalah satu package Go, dan komentar package-nya menyebut tugasnya.
+Lab `labs/api-t1` memakai struktur ini, dengan satu beda di skema: satu file `schema.sql`, bukan folder `migrations/`. Lab juga punya file untuk menjalankannya. Migration dipraktikkan di [[B4.1]]. Setiap lapisan adalah satu package Go, dan komentar package-nya menyebut tugasnya.
 
 <Snippet file="labs/api-t1/internal/handler/handler.go" lines="1:1" lang="go" title="labs/api-t1/internal/handler/handler.go" />
 <Snippet file="labs/api-t1/internal/service/sesi.go" lines="1:1" lang="go" title="labs/api-t1/internal/service/sesi.go" />
