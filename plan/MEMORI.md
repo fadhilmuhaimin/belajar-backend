@@ -47,8 +47,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1xb selesai di branch `perbaikan/k1xb-kontrak-expand` (keputusan 255, PR #168 menunggu tinjauan, jangan merge sebelum disetujui pengatur): `PermintaanBayar` expand mewajibkan salah satu `jumlah` atau `nominal` (`anyOf` + `required`, OpenAPI 3.1.0 = JSON Schema 2020-12).
-Rekaman `expand.txt` tidak berubah (oasdiff tetap tanpa breaking change); Snippet 1.33 memakai region `skema-bayar`. Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-11 · K1xc selesai di branch `perbaikan/k1xc-bearer` (keputusan 256, PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): `tokenBearer` (`strings.Cut` + `strings.EqualFold`) dipakai `wajibLogin` dan `logout`, tes `TestTokenBearer` tanpa database.
+Rekaman berubah hanya `testing.txt` (+3 baris per bagian A/B; rentang Snippet 1.32 digeser, isi sama) dan `Lines` gosec di `injection.txt`. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 

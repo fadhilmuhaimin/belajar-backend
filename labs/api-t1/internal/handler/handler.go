@@ -136,7 +136,7 @@ type kunciPeminta struct{}
 // wajibLogin: setiap endpoint di belakangnya butuh sesi yang masih aktif.
 func (s Server) wajibLogin(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token, ada := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
+		token, ada := tokenBearer(r)
 		akunID, err := s.svc.Periksa(r.Context(), token)
 		if !ada || errors.Is(err, service.ErrSesiTidakSah) {
 			// RFC 6750 §3.1: request tanpa token Bearer tidak diberi kode error.
@@ -157,12 +157,22 @@ func (s Server) wajibLogin(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// tokenBearer membaca token dari header Authorization. Nama skema tidak peka huruf
+// (RFC 9110 §11.1), jadi "bearer" dan "BEARER" diterima sama dengan "Bearer".
+func tokenBearer(r *http.Request) (string, bool) {
+	skema, token, ada := strings.Cut(r.Header.Get("Authorization"), " ")
+	if !ada || !strings.EqualFold(skema, "Bearer") {
+		return "", false
+	}
+	return token, true
+}
+
 // --8<-- [end:wajib-login]
 
 func peminta(r *http.Request) int64 { return r.Context().Value(kunciPeminta{}).(int64) }
 
 func (s Server) logout(w http.ResponseWriter, r *http.Request) {
-	token, _ := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
+	token, _ := tokenBearer(r)
 	if err := s.svc.Logout(r.Context(), token); err != nil {
 		s.errorInternal(w, err)
 		return
