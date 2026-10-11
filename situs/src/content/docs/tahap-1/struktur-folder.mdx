@@ -55,7 +55,7 @@ rekeningo/
 │   ├── handler/             HTTP: parsing, sesi, status code
 │   ├── service/             aturan uang: bayar, top-up, saldo
 │   └── repo/                akses data: SQL
-├── migrations/
+├── migrations/              perubahan skema bernomor
 └── go.mod
 ```
 
@@ -67,11 +67,11 @@ Aturan arahnya sederhana:
 2. Service memanggil repo. Service tidak tahu HTTP, JSON, atau status code.
 3. Repo hanya menjalankan SQL. Repo tidak tahu aturan uang.
 
-Lab di repo ini menyederhanakannya: ketiga lapisan adalah tiga file di satu package Go, supaya mudah dibaca. Komentar di kepala tiap file menyebut tugasnya.
+Lab `labs/api-t1` memakai struktur ini, dengan satu beda di skema: satu file `schema.sql`, bukan folder `migrations/`. Lab juga punya file untuk menjalankannya. Migration dipraktikkan di [[B4.1]]. Setiap lapisan adalah satu package Go, dan komentar package-nya menyebut tugasnya.
 
-<Snippet file="labs/api-t1-lama/handler.go" lines="3:3" lang="go" title="labs/api-t1-lama/handler.go" />
-<Snippet file="labs/api-t1-lama/layanan.go" lines="3:3" lang="go" title="labs/api-t1-lama/layanan.go" />
-<Snippet file="labs/api-t1-lama/data.go" lines="3:3" lang="go" title="labs/api-t1-lama/data.go" />
+<Snippet file="labs/api-t1/internal/handler/handler.go" lines="1:1" lang="go" title="labs/api-t1/internal/handler/handler.go" />
+<Snippet file="labs/api-t1/internal/service/sesi.go" lines="1:1" lang="go" title="labs/api-t1/internal/service/sesi.go" />
+<Snippet file="labs/api-t1/internal/repo/repo.go" lines="1:1" lang="go" title="labs/api-t1/internal/repo/repo.go" />
 
 Aturan arah ini dipaksa dan diuji di [[B7.1]], setelah masalah pertama menunjukkan kenapa ia perlu.
 
