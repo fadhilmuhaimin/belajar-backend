@@ -47,8 +47,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1xc mulai di branch `perbaikan/k1xc-bearer`: lab `api-t1` menerima skema `bearer`/`BEARER` sama dengan `Bearer` (RFC 9110 §11.1), helper `tokenBearer` dipakai `wajibLogin` dan `logout`, tes unit handler tanpa DB.
-File: `labs/api-t1/internal/handler/handler.go` (+ `_test.go`), rekaman `api-t1/output`, Snippet 1.27 dan 1.32 (`testing.mdx` rentang), KEPUTUSAN, ANTREAN. Berikutnya: rekam dua kali, gerbang, PR (jangan merge).
+2026-10-11 · K1xc selesai di branch `perbaikan/k1xc-bearer` (keputusan 256, PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): `tokenBearer` (`strings.Cut` + `strings.EqualFold`) dipakai `wajibLogin` dan `logout`, tes `TestTokenBearer` tanpa database.
+Rekaman berubah hanya `testing.txt` (+3 baris per bagian A/B; rentang Snippet 1.32 digeser, isi sama) dan `Lines` gosec di `injection.txt`. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 

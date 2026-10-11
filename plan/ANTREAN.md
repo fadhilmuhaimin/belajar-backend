@@ -326,11 +326,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K1xc · Skema Bearer tidak peka huruf di lab api-t1
 
 - jenis: perbaikan
-- status: antre
-- percobaan: 0
+- status: selesai
+- percobaan: 1
 - bergantung: -
 - selesai bila: lab `api-t1` menerima `bearer` dan `BEARER` sama dengan `Bearer` (RFC 9110 §11.1), dengan tes; rekaman yang memuat header Authorization dibandingkan sebelum dan sesudah (status, urutan; bukan waktu) dan tidak berubah kecuali baris baru untuk kasus ini; Snippet 1.27 (region `wajib-login`, `situs/src/content/docs/tahap-1/authentication.mdx` ~baris 74) dan teks 1.27 ~baris 76 (tanpa token hanya `Bearer`, token ditolak `Bearer error="invalid_token"`) tetap cocok dengan kode baru; keputusan baru.
-- catatan: Dari K1x butir (g): sekarang `bearer <token>` diperlakukan sebagai tanpa token (`401`). `strings.CutPrefix(..., "Bearer ")` ada di dua tempat di `labs/api-t1/internal/handler/handler.go`: `wajibLogin` ~baris 139, di dalam region `wajib-login` (135–160) yang tampil di 1.27, dan `logout` ~baris 165.
+- catatan: Dari K1x butir (g): sekarang `bearer <token>` diperlakukan sebagai tanpa token (`401`). `strings.CutPrefix(..., "Bearer ")` ada di dua tempat di `labs/api-t1/internal/handler/handler.go`: `wajibLogin` ~baris 139, di dalam region `wajib-login` (135–160) yang tampil di 1.27, dan `logout` ~baris 165. Selesai 2026-10-11 (keputusan 256): helper `tokenBearer` (`strings.Cut` + `strings.EqualFold`) dipakai `wajibLogin` dan `logout`, tes unit `TestTokenBearer` tanpa database; rekaman hanya berubah di `testing.txt` (+3 baris per bagian A/B, rentang Snippet 1.32 digeser, isi sama) dan ringkasan `Lines` gosec di `injection.txt`.
 
 ### K1xd · 1.29: rekaman bagian 10 tampil untuk klaimnya
 
