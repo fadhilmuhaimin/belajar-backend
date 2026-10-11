@@ -294,7 +294,7 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - percobaan: 0
 - bergantung: -
 - selesai bila: `adr-1-backend-sendiri.mdx` dan `struktur-folder.mdx` memakai Snippet dari `labs/api-t1` (folder nyata), bukan `api-t1-lama`; `grep -rn api-t1-lama situs/src/content/docs/tahap-1/` kosong.
-- catatan: 1.4 memakai `internal/service/bayar.go` region `bayar`; 1.6 memakai komentar package handler, service, repo dan pohon rencana dengan `schema.sql`.
+- catatan: 1.4 memakai `internal/service/bayar.go` region `bayar`; 1.4 menyebut transaction baru ada setelah M4 (minggu 3), seperti 1.9; 1.6 memakai komentar package handler, service, repo, pohon rencananya tetap `migrations/`, dan kalimat lab menyebut beda `schema.sql`.
 
 ### P2 · Hapus labs/api-t1-lama
 

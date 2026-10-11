@@ -47,7 +47,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · P1 selesai di branch `perbaikan/p1-api-t1-lama` (PR menunggu tinjauan; jangan merge sebelum disetujui pengatur): 1.4 memakai Snippet `labs/api-t1/internal/service/bayar.go` region `bayar`; 1.6 memakai komentar package `internal/handler/handler.go`, `internal/service/sesi.go`, `internal/repo/repo.go`, dan pohon rencananya memakai `schema.sql` (migration baru di 1.25). `grep -rn api-t1-lama situs/src/content/docs/tahap-1/` kosong; `labs/api-t1-lama` masih ada (P2). Berikutnya sesudah merge: `python3 tools/antrean.py berikut` (P2).
+2026-10-11 · P1 selesai di branch `perbaikan/p1-api-t1-lama` (PR menunggu tinjauan; jangan merge sebelum disetujui pengatur): 1.4 memakai Snippet `labs/api-t1/internal/service/bayar.go` region `bayar`; 1.6 memakai komentar package `internal/handler/handler.go`, `internal/service/sesi.go`, `internal/repo/repo.go`, pohon rencananya tetap `migrations/` (cocok dengan `migrate.txt` minggu 1, 1.25, 1.33), kalimat lab menyebut lab memakai `schema.sql`; 1.4 menyebut transaction baru ada setelah M4 (perbaikan review #165). `grep -rn api-t1-lama situs/src/content/docs/tahap-1/` kosong; `labs/api-t1-lama` masih ada (P2). Berikutnya sesudah merge: `python3 tools/antrean.py berikut` (P2).
 
 ## Pelajaran
 
