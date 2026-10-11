@@ -47,7 +47,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1xe (perbaikan) di branch `perbaikan/k1xe-gulir-berikutnya`: tombol Berikutnya blok 1 di halaman ADR dan konsep; blok tujuan tidak boleh meloncat jauh di atas viewport saat blok 1 menutup. File: `situs/src/components/Blok.astro`, `situs/tools/ukur-gerak.mjs`, KEPUTUSAN, ANTREAN, MEMORI. Ukur sebelum dengan `situs/tangkapan/k1xe-gulir.mjs`, simpan `layar.mjs` sebelum/sesudah.
+2026-10-11 · K1xe selesai di branch `perbaikan/k1xe-gulir-berikutnya` (keputusan 257; PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): Berikutnya di `Blok.astro` mengoreksi gulir seketika sebesar pergeseran kepala blok tujuan saat blok selesai ditutup; `ukur-gerak.mjs` memeriksa Berikutnya blok 1 di semua ADR registry + 1.32, dua ukuran, dengan dan tanpa reduced motion. Layar pertama tidak berubah. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 
@@ -76,3 +76,4 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - `tmp/sidik_dist.py` hanya menghitung file yang dirujuk HTML; chunk yang diimpor island (React Flow) terlihat lewat `tmp/ukur_diagram_js.py` atau byte jaringan (`situs/tangkapan/i5b-jaringan.mjs`). React Flow `fitView` hanya untuk node awal: data baru = ReactFlow baru (`key`).
 - layar.mjs tidak menghitung Snippet sebagai visual Inti; Inti butuh Rantai atau widget (1.32 gagal 4 ukuran sebelum Rantai).
 - Markup pesanan yang meniru komponen (mis. `figure.diagram` di `.peta__pesan`) ikut tertangkap selector alat ukur; kecualikan wadahnya (`:not(.peta__pesan figure)`, `:scope >`).
+- Menutup blok di atas tombol yang diklik menggeser semua yang di bawahnya; ukur top tujuan sebelum dan sesudah `open = false`, lalu `scrollBy({ behavior: "instant" })` sebesar selisihnya. Scroll anchoring Chromium tidak mengoreksinya (K1xe).

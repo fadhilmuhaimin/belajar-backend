@@ -344,7 +344,7 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K1xe · Berikutnya blok 1: blok tujuan tetap dekat layar saat blok 1 menutup
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: diukur dari tombol Berikutnya blok 1 yang sudah di layar (tombol digulir ke layar dulu, lalu diklik, lalu disampel per rAF), di frame pertama sesudah klik top blok tujuan masih di dalam viewport, atau jarak gulir ≤ satu tinggi viewport; berlaku di halaman ADR (1.4, 1.24, dan yang menyusul) dan halaman konsep (mis. 1.32) di 375×667 dan 1366×657; pemeriksaannya masuk gerbang (mis. `ukur-gerak.mjs`); komentar handler Berikutnya di `situs/src/components/Blok.astro` ("sudah di atas layar") sesuai perilakunya; reduced motion tetap tanpa gerak.
