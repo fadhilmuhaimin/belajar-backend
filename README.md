@@ -174,6 +174,18 @@ Yang terekam: jeda layanan selama tiga putaran, lalu app 1.0 yang tidak menemuka
 
 Sesudah kolom dikembalikan ke `jumlah`, v1 melayani app 1.0 lagi, tapi app 1.1 mendapat `200` tanpa field `nominal`. Rekaman halaman sesudah 1.30 mulai dari keadaan itu: kolom `jumlah`, kode v1. Lab berhenti dengan error bila satu penggantian v2 tidak ditemukan atau hasil prober berbeda dari skenario.
 
+### Rekaman M7: `.env` di riwayat git
+
+`make -C labs/api-t1 run BAGIAN=m7` mengulang temuan minggu 5 untuk halaman 1.34 dan menulis `labs/api-t1/output/m7.txt`. Lab membuat repo git sementara yang meniru laptop Raka. Commit minggu 1 memuat `.env`, commit minggu 5 melepasnya dengan `git rm --cached`, dan `git show <commit>:.env` tetap mencetak isinya.
+
+Nilai di `.env` palsu. Lab membangkitkannya saat berjalan, jadi nilainya tidak ada di file repo mana pun. Rekaman menggantinya dengan label seperti `<password-lama>`, dan lab berhenti dengan error bila satu nilai asli lolos ke rekaman. Nama dan tanggal commit tetap, jadi hash commit sama di setiap rekaman.
+
+gitleaks v8.30.1 dipasang dengan `go install` ke folder sementara dan selalu dipanggil dengan `--redact`. Aturan bawaannya menandai baris `POSTGRES_PASSWORD`, tapi tidak menandai `DATABASE_URL` yang memuat password yang sama. Aturan tambahan di `.gitleaks.toml` repo contoh menemukan baris itu.
+
+Sesudah itu Postgres lab memerankan database di VPS. Password dari riwayat masih bisa dipakai login sampai `ALTER ROLE` menggantinya, lalu login dengan password lama ditolak. Pre-commit hook menolak `.env.example` yang berisi password. `git commit --no-verify` melewati hook itu, dan pemindaian commit baru seperti di CI tetap menemukannya.
+
+Yang dibutuhkan: Docker, Go, dan koneksi internet saat `go install` pertama kali.
+
 ### Semua pihak ketiga di lab adalah tiruan
 
 Tidak ada lab yang menghubungi layanan luar atau butuh akun vendor. Payment gateway, layanan verifikasi identitas, object storage, server identitas (OAuth/OpenID Connect), layanan notifikasi, dan pengirim webhook di lab adalah program kecil di folder lab itu sendiri. Namanya netral, dan perilakunya (lambat, gagal, mengirim ulang) diatur supaya konsepnya terlihat. Program-program ini tidak meniru API vendor tertentu. Format webhook mengikuti spesifikasi terbuka Standard Webhooks.

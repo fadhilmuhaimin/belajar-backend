@@ -1600,8 +1600,214 @@ def rekam_testing():
     tulis("testing.txt")
 
 
+# --- 1.34 M7: .env di riwayat git (keputusan 259) ---
+GITLEAKS = "github.com/zricethezav/gitleaks/v8@v8.30.1"   # rilis resmi terbaru per 2026-10-11; dipasang ke folder sementara
+TGL_M7 = {"minggu 1": "2026-01-12T08:30:00+07:00", "minggu 5": "2026-02-11T10:00:00+07:00"}
+ROLE_M7 = "rekeningo_app"
+# Konfigurasi gitleaks di repo Raka: aturan bawaan ditambah satu aturan untuk password di URL koneksi.
+ATURAN_URL = """[extend]
+useDefault = true
+
+[[rules]]
+id = "url-dengan-password"
+description = "Password di dalam URL koneksi database"
+regex = '''[a-z][a-z0-9+.-]*://[^:@/\\s]+:([^@/\\s]{8,})@'''
+secretGroup = 1
+keywords = ["://"]
+"""
+
+
+def palsu(nama):
+    """Nilai palsu lab M7: dibangkitkan saat run dari nama tetap, jadi isi commit dan hash-nya sama di setiap rekaman.
+    Nilainya tidak pernah ditulis di file repo, dan rekaman menggantinya dengan label (keputusan 259)."""
+    huruf = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    return "".join(huruf[b % len(huruf)] for b in hashlib.sha256(f"rekeningo-lab-m7:{nama}".encode()).digest()[:24])
+
+
+def env_m7(pw):
+    return ("# Postgres di VPS dan URL yang dibaca server (cmd/api membaca DATABASE_URL)\n"
+            f"POSTGRES_PASSWORD={pw}\n"
+            f"DATABASE_URL=postgres://{ROLE_M7}:{pw}@127.0.0.1:5432/rekeningo\n")
+
+
+def rekam_m7():
+    """1.34 M7: .env di riwayat git (keputusan 259). Repo git sementara, gitleaks, rotasi password, pre-commit hook."""
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="api-t1-m7-"))
+    try:
+        _rekam_m7(tmp)
+    finally:
+        subprocess.run(PSQL + ["-c", f"DROP ROLE IF EXISTS {ROLE_M7}"], capture_output=True)
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def _rekam_m7(tmp):
+    stop()
+    lama, baru, latihan = palsu("password-lama"), palsu("password-baru"), palsu("password-latihan")
+    bin_dir, repo = tmp / "bin", tmp / "rekeningo"
+    subprocess.run(["go", "install", GITLEAKS], env=dict(os.environ, GOBIN=str(bin_dir)), cwd=tmp,
+                   check=True, capture_output=True)
+    gl = bin_dir / "gitleaks"
+    label = {lama: "<password-lama>", baru: "<password-baru>", latihan: "<password-latihan>",
+             str(gl): "gitleaks", str(tmp): "<tmp>"}
+
+    def catat(teks):
+        for asli, ganti in label.items():
+            teks = teks.replace(asli, ganti)
+        log.append(teks)
+
+    def g(minggu, *arg, cek=True):
+        env = dict(GIT_ENV, GIT_AUTHOR_DATE=TGL_M7[minggu], GIT_COMMITTER_DATE=TGL_M7[minggu])
+        r = subprocess.run(["git", *arg], cwd=repo, env=env, capture_output=True, text=True)
+        if cek and r.returncode:
+            gagal(f"git {' '.join(arg)}: {r.stderr[-500:]}")
+        return r
+
+    def rapikan(teks):
+        # Warna, jam di awal baris log, dan lama pemindaian berubah tiap run; isinya tidak.
+        teks = re.sub(r"\x1b\[[0-9;]*m", "", teks)
+        teks = re.sub(r"\n?    ○\n    │╲\n    │ ○\n    ○ ░\n    ░    gitleaks\n\n", "", teks)
+        teks = re.sub(r"(?m)^\d{1,2}:\d\d(AM|PM) ", "", teks)
+        teks = re.sub(r" in [\d.]+(ns|µs|ms|s|m)\b", " in <durasi>", teks)
+        # gitleaks memindai secara paralel, jadi urutan temuan berubah antar-run: diurutkan menurut file dan baris.
+        pola = r"(?ms)^Finding:.*?\n\n"
+        def kunci(b):
+            return (re.search(r"^File:\s+(.*)$", b, re.M).group(1), int(re.search(r"^Line:\s+(\d+)$", b, re.M).group(1)))
+        return "".join(sorted(re.findall(pola, teks), key=kunci)) + re.sub(pola, "", teks)
+
+    def scan(*arg):
+        r = subprocess.run([str(gl), "git", "--no-banner", "--redact", "-v", *arg, "."], cwd=repo, env=GIT_ENV,
+                           capture_output=True, text=True)
+        return r.returncode, rapikan(r.stdout + r.stderr)
+
+    def masuk(pw):
+        import psycopg
+        try:
+            with psycopg.connect(host="127.0.0.1", port=54333, dbname="lab", user=ROLE_M7, password=pw,
+                                 connect_timeout=5) as c:
+                return "masuk sebagai " + c.execute("SELECT current_user").fetchone()[0]
+        except psycopg.OperationalError as e:
+            return "ditolak: " + re.search(r"FATAL:\s+(.*)", str(e)).group(1).strip()
+
+    catat("# repo: repo git sementara meniru laptop Raka. Nama dan tanggal commit tetap, jadi hash sama di setiap rekaman.\n"
+          "# Nilai di .env palsu: dibangkitkan saat lab berjalan, tidak ada di file repo, dan diganti label di rekaman.\n"
+          f"# gitleaks: go install {GITLEAKS}, dipanggil dengan --redact (secret tidak dicetak).\n"
+          "# database VPS: Postgres lab (labs/b3-race) memerankan database di VPS untuk bagian F.\n"
+          "# Banner gambar gitleaks yang dicetak hook di bagian G dibuang dari rekaman.\n")
+
+    bagian("A. Minggu 1: repo pertama, .env ikut ter-commit")
+    repo.mkdir()
+    (repo / "README.md").write_text("# rekeningo-api\n\nAPI Rekeningo Tahap 1. Jalankan: go run ./cmd/api\n")
+    (repo / "go.mod").write_text("module rekeningo/api\n\ngo 1.24\n")
+    (repo / ".env").write_text(env_m7(lama))
+    g("minggu 1", "init", "-q", "-b", "main")
+    g("minggu 1", "add", ".")
+    g("minggu 1", "commit", "-q", "-m", "Kerangka api-t1")
+    c1 = g("minggu 1", "rev-parse", "--short", "HEAD").stdout.strip()
+    catat("$ git add . && git commit -m \"Kerangka api-t1\"\n"
+          f"$ git show --stat --format='%h %ad %s' --date=short HEAD\n"
+          f"{g('minggu 1', 'show', '--stat', '--format=%h %ad %s', '--date=short', 'HEAD').stdout}\n"
+          f"$ cat .env\n{(repo / '.env').read_text()}")
+
+    bagian("B. Minggu 5: Raka menemukan .env di repo, lalu menghapusnya")
+    g("minggu 5", "rm", "--cached", "-q", ".env")
+    (repo / ".gitignore").write_text(".env\n")
+    g("minggu 5", "add", ".gitignore")
+    g("minggu 5", "commit", "-q", "-m", "Hapus .env dari repo")
+    dilacak = g("minggu 5", "ls-files").stdout
+    harap(".env" in dilacak.split(), False, ".env tidak lagi dilacak sesudah git rm --cached")
+    harap((repo / ".env").exists(), True, ".env tetap ada di laptop (git rm --cached)")
+    catat("$ git rm --cached .env && echo .env > .gitignore && git add .gitignore && git commit -m \"Hapus .env dari repo\"\n"
+          f"$ git ls-files\n{dilacak}"
+          "# .env tidak lagi dilacak. File di laptop Raka tetap ada, karena git rm --cached hanya melepasnya dari index.\n")
+
+    bagian("C. Riwayat masih menyimpan isinya")
+    riwayat = g("minggu 5", "log", "--oneline", "--", ".env").stdout
+    isi_lama = g("minggu 5", "show", f"{c1}:.env").stdout
+    harap((len(riwayat.splitlines()), isi_lama), (2, env_m7(lama)), "commit pertama masih memuat .env yang sama persis")
+    catat(f"$ git log --oneline -- .env\n{riwayat}\n$ git show {c1}:.env\n{isi_lama}"
+          "# Siapa pun yang punya clone repo ini bisa membaca password itu, juga sesudah file dihapus.\n")
+
+    bagian("D. gitleaks memindai seluruh riwayat (aturan bawaan v8.30.1)")
+    rc_akhir, k_akhir = scan("--log-opts=-1")
+    harap((rc_akhir, "no leaks found" in k_akhir), (0, True), "commit terakhir saja (penghapusan) tidak memuat temuan")
+    catat(f"$ gitleaks git --redact -v --log-opts=-1 .   # commit terakhir saja\n{k_akhir}# exit status {rc_akhir}\n"
+          "# Commit penghapusan sendiri tidak memuat temuan. Temuannya ada di commit sebelumnya:\n\n")
+    rc, k = scan()
+    harap((rc, k.count("Finding:"), "POSTGRES_PASSWORD=REDACTED" in k, "DATABASE_URL" in k), (1, 1, True, False),
+          "aturan bawaan menandai POSTGRES_PASSWORD, tidak menandai DATABASE_URL")
+    catat(f"$ gitleaks git --redact -v .   # seluruh riwayat\n{k}# exit status {rc}\n"
+          "# Satu temuan, di commit minggu 1. Baris DATABASE_URL memuat password yang sama, tapi tidak ditandai aturan bawaan.\n")
+
+    bagian("E. Aturan tambahan: password di dalam URL")
+    (repo / ".gitleaks.toml").write_text(ATURAN_URL)
+    g("minggu 5", "add", ".gitleaks.toml")
+    g("minggu 5", "commit", "-q", "-m", "Tambah aturan gitleaks untuk password di URL")
+    rc, k = scan()
+    harap((rc, k.count("Finding:"), "url-dengan-password" in k), (1, 2, True), "aturan URL menemukan baris DATABASE_URL")
+    catat(f"$ cat .gitleaks.toml\n{ATURAN_URL}\n$ gitleaks git --redact -v .\n{k}# exit status {rc}\n")
+
+    bagian("F. Password harus diganti: menghapus file tidak mengubah password")
+    for q in (f"DROP ROLE IF EXISTS {ROLE_M7}", f"CREATE ROLE {ROLE_M7} LOGIN PASSWORD '{lama}'"):
+        subprocess.run(PSQL + ["-v", "ON_ERROR_STOP=1", "-c", q], check=True, capture_output=True)
+    pw_riwayat = re.search(r"^POSTGRES_PASSWORD=(.*)$", isi_lama, re.M).group(1)
+    sebelum = masuk(pw_riwayat)
+    subprocess.run(PSQL + ["-v", "ON_ERROR_STOP=1", "-c", f"ALTER ROLE {ROLE_M7} PASSWORD '{baru}'"],
+                   check=True, capture_output=True)
+    sesudah, baru_masuk = masuk(pw_riwayat), masuk(baru)
+    harap((sebelum, sesudah.startswith("ditolak: password authentication failed"), baru_masuk),
+          (f"masuk sebagai {ROLE_M7}", True, f"masuk sebagai {ROLE_M7}"), "password lama berlaku sampai diganti")
+    (repo / ".env").write_text(env_m7(baru))
+    catat(f"# persiapan: role {ROLE_M7} dengan password lama, seperti database di VPS sejak minggu 1.\n"
+          "# Koneksi dibuka dari mesin lab lewat TCP (psycopg), jadi Postgres benar-benar memeriksa password;\n"
+          "# baris psql di bawah adalah padanan koneksi itu.\n"
+          f"$ psql \"postgres://{ROLE_M7}:<password dari git show {c1}:.env>@db/lab\" -c 'SELECT current_user'\n-> {sebelum}\n\n"
+          f"$ psql -c \"ALTER ROLE {ROLE_M7} PASSWORD '{baru}'\"\nALTER ROLE\n"
+          f"$ psql \"postgres://{ROLE_M7}:<password dari git show {c1}:.env>@db/lab\" -c 'SELECT current_user'\n-> {sesudah}\n"
+          f"$ psql \"postgres://{ROLE_M7}:{baru}@db/lab\" -c 'SELECT current_user'\n-> {baru_masuk}\n"
+          "# .env di laptop dan di VPS diisi password baru. Password lama di riwayat tidak lagi membuka apa pun.\n")
+
+    bagian("G. Pre-commit hook: commit berikutnya yang memuat secret ditolak")
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text(f"#!/bin/sh\n# entry hook resmi gitleaks (.pre-commit-hooks.yaml di v8.30.1)\nexec {gl} git --pre-commit --redact --staged --verbose\n")
+    hook.chmod(0o755)
+    catat(f"$ cat .git/hooks/pre-commit\n{hook.read_text()}\n")
+    sebelum_head = g("minggu 5", "rev-parse", "--short", "HEAD").stdout.strip()
+    (repo / ".env.example").write_text(env_m7(baru))
+    g("minggu 5", "add", ".env.example")
+    r = g("minggu 5", "commit", "-q", "-m", "Tambah .env.example", cek=False)
+    head = g("minggu 5", "rev-parse", "--short", "HEAD").stdout.strip()
+    harap((r.returncode, head, "Finding:" in r.stderr), (1, sebelum_head, True), "hook menolak .env.example berisi password")
+    catat("# .env.example disalin dari .env, password baru ikut tersalin.\n"
+          f"$ git add .env.example && git commit -m \"Tambah .env.example\"\n{rapikan(r.stdout + r.stderr)}# exit status {r.returncode}\n"
+          f"$ git log --oneline -1\n{g('minggu 5', 'log', '--oneline', '-1').stdout}# commit tidak dibuat; HEAD tetap {head}\n\n")
+    (repo / ".env.example").write_text("# Salin ke .env, lalu isi. Nilai asli hanya ada di laptop dan di VPS.\n"
+                                       "POSTGRES_PASSWORD=\nDATABASE_URL=\n")
+    g("minggu 5", "add", ".env.example")
+    r = g("minggu 5", "commit", "-q", "-m", "Tambah .env.example", cek=False)
+    harap((r.returncode, "no leaks found" in r.stderr), (0, True), "hook meloloskan .env.example tanpa nilai")
+    catat(f"$ cat .env.example\n{(repo / '.env.example').read_text()}"
+          f"$ git add .env.example && git commit -m \"Tambah .env.example\"\n{rapikan(r.stdout + r.stderr)}# exit status {r.returncode}\n"
+          f"$ git log --oneline\n{g('minggu 5', 'log', '--oneline').stdout}\n")
+
+    bagian("H. Hook tinggal di .git/hooks laptop Raka: --no-verify melewatinya, pemindaian di CI tidak")
+    (repo / "catatan-vps.env").write_text(f"POSTGRES_PASSWORD={latihan}\n")
+    g("minggu 5", "add", "catatan-vps.env")
+    r = g("minggu 5", "commit", "-q", "--no-verify", "-m", "Catatan VPS", cek=False)
+    harap((r.returncode, "Finding:" in r.stderr + r.stdout), (0, False), "--no-verify melewati hook")
+    rc, k = scan("--log-opts=-1")
+    harap((rc, k.count("Finding:"), "catatan-vps.env" in k), (1, 1, True), "pemindaian commit baru menemukan password latihan")
+    catat("# latihan lab, bukan kejadian di cerita: nilai <password-latihan> tidak dipakai di mana pun.\n"
+          f"$ git add catatan-vps.env && git commit --no-verify -m \"Catatan VPS\"\n# exit status {r.returncode}\n"
+          f"$ git log --oneline -1\n{g('minggu 5', 'log', '--oneline', '-1').stdout}\n"
+          f"$ gitleaks git --redact -v --log-opts=-1 .   # seperti CI memindai commit yang di-push\n{k}# exit status {rc}\n")
+
+    teks = "".join(log)
+    harap([s in teks for s in (lama, baru, latihan, str(tmp))], [False] * 4, "rekaman tidak memuat nilai palsu atau path sementara")
+    tulis("m7.txt")
+
+
 if __name__ == "__main__":
     subprocess.run(["go", "build", "-o", str(BIN), "./cmd/api"], cwd=HERE, check=True)
-    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5", "authz", "m6", "deploy", "testing", "versi"]
+    pilihan = sys.argv[1:] or ["login", "topup", "bayar", "riwayat", "pertukaran", "relasi", "m1", "http", "m2", "m3", "injection", "lapisan", "m4", "koreksi", "m5", "authz", "m6", "deploy", "testing", "versi", "m7"]
     for p in pilihan:
         globals()["rekam_" + p.replace("-", "_")]()
