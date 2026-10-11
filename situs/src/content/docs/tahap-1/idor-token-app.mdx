@@ -90,9 +90,9 @@ Jalan keluarnya adalah policy per perintah. Role aplikasi hanya boleh `SELECT` b
 
 `WITH CHECK (true)` hanya aman karena role penulis tidak bisa login ([CREATE ROLE](https://www.postgresql.org/docs/17/sql-createrole.html)) dan tidak punya anggota; pemeriksaannya ada di dalam `bayar`. Dokumentasi CREATE FUNCTION juga meminta `search_path` tetap dengan `pg_temp` terakhir, dan `EXECUTE` dicabut dari `PUBLIC`. Hasilnya di rekaman bagian 10:
 
-<Snippet file="labs/b5-rls/output/rls.txt" lines="134:144" title="Rekaman lab: labs/b5-rls/output/rls.txt, bagian 10" />
+<Snippet files={["labs/b5-rls/output/rls.txt:125:125","labs/b5-rls/output/rls.txt:134:144","labs/b5-rls/output/rls.txt:148:148","labs/b5-rls/output/rls.txt:157:161","labs/b5-rls/output/rls.txt:165:165","labs/b5-rls/output/rls.txt:174:181"]} title="Rekaman lab: labs/b5-rls/output/rls.txt, bagian 10" />
 
-Dimas hanya melihat entri −5.000 miliknya, dan request Warung Ani hanya melihat entri +5.000. `INSERT` langsung dari role aplikasi ditolak `permission denied for table entri`. `bayar` tanpa identitas ditolak dengan error.
+Request Dimas membayar lewat `bayar` dan hanya melihat entri −5.000 miliknya. Request Warung Ani hanya melihat entri +5.000. Saat Dimas menulis entri +5.000 untuk dirinya langsung ke tabel, `INSERT` ditolak dengan `permission denied for table entri`. `bayar` yang dipanggil tanpa identitas berhenti dengan error `pembayaran ditolak`.
 
 **4. Token di app: siapa pun yang memegangnya adalah Budi.** Token sesi dari [[B5.1]] berisi 32 byte acak dan berlaku 8 jam. Server hanya menyimpan hash-nya. Selama token itu berlaku, siapa pun yang membacanya dari HP Budi bisa memakai saldo Budi.
 
