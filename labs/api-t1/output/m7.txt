@@ -1,0 +1,196 @@
+# repo: repo git sementara meniru laptop Raka. Nama dan tanggal commit tetap, jadi hash sama di setiap rekaman.
+# Nilai di .env palsu: dibangkitkan saat lab berjalan, tidak ada di file repo, dan diganti label di rekaman.
+# gitleaks: go install github.com/zricethezav/gitleaks/v8@v8.30.1, dipanggil dengan --redact (secret tidak dicetak).
+# database VPS: Postgres lab (labs/b3-race) memerankan database di VPS untuk bagian F.
+# Banner gambar gitleaks yang dicetak hook di bagian G dibuang dari rekaman.
+
+# --- A. Minggu 1: repo pertama, .env ikut ter-commit ---
+$ git add . && git commit -m "Kerangka api-t1"
+$ git show --stat --format='%h %ad %s' --date=short HEAD
+80952b1 2026-01-12 Kerangka api-t1
+
+ .env      | 3 +++
+ README.md | 3 +++
+ go.mod    | 3 +++
+ 3 files changed, 9 insertions(+)
+
+$ cat .env
+# Postgres di VPS dan URL yang dibaca server (cmd/api membaca DATABASE_URL)
+POSTGRES_PASSWORD=<password-lama>
+DATABASE_URL=postgres://rekeningo_app:<password-lama>@127.0.0.1:5432/rekeningo
+
+# --- B. Minggu 5: Raka menemukan .env di repo, lalu menghapusnya ---
+$ git rm --cached .env && echo .env > .gitignore && git add .gitignore && git commit -m "Hapus .env dari repo"
+$ git ls-files
+.gitignore
+README.md
+go.mod
+# .env tidak lagi dilacak. File di laptop Raka tetap ada, karena git rm --cached hanya melepasnya dari index.
+
+# --- C. Riwayat masih menyimpan isinya ---
+$ git log --oneline -- .env
+030e999 Hapus .env dari repo
+80952b1 Kerangka api-t1
+
+$ git show 80952b1:.env
+# Postgres di VPS dan URL yang dibaca server (cmd/api membaca DATABASE_URL)
+POSTGRES_PASSWORD=<password-lama>
+DATABASE_URL=postgres://rekeningo_app:<password-lama>@127.0.0.1:5432/rekeningo
+# Siapa pun yang punya clone repo ini bisa membaca password itu, juga sesudah file dihapus.
+
+# --- D. gitleaks memindai seluruh riwayat (aturan bawaan v8.30.1) ---
+$ gitleaks git --redact -v --log-opts=-1 .   # commit terakhir saja
+INF 1 commits scanned.
+INF scanned ~5 bytes (5 bytes) in <durasi>
+INF no leaks found
+# exit status 0
+# Commit penghapusan sendiri tidak memuat temuan. Temuannya ada di commit sebelumnya:
+
+$ gitleaks git --redact -v .   # seluruh riwayat
+Finding:     POSTGRES_PASSWORD=REDACTED
+Secret:      REDACTED
+RuleID:      generic-api-key
+Entropy:     4.251629
+File:        .env
+Line:        2
+Commit:      80952b1fb9e2248479e915249fa903d75db394c1
+Author:      Raka
+Email:       raka@lestari.example
+Date:        2026-01-12T01:30:00Z
+Fingerprint: 80952b1fb9e2248479e915249fa903d75db394c1:.env:generic-api-key:2
+
+INF 2 commits scanned.
+INF scanned ~309 bytes (309 bytes) in <durasi>
+WRN leaks found: 1
+# exit status 1
+# Satu temuan, di commit minggu 1. Baris DATABASE_URL memuat password yang sama, tapi tidak ditandai aturan bawaan.
+
+# --- E. Aturan tambahan: password di dalam URL ---
+$ cat .gitleaks.toml
+[extend]
+useDefault = true
+
+[[rules]]
+id = "url-dengan-password"
+description = "Password di dalam URL koneksi database"
+regex = '''[a-z][a-z0-9+.-]*://[^:@/\s]+:([^@/\s]{8,})@'''
+secretGroup = 1
+keywords = ["://"]
+
+$ gitleaks git --redact -v .
+Finding:     POSTGRES_PASSWORD=REDACTED
+Secret:      REDACTED
+RuleID:      generic-api-key
+Entropy:     4.251629
+File:        .env
+Line:        2
+Commit:      80952b1fb9e2248479e915249fa903d75db394c1
+Author:      Raka
+Email:       raka@lestari.example
+Date:        2026-01-12T01:30:00Z
+Fingerprint: 80952b1fb9e2248479e915249fa903d75db394c1:.env:generic-api-key:2
+
+Finding:     DATABASE_URL=postgres://rekeningo_app:REDACTED@127.0.0.1:5432/reken...
+Secret:      REDACTED
+RuleID:      url-dengan-password
+Entropy:     4.251629
+File:        .env
+Line:        3
+Commit:      80952b1fb9e2248479e915249fa903d75db394c1
+Author:      Raka
+Email:       raka@lestari.example
+Date:        2026-01-12T01:30:00Z
+Fingerprint: 80952b1fb9e2248479e915249fa903d75db394c1:.env:url-dengan-password:3
+
+INF 3 commits scanned.
+INF scanned ~523 bytes (523 bytes) in <durasi>
+WRN leaks found: 2
+# exit status 1
+
+# --- F. Password harus diganti: menghapus file tidak mengubah password ---
+# persiapan: role rekeningo_app dengan password lama, seperti database di VPS sejak minggu 1.
+# Koneksi dibuka dari mesin lab lewat TCP (psycopg), jadi Postgres benar-benar memeriksa password;
+# baris psql di bawah adalah padanan koneksi itu.
+$ psql "postgres://rekeningo_app:<password dari git show 80952b1:.env>@db/lab" -c 'SELECT current_user'
+-> masuk sebagai rekeningo_app
+
+$ psql -c "ALTER ROLE rekeningo_app PASSWORD '<password-baru>'"
+ALTER ROLE
+$ psql "postgres://rekeningo_app:<password dari git show 80952b1:.env>@db/lab" -c 'SELECT current_user'
+-> ditolak: password authentication failed for user "rekeningo_app"
+$ psql "postgres://rekeningo_app:<password-baru>@db/lab" -c 'SELECT current_user'
+-> masuk sebagai rekeningo_app
+# .env di laptop dan di VPS diisi password baru. Password lama di riwayat tidak lagi membuka apa pun.
+
+# --- G. Pre-commit hook: commit berikutnya yang memuat secret ditolak ---
+$ cat .git/hooks/pre-commit
+#!/bin/sh
+# entry hook resmi gitleaks (.pre-commit-hooks.yaml di v8.30.1)
+exec gitleaks git --pre-commit --redact --staged --verbose
+
+# .env.example disalin dari .env, password baru ikut tersalin.
+$ git add .env.example && git commit -m "Tambah .env.example"
+Finding:     POSTGRES_PASSWORD=REDACTED
+Secret:      REDACTED
+RuleID:      generic-api-key
+Entropy:     4.251629
+File:        .env.example
+Line:        2
+Fingerprint: .env.example:generic-api-key:2
+
+Finding:     DATABASE_URL=postgres://rekeningo_app:REDACTED@127.0.0.1:5432/reken...
+Secret:      REDACTED
+RuleID:      url-dengan-password
+Entropy:     4.251629
+File:        .env.example
+Line:        3
+Fingerprint: .env.example:url-dengan-password:3
+
+INF 0 commits scanned.
+INF scanned ~207 bytes (207 bytes) in <durasi>
+WRN leaks found: 2
+# exit status 1
+$ git log --oneline -1
+c609ee5 Tambah aturan gitleaks untuk password di URL
+# commit tidak dibuat; HEAD tetap c609ee5
+
+$ cat .env.example
+# Salin ke .env, lalu isi. Nilai asli hanya ada di laptop dan di VPS.
+POSTGRES_PASSWORD=
+DATABASE_URL=
+$ git add .env.example && git commit -m "Tambah .env.example"
+INF 0 commits scanned.
+INF scanned ~103 bytes (103 bytes) in <durasi>
+INF no leaks found
+# exit status 0
+$ git log --oneline
+15fd073 Tambah .env.example
+c609ee5 Tambah aturan gitleaks untuk password di URL
+030e999 Hapus .env dari repo
+80952b1 Kerangka api-t1
+
+
+# --- H. Hook tinggal di .git/hooks laptop Raka: --no-verify melewatinya, pemindaian di CI tidak ---
+# latihan lab, bukan kejadian di cerita: nilai <password-latihan> tidak dipakai di mana pun.
+$ git add catatan-vps.env && git commit --no-verify -m "Catatan VPS"
+# exit status 0
+$ git log --oneline -1
+5358b91 Catatan VPS
+
+$ gitleaks git --redact -v --log-opts=-1 .   # seperti CI memindai commit yang di-push
+Finding:     POSTGRES_PASSWORD=REDACTED
+Secret:      REDACTED
+RuleID:      generic-api-key
+Entropy:     4.168296
+File:        catatan-vps.env
+Line:        1
+Commit:      5358b91e11a8d2a8334a928ffd3cdac00c0d9ad1
+Author:      Raka
+Email:       raka@lestari.example
+Date:        2026-02-11T03:00:00Z
+Fingerprint: 5358b91e11a8d2a8334a928ffd3cdac00c0d9ad1:catatan-vps.env:generic-api-key:1
+
+INF 1 commits scanned.
+INF scanned ~43 bytes (43 bytes) in <durasi>
+WRN leaks found: 1
+# exit status 1
