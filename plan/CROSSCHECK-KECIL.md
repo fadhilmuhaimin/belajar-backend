@@ -113,7 +113,7 @@ Branch `crosscheck/k1x` (main 7fdc0ad, P1 sudah di-merge lewat #165). Build `bun
 
 1.33 menunjuk 1.38 karena `urutanBaca` hanya memuat halaman yang ada (`situs/tools/registri.mjs` baris 64); `[[berikutnya]]` di 1.33 baris 31 dan `Lanjut` pindah sendiri ke 1.34 saat halaman itu terbit. Bukan temuan; diperiksa lagi di K2.
 
-`k1x-nav2.mjs` untuk beranda, 1.4, 1.6, dan 1.29 di dua ukuran: `200`, `scrollWidth` = viewport, 0 error konsol. Satu hasil janggal: di 1.4 375×667, 250 ms sesudah Berikutnya blok 1, blok Opsi berada 374 px di atas viewport. `k1x-adr.mjs` mengukur ulang per waktu: blok Kebutuhan menutup (tinggi halaman 4.678 → 2.704 px), `scrollY` 0 → 1.737 (100 ms) → 610 (250 ms) → 192 (600 ms), lalu berhenti dengan blok Opsi di top 112 px. Pola sama di 1.24 (`scrollY` 1.143 → 186). Tujuannya benar, tetapi halaman menggulir melewati ±1.500 px lalu kembali; jadi K1xe. Halaman konsep tidak mengalaminya karena blok 1 tidak menutup.
+`k1x-nav2.mjs` untuk beranda, 1.4, 1.6, dan 1.29 di dua ukuran: `200`, `scrollWidth` = viewport, 0 error konsol. Satu hasil janggal: di 1.4 375×667, 250 ms sesudah Berikutnya blok 1, blok Opsi berada 374 px di atas viewport. Diagnosis pertama di sini salah (review PR #166): `k1x-adr.mjs` membaca `scrollY` sebelum `click()` Playwright, padahal `click()` lebih dulu menggulir ke tombol, jadi "0 → 1.737" adalah gulir otomatis ke tombol, bukan gulir yang melewati tujuan. Ukuran ulang `situs/tangkapan/k1xe-gulir.mjs` (tombol digulir ke layar dulu, lalu diklik, lalu disampel per rAF) tidak menemukan gulir yang melewati posisi akhir. Masalah nyatanya: blok 1 menutup selagi masih di layar, padahal komentar handler Berikutnya di `Blok.astro` menganggapnya sudah di atas layar. Di frame pertama blok tujuan meloncat ke atas viewport, lalu gulir halus membawanya kembali. Di 1.4 375×667 tinggi halaman 4.678 → 2.704 px, top blok Opsi −1.570 px, gulir 1.682 px selama 663 ms; di 1.24 375×667 top −898 px, gulir 1.010 px. Halaman konsep juga mengalaminya: 1.32 375×667 tinggi 2.951 → 1.868 px, top −301 px, gulir 389 px. Jadi K1xe.
 
 ### Tautan
 
@@ -148,11 +148,11 @@ Branch `crosscheck/k1x` (main 7fdc0ad, P1 sudah di-merge lewat #165). Build `bun
 | (b) 1.29 baris 95: Ani +5.000, `permission denied`, `bayar` tanpa identitas | Nyata: Snippet baris 93 hanya `rls.txt` 134–144 (Dimas −5.000); bukti ada di 157–160 dan 174–181 tetapi tidak tampil | K1xd |
 | (c) KEPUTUSAN 246 tanpa URL dan tanggal akses | Nyata | Diperbaiki: tiga URL dokumentasi PostgreSQL 17 (yang sama dengan di 1.29) + tanggal akses |
 | (d) "belum dipindah" di `remark-rujukan.mjs:3` dan `Lanjut.astro:4` | Nyata, komentar basi sejak keputusan 245 | Diperbaiki jadi "belum ditulis" |
-| (e) beranda: tab 2–5 ditap sebelum hydrate menggeser 20–63 px (CLS 0,0323) | Nyata: gerbang hanya mengukur tap Tahap 3 (CLS 0,0105) | K1xa; komentar `Beranda.astro` diperbaiki langsung supaya tidak lagi menulis "tidak lagi menggeser" |
+| (e) beranda: tab 2–5 ditap sebelum hydrate masih menggeser halaman | Nyata, tetapi angka peninjau sebelumnya (20–63 px, CLS 0,0323) tidak bisa dihasilkan ulang. Cara ukur `ukur-diagram.mjs` bagian 6 per tab (review PR #166): Tahap 2 dan 3 geser 63 px (CLS 0,0105), Tahap 4 dan 5 geser 41 px (CLS 0,0067); gerbang hanya mengukur Tahap 3 | K1xa (target 0 px); komentar `Beranda.astro` memakai angka ukur ini |
 | (f) KEPUTUSAN 252 alasan berputar | Nyata: opsi ditolak karena bertentangan dengan ADR yang sedang diputuskan | Diperbaiki: nama kolom tidak dibaca app (`EXPAND_UBAH` memetakan `nominal` ke kolom `jumlah`) |
 | (f) label "Ubah satu hal: Latihan lab: …" | Nyata, dua titik dua | Diperbaiki: label `t1-versi.json` jadi "… (contract, latihan lab)" |
 | (f) `PermintaanBayar` `required: [ke]` | Nyata: kontrak tidak menyatakan salah satu `jumlah`/`nominal` wajib, padahal server menjawab `400` tanpa keduanya | K1xb (rekaman `expand.txt` diulang) |
-| (g) `bearer` huruf kecil diperlakukan tanpa token | Nyata menurut RFC 9110 §11.1 (nama skema tidak peka huruf), tidak tampil di halaman | K1xc |
+| (g) `bearer` huruf kecil diperlakukan tanpa token | Nyata menurut RFC 9110 §11.1 (nama skema tidak peka huruf). Kodenya tampil: `strings.CutPrefix(..., "Bearer ")` di `handler.go` ~139 ada di region `wajib-login` (135–160) yang ditampilkan 1.27; tempat kedua di `logout` ~165 | K1xc (Snippet dan teks 1.27 ikut dicek) |
 | (h) 1.31 "GHCR" tanpa kepanjangan | Nyata | Diperbaiki: "GitHub Container Registry (GHCR)" |
 
 ### Diperbaiki langsung di PR ini
@@ -165,8 +165,8 @@ Branch `crosscheck/k1x` (main 7fdc0ad, P1 sudah di-merge lewat #165). Build `bun
 
 ### Tugas perbaikan yang lahir
 
-- K1xa: CLS beranda untuk tab 2–5 yang ditap sebelum hydrate, diukur di gerbang.
+- K1xa: geseran beranda 0 px untuk tab 2–5 yang ditap sebelum hydrate, semua tab diukur di gerbang.
 - K1xb: kontrak expand menyatakan salah satu `jumlah`/`nominal` wajib.
 - K1xc: skema `Bearer` tidak peka huruf di lab `api-t1`.
 - K1xd: rekaman `rls.txt` untuk klaim bagian 10 tampil di 1.29.
-- K1xe: Berikutnya blok 1 di halaman ADR tidak menggulir melewati tujuan.
+- K1xe: Berikutnya blok 1 di halaman ADR dan konsep: blok tujuan tidak meloncat jauh ke atas layar saat blok 1 menutup.

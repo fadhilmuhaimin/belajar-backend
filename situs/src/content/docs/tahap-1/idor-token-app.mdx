@@ -148,7 +148,9 @@ await storage.delete(key: 'token_sesi'); // saat Keluar atau saat server menjawa
 
 **Kapan keputusan ini salah.** Saat ada client yang membaca database langsung, misalnya tool laporan untuk Pak Hadi, service tidak lagi satu-satunya pintu, dan RLS harus menjadi pagar pertama. Keputusan ini juga mulai salah saat aturan izin bertambah, misalnya kepala bagian melihat transaksi timnya. Pertanyaan `peminta != id` yang tersebar di banyak method sulit diperiksa satu per satu. Butir 4 mulai berat saat jenis entri bertambah, misalnya top-up dan koreksi: setiap jenis butuh fungsi sendiri, dan pemeriksaan di dalamnya menggantikan policy.
 
-**Yang merevisinya nanti.** Tahap 2 mengganti model uang v1 dengan ledger double-entry dan memasang butir 4 di tabel ledger. Policy pemilik untuk semua perintah tidak dipakai, karena `INSERT` entri Warung Ani dari pembayaran Dimas gagal dengan error (rekaman bagian 9). Query yang membaca baris pihak lain, misalnya batas saldo Ani, tersaring untuk role aplikasi (rekaman bagian 2), jadi query itu pindah ke `bayar` dengan policy baca sendiri. Di Tahap 2 juga, test "token A meminta data B" menjadi syarat merge untuk engineer kedua.
+**Yang merevisinya nanti.** Tahap 2 mengganti model uang v1 dengan ledger double-entry dan memasang butir 4 di tabel ledger. Policy pemilik untuk semua perintah tidak dipakai, karena `INSERT` entri Warung Ani dari pembayaran Dimas gagal dengan error (rekaman bagian 9). Query yang membaca baris pihak lain, misalnya batas saldo Ani, tersaring untuk role aplikasi (rekaman bagian 2). Karena itu, query tersebut pindah ke `bayar` dengan policy baca sendiri.
+
+Di Tahap 2 juga, test "token A meminta data B" menjadi syarat merge untuk engineer kedua.
 
 ### ADR 8: sesi acak di server, token di secure storage, JWT ditunda
 

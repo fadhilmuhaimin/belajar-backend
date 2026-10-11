@@ -48,7 +48,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 ## Sedang dikerjakan
 
 2026-10-11 · K1x selesai di branch `crosscheck/k1x` (PR menunggu tinjauan, jangan merge sebelum disetujui pengatur; keputusan 254): alur 1.30→1.33 dan beranda, 1.4, 1.6, 1.29 tanpa error konsol dan tanpa scroll horizontal, href 0 salah, lintas halaman cocok, layar pertama lolos (1.32 tertipis, 20 px di 375×667).
-Diperbaiki langsung: terjemahan literal 1.29, GHCR 1.31, label varian 1.33, tiga komentar, sumber KEPUTUSAN 246, alasan KEPUTUSAN 252. Tugas baru K1xa–K1xe (CLS tab beranda, kontrak expand, Bearer tidak peka huruf, Snippet rls 1.29, gulir blok 1 halaman ADR); K2 menyempit ke 1.34–1.35.
+Diperbaiki langsung: terjemahan literal 1.29, GHCR 1.31, label varian 1.33, tiga komentar, sumber KEPUTUSAN 246, alasan KEPUTUSAN 252. Tugas baru K1xa–K1xe (CLS tab beranda, kontrak expand, Bearer tidak peka huruf, Snippet rls 1.29, blok tujuan meloncat saat blok 1 menutup); K2 menyempit ke 1.34–1.35. Review #166 diperbaiki: K1xe didiagnosis ulang (bukan gulir melewati tujuan), K1xa target 0 px, K1xb/K1xc menyebut Snippet 1.33 dan 1.27, kalimat 1.29 dipecah.
 Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
@@ -74,7 +74,7 @@ Berikutnya: python3 tools/antrean.py berikut
 - Lab psql dengan `-e`: `\set ECHO none` menyembunyikan setup panjang (fungsi, policy); `DROP SCHEMA ... CASCADE` atas lebih dari satu objek mencetak `DETAIL:` yang tidak tersaring `^NOTICE`, jadi run ulang berbeda dari run bersih.
 - Mode dontAsk/auto menolak: perintah majemuk dengan `cd`, heredoc, loop shell, awalan env (`AXE=...`), diff `<(...)`, pipa ke `gzip`/`wc`, mengubah `.claude/settings.json`; pakai skrip di `tmp/` dan path relatif.
 - Ukur konteks sesi pengatur 1.28 (tools/ukur_konteks.py pada transcript subagen): awal 65–66k (loop lama 94–101k), puncak pelaksana 279k, 24,9 juta token diproses, 86% di atas 150k; peninjau 98–176k. Pelaksana wajib serah-terima di ±120k (PROTOKOL k.4).
-- Animasi CSS yang dipicu event `toggle` (async) mulai satu sampai dua frame sesudah `<details>` terbuka: isi penuh sempat berkedip. Ukur frame per rAF sesudah klik sungguhan (`page.click`, bukan `el.click()`, yang tidak mengirim pointerdown).
+- Animasi CSS yang dipicu event `toggle` (async) mulai satu sampai dua frame sesudah `<details>` terbuka: isi penuh sempat berkedip. Ukur frame per rAF sesudah klik sungguhan (`page.click`, bukan `el.click()`, yang tidak mengirim pointerdown). `page.click` lebih dulu menggulir ke elemen: ukur gulir dari tombol yang sudah di layar, bukan `scrollY` sebelum klik (K1xe).
 - Penanda selesai di `tmp/` bisa tertinggal dari sesi lama (K1: `tmp/cek-hasil.txt` membuat Monitor menyala saat gerbang masih jalan); hapus penanda sebelum gerbang mulai, atau tunggu prosesnya (`pgrep -f cek_situs`).
 - `tmp/sidik_dist.py` hanya menghitung file yang dirujuk HTML; chunk yang diimpor island (React Flow) terlihat lewat `tmp/ukur_diagram_js.py` atau byte jaringan (`situs/tangkapan/i5b-jaringan.mjs`). React Flow `fitView` hanya untuk node awal: data baru = ReactFlow baru (`key`).
 - layar.mjs tidak menghitung Snippet sebagai visual Inti; Inti butuh Rantai atau widget (1.32 gagal 4 ukuran sebelum Rantai).

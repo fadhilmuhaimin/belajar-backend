@@ -311,8 +311,8 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - status: antre
 - percobaan: 0
 - bergantung: -
-- selesai bila: tap tab Tahap 2, 3, 4, dan 5 sebelum hydrate di 375×667 masing-masing diukur di gerbang (bukan hanya Tahap 3) dan CLS tiap tab ≤ 0,0105 (nilai Tahap 3 sekarang); komentar `situs/src/components/Beranda.astro` di atas `cssPesan` sesuai hasil ukur; tangkapan sebelum/sesudah.
-- catatan: Dari K1x butir (e): peninjau PR sebelumnya mengukur geseran 20–63 px (CLS 0,0323) untuk tab 2–5; gerbang sekarang hanya mengukur tap Tahap 3 (0,0105). Keputusan 248.
+- selesai bila: tap tab Tahap 2, 3, 4, dan 5 sebelum hydrate di 375×667 masing-masing diukur di gerbang (`situs/tools/ukur-diagram.mjs` bagian 6 untuk semua tab, bukan hanya Tahap 3) dan geseran tiap tab 0 px (CLS 0); komentar `situs/src/components/Beranda.astro` di atas `cssPesan` diperbarui dengan angka ukur baru dan cara ukurnya; tangkapan sebelum/sesudah.
+- catatan: Dari K1x butir (e). Ukuran review PR #166 dengan cara `ukur-diagram.mjs` bagian 6, per tab, dua kali identik: Tahap 2 dan 3 geser 63 px (CLS 0,0105), Tahap 4 dan 5 geser 41 px (CLS 0,0067). Gerbang sekarang hanya mengukur Tahap 3. Angka 20–63 px dan CLS 0,0323 dari review PR sebelumnya tidak bisa dihasilkan ulang dan tidak dipakai. Keputusan 248.
 
 ### K1xb · Kontrak expand: salah satu jumlah atau nominal wajib
 
@@ -320,7 +320,7 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - status: antre
 - percobaan: 0
 - bergantung: -
-- selesai bila: `PermintaanBayar` di `labs/b1-openapi/openapi-expand.yaml` menyatakan salah satu `jumlah` atau `nominal` wajib (mis. `anyOf` dengan `required: [jumlah]` dan `required: [nominal]`), dicek ke spesifikasi OpenAPI yang dipakai file itu; redocly lint dan oasdiff direkam ulang ke `labs/b1-openapi/output/expand.txt` (dua kali identik); bila hasil oasdiff berubah, 1.33 baris 79 diperbarui sesuai rekaman; keputusan baru.
+- selesai bila: `PermintaanBayar` di `labs/b1-openapi/openapi-expand.yaml` menyatakan salah satu `jumlah` atau `nominal` wajib (mis. `anyOf` dengan `required: [jumlah]` dan `required: [nominal]`), dicek ke spesifikasi OpenAPI yang dipakai file itu; redocly lint dan oasdiff direkam ulang ke `labs/b1-openapi/output/expand.txt` (dua kali identik); bila hasil oasdiff berubah, 1.33 baris 79 diperbarui sesuai rekaman; Snippet 1.33 `openapi-expand.yaml` `lines="221:228"` (`situs/src/content/docs/tahap-1/app-versi-lama.mdx` ~baris 77) diganti region `skema-bayar` atau rentang baru, supaya syarat baru tampil; keputusan baru.
 - catatan: Dari K1x butir (f): server expand menjawab `400` (field `jumlah`) bila keduanya tidak dikirim (`EXPAND_UBAH` di `labs/api-t1/run.py`), tetapi kontrak hanya mewajibkan `ke`.
 
 ### K1xc · Skema Bearer tidak peka huruf di lab api-t1
@@ -329,8 +329,8 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - status: antre
 - percobaan: 0
 - bergantung: -
-- selesai bila: lab `api-t1` menerima `bearer` dan `BEARER` sama dengan `Bearer` (RFC 9110 §11.1), dengan tes; rekaman yang memuat header Authorization dibandingkan sebelum dan sesudah (status, urutan; bukan waktu) dan tidak berubah kecuali baris baru untuk kasus ini; keputusan baru.
-- catatan: Dari K1x butir (g): sekarang `bearer <token>` diperlakukan sebagai tanpa token (`401`). Tidak tampil di halaman mana pun.
+- selesai bila: lab `api-t1` menerima `bearer` dan `BEARER` sama dengan `Bearer` (RFC 9110 §11.1), dengan tes; rekaman yang memuat header Authorization dibandingkan sebelum dan sesudah (status, urutan; bukan waktu) dan tidak berubah kecuali baris baru untuk kasus ini; Snippet 1.27 (region `wajib-login`, `situs/src/content/docs/tahap-1/authentication.mdx` ~baris 74) dan teks 1.27 ~baris 76 (tanpa token hanya `Bearer`, token ditolak `Bearer error="invalid_token"`) tetap cocok dengan kode baru; keputusan baru.
+- catatan: Dari K1x butir (g): sekarang `bearer <token>` diperlakukan sebagai tanpa token (`401`). `strings.CutPrefix(..., "Bearer ")` ada di dua tempat di `labs/api-t1/internal/handler/handler.go`: `wajibLogin` ~baris 139, di dalam region `wajib-login` (135–160) yang tampil di 1.27, dan `logout` ~baris 165.
 
 ### K1xd · 1.29: rekaman bagian 10 tampil untuk klaimnya
 
@@ -341,14 +341,14 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 - selesai bila: kalimat di `situs/src/content/docs/tahap-1/idor-token-app.mdx` sesudah Snippet bagian 10 (Warung Ani melihat +5.000, `INSERT` ditolak `permission denied`, `bayar` tanpa identitas ditolak) didukung Snippet yang tampil dari `labs/b5-rls/output/rls.txt` baris 157–160 dan 174–181 (atau satu Snippet bila komponen mendukung beberapa rentang); layar pertama 1.29 tidak berubah.
 - catatan: Dari K1x butir (b): Snippet sekarang hanya baris 134–144 (Dimas −5.000).
 
-### K1xe · Berikutnya blok 1 di halaman ADR tidak menggulir melewati tujuan
+### K1xe · Berikutnya blok 1: blok tujuan tetap dekat layar saat blok 1 menutup
 
 - jenis: perbaikan
 - status: antre
 - percobaan: 0
 - bergantung: -
-- selesai bila: di setiap halaman ADR (1.4, 1.24, dan yang menyusul) di 375×667 dan 1366×657, `scrollY` sesudah klik Berikutnya di blok 1 bergerak ke posisi akhir tanpa melewatinya (diukur per frame); pemeriksaannya masuk gerbang (mis. `ukur-gerak.mjs`); reduced motion tetap tanpa gerak.
-- catatan: Dari K1x: di 1.4 375×667 blok Kebutuhan menutup (tinggi halaman 4.678 → 2.704 px) saat gulir berjalan, `scrollY` 0 → 1.737 → 610 → 192 dalam 600 ms; 1.24 1.143 → 186. Alat ukur: `situs/tangkapan/k1x-adr.mjs` (di-.gitignore, tulis ulang bila hilang).
+- selesai bila: diukur dari tombol Berikutnya blok 1 yang sudah di layar (tombol digulir ke layar dulu, lalu diklik, lalu disampel per rAF), di frame pertama sesudah klik top blok tujuan masih di dalam viewport, atau jarak gulir ≤ satu tinggi viewport; berlaku di halaman ADR (1.4, 1.24, dan yang menyusul) dan halaman konsep (mis. 1.32) di 375×667 dan 1366×657; pemeriksaannya masuk gerbang (mis. `ukur-gerak.mjs`); komentar handler Berikutnya di `situs/src/components/Blok.astro` ("sudah di atas layar") sesuai perilakunya; reduced motion tetap tanpa gerak.
+- catatan: Diagnosis K1x salah (review PR #166): `k1x-adr.mjs` membaca `scrollY` sebelum `click()` Playwright, yang lebih dulu menggulir ke tombol, jadi "0 → 1.737" adalah gulir otomatis itu. Tidak ada gulir yang melewati tujuan. Masalah nyata: blok 1 menutup selagi masih di layar, tinggi halaman turun, dan blok tujuan meloncat ke atas viewport sebelum gulir halus membawanya kembali. Ukuran 2026-10-11 (`situs/tangkapan/k1xe-gulir.mjs`, di-.gitignore, tulis ulang bila hilang; tombol di top ±351 px; top blok tujuan di frame 1 → jarak gulir, lama gulir): 1.4 375×667 −1.570 px → 1.682 px, 663 ms; 1.4 1366×657 −576 → 672 px, 436 ms; 1.24 375×667 −898 → 1.010 px, 510 ms; 1.24 1366×657 −588 → 684 px, 418 ms; 1.32 375×667 −301 → 389 px, 314 ms; 1.32 1366×657 −195 → 291 px, 275 ms. Menurut syarat di atas, 1.4 dan 1.24 gagal di kedua ukuran; 1.32 lolos karena jarak gulirnya di bawah satu viewport.
 
 ### P2 · Hapus labs/api-t1-lama
 
