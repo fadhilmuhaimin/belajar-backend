@@ -70,7 +70,7 @@ Waktu jawabannya juga dijaga. Untuk email yang tidak terdaftar, `Login` tetap me
 
 - **Role aplikasi tidak melewati RLS.** Superuser dan role ber-`BYPASSRLS` selalu melewati RLS. Pemilik tabel juga melewatinya, kecuali tabel diberi `FORCE ROW LEVEL SECURITY` (rekaman di [[B5.3]]).
 - **Identitas hidup sepanjang satu transaction.** Menurut [dokumentasi `SET`](https://www.postgresql.org/docs/17/sql-set.html), nilai `SET` biasa bertahan sampai sesi berakhir setelah transaction-nya di-COMMIT. Connection pool memakai ulang sesi itu untuk request berikutnya, seperti di blok Coba. `set_config(..., true)` hanya berlaku di transaction yang sedang berjalan ([functions-admin](https://www.postgresql.org/docs/17/functions-admin.html)).
-- **Tulisan atas nama orang lain tidak lewat policy pemilik.** Bayar ke warung mengubah baris milik Ani. Di bawah policy pemilik, perintah itu tidak gagal; ia tidak menemukan baris:
+- **Mengubah baris milik orang lain tidak lolos policy pemilik.** Bayar ke warung mengubah baris milik Ani. Di bawah policy pemilik, perintah itu tidak gagal; ia tidak menemukan baris:
 
 <Snippet file="labs/b5-rls/output/rls.txt" lines="52:60" title="Rekaman lab: labs/b5-rls/output/rls.txt" />
 
@@ -130,7 +130,7 @@ await storage.delete(key: 'token_sesi'); // saat Keluar atau saat server menjawa
 | UUID untuk semua ID (yang Raka kira) | Enumerasi berurutan tidak bisa lagi | OWASP: pemeriksaan tetap wajib; UUID ikut tersebar di struk, log, dan tangkapan layar |
 | Pertanyaan pemilik hanya di service | Terbaca, dites tanpa HTTP, status dan pesan bebas dipilih | Satu method baru yang lupa bertanya membuka data lagi |
 | RLS saja | Berlaku untuk setiap query, termasuk yang lupa | Bayar ke warung jadi `UPDATE 0` (rekaman); login dan admin butuh jalan pintas |
-| **Service sebagai pagar pertama, RLS per perintah sebagai pagar kedua** | Lupa di satu lapis disaring lapis lain | Aturan ditulis di dua tempat; RLS punya tiga syarat; tulisan ke akun lain butuh fungsi `bayar` |
+| **Service sebagai pagar pertama, RLS per perintah sebagai pagar kedua** | Lupa di satu lapis disaring lapis lain | Aturan ditulis di dua tempat; RLS punya tiga syarat; menulis ke akun lain butuh fungsi `bayar` |
 
 **Yang dipilih.**
 
@@ -148,7 +148,7 @@ await storage.delete(key: 'token_sesi'); // saat Keluar atau saat server menjawa
 
 **Kapan keputusan ini salah.** Saat ada client yang membaca database langsung, misalnya tool laporan untuk Pak Hadi, service tidak lagi satu-satunya pintu, dan RLS harus menjadi pagar pertama. Keputusan ini juga mulai salah saat aturan izin bertambah, misalnya kepala bagian melihat transaksi timnya. Pertanyaan `peminta != id` yang tersebar di banyak method sulit diperiksa satu per satu. Butir 4 mulai berat saat jenis entri bertambah, misalnya top-up dan koreksi: setiap jenis butuh fungsi sendiri, dan pemeriksaan di dalamnya menggantikan policy.
 
-**Yang merevisinya nanti.** Tahap 2 mengganti model uang v1 dengan ledger double-entry dan memasang butir 4 di tabel ledger. Policy pemilik untuk semua perintah tidak dipakai, karena `INSERT` entri Warung Ani dari pembayaran Dimas gagal dengan error (rekaman bagian 9). Bacaan untuk pihak lain, misalnya batas saldo Ani, tersaring untuk role aplikasi (rekaman bagian 2), jadi pindah ke `bayar` dengan policy baca sendiri. Di Tahap 2 juga, test "token A meminta data B" menjadi syarat merge untuk engineer kedua.
+**Yang merevisinya nanti.** Tahap 2 mengganti model uang v1 dengan ledger double-entry dan memasang butir 4 di tabel ledger. Policy pemilik untuk semua perintah tidak dipakai, karena `INSERT` entri Warung Ani dari pembayaran Dimas gagal dengan error (rekaman bagian 9). Query yang membaca baris pihak lain, misalnya batas saldo Ani, tersaring untuk role aplikasi (rekaman bagian 2), jadi query itu pindah ke `bayar` dengan policy baca sendiri. Di Tahap 2 juga, test "token A meminta data B" menjadi syarat merge untuk engineer kedua.
 
 ### ADR 8: sesi acak di server, token di secure storage, JWT ditunda
 
@@ -166,7 +166,7 @@ Tempat token di app:
 
 | Opsi | Kelebihan | Kekurangan |
 |---|---|---|
-| `shared_preferences` (v1) | Sudah terpasang, dibaca sinkron dari cache | Tanpa enkripsi di Android (MASTG); README-nya melarang data penting karena tulisan ke disk tidak dijamin |
+| `shared_preferences` (v1) | Sudah terpasang, dibaca sinkron dari cache | Tanpa enkripsi di Android (MASTG); README-nya melarang data penting karena penulisan ke disk tidak dijamin |
 | **`flutter_secure_storage`** | Keychain dan Keystore milik sistem | Auto backup Android dan isi Keychain sesudah instal ulang perlu ditangani |
 | Hanya di memori | Tidak ada yang tersimpan di HP | Budi login setiap kali app dibuka, juga saat warung ramai |
 
