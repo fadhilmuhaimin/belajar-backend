@@ -47,9 +47,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1xa selesai di branch `perbaikan/k1xa-cls-tab` (frasa K1xa di keputusan 248; PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): kaki diagram setiap tahap di `.peta__pesan` (PetaDiagram.tsx), ditampilkan cssPesan (Beranda.astro) selama diagram belum mengikuti tab.
-Bukti `ukur-diagram.mjs` bagian 6 per tab 375×667: sebelum Tahap 2–6 geser 63/63/41/41/0 px, sesudah 0 px dan CLS 0 semua tab. Berikutnya: `python3 tools/antrean.py berikut`.
-Berikutnya: python3 tools/antrean.py berikut
+2026-10-11 · K1xb mulai di branch `perbaikan/k1xb-kontrak-expand`: `PermintaanBayar` di `labs/b1-openapi/openapi-expand.yaml` mewajibkan salah satu `jumlah` atau `nominal` (`anyOf` + `required`), dicek ke spesifikasi OpenAPI versi file itu.
+File: kontrak expand, rekaman `labs/b1-openapi/output/expand.txt` (dua kali identik), Snippet dan kalimat oasdiff di `tahap-1/app-versi-lama.mdx`, KEPUTUSAN, ANTREAN. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 

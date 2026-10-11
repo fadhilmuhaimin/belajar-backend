@@ -62,8 +62,8 @@ Dipindah dari plan/MEMORI.md saat MEMORI dipangkas ke 80 baris (keputusan 235, 2
 - Halaman lama dengan judul pendek di H1 (keputusan 68/74) berbeda dari `title` frontmatter; Starlight memakai satu `title`, jadi konverter mengambil H1 badan. `banding.mjs` menangkapnya sebagai "urutan heading BERBEDA".
 - pymdownx.snippets punya dua pola selain region: beberapa baris `--8<--` dalam satu fence (digabung) dan rentang baris `file:1:13`; Snippet mendukung `files={[...]}` dan `lines="1:13"`.
 - (dipindah dari MEMORI 2026-10-11, K1x) Data widget lama (skenario alur) ditulis di `situs/lama/widgets/data/`; `situs/public/widgets/` tidak dilacak git dan disalin saat build. `tools/sinkron_cerita.py` mengabaikan argumen (`--help` pun langsung menyinkronkan).
+- (dipindah dari MEMORI 2026-10-11) Astro 7 `preview` otomatis jadi daemon bila agen terdeteksi, dan bila daemon lama hidup ia keluar tanpa menyalakan server baru; `curl /` berhasil tidak membuktikan server melayani build ini (G1 memakai penanda per jalan di `situs/dist`).
 
-- Astro 7 `preview` otomatis jadi daemon bila agen terdeteksi, dan bila daemon lama hidup ia keluar tanpa menyalakan server baru; `curl /` berhasil tidak membuktikan server melayani build ini (G1 memakai penanda per jalan di `situs/dist`).
 ## Sedang dikerjakan (sampai 2026-10-10)
 
 2026-10-10 · 1.26 M5 selesai (keputusan 234), branch `tahap-1/m5-angka-di-url`. Halaman `tahap-1/m5-angka-di-url.mdx`, Rantai `t1-m5-pemilik.json`, alur `lama/widgets/data/skenario/t1-m5.json`, ilustrasi `m5` (tanpa teks di SVG). Token di app hanya berlabel Ilustrasi dan merujuk 1.29; 1.29 harus memuat ADR 8 dengan sumber shared_preferences 2.5.6 dan flutter_secure_storage 11.2.0. Berikutnya: `python3 tools/antrean.py berikut`.
