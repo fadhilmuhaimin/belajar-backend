@@ -54,7 +54,7 @@ Lolos semua adalah syarat minimum, bukan bukti kualitas.
 
 ## Menjalankan lab
 
-Setiap halaman yang menampilkan **Rekaman lab** menyebut file output-nya, misalnya `labs/api-t1-lama/output/b1-1-http.txt`. Output yang direkam sudah ada di repo. Kamu menjalankan lab untuk melihat perilakunya sendiri, atau untuk membuat ulang rekaman setelah mengubah kode lab.
+Setiap halaman yang menampilkan **Rekaman lab** menyebut file output-nya, misalnya `labs/api-t1/output/http.txt`. Output yang direkam sudah ada di repo. Kamu menjalankan lab untuk melihat perilakunya sendiri, atau untuk membuat ulang rekaman setelah mengubah kode lab.
 
 ### Yang dibutuhkan
 
@@ -83,7 +83,6 @@ Hampir semua lab memakai satu PostgreSQL bersama di port `54333`. Setiap lab pun
 | Schema | Lab |
 |---|---|
 | `tahap1` | `api-t1` (versi naskah Tahap 1, keputusan 132) |
-| `t1` | `api-t1-lama` (versi sebelum naskah Tahap 1) |
 | `b2`, `b2q` | `b2-model`, `b2-query` (`e5-payload` membaca `b2q`, jadi jalankan `b2-query` dulu) |
 | `b3r`, `b3s`, `b33` | `b3-race`, `b3-stack`, `b3-isolasi` |
 | `b4m`, `b4` | `b4-migration`, `b4-skema` |
@@ -132,14 +131,13 @@ Lab yang punya `Makefile` dijalankan dengan `make -C labs/<nama> run`. Sisanya d
 
 | Lab | Halaman | Cara menjalankan |
 |---|---|---|
-| `api-t1` | Halaman Tahap 1 versi naskah, mulai 1.7 | `make -C labs/api-t1 run` (satu bagian: `make -C labs/api-t1 run BAGIAN=login`) |
-| `api-t1-lama` | Halaman Tahap 1 versi lama (keputusan 132) | `make -C labs/api-t1-lama run`; deploy: `labs/.venv/bin/python labs/api-t1-lama/deploy.py` |
-| `b1-openapi` | 1.7 | `make -C labs/b1-openapi run` |
-| `b2-model` | 1.8 | `make -C labs/b2-model run` |
-| `b4-migration` | 1.10 | `make -C labs/b4-migration run` |
-| `b3-stack` | 1.11, 2.1 | `make -C labs/b3-stack run` (butuh Go, Node, PHP + Composer; gagal bila hasil satu stack tidak sesuai skenario) |
+| `api-t1` | 1.4, 1.6–1.12, 1.14–1.24, 1.26–1.33 | `make -C labs/api-t1 run` (satu bagian: `make -C labs/api-t1 run BAGIAN=login`) |
+| `b1-openapi` | 1.18, 1.33 | `make -C labs/b1-openapi run` |
+| `b2-model` | Belum dirujuk halaman | `make -C labs/b2-model run` |
+| `b4-migration` | 1.25 | `make -C labs/b4-migration run` |
+| `b3-stack` | 1.11, 1.23, 2.1 | `make -C labs/b3-stack run` (butuh Go, Node, PHP + Composer; gagal bila hasil satu stack tidak sesuai skenario) |
 | `b5-rls` | 1.28, 1.29 | `make -C labs/b5-rls run` (gagal bila hasil RLS tidak sesuai) |
-| `f2-review` | 1.19 | `make -C labs/f2-review run` |
+| `f2-review` | F2 (halaman lama) | `make -C labs/f2-review run` |
 | `b3-race` | 2.1 | `make -C labs/b3-race run` |
 | `b3-isolasi` | 2.2 | `make -C labs/b3-isolasi run` |
 | `e3-idempotency` | 2.3 | `make -C labs/e3-idempotency run` |
