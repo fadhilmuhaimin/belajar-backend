@@ -1,5 +1,5 @@
 -- Lab API Tahap 1 · Rekeningo (fiktif), mengikuti plan/CERITA-TAHAP-1.md (keputusan 132).
--- Schema tahap1, terpisah dari lab lain dan dari api-t1-lama (schema t1).
+-- Schema tahap1, terpisah dari schema lab lain (keputusan 80).
 DROP SCHEMA IF EXISTS tahap1 CASCADE;
 CREATE SCHEMA tahap1;
 SET search_path = tahap1;

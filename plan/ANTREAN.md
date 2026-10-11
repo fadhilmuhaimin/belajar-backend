@@ -353,7 +353,7 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### P2 · Hapus labs/api-t1-lama
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: 1.27, 1.28, 1.31, 1.32, 1.33, P1
 - selesai bila: `grep -rn api-t1-lama situs/ labs/ tools/` kosong kecuali folder itu sendiri, bukti grep tertulis di PR; folder `labs/api-t1-lama` dihapus; tabel lab di README diperbarui.

@@ -23,7 +23,6 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 - Ilustrasi latar Grup Lestari belum ada; ilustrasi baru wajib lolos `ukur-ilustrasi.mjs` (tambahkan path halamannya ke alat itu). `situs/lama/assets/cerita/tahap-1.svg` tidak dipakai lagi.
 - Tabel "Angka di tahap ini" ditulis ulang di 1.37/1.38, angka dari `tahap[0].asumsi`.
 - `/cara-pakai/` (A0) masih menjelaskan susunan lama; tulis ulang untuk lima blok dan tiga pintu.
-- `labs/api-t1-lama` boleh dihapus (disetujui pemilik 2026-10-08) hanya setelah `grep -rn api-t1-lama situs/ labs/ tools/` kosong; bukti grep di PR hapus. Kolom "Halaman" di README lab memakai nomor lama.
 - Audit bahasa menolak "kantor" (pakai "perusahaan") dan "pemakai" (pakai "user").
 - Pola tulis ulang halaman lama: pindah ke `tahap-1/<slug>.mdx`, lima blok, contoh PRD v1; hapus file lama dan data widget lama; perbarui `path`, `prasyarat`, hapus `lama` di registry, perbarui `alat/indeks-topik.mdx`, lalu `python3 tools/sinkron_cerita.py`.
 
@@ -47,7 +46,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1xe selesai di branch `perbaikan/k1xe-gulir-berikutnya` (keputusan 257; PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): Berikutnya di `Blok.astro` mengoreksi gulir seketika sebesar pergeseran kepala blok tujuan saat blok selesai ditutup; `ukur-gerak.mjs` memeriksa Berikutnya blok 1 di semua ADR registry + 1.32, dua ukuran, dengan dan tanpa reduced motion. Layar pertama tidak berubah. Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-11 · P2 selesai di branch `perbaikan/p2-hapus-api-t1-lama` (keputusan 258; PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): `labs/api-t1-lama` dihapus, komentar `labs/api-t1/schema.sql` dan README root (contoh rekaman, tabel schema, daftar lab dengan nomor 1.x) tidak lagi menunjuk folder itu; `make -C labs/api-t1 run` penuh tanpa diff rekaman. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 
