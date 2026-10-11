@@ -47,7 +47,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1xd sedang dikerjakan di branch `perbaikan/k1xd-snippet-rls` (frasa di keputusan 246, tanpa nomor baru): Snippet bagian 10 di 1.29 (`tahap-1/idor-token-app.mdx`) diganti `files` berisi rentang `rls.txt` 125, 134–144, 148, 157–161, 165, 174–181, dan kalimat sesudahnya disesuaikan ke isi rekaman. Berikutnya: gerbang, PR, tunggu CI.
+2026-10-11 · K1xd selesai di branch `perbaikan/k1xd-snippet-rls` (frasa di keputusan 246, tanpa nomor baru; PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): Snippet bagian 10 di 1.29 memakai `files` dengan rentang `rls.txt` 125, 134–144, 148, 157–161, 165, 174–181; kalimat sesudahnya menyebut `permission denied for table entri` dan `pembayaran ditolak`. Layar pertama 1.29 tetap (blok Paham tertutup). Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 
