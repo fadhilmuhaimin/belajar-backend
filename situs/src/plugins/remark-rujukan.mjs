@@ -1,6 +1,6 @@
 // Rujukan antar halaman [[ID]], [[ID|teks]], [[berikutnya]] -> link berjudul + nomor tampilan.
 // ID tidak pernah tampil. ID yang tidak dikenal menggagalkan build (padanan hook MkDocs).
-// Link ke halaman yang belum dipindah diberi kelas rujukan-menyusul (keputusan 104).
+// Link ke halaman yang belum ditulis diberi kelas rujukan-menyusul (keputusan 104).
 import path from "node:path";
 import { muat, byId, label, url, urutanBaca, urlDariId, SITE_DOCS, JUDUL_MENYUSUL } from "../../tools/registri.mjs";
 

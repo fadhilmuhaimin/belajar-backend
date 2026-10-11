@@ -96,7 +96,7 @@ File ini contoh untuk repo Rekeningo dan tidak dijalankan di repo panduan ini. V
 
 Nama image di registry harus huruf kecil, karena aturan nama image OCI hanya menerima `[a-z0-9]` dan pemisah ([OCI distribution-spec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md)). Login ke registry memakai `GITHUB_TOKEN` bawaan workflow dengan izin `packages: write` ([docs.github.com](https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions)). Deploy tetap satu perintah di VPS, dijalankan Raka sesudah CI hijau.
 
-Image yang pertama di-push ke GHCR bersifat privat, jadi VPS perlu `docker login ghcr.io` dengan token yang punya izin `read:packages` sebelum bisa menarik image ([docs.github.com](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)). Token itu secret, dan tempat menyimpannya dibahas di [[t1-m7]]. Lab membangun image di mesin yang sama, jadi langkah tarik dari registry tidak direkam.
+Image yang pertama di-push ke GitHub Container Registry (GHCR) bersifat privat, jadi VPS perlu `docker login ghcr.io` dengan token yang punya izin `read:packages` sebelum bisa menarik image ([docs.github.com](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)). Token itu secret, dan tempat menyimpannya dibahas di [[t1-m7]]. Lab membangun image di mesin yang sama, jadi langkah tarik dari registry tidak direkam.
 
 ### Infra Tahap 1: satu VPS dan Compose
 

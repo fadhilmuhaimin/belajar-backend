@@ -95,3 +95,78 @@ Di luar kelima halaman: `alat/kamus-lintas-stack.mdx` baris 35 memetakan "Login 
 - K1b: satu tahap untuk batas percobaan login (Tahap 2 menurut PROPOSAL) di 1.7, 1.27, dan 1.29.
 - K1c: ADR 7 butir 4 tidak bertentangan dengan rencana RLS di ledger Tahap 2.
 - Pertentangan C3 lama dengan 1.30 masuk catatan tugas 1.31 yang sudah ada, bukan tugas baru.
+
+## K1x · 1.31–1.33 (2026-10-11)
+
+Branch `crosscheck/k1x` (main 7fdc0ad, P1 sudah di-merge lewat #165). Build `bun run --cwd situs build`: 79 halaman, exit 0. Preview `bun run --cwd situs preview --background --port 4321 --host 127.0.0.1`. Alat: `situs/tangkapan/k1x-nav.mjs`, `k1x-nav2.mjs`, `k1x-adr.mjs` (Playwright), `tmp/k1x_href.py` (href di `situs/dist/`), `tmp/k1x_grep.py` (grep silang `situs/src/content/docs/tahap-1` dan `situs/lama/widgets/data`); semuanya di folder yang di-.gitignore. Sebelum K1x berlaku `K1` di atas; K2 nanti cukup 1.34–1.35.
+
+### Alur baca 1.30 → 1.34
+
+`node situs/tangkapan/k1x-nav.mjs http://127.0.0.1:4321` di 375×667 dan 1366×657: keempat halaman yang ada `200`, `scrollWidth` sama dengan lebar viewport, 0 error konsol; 1.34 `404` karena belum ditulis. Di tiap halaman, Berikutnya di blok 1–4 diklik berurutan: blok tujuan terbuka dan terlihat (4 dari 4).
+
+| Halaman | Blok (dua pertama terbuka) | Blok 5 dan Lanjut → | Breadcrumb HP | Sidebar aktif |
+|---|---|---|---|---|
+| 1.30 M6 | Gejala, Yang Raka kira, Yang sebenarnya, Coba sendiri, Konsep yang lahir | `/tahap-1/deployment-rollback/` | Tahap 1 › Masalah yang muncul › minggu 5 | 1.30 |
+| 1.31 Deployment + ADR 9 | Mulai, Coba, Paham, Putuskan, Kunci | `/tahap-1/testing/` | Tahap 1 › Masalah yang muncul | 1.31 |
+| 1.32 Testing | lima blok konsep | `/tahap-1/app-versi-lama/` | sama | 1.32 |
+| 1.33 App versi lama + ADR 10 | lima blok konsep | `/d-system-design/d1-kerangka-berpikir/` (1.38 lama) | sama | 1.33 |
+
+1.33 menunjuk 1.38 karena `urutanBaca` hanya memuat halaman yang ada (`situs/tools/registri.mjs` baris 64); `[[berikutnya]]` di 1.33 baris 31 dan `Lanjut` pindah sendiri ke 1.34 saat halaman itu terbit. Bukan temuan; diperiksa lagi di K2.
+
+`k1x-nav2.mjs` untuk beranda, 1.4, 1.6, dan 1.29 di dua ukuran: `200`, `scrollWidth` = viewport, 0 error konsol. Satu hasil janggal: di 1.4 375×667, 250 ms sesudah Berikutnya blok 1, blok Opsi berada 374 px di atas viewport. Diagnosis pertama di sini salah (review PR #166): `k1x-adr.mjs` membaca `scrollY` sebelum `click()` Playwright, padahal `click()` lebih dulu menggulir ke tombol, jadi "0 → 1.737" adalah gulir otomatis ke tombol, bukan gulir yang melewati tujuan. Ukuran ulang `situs/tangkapan/k1xe-gulir.mjs` (tombol digulir ke layar dulu, lalu diklik, lalu disampel per rAF) tidak menemukan gulir yang melewati posisi akhir. Masalah nyatanya: blok 1 menutup selagi masih di layar, padahal komentar handler Berikutnya di `Blok.astro` menganggapnya sudah di atas layar. Di frame pertama blok tujuan meloncat ke atas viewport, lalu gulir halus membawanya kembali. Di 1.4 375×667 tinggi halaman 4.678 → 2.704 px, top blok Opsi −1.570 px, gulir 1.682 px selama 663 ms; di 1.24 375×667 top −898 px, gulir 1.010 px. Halaman konsep juga mengalaminya: 1.32 375×667 tinggi 2.951 → 1.868 px, top −301 px, gulir 389 px. Jadi K1xe.
+
+### Tautan
+
+`python3 tmp/k1x_href.py`: href internal di `<main>` beranda (36), 1.4 (13), 1.6 (15), 1.30 (11), 1.31 (32), 1.32 (36), 1.33 (20); 0 href atau anchor salah. Yang tanpa target hanya rujukan maju dengan kelas `rujukan-menyusul` dan `title="Halaman ini belum ditulis"`: 1.31 → 1.34 (3 kali) dan 1.36 (2 kali), 1.4 dan 1.30 → 1.36. Rujukan id lama di `tahap-1/` di-resolve registry: `[[C3]]` → 1.31, `[[C1]]` → 1.32, `[[E1]]` → 1.33, `[[B4.1]]` → 1.25, `[[B5.3]]` → 1.28; `[[B4.2]]` tidak dipakai lagi (prasyarat 1.33 dibuang). Slug lama `c-operasional/c3-deployment` dan `c1-testing` tidak ada di sumber maupun `situs/dist/`.
+
+### Cocok lintas halaman
+
+| Yang diperiksa | Hasil | Bukti |
+|---|---|---|
+| Tag image 7 karakter | Cocok: hanya `390ff47` dan `f5ea0b4`, tanpa varian lebih panjang | `k1x_grep.py hash7` kosong; tangkapan 1.31 HP |
+| Login GHCR `read:packages` | Cocok: hanya 1.31 baris 99; tempat menyimpan token dan `DATABASE_URL` dirujuk ke [[t1-m7]] (1.31 baris 73, 99, 162) | `k1x_grep.py readpkg` |
+| `TEST_DATABASE_URL` dan penjaga | Cocok: tes membaca variabel sendiri, bukan `DATABASE_URL` server, dan berhenti bila bukan database tes | 1.32 baris 102, 108, 112, 230, 280; `kartu.json` 481 |
+| CI 1.31 dan `SKIP` | Cocok: 1.31 baris 91, 142 hanya menulis CI menjalankan `go test`; Cek diri 3 (baris 191) menanyakan yang belum dikerjakan CI; 1.32 baris 108 menjawab: CI tidak mengisi `TEST_DATABASE_URL`, `f5ea0b4` lolos, PostgreSQL masuk CI di Tahap 3 | `labs/api-t1/deploy/ci.yml` baris 20 |
+| Server cerita sesudah 1.33 | Cocok: expand (`jumlah` + `nominal`); contract hanya latihan lab dan menunggu hitungan request per versi (Tahap 3, observability) | 1.33 baris 39, 157–159; `t1-versi.json` 8, 10; `labs/api-t1/run.py` 1210–1219 |
+| Migration 000005–000008 | Cocok, berurutan: 000005 batas saldo warung (1.25), 000006 ganti nama kolom (1.30, 1.33 baris 91), 000007 mengembalikan kolom, 000008 kolom `catatan` (1.33 baris 93, 138) | `t1-deploy.json` 161, 193; `t1-m6.json` 148 |
+| Token pendek + refresh, JWT | Cocok: Tahap 3 dan Tahap 4 | 1.27 baris 195–196; 1.29 baris 180, 190, 199–200 |
+| Batas percobaan login | Cocok sesudah K1b: Tahap 2 | 1.7 baris 83; 1.27 baris 62, 192; 1.29 baris 67, 190, 198 |
+| 100 karyawan + 3 warung; 417/418/419/400 | Cocok: "103" hanya untuk hasil enumerasi M5 | 1.31 baris 131; 1.29 baris 22, 49, 126, 155 |
+| Janji 1.28: tes empat endpoint ber-ID | Cocok: akun dan riwayat Dimas, laporan Warung Ani, satu transaksi, semuanya `404` | 1.32 baris 98, 229 |
+| Sambungan 1.30 → 1.31 | Cocok: temuan K1 (C3 lama dengan `ssh` + `git pull`) sudah hilang; Inti 1.31 menyambung binary v1 dari 1.30 | tangkapan 1.31 HP |
+| Sambungan 1.33 → 1.34 | Belum bisa: 1.34 belum ditulis (lihat Alur baca) | K2 |
+
+### Layar pertama
+
+`layar.mjs` di gerbang: `LOLOS: 0 gagal, 0 margin tipis.` Margin 375×667 / 1366×657: 1.31 55 / 86 px, 1.32 20 / 52 px, 1.33 24 / 52 px, 1.6 66 / 101 px; 1.4 (ADR) dan 1.30 (masalah) "tanpa Inti", tidak diukur (usulan K1). 1.32 sekarang yang paling tipis: jangan tambah tinggi di atas Inti. Dua tangkapan HP gelap dibuka (1.31, 1.33): di mana saya (breadcrumb "Tahap 1", judul bernomor), apa yang dibaca dulu (Inti dengan Rantai dari rekaman), ke mana (meta "Blok 1 dari 5"); ketiganya terjawab. Rantai 1.33 dua baris, masing-masing terlipat dua di HP, masih di layar pertama.
+
+### Sisa peninjau sebelumnya
+
+| Butir | Nilai | Tindakan |
+|---|---|---|
+| (a) 1.29 "Tulisan atas nama orang lain", "tulisan ke akun lain", "Bacaan untuk pihak lain" | Nyata, terjemahan literal; ditemukan satu lagi di baris 169 ("tulisan ke disk") | Diperbaiki langsung |
+| (b) 1.29 baris 95: Ani +5.000, `permission denied`, `bayar` tanpa identitas | Nyata: Snippet baris 93 hanya `rls.txt` 134–144 (Dimas −5.000); bukti ada di 157–160 dan 174–181 tetapi tidak tampil | K1xd |
+| (c) KEPUTUSAN 246 tanpa URL dan tanggal akses | Nyata | Diperbaiki: tiga URL dokumentasi PostgreSQL 17 (yang sama dengan di 1.29) + tanggal akses |
+| (d) "belum dipindah" di `remark-rujukan.mjs:3` dan `Lanjut.astro:4` | Nyata, komentar basi sejak keputusan 245 | Diperbaiki jadi "belum ditulis" |
+| (e) beranda: tab 2–5 ditap sebelum hydrate masih menggeser halaman | Nyata, tetapi angka peninjau sebelumnya (20–63 px, CLS 0,0323) tidak bisa dihasilkan ulang. Cara ukur `ukur-diagram.mjs` bagian 6 per tab (review PR #166): Tahap 2 dan 3 geser 63 px (CLS 0,0105), Tahap 4 dan 5 geser 41 px (CLS 0,0067); gerbang hanya mengukur Tahap 3 | K1xa (target 0 px); komentar `Beranda.astro` memakai angka ukur ini |
+| (f) KEPUTUSAN 252 alasan berputar | Nyata: opsi ditolak karena bertentangan dengan ADR yang sedang diputuskan | Diperbaiki: nama kolom tidak dibaca app (`EXPAND_UBAH` memetakan `nominal` ke kolom `jumlah`) |
+| (f) label "Ubah satu hal: Latihan lab: …" | Nyata, dua titik dua | Diperbaiki: label `t1-versi.json` jadi "… (contract, latihan lab)" |
+| (f) `PermintaanBayar` `required: [ke]` | Nyata: kontrak tidak menyatakan salah satu `jumlah`/`nominal` wajib, padahal server menjawab `400` tanpa keduanya | K1xb (rekaman `expand.txt` diulang) |
+| (g) `bearer` huruf kecil diperlakukan tanpa token | Nyata menurut RFC 9110 §11.1 (nama skema tidak peka huruf). Kodenya tampil: `strings.CutPrefix(..., "Bearer ")` di `handler.go` ~139 ada di region `wajib-login` (135–160) yang ditampilkan 1.27; tempat kedua di `logout` ~165 | K1xc (Snippet dan teks 1.27 ikut dicek) |
+| (h) 1.31 "GHCR" tanpa kepanjangan | Nyata | Diperbaiki: "GitHub Container Registry (GHCR)" |
+
+### Diperbaiki langsung di PR ini
+
+- 1.29 `idor-token-app.mdx`: empat terjemahan literal (baris 73, 133, 151, 169).
+- 1.31 `deployment-rollback.mdx` baris 99: kepanjangan GHCR.
+- 1.33 widget `t1-versi.json`: label varian tanpa titik dua ganda.
+- Komentar `remark-rujukan.mjs`, `Lanjut.astro`, `Beranda.astro`.
+- KEPUTUSAN 246 (sumber) dan 252 (alasan opsi ganti nama kolom).
+
+### Tugas perbaikan yang lahir
+
+- K1xa: geseran beranda 0 px untuk tab 2–5 yang ditap sebelum hydrate, semua tab diukur di gerbang.
+- K1xb: kontrak expand menyatakan salah satu `jumlah`/`nominal` wajib.
+- K1xc: skema `Bearer` tidak peka huruf di lab `api-t1`.
+- K1xd: rekaman `rls.txt` untuk klaim bagian 10 tampil di 1.29.
+- K1xe: Berikutnya blok 1 di halaman ADR dan konsep: blok tujuan tidak meloncat jauh ke atas layar saat blok 1 menutup.
