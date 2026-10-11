@@ -9,7 +9,10 @@ $ go test -v ./...
 --- SKIP: TestAkunOrangLainDijawab404
 PASS
 ok    lab/apit1/cmd/api
-?     lab/apit1/internal/handler  [no test files]
+=== RUN   TestTokenBearer
+--- PASS: TestTokenBearer
+PASS
+ok    lab/apit1/internal/handler
 ?     lab/apit1/internal/repo  [no test files]
 === RUN   TestBayarMenolakJumlahDiLuarBatas
 === RUN   TestBayarMenolakJumlahDiLuarBatas/-70000
@@ -38,7 +41,10 @@ $ TEST_DATABASE_URL=postgres://.../lab?search_path=tahap1 go test -v -p 1 ./...
 --- PASS: TestAkunOrangLainDijawab404
 PASS
 ok    lab/apit1/cmd/api
-?     lab/apit1/internal/handler  [no test files]
+=== RUN   TestTokenBearer
+--- PASS: TestTokenBearer
+PASS
+ok    lab/apit1/internal/handler
 ?     lab/apit1/internal/repo  [no test files]
 === RUN   TestBayarMenolakJumlahDiLuarBatas
 === RUN   TestBayarMenolakJumlahDiLuarBatas/-70000
