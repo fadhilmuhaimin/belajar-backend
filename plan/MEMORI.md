@@ -47,13 +47,12 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1x selesai di branch `crosscheck/k1x` (PR menunggu tinjauan, jangan merge sebelum disetujui pengatur; keputusan 254): alur 1.30→1.33 dan beranda, 1.4, 1.6, 1.29 tanpa error konsol dan tanpa scroll horizontal, href 0 salah, lintas halaman cocok, layar pertama lolos (1.32 tertipis, 20 px di 375×667).
-Diperbaiki langsung: terjemahan literal 1.29, GHCR 1.31, label varian 1.33, tiga komentar, sumber KEPUTUSAN 246, alasan KEPUTUSAN 252. Tugas baru K1xa–K1xe (CLS tab beranda, kontrak expand, Bearer tidak peka huruf, Snippet rls 1.29, blok tujuan meloncat saat blok 1 menutup); K2 menyempit ke 1.34–1.35. Review #166 diperbaiki: K1xe didiagnosis ulang (bukan gulir melewati tujuan), K1xa target 0 px, K1xb/K1xc menyebut Snippet 1.33 dan 1.27, kalimat 1.29 dipecah.
+2026-10-11 · K1xa selesai di branch `perbaikan/k1xa-cls-tab` (frasa K1xa di keputusan 248; PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): kaki diagram setiap tahap di `.peta__pesan` (PetaDiagram.tsx), ditampilkan cssPesan (Beranda.astro) selama diagram belum mengikuti tab.
+Bukti `ukur-diagram.mjs` bagian 6 per tab 375×667: sebelum Tahap 2–6 geser 63/63/41/41/0 px, sesudah 0 px dan CLS 0 semua tab. Berikutnya: `python3 tools/antrean.py berikut`.
 Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
 
-- Astro 7 `preview` otomatis jadi daemon bila agen terdeteksi, dan bila daemon lama hidup ia keluar tanpa menyalakan server baru; `curl /` berhasil tidak membuktikan server melayani build ini (G1 memakai penanda per jalan di `situs/dist`).
 - Island yang mengganti versi statis wajib memesan tinggi akhirnya di SSR; ukur CLS dengan modul JS ditunda dan gulir tanpa input (`ukur-diagram.mjs` bagian 7), karena tangkapan dan `layar.mjs` tidak melihat geser.
 - Island React Astro di-hydrate di `startTransition` dan atribut `ssr` dilepas sebelum React selesai; keadaan yang dibaca dari DOM di efek butuh CSS yang menyembunyikan isi SSR sampai cocok, bukan selektor `[ssr]`.
 - Widget alur hanya menerima nada `warn` dan `good` (`alur-core.js` NADA, diperiksa `tools/validasi_skenario.mjs` saat build); Rantai menerima juga `system`.
@@ -78,3 +77,4 @@ Berikutnya: python3 tools/antrean.py berikut
 - Penanda selesai di `tmp/` bisa tertinggal dari sesi lama (K1: `tmp/cek-hasil.txt` membuat Monitor menyala saat gerbang masih jalan); hapus penanda sebelum gerbang mulai, atau tunggu prosesnya (`pgrep -f cek_situs`).
 - `tmp/sidik_dist.py` hanya menghitung file yang dirujuk HTML; chunk yang diimpor island (React Flow) terlihat lewat `tmp/ukur_diagram_js.py` atau byte jaringan (`situs/tangkapan/i5b-jaringan.mjs`). React Flow `fitView` hanya untuk node awal: data baru = ReactFlow baru (`key`).
 - layar.mjs tidak menghitung Snippet sebagai visual Inti; Inti butuh Rantai atau widget (1.32 gagal 4 ukuran sebelum Rantai).
+- Markup pesanan yang meniru komponen (mis. `figure.diagram` di `.peta__pesan`) ikut tertangkap selector alat ukur; kecualikan wadahnya (`:not(.peta__pesan figure)`, `:scope >`).

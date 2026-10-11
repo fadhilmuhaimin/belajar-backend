@@ -636,6 +636,8 @@ body:has(.beranda) .content-panel { padding-block: 0.6rem; border-top: 0; }
 .peta__diagram { min-width: 0; }
 .peta__diagram .diagram { margin: 0; }
 .peta__catatan { margin: 0.4rem 0 0; color: var(--teks-2); font-size: var(--rk-ui); }
+/* Kaki tahap lain untuk memesan tinggi sebelum hydrate; ditampilkan hanya oleh cssPesan di Beranda.astro (K1xa). */
+.peta__pesan [data-pesan-kaki] { display: none; }
 /* Peran sebagai pertanyaan */
 .peran__tanya { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .peran__jawab { font: inherit; min-height: 2.75rem; padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid var(--garis-2); background: transparent; color: var(--teks); cursor: pointer; }

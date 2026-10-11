@@ -4,8 +4,8 @@
 // - di 375×667 roda dan gestur sentuh di atas diagram tetap menggulir halaman (scroll tidak tertangkap);
 // - kotak bisa dicapai dengan Tab dan dibuka dengan Enter; catatan muncul di bawah diagram;
 // - dengan reduced motion: 0 animasi sesudah memilih kotak; fungsi tetap;
-// - CLS ≤ 0,1 saat island di-hydrate: gulir pelan dengan modul JS ditunda 300 ms (HP dan desktop) dan tap tab
-//   beranda sebelum hydrate (keputusan 248).
+// - CLS ≤ 0,1 saat island di-hydrate: gulir pelan dengan modul JS ditunda 300 ms (HP dan desktop); tap tiap tab
+//   beranda (Tahap 2–6) sebelum hydrate: geser 0 px dan CLS 0 (keputusan 248, K1xa).
 //   node tools/ukur-diagram.mjs --url http://127.0.0.1:4321
 //   node tools/ukur-diagram.mjs --url ... --axe /path/axe.min.js   # + axe-core, gelap dan terang
 import { chromium } from "@playwright/test";
@@ -28,10 +28,12 @@ const lapor = (ok, pesan) => {
 // jendela paling lama 5 s; geser dalam 500 ms sesudah input (hadRecentInput) tidak dihitung. Baik ≤ 0,1.
 const pasangCls = (ctx) =>
   ctx.addInitScript(() => {
-    const c = (window.__cls = { nilai: 0, sesi: 0, awal: 0, akhir: 0, besar: 0, contoh: "" });
+    const c = (window.__cls = { nilai: 0, sesi: 0, awal: 0, akhir: 0, besar: 0, contoh: "", geser: 0 });
     new PerformanceObserver((l) => {
       for (const e of l.getEntries()) {
         if (e.hadRecentInput) continue;
+        // Jarak geser terbesar (px) dari elemen sumber, selain nilai CLS yang dibobot luas layar.
+        for (const s of e.sources ?? []) c.geser = Math.max(c.geser, Math.abs(s.currentRect.y - s.previousRect.y), Math.abs(s.currentRect.x - s.previousRect.x));
         if (c.sesi && e.startTime - c.akhir < 1000 && e.startTime - c.awal < 5000) c.sesi += e.value;
         else [c.sesi, c.awal] = [e.value, e.startTime];
         c.akhir = e.startTime;
@@ -233,8 +235,9 @@ for (const [lebar, tinggi, arahHarus] of [
     }
     await page.click("#tab-tahap-6");
     await page.waitForFunction(() => document.querySelector("[data-peta-diagram]")?.dataset.petaDiagram === "6");
-    const enam = await page.evaluate(() => ({ flow: !!document.querySelector("[data-peta-diagram] .react-flow"), teks: document.querySelector("[data-peta-diagram]").textContent }));
-    lapor(!enam.flow && enam.teks.includes("proyeksi"), `${tag}: Tahap 6 "${enam.teks}"`);
+    const enam = await page.evaluate(() => ({ flow: !!document.querySelector("[data-peta-diagram] .react-flow"), teks: document.querySelector("[data-peta-diagram]").innerText.trim() }));
+    // innerText: hanya teks yang tampil, tanpa kaki pesanan .peta__pesan (display: none, K1xa).
+    lapor(!enam.flow && enam.teks.includes("proyeksi") && !enam.teks.includes("Tahap 1"), `${tag}: Tahap 6 "${enam.teks}"`);
     if (AXE && reducedMotion === "no-preference") {
       await page.click("#tab-tahap-1");
       await page.waitForSelector("[data-peta-diagram] .react-flow__node .diagram__kotak");
@@ -253,9 +256,9 @@ for (const [lebar, tinggi, arahHarus] of [
   }
 }
 
-// 6. Tab dipilih sebelum island di-hydrate (temuan review PR #161, keputusan 248). Di HP, tap Tahap 3 saat island
+// 6. Tab dipilih sebelum island di-hydrate (temuan review PR #161, keputusan 248). Di HP, tap satu tab saat island
 // diagram belum jalan, lalu gulir ke diagram. Modul JS diperlambat 1,5 detik sesudah halaman dimuat (seperti jaringan
-// lambat), dan setiap frame dicatat: selama panel Tahap 3 terbuka, tidak boleh ada frame dengan diagram tahap lain
+// lambat), dan setiap frame dicatat: selama panel tahap itu terbuka, tidak boleh ada frame dengan diagram tahap lain
 // (versi statis Tahap 1 dari SSR) yang terlihat. Tanpa JS: panel dan diagram Tahap 1 terlihat bersama.
 {
   const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 375, height: 667 } });
@@ -269,18 +272,28 @@ for (const [lebar, tinggi, arahHarus] of [
   lapor(r.no === "1" && r.terlihat && r.label.includes("Tahap 1") && r.panel.join() === "panel-tahap-1", `beranda tanpa JS: panel ${r.panel.join()}, diagram ${r.no} ${r.terlihat ? "terlihat" : "tersembunyi"} "${r.label}"`);
   await ctx.close();
 }
-{
+// Diukur untuk setiap tab selain Tahap 1 (tahap SSR), satu konteks baru per tab (K1xa): sesudah hydrate, kaki diagram
+// (caption dan catatan) tahap itu harus menempati tinggi yang sama dengan pesanan sebelum hydrate, jadi geser 0 px.
+const tabPeta = await (async () => {
+  const ctx = await browser.newContext({ javaScriptEnabled: false });
+  const page = await ctx.newPage();
+  await page.goto(beranda);
+  const no = await page.$$eval(".peta__pilih", (b) => b.map((x) => x.dataset.no));
+  await ctx.close();
+  return no.slice(1);
+})();
+for (const no of tabPeta) {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 667 }, hasTouch: true });
   await pasangCls(ctx);
   const page = await ctx.newPage();
   await page.goto(beranda, { waitUntil: "networkidle" });
   await tundaJs(page, 1500);
-  await page.evaluate(() => {
+  await page.evaluate((no) => {
     const f = (window.__frame = { total: 0, salah: 0, kosong: 0, contoh: "", jalan: true });
     const cek = () => {
       const d = document.querySelector("[data-peta-diagram]");
       const tab = document.querySelector(".peta__pilih[aria-selected='true']")?.dataset.no;
-      if (d && tab === "3") {
+      if (d && tab === no) {
         f.total++;
         const terlihat = d.checkVisibility({ visibilityProperty: true });
         if (!terlihat) f.kosong++;
@@ -292,20 +305,24 @@ for (const [lebar, tinggi, arahHarus] of [
       if (f.jalan) requestAnimationFrame(cek);
     };
     requestAnimationFrame(cek);
-  });
+  }, no);
   const belum = await page.evaluate(() => !!document.querySelector("[data-peta-diagram]").closest("astro-island[ssr]"));
-  await page.tap("#tab-tahap-3");
+  await page.tap(`#tab-tahap-${no}`);
   await page.evaluate(() => document.querySelector("[data-peta-diagram]").scrollIntoView({ block: "center" }));
-  await page.waitForFunction(() => document.querySelector("[data-peta-diagram]")?.dataset.petaDiagram === "3" && document.querySelectorAll("[data-peta-diagram] .react-flow__node .diagram__kotak").length === 6, null, { timeout: 15000 });
+  // Hydrate selesai: diagram tahap ini terpasang (React Flow dengan kotak, atau catatan proyeksi tanpa React Flow).
+  await page.waitForFunction((no) => {
+    const d = document.querySelector("[data-peta-diagram]");
+    return d?.dataset.petaDiagram === no && !d.closest("astro-island[ssr]") && (!d.querySelector(":scope > figure.diagram") || d.querySelectorAll(".react-flow__node .diagram__kotak").length > 0);
+  }, no, { timeout: 15000 });
   await page.waitForTimeout(300);
   const f = await page.evaluate(() => {
     window.__frame.jalan = false;
     return { ...window.__frame, akhir: document.querySelector("[data-peta-diagram]").checkVisibility({ visibilityProperty: true }) };
   });
-  lapor(belum && f.total > 0 && f.salah === 0 && f.akhir, `beranda 375×667 tap Tahap 3 ${belum ? "sebelum" : "SESUDAH"} hydrate lalu gulir: ${f.total} frame, ${f.salah} frame diagram tahap lain${f.contoh ? ` (${f.contoh})` : ""}, ${f.kosong} frame kosong, akhir ${f.akhir ? "terlihat" : "tersembunyi"}`);
-  // Hydrate datang 1,5 s sesudah tap, jadi geser saat itu dihitung CLS: wadah harus sudah memesan tinggi Tahap 3.
+  lapor(belum && f.total > 0 && f.salah === 0 && f.akhir, `beranda 375×667 tap Tahap ${no} ${belum ? "sebelum" : "SESUDAH"} hydrate lalu gulir: ${f.total} frame, ${f.salah} frame diagram tahap lain${f.contoh ? ` (${f.contoh})` : ""}, ${f.kosong} frame kosong, akhir ${f.akhir ? "terlihat" : "tersembunyi"}`);
+  // Hydrate datang 1,5 s sesudah tap (di luar jendela 500 ms input), jadi geser saat itu dihitung CLS. Syarat 0.
   const c = await page.evaluate(() => window.__cls);
-  lapor(c.nilai <= 0.1, `CLS beranda 375×667 tap Tahap 3 sebelum hydrate: ${c.nilai.toFixed(4)}${c.contoh ? ` (terbesar ${c.contoh})` : ""}`);
+  lapor(c.nilai === 0 && c.geser === 0, `beranda 375×667 tap Tahap ${no} sebelum hydrate: geser ${Math.round(c.geser)} px, CLS ${c.nilai.toFixed(4)}${c.contoh ? ` (terbesar ${c.contoh})` : ""}`);
   await ctx.close();
 }
 
@@ -329,7 +346,8 @@ for (const [nama, halaman] of [["/uji/diagram/", url], ["beranda", beranda]]) {
         await jeda(120);
       }
     });
-    await page.waitForFunction(() => [...document.querySelectorAll("figure.diagram")].every((f) => f.querySelector(".react-flow__node")), null, { timeout: 15000 });
+    // Kaki pesanan di beranda (.peta__pesan, K1xa) memakai figure.diagram tanpa React Flow; bukan diagram.
+    await page.waitForFunction(() => [...document.querySelectorAll("figure.diagram:not(.peta__pesan figure)")].every((f) => f.querySelector(".react-flow__node")), null, { timeout: 15000 });
     await page.waitForTimeout(600);
     const c = await page.evaluate(() => window.__cls);
     lapor(c.nilai <= 0.1, `CLS ${nama} ${lebar}×${tinggi} gulir pelan, JS ditunda 300 ms: ${c.nilai.toFixed(4)}${c.contoh ? ` (terbesar ${c.contoh})` : ""}`);
