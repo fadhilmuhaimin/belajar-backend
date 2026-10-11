@@ -47,7 +47,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1xe selesai di branch `perbaikan/k1xe-gulir-berikutnya` (keputusan 257; PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): Berikutnya di `Blok.astro` mengoreksi gulir seketika sebesar pergeseran kepala blok tujuan saat blok selesai ditutup; `ukur-gerak.mjs` memeriksa Berikutnya blok 1 di semua ADR registry + 1.32, dua ukuran, dengan dan tanpa reduced motion. Layar pertama tidak berubah. Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-11 · P2 Hapus `labs/api-t1-lama` di branch `perbaikan/p2-hapus-api-t1-lama` (PR menunggu tinjauan, jangan merge sebelum disetujui pengatur). Rujukan di luar folder: komentar `labs/api-t1/schema.sql` baris 2, README root (contoh rekaman, tabel schema, daftar lab). File disentuh: folder lab (dihapus), `labs/api-t1/schema.sql`, `README.md`, KEPUTUSAN, ANTREAN, MEMORI, STATUS. Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 
