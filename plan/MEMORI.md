@@ -46,7 +46,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · P2 selesai di branch `perbaikan/p2-hapus-api-t1-lama` (keputusan 258; PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): `labs/api-t1-lama` dihapus, komentar `labs/api-t1/schema.sql` dan README root (contoh rekaman, tabel schema, daftar lab dengan nomor 1.x) tidak lagi menunjuk folder itu; `make -C labs/api-t1 run` penuh tanpa diff rekaman. Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-11 · 1.34-lab (M7: `.env` di riwayat git) di branch `tahap-1/m7-lab`: bagian `m7` di `labs/api-t1/run.py` (repo git sementara, nilai palsu dibangkitkan saat run, gitleaks v8.30.1 lewat `go install`, pre-commit hook, rotasi password di Postgres lab), rekaman `labs/api-t1/output/m7.txt`, README root bagian M7, KEPUTUSAN, ANTREAN, STATUS. PR tidak di-merge pelaksana.
 
 ## Pelajaran
 
