@@ -47,8 +47,8 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1x selesai di branch `crosscheck/k1x` (PR menunggu tinjauan, jangan merge sebelum disetujui pengatur; keputusan 254): alur 1.30→1.33 dan beranda, 1.4, 1.6, 1.29 tanpa error konsol dan tanpa scroll horizontal, href 0 salah, lintas halaman cocok, layar pertama lolos (1.32 tertipis, 20 px di 375×667).
-Diperbaiki langsung: terjemahan literal 1.29, GHCR 1.31, label varian 1.33, tiga komentar, sumber KEPUTUSAN 246, alasan KEPUTUSAN 252. Tugas baru K1xa–K1xe (CLS tab beranda, kontrak expand, Bearer tidak peka huruf, Snippet rls 1.29, blok tujuan meloncat saat blok 1 menutup); K2 menyempit ke 1.34–1.35. Review #166 diperbaiki: K1xe didiagnosis ulang (bukan gulir melewati tujuan), K1xa target 0 px, K1xb/K1xc menyebut Snippet 1.33 dan 1.27, kalimat 1.29 dipecah.
+2026-10-11 · K1xa (CLS beranda tab 2–5 sebelum hydrate, keputusan 248) di branch `perbaikan/k1xa-cls-tab`: catatan/caption peta diberi tinggi tetap yang sama untuk semua tahap supaya tap tab sebelum hydrate geser 0 px; `ukur-diagram.mjs` bagian 6 mengukur Tahap 2–5.
+File: `situs/src/components/Beranda.astro`, `situs/src/diagram/`, `situs/tools/ukur-diagram.mjs`, ANTREAN, MEMORI. Jangan merge; PR untuk ditinjau pengatur.
 Berikutnya: python3 tools/antrean.py berikut
 
 ## Pelajaran
