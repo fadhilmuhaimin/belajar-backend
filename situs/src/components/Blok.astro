@@ -94,10 +94,16 @@ const id = slugBlok(nama);
     if (t.dataset.ke) {
       digulir = false;
       const lanjut = blok().find((x) => x.dataset.blok === t.dataset.ke);
-      // Blok yang selesai langsung tertutup (sudah di atas layar); blok berikutnya terbuka dengan gerak.
+      // Blok yang selesai langsung tertutup tanpa gerak. Isinya ada di atas tombol, jadi kepala blok tujuan ikut naik
+      // setinggi isi itu (K1xe, keputusan 257). Gulir dikoreksi seketika sebesar pergeseran itu: kepala blok tujuan
+      // tetap di tempatnya, sejauh halaman bisa digulir. Lalu blok tujuan terbuka dengan gerak dan digulir halus ke
+      // atas layar.
+      const atasSebelum = lanjut?.getBoundingClientRect().top ?? 0;
       hentikan(kini);
       kini.open = false;
       if (lanjut) {
+        const geser = lanjut.getBoundingClientRect().top - atasSebelum;
+        if (geser) scrollBy({ top: geser, behavior: "instant" });
         lipat(lanjut, true);
         const halus = !matchMedia("(prefers-reduced-motion: reduce)").matches;
         lanjut.scrollIntoView({ behavior: halus ? "smooth" : "auto", block: "start" });

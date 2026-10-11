@@ -7,6 +7,7 @@
 // JavaScript <details> tetap bisa dibuka.
 //   node tools/ukur-gerak.mjs --url http://127.0.0.1:4321
 //   node tools/ukur-gerak.mjs --url ... --axe /path/axe.min.js   # + axe-core di halaman uji, gelap dan terang
+import { readFileSync } from "node:fs";
 import { chromium } from "@playwright/test";
 
 const arg = (nama, bawaan) => {
@@ -179,6 +180,43 @@ for (const reducedMotion of ["no-preference", "reduce"]) {
   if (!ok) gagal++;
   await page.close();
 }
+// Berikutnya blok 1 (K1xe, keputusan 257): blok 1 menutup selagi tombolnya di layar; kepala blok tujuan tidak boleh
+// meloncat jauh ke atas layar. Tombol digulir ke tengah layar dulu, lalu diklik dari halaman (bukan page.click, yang
+// menggulir sendiri), lalu scrollY dan top kepala blok tujuan disampel per requestAnimationFrame selama 1,2 detik.
+// Lolos bila di frame pertama sesudah klik top blok tujuan di dalam viewport, atau sisa gulirnya ≤ satu tinggi
+// viewport; akhirnya kepala blok tujuan di layar dan memegang fokus. Dengan reduced motion frame pertama sudah
+// keadaan akhir (tanpa gulir halus, 0 animasi). Halaman: semua ADR di registry dan satu halaman konsep (1.32).
+const registri = JSON.parse(readFileSync(new URL("../data/cerita.json", import.meta.url), "utf8"));
+const halBerikutnya = [
+  ...registri.halaman.filter((h) => h.jenis === "adr" && h.ada).map((h) => h.path),
+  registri.halaman.find((h) => h.nomor === "1.32").path,
+].map((p) => "/" + p.replace(/\.mdx?$/, "/"));
+for (const pth of halBerikutnya) for (const [w, h] of [[375, 667], [1366, 657]]) for (const reducedMotion of ["no-preference", "reduce"]) {
+  const page = await browser.newPage({ viewport: { width: w, height: h }, reducedMotion });
+  await page.goto(url + pth, { waitUntil: "networkidle" });
+  const r = await page.evaluate(async () => {
+    const tunggu = (ms) => new Promise((ok) => setTimeout(ok, ms));
+    const btn = document.querySelector("details.blok button.blok__lanjut");
+    const ke = document.querySelector(`details.blok[data-blok="${btn.dataset.ke}"]`);
+    btn.scrollIntoView({ block: "center", behavior: "instant" });
+    await tunggu(300);
+    const ambil = () => ({ y: Math.round(scrollY), top: Math.round(ke.getBoundingClientRect().top), animasi: document.getAnimations().length });
+    const s = [];
+    const t0 = performance.now();
+    btn.click();
+    await new Promise((ok) => { const f = () => { s.push(ambil()); performance.now() - t0 < 1200 ? requestAnimationFrame(f) : ok(); }; requestAnimationFrame(f); });
+    return { s, vh: innerHeight, fokus: document.activeElement === ke.querySelector("summary") };
+  });
+  const f1 = r.s[0], akhir = r.s.at(-1);
+  const sisa = Math.max(...r.s.map((x) => Math.abs(x.y - akhir.y)));
+  const diLayar = (t) => t >= 0 && t < r.vh;
+  const ok = reducedMotion === "reduce"
+    ? diLayar(f1.top) && f1.y === akhir.y && f1.animasi === 0 && r.fokus
+    : (diLayar(f1.top) || sisa <= r.vh) && diLayar(akhir.top) && r.fokus;
+  console.log(`${ok ? "ok" : "GAGAL"} Berikutnya blok 1 ${pth} ${w}x${h} ${reducedMotion}: frame pertama top ${f1.top} px, sisa gulir ${sisa} px (vh ${r.vh}), akhir top ${akhir.top} px, fokus ${r.fokus ? "di blok tujuan" : "HILANG"}`);
+  if (!ok) gagal++;
+  await page.close();
+}
 await browser.close();
-console.log(gagal ? "Fondasi gerak GAGAL" : "Reduced motion mematikan gerak (contoh, blok, teka-teki); tanpa itu gerak berjalan");
+console.log(gagal ? "Fondasi gerak GAGAL" : "Reduced motion mematikan gerak (contoh, blok, teka-teki, Berikutnya); tanpa itu gerak berjalan");
 process.exit(gagal ? 1 : 0);
