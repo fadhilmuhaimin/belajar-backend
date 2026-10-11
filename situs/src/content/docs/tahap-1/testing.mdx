@@ -79,13 +79,13 @@ Saldo awal Budi Rp250.000 dan Warung Ani Rp1.450.000 sama dengan Jumat siang di 
 
 **Regression test harus gagal untuk bug-nya.** Tes yang lolos belum membuktikan apa-apa sebelum terlihat gagal untuk bug yang ingin dicegahnya. Lab menyalin kode ke folder sementara, mengembalikan `Bayar` tanpa transaction, lalu menjalankan tes yang sama:
 
-<Snippet file="labs/api-t1/output/testing.txt" lines="59:69" title="Rekaman lab: labs/api-t1/output/testing.txt" />
+<Snippet file="labs/api-t1/output/testing.txt" lines="65:75" title="Rekaman lab: labs/api-t1/output/testing.txt" />
 
 Saldo Budi Rp180.000 dan total kurang Rp70.000, sama dengan rekaman [[t1-m4]]. Cara yang sama dipakai untuk commit latihan `f5ea0b4` dari [[C3]], yang mengganti satu `OR` dengan `AND` di query riwayat:
 
 <Snippet file="labs/api-t1/internal/service/db_test.go" region="riwayat" lang="go" title="labs/api-t1/internal/service/db_test.go" />
 
-<Snippet file="labs/api-t1/output/testing.txt" lines="71:81" title="Rekaman lab: labs/api-t1/output/testing.txt" />
+<Snippet file="labs/api-t1/output/testing.txt" lines="77:87" title="Rekaman lab: labs/api-t1/output/testing.txt" />
 
 Query itu tetap menjawab tanpa error, jadi hanya tes yang memeriksa isi riwayat yang menangkapnya. Mock repo yang mengembalikan satu baris akan lolos, karena SQL-nya tidak pernah dijalankan.
 
@@ -101,9 +101,9 @@ Tes kedua di file yang sama menjawab janji di [[B5.3]]. Token Budi meminta data 
 
 **`SKIP` bukan lolos.** Tes database membaca alamat PostgreSQL dari `TEST_DATABASE_URL` dan memanggil `t.Skip` saat variabel itu kosong. Tanpa database, seperti job CI di [[C3]], paketnya tetap ditulis `ok`:
 
-<Snippet file="labs/api-t1/output/testing.txt" lines="18:29" title="Rekaman lab: labs/api-t1/output/testing.txt" />
+<Snippet file="labs/api-t1/output/testing.txt" lines="21:32" title="Rekaman lab: labs/api-t1/output/testing.txt" />
 
-Di sini `ok` hanya membuktikan unit test. Keempat tes database tidak dijalankan: dua `SKIP` di atas, dan dua `SKIP` lain untuk tes HTTP di paket `cmd/api`. Dengan `TEST_DATABASE_URL` terisi, kelima tes beserta tiga subtest lolos tanpa `SKIP` (bagian B di rekaman).
+Di sini `ok` hanya membuktikan unit test. Keempat tes database tidak dijalankan: dua `SKIP` di atas, dan dua `SKIP` lain untuk tes HTTP di paket `cmd/api`. Dengan `TEST_DATABASE_URL` terisi, keenam tes beserta tiga subtest lolos tanpa `SKIP` (bagian B di rekaman).
 
 Job CI dari ADR 9 di [[C3]] tidak mengisi `TEST_DATABASE_URL`. Karena itu commit seperti `f5ea0b4` tetap lolos CI [[C3]]. Yang menangkapnya adalah butir 5 di Putuskan, sampai PostgreSQL masuk job CI di Tahap 3.
 
@@ -111,7 +111,7 @@ Flag `-p 1` di bagian B membuat `go test` menjalankan test binary satu per satu.
 
 **Tes tidak memakai alamat server.** `siapkan` menghapus semua transaksi dan koreksi, lalu membuat semua saldo nol. Karena itu tes membaca `TEST_DATABASE_URL`, bukan `DATABASE_URL` yang dipakai server dan deploy di [[C3]]. Sebelum menghapus apa pun, `siapkan` memeriksa database dan schema-nya: hanya `lab` dengan schema `tahap1` yang dibuat ulang lab dari nol. Alamat ke database lain langsung `FAIL`:
 
-<Snippet file="labs/api-t1/output/testing.txt" lines="84:90" title="Rekaman lab: labs/api-t1/output/testing.txt" />
+<Snippet file="labs/api-t1/output/testing.txt" lines="90:96" title="Rekaman lab: labs/api-t1/output/testing.txt" />
 
 `batasWarung` di tes M4 memasang constraint batas saldo warung hanya bila constraint itu belum ada, lalu melepasnya lagi sesudah tes. Constraint yang sudah ada sebelum tes tidak disentuh.
 
