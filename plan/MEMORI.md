@@ -47,8 +47,7 @@ Catatan kerja lintas sesi dan lintas model. Maksimal 80 baris (gerbang menolak l
 
 ## Sedang dikerjakan
 
-2026-10-11 · K1xc selesai di branch `perbaikan/k1xc-bearer` (keputusan 256, PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): `tokenBearer` (`strings.Cut` + `strings.EqualFold`) dipakai `wajibLogin` dan `logout`, tes `TestTokenBearer` tanpa database.
-Rekaman berubah hanya `testing.txt` (+3 baris per bagian A/B; rentang Snippet 1.32 digeser, isi sama) dan `Lines` gosec di `injection.txt`. Berikutnya: `python3 tools/antrean.py berikut`.
+2026-10-11 · K1xd selesai di branch `perbaikan/k1xd-snippet-rls` (frasa di keputusan 246, tanpa nomor baru; PR menunggu tinjauan, jangan merge sebelum disetujui pengatur): Snippet bagian 10 di 1.29 memakai `files` dengan rentang `rls.txt` 125, 134–144, 148, 157–161, 165, 174–181; kalimat sesudahnya menyebut `permission denied for table entri` dan `pembayaran ditolak`. Layar pertama 1.29 tetap (blok Paham tertutup). Berikutnya: `python3 tools/antrean.py berikut`.
 
 ## Pelajaran
 

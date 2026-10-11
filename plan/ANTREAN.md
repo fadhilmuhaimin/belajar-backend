@@ -335,7 +335,7 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K1xd · 1.29: rekaman bagian 10 tampil untuk klaimnya
 
 - jenis: perbaikan
-- status: antre
+- status: selesai
 - percobaan: 0
 - bergantung: -
 - selesai bila: kalimat di `situs/src/content/docs/tahap-1/idor-token-app.mdx` sesudah Snippet bagian 10 (Warung Ani melihat +5.000, `INSERT` ditolak `permission denied`, `bayar` tanpa identitas ditolak) didukung Snippet yang tampil dari `labs/b5-rls/output/rls.txt` baris 157–160 dan 174–181 (atau satu Snippet bila komponen mendukung beberapa rentang); layar pertama 1.29 tidak berubah.
