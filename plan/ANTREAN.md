@@ -308,11 +308,11 @@ Berlaku untuk setiap tugas, di samping "selesai bila" masing-masing:
 ### K1xa · CLS beranda untuk tab 2–5 sebelum hydrate
 
 - jenis: perbaikan
-- status: antre
-- percobaan: 0
+- status: selesai
+- percobaan: 1
 - bergantung: -
 - selesai bila: tap tab Tahap 2, 3, 4, dan 5 sebelum hydrate di 375×667 masing-masing diukur di gerbang (`situs/tools/ukur-diagram.mjs` bagian 6 untuk semua tab, bukan hanya Tahap 3) dan geseran tiap tab 0 px (CLS 0); komentar `situs/src/components/Beranda.astro` di atas `cssPesan` diperbarui dengan angka ukur baru dan cara ukurnya; tangkapan sebelum/sesudah.
-- catatan: Dari K1x butir (e). Ukuran review PR #166 dengan cara `ukur-diagram.mjs` bagian 6, per tab, dua kali identik: Tahap 2 dan 3 geser 63 px (CLS 0,0105), Tahap 4 dan 5 geser 41 px (CLS 0,0067). Gerbang sekarang hanya mengukur Tahap 3. Angka 20–63 px dan CLS 0,0323 dari review PR sebelumnya tidak bisa dihasilkan ulang dan tidak dipakai. Keputusan 248.
+- catatan: Dari K1x butir (e). Ukuran review PR #166 dengan cara `ukur-diagram.mjs` bagian 6, per tab, dua kali identik: Tahap 2 dan 3 geser 63 px (CLS 0,0105), Tahap 4 dan 5 geser 41 px (CLS 0,0067). Gerbang sekarang hanya mengukur Tahap 3. Angka 20–63 px dan CLS 0,0323 dari review PR sebelumnya tidak bisa dihasilkan ulang dan tidak dipakai. Keputusan 248. Selesai 2026-10-11 (frasa K1xa di keputusan 248): kaki setiap tahap di `.peta__pesan`, ditampilkan cssPesan selama diagram belum mengikuti tab; bagian 6 mengukur Tahap 2–6, semuanya geser 0 px dan CLS 0 (sebelumnya 63, 63, 41, 41, 0 px).
 
 ### K1xb · Kontrak expand: salah satu jumlah atau nominal wajib
 
